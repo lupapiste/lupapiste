@@ -1,0 +1,146 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="application-ymp-bulletin-template">
+
+      <div class="application_summary">
+        <div class="container">
+          <div class="bulletin-preamble">
+            <div class="application_summary_info" data-bind="with: bulletin">
+              <!-- ko if: $data.note -->
+              <div class="gap--b4 bg--white">
+                <div class="danger-note" data-bind="ltext: note"></div>
+              </div>
+              <!-- /ko -->
+              <h4 data-bind="text: address" data-test-id="bulletin-address"></h4>
+              <h5 data-bind="if: primaryOperation">
+                    <span data-test-id="bulletin-primary-operation"
+                          data-bind="ltext: 'operations.' + primaryOperation.name, attr: {'data-test-primary-operation-id': primaryOperation.name}"></span>
+              </h5>
+
+              <!-- State: -->
+              <div class="state-indication" data-bind="attr: {'data-test-state': bulletinState}" data-test-id="bulletin-state" >
+                <div data-bind="attr: {'class': bulletinState}">
+                  <!-- ko ifnot: $parent.currentStateInSeq() -->
+                  <span data-bind="ltext: $parent.bulletinStateLoc(), attr: {'title' : loc([$parent.bulletinStateLoc(), 'title']), 'class': bulletinState + '-box'}"></span>
+                  <!-- /ko -->
+                  <!-- ko foreach: stateSeq -->
+                    <span data-bind="ltext: 'bulletin.state.' + $data, attr: {'title' : loc(['bulletin.state', $data, 'title']), 'class': $data + '-box'}"></span>
+                  <!-- /ko -->
+                </div>
+              </div>
+              <!-- Property ID: -->
+              <div>
+                <p data-bind="ltext: 'application.property'"></p>
+                <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="bulletin-property-id"></span>
+              </div>
+
+              <!-- Municipality: -->
+              <div>
+                <p data-bind="ltext: 'application.municipality'"></p>
+                <span class="application_summary_text" data-bind="text: loc(['municipality', municipality])"></span>
+              </div>
+              <div>
+                <p data-bind="text: loc('bulletin.applicants') + ':'"></p>
+                <ul data-bind="foreach: _applicantIndex">
+                  <li data-bind="text: $data"></li>
+                </ul>
+              </div>
+            </div>
+            <div class="application-map-container">
+              <div id="bulletin-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+              <!-- FIXME: embed new map component here -->
+              <!-- Use react: bindinghandler:  <div data-bind="react: {component: Komponentti, props: {mun: "propsi"}}"><div> -->
+            </div>
+
+              <!-- Actions: -->
+                <div class="application_actions"
+                     data-test-id="bulletin-actions">
+                  <div class="flex--column flex--gap1">
+                    <!-- ko if: showCommenting -->
+                    <!-- ko if: authenticated-->
+                    <button class="bulletin"
+                            data-bind="click: scrollToCommenting"
+                            data-test-id="comment-bulletin">
+                      <i class="lupicon-comment"></i>
+                      <span data-bind="ltext: 'bulletin.actions.comment'"></span>
+                    </button>
+                    <!-- /ko -->
+                    <!-- ko if: !authenticated() -->
+                    <button class="bulletin"
+                            data-bind="click: clickAuthenticationButton"
+                            data-test-id="comment-bulletin">
+                      <i class="lupicon-comment"></i>
+                      <span data-bind="ltext: 'bulletin.actions.comment'"></span>
+                    </button>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                    <button class="bulletin"
+                            data-bind="click: exportToPdf"
+                            data-test-id="print-bulletin">
+                      <i class="lupicon-print"></i>
+                      <span data-bind="ltext: 'bulletin.pdf'"></span>
+                    </button>
+                  </div>
+                </div>
+          </div>
+
+          <!-- Tabs: -->
+          <div class="tabs-container">
+            <ul class="tabs" id="bulletin-tabs">
+              <!-- ko if: showInstructionsTab -->
+              <li data-bind="css: {'active': selectedTab() === 'instructions'}">
+                <a data-bind="click: _.partial(openTab, 'instructions')" href="#" class="link-btn-julkipano" data-test-id="bulletin-open-instructions-tab">
+                  <span data-bind="visible: inProclaimedState, ltext: 'application.tabInstructions.proclaimed'"></span>
+                  <span data-bind="visible: inVerdictGivenState() || inFinalState() , ltext: 'application.tabInstructions.verdictGiven'"></span>
+                </a>
+              </li>
+              <!-- /ko -->
+              <!-- ko if: showInfoTab -->
+              <li data-bind="css: {'active': selectedTab() === 'info'}">
+                  <a data-bind="click: _.partial(openTab, 'info')" href="#" class="link-btn-julkipano" data-test-id="bulletin-open-info-tab">
+                      <span data-bind="ltext: 'application.tabInfo'"></span> </a></li>
+              <!-- /ko -->
+              <!-- ko if: showAttachmentsTab -->
+              <li data-bind="css: {'active': selectedTab() === 'attachments'}">
+                  <a data-bind="click: _.partial(openTab, 'attachments')" href="#" data-test-id="bulletin-open-attachments-tab" class="link-btn-julkipano">
+                      <span data-bind="ltext: 'application.tabAttachments'"></span></a></li>
+              <!-- /ko -->
+              <!-- ko if: showVerdictsTab -->
+              <li data-bind="css: {'active': selectedTab() === 'verdicts'}">
+                  <a data-bind="click: _.partial(openTab, 'verdicts')" href="#" data-test-id="bulletin-open-verdicts-tab" class="link-btn-julkipano">
+                      <span data-bind="ltext: 'application.tabVerdict'"></span></a></li>
+              <!-- /ko -->
+
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab',
+                                                                  params: { bulletin: bulletin,
+                                                                            attachments: attachments,
+                                                                            verdicts: verdicts }},
+                                                     attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
+
+        <div data-bind="visible: selectedTab() === 'info'" id="bulletinDocgen" class="docgen-content">
+            <!-- This is where the generated documents will be placed. -->
+        </div>
+      </div>
+
+      <!-- ko if: showCommenting -->
+        <!-- ko if: authenticated -->
+        <div data-bind="component: { name: 'bulletin-comment',
+                                     params: { bulletin: $data,
+                                               versionId: versionId,
+                                               userInfo: userInfo,
+                                               fileuploadService: fileuploadService } }"></div>
+        <!-- /ko -->
+        <!-- ko if: !authenticated() -->
+        <div class="container">
+          <p data-bind="lhtml: 'bulletins.vetuma.info'"></p>
+          <div data-bind="component: { name: 'vetuma-init',
+                                       params: vetumaParams }"></div>
+        </div>
+        <!-- /ko -->
+      <!-- /ko -->
+</script>

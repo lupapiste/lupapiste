@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="actions">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2>Toiminnot joita ei ole testattu</h2>
+
+        <p>
+        <span data-bind="text: uncalledActions" data-test-id="uncalled-actions"></span>
+        (<span data-bind="text: uncalledActionsCount" data-test-id="uncalled-actions-count"></span>)
+        </p>
+
+        <h2>Kaikki toiminnot</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>toiminto</th>
+              <th>tyyppi</th>
+              <th>kutsut</th>
+              <th>kuvaus</th>
+              <th>roolit</th>
+              <th>extra-roolit</th>
+              <th>tilat</th>
+              <th>parametrit</th>
+              <th>email</th>
+              <th>feature</th>
+              <th>l&auml;hdekoodi</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: actions">
+            <tr>
+              <td data-bind="text: name"></td>
+              <td data-bind="text: type"></td>
+              <td data-bind="text: $data['call-count']"></td>
+              <td>
+                <!-- ko if: $data.description -->
+                  <span data-bind="text: description"></span>
+                <!-- /ko -->
+              </td>
+              <td  data-bind="css: {'negative' : $data['user-roles'][0] === 'anonymous'}">
+                <ul data-bind="foreach: $data['user-roles']">
+                  <li data-bind="text: $data"></li>
+                </ul>
+              </td>
+              <td>
+                <!-- ko if: $data['extra-auth-roles'] -->
+                <ul data-bind="foreach: $data['extra-auth-roles']">
+                  <li data-bind="text: $data"></li>
+                </ul>
+                <!-- /ko -->
+              </td>
+              <td>
+                <!-- ko if: $data.states -->
+                <ul data-bind="foreach: states">
+                  <li data-bind="text: $data"></li>
+                </ul>
+                <!-- /ko -->
+              </td>
+              <td>
+                <!-- ko if: $data.parameters -->
+                <ul data-bind="foreach: parameters">
+                  <li data-bind="text: $data"></li>
+                </ul>
+                <!-- /ko -->
+              </td>
+              <td data-bind="css: {'positive': $data.notified}">
+                <span data-bind="text: $data.notified || ''"></span>
+              </td>
+              <td data-bind="attr: {'class': $data.feature ? features.enabled($data.feature) ? 'positive' : 'negative' : ''}">
+                <span data-bind="text: $data.feature || ''"></span>
+              </td>
+              <td>
+                <span data-bind="text: ns"></span>:<span data-bind="text: line"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </section>
+  </body>
+</html>

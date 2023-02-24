@@ -1,0 +1,51 @@
+<section class="page hidden" id="users-templates">
+
+    <!--
+      WARNING:
+      This is a template that will be cloned to
+      multiple places, so DO NOT USE element ID's.
+    -->
+
+    <div class="users-table">
+
+      <div class="filters" data-bind="visible: show.filters">
+        <span class="filter" data-bind="visible: show.roleFilter">
+          <span data-bind="ltext: 'users.filters.role'"></span>
+          <select class="dropdown"
+            data-bind="options: availableRoles, value: filters.role, optionsText: 'name', optionsValue: 'id'"
+            data-test-id="users-list-select-role">
+          </select>
+        </span>
+        <span class="filter" data-bind="visible: show.enabledFilter">
+          <span data-bind="ltext: 'users.filters.enabled'"></span>
+          <select class="dropdown"
+            data-bind="options: availableEnableds, value: filters.enabled, optionsText: 'name', optionsValue: 'id'"
+            data-test-id="users-list-select-enabled">
+          </select>
+        </span>
+        <span class="users-search" data-bind="visible: show.search" data-test-id="users-list-filter-role">
+            <input class="textinput textinput--big" type="text"
+              data-bind="textInput: filters.search,
+                         attr: {placeholder: loc('auth-admin.users.search.placeholder')}"
+              data-test-id="users-list-input-search"/>
+        </span>
+      </div>
+      <div class="clear spacerM"></div>
+
+      <table class="table table-striped tablesorter">
+        <thead>
+          <tr>
+            <th data-bind="ltext: 'users.table.email'"></th>
+            <th data-bind="ltext: 'users.table.name'"></th>
+            <th data-bind="ltext: 'users.table.organizationsAndRoles'"></th>
+            <th data-bind="text: show.directMarketing ? loc('users.table.directMarketing') : ''"></th>
+            <th data-bind="ltext: 'users.table.active'"></th>
+            <th data-bind="ltext: 'users.table.actions'"></th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+    </div>
+</section>

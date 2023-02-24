@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="toggle-template">
+  <div data-bind="css: wrapperCss">
+    <input type="checkbox"
+           data-bind="attr: {id: id},
+                      checked: value,
+                      disable: isDisabled,
+                      testId: testId + '-input',
+                      ariaText: ariaLabel,
+                      ariaInvalid: isInvalid,
+                      ariaRequired: isRequired,
+                      click: click">
+    <label aria-hidden="true"
+           data-bind="attr: {'for': id,
+                      'class': labelClass},
+                      text: text,
+                      css: {'no-label-text': noText},
+                      testId: testId + '-label'"></label>
+  </div>
+</script>

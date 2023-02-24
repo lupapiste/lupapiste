@@ -1,0 +1,131 @@
+$new-row-color: #ddffd4;
+$edited-row-color: #d5f4f7;
+$edited-cell-color: #ad2fcc;
+$removed-row-color: #f9c2c2;
+
+table.huoneistot-table,
+.huoneistot-table {
+  .tip {
+    border-width: 3px !important;
+  }
+
+  .dropdown.tip {
+    height: 34px !important;
+  }
+
+  .warn {
+    border-width: 3px !important;
+  }
+
+  tr,
+  tr:nth-child( even )
+  {
+    &.new-row {
+      background: $new-row-color;
+    }
+
+    &.edited-row {
+      background: $edited-row-color;
+    }
+
+    &.removed-row {
+
+      background-color: $removed-row-color;
+      td.content-column:before {
+        content: " ";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        border-bottom: 1px solid #111;
+        width: 100%;
+      }
+    }
+
+    &.hide-row {
+      display: none;
+    }
+  }
+
+  td {
+    position: relative;
+
+    .edited-cell {
+      border-color: $edited-cell-color;
+      border-width: 3px;
+    }
+
+    .edited-cell + .checkbox-label:before {
+      color: $edited-cell-color;
+    }
+
+    .form-entry {
+      position: static;
+    }
+
+    &.action-column {
+      text-align: center;
+    }
+  }
+
+
+  .show-changes-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .show-changes {
+    margin-left: 40px;
+  }
+
+  .show-changes-label {
+    font-weight: 900;
+    padding-bottom: 0px;
+  }
+
+  .legend-description {
+    padding-top: 7px;
+    padding-bottom: 0px;
+    margin-bottom: 0;
+    margin-right: 20px;
+    font-weight: 900;
+    font-size: small;
+    text-transform: uppercase;
+  }
+
+  .legend-item {
+    display: flex;
+
+    .legend-rectangle {
+      margin-top: 11px;
+      margin-bottom: 0x;
+      margin-right: 5px;
+      border: 2px solid #9c9c9c;
+      border-radius: 3px;
+      display: inline-block;
+      height: 16px;
+      padding: 0;
+      width: 16px;
+    }
+
+    .legend-text {
+      padding-top: 7px;
+      padding-bottom: 0px;
+      margin-bottom: 0;
+      margin-right: 10px;
+      font-size: smaller;
+      text-transform: uppercase;
+    }
+
+    .legend-new {
+      background-color: $new-row-color;
+    }
+
+    .legend-edited {
+      background-color: $edited-row-color;
+    }
+
+    .legend-removed {
+      background-color: $removed-row-color;
+    }
+  }
+}

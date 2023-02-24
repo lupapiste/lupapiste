@@ -1,0 +1,501 @@
+#authority-admin {
+  h2{
+    margin-top: $marginL;
+  }
+}
+
+#kopiolaitos-info {
+  margin-left: $marginL;
+}
+
+#dialog-edit-kopiolaitos-info {
+  .dialog-content {
+    margin-left: $marginS;
+  }
+}
+
+// RAM-disabled selection
+
+div.ram-disabled {
+  input {
+    @include textinputBig;
+    width: 80%;
+  }
+  .save-indicator { top: 0px; }
+  position: relative;
+}
+
+table.admin-settings {
+  td { width: 50%; }
+  td.value {
+    input {
+      @include textinputBig;
+      width: 80%;
+    }
+    .save-indicator { top: 0px; }
+    position: relative;
+  }
+}
+
+table.admin-settings.form-grid {
+  border: 1px solid $gray221;
+  tr {
+    background-color: white;
+    border: 0;
+    td {
+      vertical-align: top;
+      table {
+        margin-bottom: 0;
+      }
+      &.sub-table-container {
+        padding: 0;
+      }
+    }
+  }
+  textarea {
+    resize: none;
+    height: 200px;
+  }
+  .buttons {
+    text-align: right;
+  }
+  .pate-autocomplete {
+    margin-bottom: -8px;
+
+    .autocomplete-selection-wrapper {
+      &.disabled:hover {
+        cursor: not-allowed;
+      }
+      .tags {
+        padding-right: 3em;
+      }
+      .tags li {
+        padding-right: 0.5em;
+      }
+      .placeholder {
+        display: inline-block;
+        padding: 0.4em;
+      }
+      .ac--chevron {
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+      }
+    }
+  }
+}
+
+table.admin-settings-local-bulletins {
+  td:first-child { width: 20%; }
+  td.full-width { width: 90%; }
+  td.value {
+    input {
+      @include textinputBig;
+      width: 90%;
+    }
+    textarea {
+      @include textinputBig;
+      max-height: unset;
+      height: 4em;
+      width: 99%;
+    }
+    .save-indicator { top: 0px; }
+    position: relative;
+  }
+}
+
+.serversettings--error {
+  color: $red-dark;
+  margin: {
+    left: $marginS;
+    right: $marginS;
+    bottom: $marginL;
+  }
+  font-size: 16px;
+}
+
+// Municipality maps
+.munimaps {
+  margin: 24px 0;
+
+  h3 {
+    margin-top: .5em;
+  }
+  .munimaps--wide, .serversettings--wide {
+    input, select {
+      width: 90%;
+    }
+  }
+  .munimaps--check input {
+    margin-left: $marginL;
+  }
+  .munimaps__map {
+    width: 100%;
+    height: 500px;
+    margin-top: $marginL;
+  }
+}
+
+// Suti
+.sutiapi {
+  .serversettings--wide {
+    input, select {
+      width: 90%;
+    }
+  }
+}
+
+.authority-admin .mask {
+  /* cover the tabs*/
+  margin-top: -38px;
+}
+
+// Guest authorities
+.guest-authorities {
+  margin-top: 1em;
+}
+
+
+.form-input--inline {
+  @extend .form-input;
+  display: inline-block;
+}
+
+.form-input--error {
+  border-color: red;
+}
+
+.form-error-message {
+  padding: 2px 2px 2px 2px;
+  color: red;
+}
+
+.permanent-archive-date-input {
+  label {
+    margin-right: $marginS;
+  }
+  input {
+    width: 100px;
+  }
+}
+
+table.selected-operations-table {
+  th.sot--full-width {
+    width: 100%;
+  }
+  div.checkbox-wrapper, div.sectionbox-wrapper {
+    text-align: center;
+    border: none;
+    display: inline-block;
+  }
+  td.sot--center {
+    text-align: center;
+  }
+}
+
+// Organization links
+div.organization-link-cell {
+  @include link-text( 24em );
+  white-space: nowrap;
+}
+
+// Stamp Editor
+
+.edit-stamp-bubble {
+  border: 1px solid $gray221;
+  margin-top: 1em;
+  max-width: 90%;
+}
+
+.stamp-selection {
+  select {
+    margin-right: 1em;
+  }
+}
+
+.stamp-editor-header {
+  margin: 0;
+  .row {
+    margin: 10px 0;
+    button {
+      float: right;
+    }
+  }
+  .buttons {
+    text-align: right;
+    button {
+      margin-right: 0;
+    }
+  }
+}
+
+.stamp-preview {
+  border: medium solid $gray221;
+  border-radius: 10px;
+  width: 50%;
+  padding: 20px 20px 20px 20px;
+}
+
+.stamp-preview-row {
+  width: auto;
+}
+
+@mixin btn-with-border {
+  border-style: solid;
+  border-width: 2px;
+  border-color: $gray221;
+  background-color: white;
+  display: inline-block;
+  font-size: $font-size-body;
+  padding: 5px 10px;
+  .btn-content {
+    display: inline-block;
+  }
+  span, input {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  i {
+    display: inline;
+    vertical-align: middle;
+  }
+  input {
+    font-size: inherit;
+  }
+}
+
+@mixin stamp-editor-borders {
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+
+.stamp-row-btn {
+  @include btn-with-border;
+  i {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+}
+
+.stamp-editor-btn {
+  @include btn-with-border;
+  color: $orange-dark;
+  cursor: move;
+  i {
+    margin-right: 10px;
+  }
+}
+
+.stamp-row-btn, .stamp-editor-btn {
+  @include stamp-editor-borders;
+}
+
+.stamp-row-label {
+  @include stamp-editor-borders;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.stamp-row-placeholder {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: dashed;
+  color: $gray221;
+}
+
+.stamp-row-focus {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: solid;
+  color: $gray221;
+}
+
+.stamp-editor-drag-guide {
+  margin: 1em 0;
+}
+
+body.admin .nav-box,
+body.authority-admin .nav-box {
+  max-width: none;
+  padding-left: $marginL;
+  padding-right: $marginL;
+  .brand > a {
+    margin-left: 0;
+  }
+}
+
+nav .header-menu {}
+
+// Note on breakpoints: IE does not support display: initial.
+$navi-sidebar-bp: 1800px;
+
+.navi-sidebar {
+  position: fixed;
+  height: 100%;
+  background-color: $sidebar-button-color; // from buttons.scss
+  border-right: 1px solid $gray221;
+  @media (max-width: $navi-sidebar-bp ) {
+    display: none;
+  }
+}
+
+.navi-sidebar.navi-sidebar--menu {
+  z-index: 888;
+  @media (max-width: $navi-sidebar-bp ) {
+    display: block;
+  }
+}
+
+.container.container--authority-admin {
+  padding: 10px 48px 10px 48px;
+  max-width: initial;
+  width: initial;
+  margin-left: $sidebar-button-width; // from buttons.scss
+
+  &.container--icon {
+    margin-left: $sidebar-icon-width;
+  }
+  section {
+    margin-bottom: $marginL*1.5;
+  }
+
+  .container-padding {
+    padding: 20px 40px 15px 40px;
+  }
+}
+
+.container.container--authority-admin,
+.container.container--authority-admin.container--icon {
+  @media (max-width: $navi-sidebar-bp ) {
+    margin-left: 0;
+  }
+}
+
+.navi-toolbar {
+  background-color: $sidebar-button-color; // from buttons.scss
+  border-bottom: 1px solid $gray221;
+  width: 100%;
+  min-height: $btn-height;
+  white-space: nowrap;
+
+  button.sidebar-button {
+    border: none;
+    display: none;
+     @media (max-width: $navi-sidebar-bp ) {
+       display: inline-block;
+     }
+  }
+
+  .navi-toolbar-title {
+    display: inline;
+    margin: 0 0 0 $marginL;
+    line-height: $btn-height;
+  }
+}
+
+@include rotate-frames( half-spin, 180deg );
+
+.spin-once {
+  @include rotate( half-spin, 0.5s, $count: 1);
+  vertical-align: middle;
+  padding: 0 !important;
+  display: table-cell;
+}
+
+.spin-once + span {
+  padding-left: $icon-pad;
+}
+
+.users-search {
+  input.textinput {
+    display: inline-block;
+    width: 20em;
+    vertical-align: middle;
+  }
+}
+
+.docterminal-settings {
+  .checkbox-wrapper {
+    border: none;
+  }
+  table {
+    margin-bottom: 0;
+  }
+}
+
+table.default-digitalization-location {
+  width: auto;
+}
+
+#organization-bulletins .checkbox-wrapper {
+  border: none;
+}
+
+.edit-authority-roles {
+  width: 60%;
+
+  button {
+    margin-top: 12px;
+  }
+}
+
+.edit-authority-info {
+
+  label {
+    display: block;
+  }
+
+  p {
+    margin-left: 0px;
+    margin-top: 12px;
+  }
+}
+
+.configuration-details {
+  padding-left: $marginL;
+  padding-right: $marginL;
+}
+
+div.automatic-filter-editor {
+  border: 1px black solid;
+  padding-left: 1em;
+  padding-right: 1em;
+  span.selected {margin-right: 1em}
+  h3 {font-weight: bold}
+}
+
+div.automatic-filter-list {
+  .filter-item {
+    .tabby {
+      margin: 0 0;
+      .tabby__cell {
+        padding: 0 0;
+      }
+    }
+  }
+  .filter-actions {
+      white-space: nowrap;
+      button {
+        margin-right: 1em;
+      }
+    }
+  tr.open {
+    a {font-weight: bold;}
+    border-bottom: none;
+  }
+  tr.details {
+    border-top: none;
+    div.tabby {
+      padding-left: 1em;
+      margin: 0 0;
+      div.tabby__cell {
+        padding: 0 0;
+        padding-left: .5em;
+        label {white-space: nowrap;}
+        label:after {content: ": ";}
+      }
+    }
+    div.message {white-space: pre-wrap}
+  }
+}

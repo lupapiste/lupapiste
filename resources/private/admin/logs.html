@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="logs">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <h2>Frontend log</h2>
+        <!-- ko foreach: ['fatal', 'error', 'warn', 'info', 'debug']  -->
+          <!-- ko if: $root[$data]().length -->
+          <h3 data-bind="text: $data + 's'" style="text-transform: capitalize"></h3>
+
+          <table data-bind="attr: {'data-test-id': $data + '-log'}">
+            <thead><tr><th>Aika</th><th>Viesti</th></tr></thead>
+            <tbody data-bind="foreach: $root[$data]">
+              <tr>
+                <td data-bind="dateTimeString: $data.ts"></td>
+                <td data-bind="text: $data.msg"></td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- /ko -->
+        <!-- /ko -->
+      <button class="primary" data-bind="click: resetLog" data-test-id="reset-frontend-log">Resetoi logi</button>
+      </div>
+    </section>
+  </body>
+</html>

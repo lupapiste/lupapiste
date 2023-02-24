@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.4/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.4/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wfs="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" xmlns:ows="http://www.opengis.net/ows" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>Sample</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Järvenpää</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2013-09-10</yht:toimitusPvm>
+    <yht:kuntakoodi>186</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.18480">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>1001-01-01Z</yht:pvm>
+          <yht:tila>ei tiedossa</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0185-R</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-186-2013-00002</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>18600013-0185</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-06-14Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:naapuritieto>
+            <yht:Naapuri>
+              <yht:henkilo> </yht:henkilo>
+            </yht:Naapuri>
+          </yht:naapuritieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2016-10-08Z</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2013-10-08Z</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2018-10-08Z</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2013-09-06Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-10-07Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-09-04Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Rakennuslautakunta</yht:paatoksentekija>
+            <yht:paatospvm>2013-09-03Z</yht:paatospvm>
+            <yht:pykala>12</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Päätösote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-09-03T15:27:46Z</yht:muokkausHetki>
+              <yht:tyyppi>Päätösote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>true</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen>Ei poikkeamisia.</rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

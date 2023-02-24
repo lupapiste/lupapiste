@@ -1,0 +1,25 @@
+<script class="ko-template" type="text/x-jquery/tmpl"
+        id="company-notes-panel-template">
+
+  <div>
+    <div>
+      <label data-bind="ltext: 'application.tags'"></label>
+      <div data-test-id="autocomplete-application-tags-component"
+           data-bind="component: {name: 'autocomplete-application-company-tags',
+                      params: {tags: true,
+                      selectedValues: tags,
+                      enable: authorization.ok('company-tags'),
+                      lPlaceholder: 'tags.autocomplete.placeholder'}}"></div>
+    </div>
+
+    <div class="gap--t1 notice--notes"
+         data-bind="component: {name: 'textarea-field',
+                      params: {value: note,
+                      id: 'application-company-note',
+                      label: noteLabel,
+                      lPlaceholder: 'comment.placeholder',
+                      enable: authorization.ok('update-application-company-notes')}}">
+    </div>
+  </div>
+
+</script>

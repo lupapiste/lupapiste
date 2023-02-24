@@ -1,0 +1,41 @@
+/* selectm component styles*/
+
+
+.selectm-dialog {
+  .dialog-content {
+    width: 100%;
+    min-height: 350px;
+  }
+}
+
+.selectm {
+  margin: 0px;
+  padding: 0px;
+
+  label,input,select {
+    display:block;
+    width: 100%;
+    height: auto;
+    margin-bottom: $marginS;
+  }
+  .selectm-target, .selectm-source  {
+  	height: 100px;
+  }
+  input {
+    box-sizing: border-box;
+    margin: 0px;
+  }
+
+  .ok-cancel-row {
+    margin-top: $marginM;
+  }
+}
+
+@media (min-height: 800px) {
+  .selectm {
+    .selectm-target, .selectm-source  {
+      height: auto;
+      max-height: 170px;
+    }
+  }
+}

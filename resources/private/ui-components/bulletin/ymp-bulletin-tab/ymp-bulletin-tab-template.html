@@ -1,0 +1,30 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="ymp-bulletin-tab-template">
+
+  <!-- ko if: showPublishing -->
+  <div class="bulletin-component" data-bind="component: {name: 'publish-application',
+                                                         params: {appId: appId,
+                                                                  appState: appState,
+                                                                  authModel: authModel,
+                                                                  bulletin: bulletin,
+                                                                  bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
+  <!-- /ko -->
+
+  <!-- ko if: bulletin -->
+    <!-- ko if: showVersions -->
+    <div class="bulletin-component" data-bind="component: {name: 'ymp-bulletin-versions',
+                                                           params: {appId: appId,
+                                                                    authModel: authModel,
+                                                                    bulletin: bulletin,
+                                                                    handleVersionClick: handleVersionClick}}"></div>
+    <!-- /ko -->
+
+    <!-- ko if: bulletinVersion -->
+    <div class="bulletin-component" data-bind="component: {name: 'ymp-bulletin-comments',
+                                                           params: {bulletinVersion: bulletinVersion,
+                                                                    bulletin: bulletin,
+                                                                    comments: comments,
+                                                                    commentsLeft: commentsLeft,
+                                                                    totalComments: totalComments}}"></div>
+    <!-- /ko -->
+  <!-- /ko -->
+</script>

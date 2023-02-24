@@ -1,0 +1,299 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="statements-tab-template">
+  <!-- ko if: application.permitType -->
+      <div class="application-statements">
+
+        <h1 data-bind="ltext: 'application.statements'"></h1>
+        <span data-bind="component: {
+                         name: 'help-toggle',
+                         params: {lhtml: 'help.' + application.permitType() + '.statementsDesc'}
+                         }"></span>
+        <div id="application-statements-table">
+          <div data-bind="component: {name: 'statements-table',
+                                      params: {application: application,
+                                               statements: application.statements,
+                                               authModel: $root.authorization,
+                                               localisationKeys: {missing: 'application.statement.missing'}}}"></div>
+        </div>
+        <button data-bind="click: toggleInviteSection,
+                           visible: authorization.ok('request-for-statement') && !someDialogOpen()"
+                class="positive modal"
+                data-test-id="add-statement">
+          <i aria-hidden="true" class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'application.statement.add'"></span>
+        </button>
+        <button data-bind="toggleClick: showElyStatementSection,
+                           visible: authorization.ok('ely-statement-request') && !someDialogOpen()"
+                class="positive modal"
+                data-test-id="add-ely-statement">
+          <i aria-hidden="true" class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'application.ely-statement.add'"></span>
+        </button>
+
+
+        <!-- ko if: showInviteSection -->
+        <div data-bind="template: 'statement-invite-section'"></div>
+        <!-- /ko -->
+        <!-- ko if: showElyStatementSection() && elySubtypes().length > 0 -->
+        <bubble-dialog params="visible: showElyStatementSection,
+                               initFun: resetElyData,
+                               okFun: requestElyStatement,
+                               okEnabled: elyDataOk,
+                               buttonText: 'application.statement.add',
+                               buttonIcon: 'lupicon-circle-check',
+                               waiting: submitting">
+          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}" data-test-id="ely-statement-bubble"></div>
+        </bubble-dialog>
+        <!-- /ko -->
+      </div>
+
+      <!-- ko if: $root.authorization.ok('neighbors-statement-enabled') -->
+        <div class="application-neighbors">
+            <h1 data-bind="lhtml: 'application.' + application.permitType() + '.neighbors'"></h1>
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.' + application.permitType() + '.neighborsDesc'}
+                             }"></span>
+
+            <neighborhood params="municipalityHearsNeighborsOption: true"></neighborhood>
+
+            <button data-bind="click: openNeighborsPage,
+                               visible: $root.authorization.ok('neighbor-add')"
+                    class="btn btn-primary modal"
+                    data-test-id="manage-neighbors">
+               <i aria-hidden="true" class="lupicon-circle-plus"></i>
+               <span data-bind="ltext: 'neighbors.manage'"></span>
+            </button>
+        </div>
+      <!-- /ko -->
+  <!-- /ko -->
+
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="statement-invite-section">
+  <div id="invite-statement-givers-section">
+      <h3 id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></h3>
+      <table class="table table-striped" data-test-id="table-application-statements-givers">
+          <thead>
+              <tr>
+                  <th></th>
+                  <th data-bind="ltext: 'application.statement.desc'"></th>
+                  <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                  <th data-bind="ltext: 'userinfo.email'"></th>
+              </tr>
+          </thead>
+          <tbody data-bind="foreach: combinedData">
+              <tr class="statement-giver-row" data-bind="{attr: {'data-test-email': email()}}">
+                <td>
+                  <toggle params="value: $data.selected,
+                                  ltext: 'application-choose-statement-givers',
+                                  noText: true,
+                                  testId: 'statement-giver-checkbox-' + $index(),
+                                  prefix: 'blockbox'"></toggle>
+
+                  </td>
+                  <!-- ko if: readonly -->
+                  <td>
+                    <span data-bind="text: text, testId: 'statement-giver-role-text-' + $index()"></span>
+                  </td>
+                  <td>
+                    <span data-bind="text: name, testId: 'statement-giver-name-' + $index()"></span>
+                  </td>
+                  <td>
+                    <span data-bind="text: email, testId: 'statement-giver-email-' + $index()"></span>
+                  </td>
+                  <!-- /ko -->
+                  <!-- ko ifnot: readonly -->
+                  <td>
+                    <input class="lux full-width"
+                           type="text"
+                           data-bind="textInput: $data.text,
+                                      enable: $data.selected,
+                                      ariaLtext: 'application.statement.desc',
+                                      required: $data.required().text,
+                                      testId: 'statement-giver-role-text-' + $index()"></input>
+                  </td>
+                  <td>
+                    <input class="lux full-width"
+                           type="text"
+                           data-bind="textInput: $data.name,
+                                      enable: $data.selected,
+                                      ariaLtext: 'auth-admin.statement-person.name',
+                                      required: $data.required().name,
+                                      testId: 'statement-giver-name-' + $index()"></input>
+                  </td>
+                  <td>
+                    <input class="lux full-width"
+                           type="text"
+                           data-bind="value: $data.email,
+                                      enable: $data.selected,
+                                      ariaLtext: 'userinfo.email',
+                                      required: $data.required().email,
+                                      ariaInvalid: $data.emailError,
+                                      testId: 'statement-giver-email-' + $index()"></input>
+                  </td>
+                  <!-- /ko -->
+              </tr>
+          </tbody>
+      </table>
+
+      <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="invite-statement-giver-saateText" class="form-label form-label-text"></label>
+      <textarea id="invite-statement-giver-saateText"
+                rows="10"
+                class="lux form-input really-long"
+                data-bind="textInput: saateText,
+                           lplaceholder: 'application.invite-statement-giver-saateText-placeholder'"></textarea>
+
+
+      <label class="form-label"
+             data-bind="ltext: 'add-statement-giver-maaraaika'"
+             for="add-statement-giver-maaraaika"></label>
+      <date-input params="value: maaraaika,
+                          callback: regularDueDateCallback,
+                          validator: isAfterToday,
+                          css: 'form-input',
+                          id: 'add-statement-giver-maaraaika'"></date-input>
+
+      <icon-button params="click: send,
+                           enable: canSend,
+                           icon: 'circle-check',
+                           ltext: 'application.statement.add',
+                           waiting: submitting,
+                           testId: 'add-statement-giver'"></icon-button>
+
+      <icon-button params="click: toggleInviteSection,
+                           testId: 'cancel-add-statement-giver',
+                           icon: 'remove',
+                           buttonClass: 'secondary',
+                           ltext: 'cancel'"></icon-button>
+  </div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="ely-statement-request-bubble">
+  <h3 data-bind="ltext: 'application.ely-statement.request'"></h3>
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <label data-bind="ltext: 'application.ely-statement.subtype.select'" for="ely-subtypes" class="form-label form-label-text"></label>
+      <select class="dropdown" id="ely-subtypes"
+              data-bind="value: elyData.subtype,
+                         options: elySubtypes,
+                         valueAllowUnset: true,
+                         required: _.isBlank( elyData.subtype() ),
+                         optionsCaption: loc('choose'),
+                         optionsText: loc"></select>
+    </div>
+    <div class="row">
+      <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="ely-statement-saateText" class="form-label form-label-text"></label>
+      <textarea id="ely-statement-saateText" rows="10" class="lux"
+                aria-errormessage="ely-statement-error"
+                data-bind="textInput: elyData.saateText,
+                           ariaInvalid: elyTextOverLimit,
+                           lplaceholder: 'application.ely-statement.saateText-placeholder'"></textarea>
+      <div class="text-right" data-bind="visible: _.isNumber(elyTextLength()), ltext: 'characters', locArgs: elyTextLength()"></div>
+      <div id="ely-statement-error"
+           role="alert"
+           data-bind="ariaLtext: 'application.ely-statement.saateText.length-warning'">
+        <div class="error-message"
+             aria-hidden="true"
+             data-bind="visible: elyTextOverLimit,
+                        ltext: 'application.ely-statement.saateText.length-warning'">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="ely-maaraaika"></label>
+        <date-input params="elyData.dueDate,
+                            id: 'ely-maaraaika',
+                            callback: elyDueDateCallback,
+                            css: 'form-input',
+                            validator: isAfterToday"></date-input>
+      </div>
+      <div class="col-1">
+      <label class="form-label" data-bind="ltext: 'kieli'" for="ely-lang"></label>
+        <select class="form-input dropdown" data-bind="value: elyData.lang, options: loc.supported, optionsText: loc" id="ely-lang"></select>
+      </div>
+    </div>
+  </div>
+
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="neighbors-table-template">
+      <div data-bind="ifnot: neighbors() && neighbors().length > 0">
+        <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
+      </div>
+
+      <!-- ko if: municipalityHearsNeighborsVisible -->
+      <div class="form-grid form-grid--no-border">
+        <div class="row">
+          <div data-bind="component: {name: 'checkbox-field',
+                                      params: {value: optionMunicipalityHearsNeighbors,
+                                               lLabel: 'application.municipality-hears-neighbors',
+                                               disable: optionMunicipalityHearsNeighborsDisabled}}"
+               data-test-id="municipality-hears-neighbours" ></div>
+        </div>
+      </div>
+      <!-- /ko -->
+
+      <div data-bind="if: neighbors() && neighbors().length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'neighbors.propertyId'"></th>
+              <th data-bind="ltext: 'neighbors.owner'"></th>
+              <th data-bind="ltext: 'neighbors.status'"></th>
+              <th data-bind="ltext: 'neighbors.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: neighbors">
+            <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + owner.email()}">
+              <td data-bind="propertyId: propertyId"></td>
+              <td data-bind="with: owner">
+                <span data-bind="text: name" class="owner-name"></span>
+                <span data-bind="text: address.street" class="owner-street"></span>
+                <span data-bind="text: address.zip" class="owner-zip"></span>
+                <span data-bind="text: address.city" class="owner-city"></span>
+                <span data-bind="text: email" class="owner-email"></span>
+              </td>
+              <td>
+                <a data-bind="visible: $root.neighbor.statusCompleted($data),
+                              click: $root.neighbor.showStatus,
+                              attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
+                   href="#">
+                  <span data-bind="text: loc(['neighbor.state', _.last(status()).state()])" class="status-state"></span>
+                </a>
+                <span data-bind="visible: !$root.neighbor.statusCompleted($data),
+                                 text: loc(['neighbor.state', _.last(status()).state()]),
+                                 attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
+                      class="status-state">
+                </span>
+                <!-- ko if: _.last(status()).state() === 'email-sent' -->
+                  <span data-bind="text: _.last(status()).email(),
+                                   attr: {'data-test-id': 'email-address-' + _.last(status()).email()}"
+                        class="owner-email"></span>
+                <!-- /ko -->
+                <span data-bind="dateTimeString: _.last(status()).created()" class="status-time"></span>
+              </td>
+              <td>
+                <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
+                  <a data-bind="click: $root.sendNeighborEmailModel.open,
+                                visible: $root.authorization.ok('neighbor-send-invite'),
+                                ltext: 'neighbors.actions.sendEmail'"
+                     data-test-id="neighbor-row-invite"
+                     class="command"
+                     href="#">
+                  </a>
+                  <a data-bind="click: $root.neighbor.markDone,
+                                visible: _.last(status()).state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
+                                ltext: 'neighbors.actions.markDone',
+                                clickBubble: false"
+                     data-test-id="neighbor-row-mark-done"
+                     class="command"
+                     href="#">
+                  </a>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+</script>

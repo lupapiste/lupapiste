@@ -1,0 +1,692 @@
+@use "sass:math";
+
+$attachment-modal-width: 600px;
+
+#attachment.container {
+  padding-right: 0;
+}
+
+$previewHeight: 500px;
+
+.file-preview {
+  width: 100%;
+  position: relative;
+}
+
+.file-preview-image img {
+  width: 100%;
+  height: auto;
+}
+
+.file-preview-actions {
+  position: absolute;
+  bottom: $marginS;
+  right: $marginS;
+
+  .btn {
+    margin: 0;
+  }
+}
+
+.file-preview-content {
+  img, iframe {
+    border: 1px solid darken($lp-light-grey, 15%);
+  }
+}
+
+.file-preview-links {
+}
+
+.file-preview-pdf {
+  iframe {
+    width: 100%;
+    height: $previewHeight;
+  }
+}
+
+.attachment-file-versions {
+  margin-bottom: $marginM;
+
+  table {
+    margin: 0;
+  }
+
+  .attachment-file-versions-content {
+    padding: $marginS 0;
+    position: relative; // Allow bubble to pop out of overflow:hidden
+
+    th {
+      padding: $marginS;
+    }
+
+    tr > td {
+      padding: $marginS;
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      @include icon-bubble-hover;
+      .bubble-hover {
+        position: absolute;
+        margin-top: -12px;
+      }
+    }
+
+    tr.version-row--noted {
+      border-bottom: none;
+
+      > td {
+        padding-bottom: 0;
+        min-height: 0;
+        height: initial;
+      }
+    }
+
+    tr.version-reject-note-row {
+      border-top: none;
+      padding: 0;
+
+      > td {
+        padding: {
+          top: 0;
+          left: 6px;
+          right: 0;
+          bottom: 4px;
+        }
+        min-height: 0;
+        height: auto;
+      }
+    }
+  }
+}
+
+.attachment-file-conversation {
+  width: 48%;
+}
+
+
+.att-field {
+  label {
+    display: block;
+  }
+  .combobox-container {
+    width: 90%;
+    input {
+      width: 90%;
+    }
+  }
+}
+
+.attachment-info {
+  width: 100%;
+
+  .container {
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .col1 {
+    display: inline-block;
+    padding-right: $marginM;
+    width: 60%;
+    vertical-align: bottom;
+
+  }
+
+  .col2 {
+    display: inline-block;
+    padding-left: $marginM;
+    width: 40%;
+    vertical-align: bottom;
+    float: right;
+  }
+
+  @media (max-width: $narrow-breakpoint) {
+    .col1, .col2 {
+      display: block;
+      width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+      margin-top: $marginS;
+      float: none;
+    }
+  }
+
+  .attachment-actions {
+    width: $cols3;
+    float: right;
+    margin-top: -60px;
+    vertical-align: top;
+  }
+}
+
+.attachment-info-wrapper {
+  margin-top: $marginL;
+  width: 80%;
+
+  .tab-info {
+    width: 80%;
+  }
+}
+
+.attachment-info-header {
+  width: 100%;
+  display: block;
+  vertical-align: baseline;
+
+  h1 {
+    line-height: normal;
+    max-width: 80%;
+    display: inline-block;
+  }
+
+  a {
+    margin-left: $marginL * 2;
+  }
+}
+
+.add-new-version {
+}
+
+td.comment-text {
+  vertical-align: top;
+  text-align: left;
+}
+
+.new-attachment-version-details {
+  display: block;
+  font-style: italic;
+}
+
+.attachment-group-header {
+  font-weight: bold;
+  font-size: 1.5em;
+  background: white !important;
+  height: 50px;
+  vertical-align: bottom;
+
+  td {
+    padding: $marginS 0;
+  }
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+#attachment-type-select {
+  margin-bottom: $marginL;
+}
+
+.change-type {
+  clear: both;
+  display: block;
+}
+
+.attachment-label {
+
+  .attachment-label-header {
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.125em;
+  }
+
+  .attachment-label-header-item {
+    margin-right: $marginL;
+    font-weight: bold;
+  }
+
+  .attachment-label-info-item {
+    margin-right: $marginL;
+  }
+
+  input {
+    display: block;
+    margin: 0;
+    width: 100%;
+    height: 26px;
+  }
+
+  input[type="checkbox"] {
+    display: inline-block;
+    width: $cols1;
+  }
+
+  select {
+    display: block;
+    width: 100%;
+  }
+
+  .attachment-info-field {
+    margin-bottom: $marginS;
+    position: relative;
+  }
+}
+
+.signatures {
+  margin-top: $marginM;
+}
+
+.signature-table {
+  display: table;
+  width: auto;
+  margin-bottom: $marginM;
+  margin-left: $marginS;
+}
+
+.signature-row {
+  display: table-row;
+  width: auto;
+  clear: both;
+  margin-bottom: $marginS;
+  line-height: 27px;
+}
+
+.signature-cell {
+  display: table-cell;
+  width: 200px;
+}
+
+.tos-metadata-content {
+  margin-top: $marginM;
+
+  .subtable {
+    margin: 0;
+
+    tr {
+      background: transparent;
+      border: none;
+    }
+
+    th, td {
+      background: transparent;
+      padding: 0;
+    }
+  }
+}
+
+.upload-instructions {
+  p {
+    line-height: normal;
+    margin-bottom: $marginM;
+  }
+
+  margin-bottom: $marginL;
+}
+
+.archive-valid {
+  margin-top: $marginM;
+
+  [class^="lupicon-"] {
+    vertical-align: middle;
+    margin-left: 2px;
+    font-size: 18px;
+    cursor: default;
+  }
+
+  span {
+    margin-left: 5px;
+  }
+}
+
+.modal-body p {
+  max-width: $attachment-modal-width;
+}
+
+// Used when editing tasks, for example
+.targetted-attachments {
+  margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+}
+
+.attachment-operations {
+  @include button-row;
+  margin: {
+    top: 1em;
+    bottom: 2em;
+  }
+
+  export-attachments {
+    @include button-row;
+  }
+}
+
+.attachment-assignment-row {
+  border: {
+    top: none;
+    bottom: none;
+  }
+
+  td {
+    padding: 0px;
+    margin: 0px;
+  }
+}
+
+.hidden-row {
+  height: 0px;
+  border: {
+    top: none;
+    bottom: none;
+  }
+
+  td {
+    height: 0px;
+    padding: 0px;
+    margin: 0px;
+  }
+}
+
+.selected-attachment-types {
+  margin-top: $marginM;
+  margin-bottom: $marginM;
+}
+
+.selected-attachment-types-container {
+  min-height: $grid-input-height;
+
+  .selected-attachment-type-tag {
+    position: relative;
+    background-color: $gray247;
+    border: 1px solid $input-border-color;
+    min-height: $grid-input-height;
+    width: 100%;
+    display: inline-block;
+
+    span.tag-label {
+      display: inline-block;
+      margin: $marginS;
+      font-weight: bold;
+    }
+
+    .tag-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      color: $lp-orange;
+
+      &:hover {
+        color: $orange-hover;
+      }
+    }
+  }
+}
+
+.attachment-details-toggles {
+  padding-top: $marginL;
+  padding-bottom: $marginL;
+  clear: both;
+}
+
+.attachment-info-field .combobox-container {
+  width: 100%;
+}
+
+.attachment-batch-grouping {
+  min-width: 20em;
+}
+
+table.attachment-table {
+  // The border stuff is a bit convoluted, since tr behaves
+  // differently depending on its display (flex can have borders,
+  // table-row cannot). Thus, before collapse, the borders are done in
+  // td:s and after with tr.
+  border-collapse: unset;
+  $border: 1px solid get-gray( 11 );
+  $blue-border: 2px solid get-signal( "blue" );
+  th {
+    background-clip: border-box;
+    border-top: $border;
+    &:first-child {
+      border-top-left-radius: 10px;
+      border-left: $border;
+    }
+    &:last-child {
+      border-top-right-radius: 10px;
+      border-right: $border;
+    }
+    &.top-right {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+  }
+  @media( min-width: $collapse-s + 1px ) {
+    tbody > tr {
+      > td {
+        border-top: $border;
+        border-bottom: $border;
+        &:first-child {
+          border-left: $border;
+        }
+        &:last-child {
+          border-right: $border;
+        }
+      }
+      &.expanded > td {
+        border-top: $blue-border;
+        border-bottom: 0;
+        &:first-child {
+          border-left: $blue-border;
+        }
+        &:last-child {
+          border-right: $blue-border;
+        }
+      }
+      &.expanded-2 > td {
+        border-top: 0;
+        border-bottom: 0;
+        &:first-child {
+          border-left: $blue-border;
+        }
+        &:last-child {
+          border-right: $blue-border;
+        }
+      }
+      &.expanded-3 > td {
+        border-top: 0;
+        border-bottom: $blue-border;
+        &:first-child {
+          border-left: $blue-border;
+        }
+        &:last-child {
+          border-right: $blue-border;
+        }
+      }
+    }
+  }
+  @media( max-width: $collapse-s ) {
+    tbody > tr {
+      border: $border;
+      &.expanded {
+        $border: 2px solid get-signal( "blue" );
+        border: {
+          left: $blue-border;
+          top: $blue-border;
+          right: $blue-border;
+          bottom: 0;
+        }
+      }
+      &.expanded-2 {
+        border: {
+          left: $blue-border;
+          top: 0;
+          right: $blue-border;
+          bottom: 0;
+        }
+      }
+      &.expanded-3 {
+        border: {
+          left: $blue-border;
+          top: 0;
+          right: $blue-border;
+          bottom: $blue-border;
+        }
+      }
+    }
+  }
+
+}
+
+.attachment-state-group {
+  margin-top: $marginL * 2;
+}
+
+.attachment-detail-row {
+  display: flex;
+
+  > :not(:first-child) {
+    margin-left: $marginS;
+  }
+}
+
+.attachment-reject-note {
+  background: $blue-20;
+  padding: $marginS;
+  border-radius: .2em;
+
+  > {
+    margin-left: $marginS;
+  }
+}
+
+.attachment-reject-note-edit {
+  display: flex;
+
+  textarea {
+    width: 50%;
+  }
+
+  > :not(:first-child) {
+    margin-left: $marginS;
+  }
+}
+
+.attachment-sub-group-header {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 0.6em;
+}
+
+.attachment-assignment {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: $marginS;
+  margin-bottom: $marginS;
+  border: 1px solid $input-border-color;
+  border-radius: 0.2em;
+  flex-basis: 25%;
+}
+
+.attachment-assignment-button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $marginS;
+}
+
+.attachment-assignment-header {
+  display: flex;
+  border-bottom: 1px solid $input-border-color;
+  margin-bottom: $marginS;
+}
+
+.attachment-assignment > .attachment-assignment-header .recipient:before {
+  content: "→";
+}
+
+.attachment-assignment-editor {
+  width: 95%;
+  height: 90%;
+}
+
+.attachment-remark-container {
+  display: flex;
+
+  *:first-child {
+    margin-right: $marginM;
+  }
+}
+
+.attachment-remark-counter {
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  line-height: 1.5em;
+  text-align: center;
+  font-weight: bold;
+}
+
+.attachment-remark-ok {
+  background: $panel-background;
+}
+
+.attachment-remark-warn {
+  color: $white;
+  background: get-signal( "red" );
+}
+
+.attachment-filter-header {
+  width: 20%;
+  margin-bottom: $marginS;
+
+  button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.attachment-filter-title {
+  display: flex;
+
+  *:first-child {
+    margin-right: $marginM;
+  }
+}
+
+.attachment-filter-container {
+  background-color: $panel-background;
+  padding: $marginS;
+
+  input[type=text] {
+    width: 100%;
+  }
+}
+
+.attachment-filter-reset {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.attachment-filter-count {
+  margin-bottom: $marginM;
+}
+
+.attachment-visibility {
+  display: flex;
+
+  * {
+    margin-right: $marginS;
+  }
+
+  i {
+    font-size: 1em;
+    padding-top: math.div( $marginS, 2);
+  }
+
+}
+
+.attachment-no-results {
+  display: flex;
+  justify-content: center;
+  margin-top: $marginM;
+
+  * {
+    margin-right: $marginM;
+  }
+}
+
+.btn-inactive {
+  cursor: default;
+}

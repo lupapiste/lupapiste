@@ -1,0 +1,78 @@
+<section class="page" id="archiving">
+  <div class="container container--authority-admin"
+       data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
+                      if: organization.organizationId">
+    <h1 data-bind="ltext: 'arkistointi'"></h1>
+
+    <section>
+      <h2 data-bind="ltext: 'authorityAdmin.archive.heading'"></h2>
+      <div class="permanent-archive-date-input">
+        <span for="archiving-start-date" data-bind="ltext: 'authorityAdmin.archive.startDate'"></span>
+        <span data-bind="if: organization.earliestArchivingDate">
+          (<span data-bind="ltext: 'aikaisintaan'"></span>
+           <span data-bind="dateString: organization.earliestArchivingDate"></span>)
+        </span>
+        <br>
+        <input data-bind="datepicker: organization.permanentArchiveInUseSince,
+                          valueUpdate: 'afterkeydown',
+                          enable: $root.authorization.ok('set-organization-permanent-archive-start-date'),
+                          attr: {placeholder: loc('choose')}"
+               type="text"
+               id="archiving-start-date"
+               class="form-input textinput textinput--big">
+        <div data-bind="if: organization.earliestArchivingDate">
+          <span data-bind="ltext: 'auth-admin.earliest-archival-date.guide'"></span>
+        </div>
+      </div>
+    </section>
+
+    <section data-bind="if: lupapisteApp.models.globalAuthModel.ok('digitizing-enabled')">
+      <h2 data-bind="ltext: 'auth-admin.archiving.digitizing'"></h2>
+      <label for="digitizingTosFunction">
+        <span data-bind="ltext: 'auth-admin.archiving.digitizing.tosFunction'"></span>
+      </label><br>
+      <select class="dropdown" id="digitizingTosFunction"
+              data-bind="options: $root.organization.tosFunctions,
+                         optionsText: 'name',
+                         optionsValue: 'code',
+                         value: $root.organization.archivingProjectTosFunction,
+                         valueAllowUnset: true"></select>
+    </section>
+
+    <section>
+      <div>
+        <h3 data-bind="ltext: 'auth-admin.archiving.digitizing.defaultLocation'"></h3>
+        <p data-bind="lhtml: 'auth-admin.archiving.digitizing.defaultLocation.text'"></p>
+        <table class="table grid-style-input default-digitalization-location">
+          <thead>
+            <tr>
+              <th><span data-bind="ltext: 'auth-admin.archiving.digitizing.defaultLocation.x'"></span></th>
+              <th><span data-bind="ltext: 'auth-admin.archiving.digitizing.defaultLocation.y'"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <input data-bind="value: organization.defaultDigitalizationLocationX"
+                       type="text"
+                       id="default-digitalization-x"
+                       class="form-input-location">
+              </td>
+              <td>
+                <input data-bind="value: organization.defaultDigitalizationLocationY"
+                       type="text"
+                       id="default-digitalization-y"
+                       class="form-input-location">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <building-extra-attributes params="organization: $root.organization">
+    </section>
+
+  </div>
+</section>

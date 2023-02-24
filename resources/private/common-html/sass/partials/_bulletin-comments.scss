@@ -1,0 +1,67 @@
+.bulletin-comment {
+  border: 1px solid $grid-border-color;
+  margin-bottom: $grid-margin;
+  .bulletin-comment__header {
+    background-color: $gray221;
+    height: $grid-min-height;
+    padding: $marginS $marginM;
+    cursor: pointer;
+  }
+  .bulletin-comment__index {
+    margin-right: $marginS;
+    &:after {
+      content: ".";
+    }
+  }
+  .bulletin-comment__name {
+    @include styled-input( "link" );
+    &:after {
+      content: ",";
+    }
+  }
+  .bulletin-comment__body {
+    padding: $marginS $marginM;
+    clear: both;
+    pre {
+      white-space: pre-wrap;
+    }
+  }
+  .bulletin-comment__attachments {
+    margin-bottom: $marginS;
+    display: table;
+    .bulletin-comment__attachment {
+      display: table-row;
+      .bulletin-comment_attachment-link {
+        display: table-cell;
+        padding-right: $grid-margin;
+      }
+      .bulletin-comment__attachment-type {
+        display: table-cell;
+        &:after {
+          content: ")";
+        }
+        &:before {
+          content: "(";
+        }
+      }
+    }
+  }
+}
+
+.bulletin-comment-spinner {
+  color: $gray221;
+  padding: 0 50%;
+}
+
+.bulletin-proclamation-header {
+  overflow: auto;
+  line-height: $grid-min-height;
+  vertical-align: middle;
+  margin-bottom: $grid-margin;
+  .bulletin-proclamation-text {
+    float: left;
+  }
+  .bulletin-proclamation-sort {
+    float: right;
+  }
+}

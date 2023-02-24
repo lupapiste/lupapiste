@@ -1,0 +1,86 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="side-panel-template">
+  <!-- dummy div for catching keypress events -->
+  <div data-bind="visible: false, documentEvent: {keypress: closeOnEsc, key: 27}"></div>
+  <!-- ko if: enableSidePanel -->
+  <div id="side-panel"
+       tabindex="-1"
+       data-bind="slider: sidePanelOpen,
+                  hasFocus: sidePanelOpen">
+    <div class="content-wrapper">
+      <div id="conversation-panel" data-bind="visible: showConversationPanel">
+        <div class="header">
+          <div class="flex--between">
+            <div>
+              <h1 class="inline-block title"
+                  data-bind="ltext: 'conversation.title'"></h1>
+              <span data-bind="component: {name: 'help-toggle',
+                               params: {flag: showHelp,
+                               lhtml: 'help.' + permitType() + '.conversationDesc'}}">
+              </span>
+            </div>
+            <icon-button params="ltext: 'close',
+                                 iconOnly: true,
+                                 icon: 'remove',
+                                 buttonClass: 'tertiary',
+                                 click: closeSidePanel"></icon-button>
+          </div>
+        </div>
+        <div class="content" data-bind="event: { scroll: hideHelp }">
+          <div data-bind="component: {name: 'conversation',
+                          params: {application: sidePanelService.application,
+                          authorization: sidePanelService.authorization,
+                          authorities: sidePanelService.authorities,
+                          currentPage: sidePanelService.currentPage,
+                          comments: sidePanelService.comments,
+                          showAllComments: sidePanelService.showAllComments,
+                          mainConversation: sidePanelService.mainConversation}}"></div>
+        </div>
+      </div>
+      <!-- ko if: authorization.ok('authority-notice')-->
+      <div id="notice-panel" class="notice-panel" data-bind="visible: showNoticePanel">
+        <div class="header">
+          <div class="flex--between flex--align-center">
+            <h1 class="gap--0"
+                data-bind="ltext: 'notice.title'"></h1>
+            <icon-button params="ltext: 'close',
+                                 iconOnly: true,
+                                 icon: 'remove',
+                                 buttonClass: 'tertiary',
+                                 click: closeSidePanel"></icon-button>
+          </div>
+        </div>
+        <div class="notice-component"
+             data-bind="component: {name: 'authority-notice',
+                        params: {authorization: sidePanelService.authorization,
+                        urgency: sidePanelService.urgency,
+                        tags: sidePanelService.tags,
+                        authorityNotice: sidePanelService.authorityNotice}}"></div>
+      </div>
+      <!-- /ko -->
+      <!-- ko if: authorization.ok('company-notes')-->
+      <div id="company-notes-panel" class="notice-panel" data-bind="if: showCompanyNotesPanel,
+                                                                    visible: showCompanyNotesPanel">
+        <div class="header">
+          <div class="flex--between flex--align-center">
+            <h1 class="gap--0"
+                data-bind="ltext: 'company-notes.title'"></h1>
+            <icon-button params="ltext: 'close',
+                                 iconOnly: true,
+                                 icon: 'remove',
+                                 buttonClass: 'tertiary',
+                                 click: closeSidePanel"></icon-button>
+          </div>
+        </div>
+        <div class="notice-component"
+             data-bind="component: {name: 'company-notes-panel',
+                        params: {authorization: sidePanelService.authorization,
+                        tags: sidePanelService.companyTags,
+                        note: sidePanelService.companyNote}}"></div>
+      </div>
+      <!-- /ko -->
+      <side-panel-info data-bind="visible: showInfoPanel"></side-panel-info>
+    </div>
+  </div>
+</div>
+<!-- /ko -->
+</script>

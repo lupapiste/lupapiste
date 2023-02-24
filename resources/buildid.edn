@@ -1,0 +1,13 @@
+{:java-home ""
+ :workspace ""
+ :host "localhost"
+ :build-url ""
+ :build-number "0"
+ :build-id "programmer"
+ :jenkins-url ""
+ :executor-number ""
+ :build-tag "local"
+ :node-name ""
+ :time 0
+ :job-name ""
+ :hg-branch "no-branch"}

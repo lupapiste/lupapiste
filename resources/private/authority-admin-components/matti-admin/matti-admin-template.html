@@ -1,0 +1,152 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="matti-admin-template">
+
+  <div class="matti-admin">
+    <h1 data-bind="ltext: 'matti.title'">Matti</h1>
+
+    <div class="dictionary">
+      <div class="tabby">
+        <div class="tabby__row dictionary--header">
+          <div class="tabby__cell"
+               data-bind="ltext: 'matti.function'"></div>
+          <div class="tabby__cell"
+               data-bind="ltext: 'matti.status'"></div>
+          <div class="tabby__cell"></div>
+        </div>
+        <div class="tabby__row">
+          <div class="tabby__cell"
+               data-bind="ltext: 'matti.r-http'"></div>
+          <div class="tabby__cell">
+            <span data-bind="ltext: status( 'R')"></span>
+          </div>
+          <div class="tabby_cell">
+            <button class="matti-button"
+                    data-bind="click: _.wrap( 'R', toggleFunction),
+                               ltext: buttonText( 'R' ),
+                               css: buttonCss( 'R' )">
+            </button>
+          </div>
+        </div>
+        <div class="tabby__row">
+          <div class="tabby__cell"
+               data-bind="ltext: 'matti.p-http'"></div>
+          <div class="tabby__cell">
+            <span data-bind="ltext: status( 'P')"></span></div>
+          <div class="tabby_cell">
+            <button class="matti-button"
+                    data-bind="click: _.wrap( 'P', toggleFunction),
+                               ltext: buttonText( 'P' ),
+                               css: buttonCss( 'P')">
+            </button>
+
+          </div>
+        </div>
+        <div class="tabby__row">
+          <div class="tabby__cell"
+               data-bind="ltext: 'matti.state-change'"></div>
+          <div class="tabby__cell">
+            <span data-bind="ltext: status( 'stateChange')"></span>
+          </div>
+          <div class="tabby_cell">
+            <button class="matti-button"
+                    data-bind="click: _.wrap( 'stateChange', toggleFunction),
+                               ltext: buttonText( 'stateChange' ),
+                               css: buttonCss( 'stateChange')"></button></div>
+        </div>
+      </div>
+
+      <div class="pate-note-frame pate-note"
+           data-bind="ltext: 'matti.info'">
+      </div>
+
+      <dictionary params="entries: properties,
+                          fixed: true,
+                          textTitle: 'matti.parameter',
+                          valueTitle: 'matti.value'"></dictionary>
+
+      <button class="positive"
+              data-bind="ltext: 'save',
+                         enable: allFilled,
+                         click: updateConfig"></button>
+
+      <h2 data-bind="ltext: 'matti.batchrun'"></h2>
+
+      <div class="pate-note-frame pate-note"
+           data-bind="ltext: 'matti.batchrun.info'">
+      </div>
+
+      <div class="form-grid form-grid--no-border">
+        <div class="row">
+          <div class="col-1">
+            <toggle params="value: batchrunValidate,
+                            prefix: 'blockbox',
+                            ltext: 'matti.batchrun.validate'"></toggle>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <toggle params="value: batchrunSendVerdicts,
+                            prefix: 'blockbox',
+                            ltext: 'matti.batchrun.send.verdicts'"></toggle>
+          </div>
+          <div class="col-1">
+            <toggle params="value: batchrunSendStateChanges,
+                            prefix: 'blockbox',
+                            ltext: 'matti.batchrun.send.state-changes'"></toggle>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <form-cell params="value: batchrunMode,
+                               label: 'matti.batchrun.mode',
+                               optionsText: 'text',
+                               optionsValue: 'value',
+                               cell: 'select',
+                               options: batchrunOptions"></form-cell>
+          </div>
+        </div>
+        <!-- ko if: batchrunMode() === "dates" -->
+        <div class="row">
+          <div class="col-1">
+            <form-cell params="value: batchrunStart,
+                               label: 'matti.batchrun.start-date',
+                               cell: 'date'"></form-cell>
+          </div>
+          <div class="col-1">
+            <form-cell params="value: batchrunEnd,
+                               label: 'matti.batchrun.end-date',
+                               cell: 'date'"></form-cell>
+          </div>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: batchrunMode() === "ids" -->
+        <div class="row">
+          <div class="col-2">
+            <form-cell params="value: batchrunIds,
+                               label: 'matti.batchrun.id-info',
+                               cell: 'textarea'"></form-cell>
+          </div>
+        </div>
+        <!-- /ko -->
+        <div class="row">
+          <div class="col-1">
+            <icon-button params="enable: batchrunCan,
+                                 icon: 'hammer',
+                                 waiting: batchrunWait,
+                                 ltext: 'matti.batchrun.run',
+                                 click: batchrunRun"></icon-button>
+          </div>
+        </div>
+        <div class="row"
+             data-bind="if: batchrunResults">
+          <div class="col-4 batchrun-results">
+            <form-cell params="attr: {disabled: true},
+                               label: 'matti.batchrun.results',
+                               value: batchrunResults,
+                               cell: 'textarea'">
+            </form-cell>
+          </div>
+        </div>
+      </div>
+    </div>
+</script>

@@ -1,0 +1,116 @@
+footer.footer-bottom {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  //z-index: 100;
+}
+
+a.btn.footer {
+  $height: 56px;
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: bold;
+  line-height: $height;
+  min-height: $height;
+  max-height: $height;
+}
+
+div.city-white-box {
+  border-radius: 4px;
+  background-color: $white;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+html.cityscape {
+  background: {
+    image: url( "/lp-static/img/login-background.svg");
+    size: cover;
+    attachment: fixed;
+    color: unset;
+  }
+}
+
+body.cityscape {
+  color: $night-sky-100;
+  padding-top: 100px;
+  padding-bottom: 120px;
+  input.lux {
+    background-color: $panel-background;
+  }
+  h1 {
+    color: $night-sky-100;
+    font-size: 100px;
+    font-weight: normal;
+    text-transform: none;
+    line-height: normal;
+  }
+  h2 {
+    color: $night-sky-100;
+    font-size: 32px;
+    padding-bottom: 4px;
+    font-weight: bold;
+    text-transform: none;
+    border-bottom: 2px solid $black;
+    line-height: normal;
+  }
+  .page-content {
+    h3 {
+      color: $night-sky-100;
+      font-size: 22px;
+      margin: 0;
+      text-transform: none;
+      font-weight: bold;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      line-height: normal;
+    }
+    h4 {
+      color: $night-sky-100;
+      font-size: 18px;
+      margin: 0;
+      text-transform: none;
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      line-height: normal;
+    }
+    p {
+      color: $night-sky-100;
+      margin: 0;
+      line-height: unset;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    th,
+    td {
+      color: $night-sky-100;
+      text-align: left;
+      padding-left: 1em;
+      padding-right: 4em;
+      padding-top: 4px;
+    }
+  }
+  ul.section-toc {
+    color: $night-sky-100;
+    list-style-type: none;
+    li {
+      margin-bottom: 4px;
+      a {
+        color: $primary;
+        font-weight: bold;
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+div.lupapiste-dark-logo {
+    background: {
+      image: svg-url("lupapiste-logo", $night-sky-100);
+      repeat: no-repeat;
+      size: contain;
+      position: center center;
+    }
+    height: 80px;
+}

@@ -1,0 +1,120 @@
+@use 'sass:math';
+
+/* breakpoints*/
+$breakpoint5:  $cols6;
+$breakpoint6:  $cols7;
+$breakpoint7:  $cols8;
+$breakpoint8:  $cols9;
+$breakpoint9:  $cols10;
+$breakpoint10: $cols11;
+$breakpoint11: $cols12;
+$breakpoint12: $cols13;
+$breakpoint13: $cols14;
+$breakpoint14: $cols15;
+
+
+/* baseline & margins */
+$baseline: 24px;
+$marginL: $baseline;
+$marginM: math.div($baseline, 2);
+$marginS: math.div($baseline, 4);
+
+$application-max-width: 1660px;
+$application-min-width:  320px;
+
+$footer-min-padding: 320px;
+$footer-mid-padding: 420px;
+$footer-max-padding: 520px;
+
+@mixin width-wrapper {
+  margin:0 auto;
+
+  /* Default width for browsers that don't support media queries */
+  width: 90%;
+}
+
+html {
+    background:#fff;
+    -webkit-font-smoothing: antialiased;
+    /* Inflate text size on mobiles by full increments only */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+html.no-scroll {
+  overflow: hidden;
+}
+
+body {
+  //min-width: 820px;
+  min-height: 100%;
+  height: 100%;
+  &.applicant, &.authority, &.authority-admin, &.welcome, &.admin, &.oir, &.neighbor, &.hashbang, &.bulletins, &.local-bulletins, &.financial-authority{
+    min-height: 100vh;
+    padding-bottom: $footer-min-padding;
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  &.admin, &.authority-admin {
+    margin-top: 106px;
+  }
+
+}
+.container {
+  box-sizing: border-box;
+  padding: $marginM $marginL 0 $marginL;
+  width: 100%;
+  max-width: $application-max-width;
+  min-width: $application-min-width;
+  margin: $baseline auto $baseline auto;
+  position: relative;
+  .content {
+    width: 100%;
+  }
+  .content-narrow {
+    width: 68%;
+  }
+
+  .sidebar {
+    width: 18%;
+  }
+
+ }
+
+.clear {
+  @include clearfix;
+}
+
+.spacerM {
+  margin-bottom: $marginM;
+}
+
+.spacerL {
+  margin-bottom: $marginL;
+}
+
+.right {
+  float: right;
+}
+
+.left {
+  float: left;
+}
+
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 60px;
+  z-index: 1;
+
+  &:after, &:before {
+    content: '';
+    display: table;
+  }
+}
+
+.inline-col {
+  position: relative;
+  display: inline-block;
+}

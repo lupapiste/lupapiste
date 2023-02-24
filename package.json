@@ -1,0 +1,42 @@
+{
+  "name": "lupapiste",
+  "version": "1.0.0",
+  "description": "Lupapiste on sähköinen palvelu, jossa rakentamisen lupiin liittyvät hakemukset ja aineistot välittyvät kunnan järjestelmiin sähköisessä muodossa. Lupapiste palvelee ensikontaktista tai neuvontapyynnöstä alkaen koko hankkeen ajan aina valmistumiseen saakka. Ympäristöministeriön tilaamaa palvelua kehittää ja operoi rakennetun ympäristön lupa-asiointiin keskittyvä pilvipalveluyhtiö [Cloudpermit](https://cloudpermit.com/).",
+  "main": "index.js",
+  "engines" : {
+    "npm" : ">=8.0.0",
+    "node" : ">=14.0.0"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "symlink-map": "mkdir -p resources/public/lp-static/js && ln -s ../../../../node_modules/@cloudpermit/map-component/dist/lupapiste_map.js resources/public/lp-static/js/map.js",
+    "sass:dev:watch": "sass -w resources/private/common-html/sass:resources/public/lp-static/css --source-map-urls absolute",
+    "sass:dev:once": "sass resources/private/common-html/sass:resources/public/lp-static/css",
+    "sass:prod:once": "sass --style=compressed resources/private/common-html/sass:resources/public/lp-static/css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloudpermit/lupapiste.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/cloudpermit/lupapiste/issues"
+  },
+  "homepage": "https://github.com/cloudpermit/lupapiste#readme",
+  "devDependencies": {
+    "sass": "^1.34.0",
+    "shadow-cljs": "2.20.7"
+  },
+  "dependencies": {
+    "@cloudpermit/map-component": "^2.5.0",
+    "moment": "^2.29.4",
+    "react": "^17.0.2",
+    "react-day-picker": "^7.4.10",
+    "react-dom": "^17.0.2"
+  }
+}

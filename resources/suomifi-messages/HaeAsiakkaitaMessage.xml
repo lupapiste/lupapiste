@@ -1,0 +1,20 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:asi="http://www.suomi.fi/asiointitili">
+   <soapenv:Body>
+      <asi:HaeAsiakkaita>
+        <asi:Viranomainen>
+          <asi:ViranomaisTunnus>{{Viranomainen.viranomaisTunnus}}</asi:ViranomaisTunnus>
+          <asi:PalveluTunnus>{{Viranomainen.palveluTunnus}}</asi:PalveluTunnus>
+          <asi:KayttajaTunnus>{{Viranomainen.kayttajaTunnus}}</asi:KayttajaTunnus>
+          <asi:SanomaTunniste>{{Viranomainen.sanomaTunniste}}</asi:SanomaTunniste>
+          <asi:SanomaVersio>{{Viranomainen.sanomaVersio}}</asi:SanomaVersio>
+          <asi:SanomaVarmenneNimi>{{Viranomainen.sanomaVarmenneNimi}}</asi:SanomaVarmenneNimi>
+        </asi:Viranomainen>
+         <asi:Kysely>
+             <asi:KyselyLaji>Asiakkaat</asi:KyselyLaji>
+             <asi:Asiakkaat>
+                 <asi:Asiakas AsiakasTunnus="{{HaeAsiakkaitaAsiakas.asiakasTunnus}}" TunnusTyyppi="{{HaeAsiakkaitaAsiakas.tunnusTyyppi}}"/>
+             </asi:Asiakkaat>
+         </asi:Kysely>
+      </asi:HaeAsiakkaita>
+   </soapenv:Body>
+</soapenv:Envelope>

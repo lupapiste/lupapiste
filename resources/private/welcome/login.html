@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page welcome_page" id="login">
+    <div class="container">
+      <div class="welcome_sections">
+        <div id="login-form" class="welcome_section">
+          <section class="welcome-login-section">
+            <h3 data-bind="ltext: 'welcome.login.title'"></h3>
+            <p data-bind="ltext: 'welcome.login.desc'"></p>
+            <form data-bind="submit: handleLoginSubmit" class="welcome-login-form" id="welcome-login-form">
+              <div class="form-grid no-padding">
+                <div class="row">
+                  <div class="col-2">
+                    <label for="login-username" data-bind="ltext: 'userinfo.email'"></label>
+                    <input class="lux"
+                           id="login-username"
+                           required
+                           type="text"
+                           data-bind="attr: {placeholder: loc('userinfo.username')}" name="username">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-2">
+                    <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
+                    <input class="lux"
+                           id="login-password" type="password"
+                           required
+                           data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-2">
+                    <div class="blockbox-wrapper">
+                      <input type="checkbox" id="rememberme" data-bind="checked: rememberMe">
+                      <label id="rememberme-label" for="rememberme" class="checkbox-label" data-bind="ltext: 'userinfo.rememberme'"></label>
+                    </div>
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-2">
+                  <span id="login-message" style="display: none; color: red"></span>
+                  <button id="login-button" type="submit" class="positive"
+                          data-bind="css: {waiting: pending},
+                                     disable: processing">
+                    <i class="lupicon-log-in"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'welcome.login'"></span>
+
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+            <div class="passwd-reset">
+              <a href="#!/reset" data-bind="ltext: 'login.reset-question'"></a>
+            </div>
+          </section>
+          <section class="welcome-register-section">
+            <h3 data-bind="ltext: 'welcome.notRegistered.title'"></h3>
+            <p data-bind="ltext: 'welcome.notRegistered.desc'"></p>
+
+            <!-- ko ifnot: lupapisteApp.models.globalAuthModel.ok("register-user") -->
+            <p data-bind="ltext: 'error.service-lockdown'" class="error-message"></p>
+            <!-- /ko -->
+
+            <button id="register-button" class="secondary"
+                    data-bind="ltext: 'welcome.register', enable: lupapisteApp.models.globalAuthModel.ok('register-user')"></button>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

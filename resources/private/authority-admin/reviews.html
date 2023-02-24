@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="reviews">
+    <div class="container container--authority-admin"
+         data-bind="if: organization.organizationId() &&
+                        lupapisteApp.models.rootVMO.currentPage() === 'reviews',
+                    css: lupapisteApp.services.naviSidebarService.containerCss">
+
+      <section data-bind="component: {name: 'organization-person-list',
+                                      params: {listed: 'review-officer',
+                                               ltextHeader: 'auth-admin.review-persons',
+                                               ltextColumns: ['auth-admin.review-person.name',
+                                                              'auth-admin.review-person.code'],
+                                               ltextAdd: 'auth-admin.review-person.add',
+                                               ltextEdit: 'edit',
+                                               ltextUseList: 'auth-admin.review-person.use-list',
+                                               useListObservable: $root.organization.reviewOfficersListEnabled,
+                                               fields: ['name', 'code'],
+                                               disabledFields: {'edit': ['code']},
+                                               model: $root.reviewOfficers,
+                                               people: $root.reviewOfficers.data()}}">
+      </section>
+
+      <section>
+        <cljs-auth-admin_reviews_configuration params="organizationId: organization.organizationId(),
+                                                       reviewPdf: organization.reviewPdf()">
+        </cljs-auth-admin_reviews_configuration>
+      </section>
+
+      <section class="bottom-marginL"
+               data-bind="if: lupapisteApp.models.globalAuthModel.ok('show-automatic-construction-started')">
+        <h2 data-bind="ltext: 'auth-admin.state-transitions'"></h2>
+        <div class="bottom-marginL">
+          <toggle params="value: organization.automaticConstructionStarted,
+                          ltext: 'auth-admin.automatic-construction-started',
+                          enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-construction-started'),
+                          prefix: 'blockbox',
+                          testId: 'automatic-construction-started'">
+          </toggle>
+        </div>
+      </section>
+
+      <section class="bottom-marginL"
+               data-bind="if: organization.reviewFetchTogglerVisible">
+
+        <h2 class="help-adjacent-title" data-bind="ltext: 'auth-admin.reviews-fetch.title'"></h2>
+        <span data-bind="{component: {
+                         name: 'help-toggle',
+                         params: {lhtml: 'auth-admin.only-use-inspection-from-backend.help'}
+                         }}"></span>
+
+        <div class="bottom-marginM" data-bind="ltext: 'auth-admin.automatic-review-fetch.info'"></div>
+
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="automatic-review-fetch-enabled"
+                   data-bind="checked: organization.automaticReviewFetchEnabled,
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-organization-review-fetch-enabled')" />
+            <label for="automatic-review-fetch-enabled" class="checkbox-label"
+                   data-bind="ltext: 'auth-admin.automatic-review-fetch.enabled'"></label>
+          </div>
+
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="only-use-inspection-from-backend"
+                   data-bind="checked: organization.onlyUseInspectionFromBackend,
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-only-use-inspection-from-backend')" />
+            <label for="only-use-inspection-from-backend" class="checkbox-label"
+                   data-bind="ltext: 'auth-admin.only-use-inspection-from-backend'"></label>
+          </div>
+      </section>
+
+      <section data-bind="if: organization.noticeForms() && lupapisteApp.models.globalAuthModel.ok( 'notice-forms-supported' )">
+        <notice-form-configuration-group params="organization: organization"></notice-form-configuration-group>
+      </section>
+    </div>
+  </section>
+</body>
+</html>

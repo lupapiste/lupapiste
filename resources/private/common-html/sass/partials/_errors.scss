@@ -1,0 +1,24 @@
+.context-error {
+  color: $red-dark;
+  border: 1px solid $red-dark;
+  border-radius: 3px;
+  padding: $marginS;
+  margin: $marginM 0
+}
+
+.error-message {
+  display: block;
+  margin-left: 5px;
+  font-style: italic;
+  color: $red-dark;
+}
+
+.integration-error-dialog div.content.integration-error {
+  i {
+    float: left;
+    margin-right: $marginS;
+  }
+  p.dialog-desc {
+    display: inline-block;
+  }
+}

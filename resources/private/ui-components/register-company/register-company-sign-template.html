@@ -1,0 +1,58 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-sign-template">
+  <h2 data-bind="ltext: 'register.company.sign.title'"></h2>
+  <div class="register-company-container">
+    <h3 data-bind="ltext: 'register.company.sign.subtitle'"></h3>
+    <p data-bind="ltext: 'register.company.sign.par1'"></p>
+    <p data-bind="ltext: 'register.company.sign.par2'"></p>
+    <p data-bind="ltext: 'register.company.sign.par3'"></p>
+    <p data-bind="ltext: 'register.company.sign.par4'"></p>
+    <a data-bind="attr: {href: contractUrl}"
+       target="_blank"
+       class="btn primary">
+      <i class="lupicon-download" aria-hidden="true"></i>
+      <span data-bind="ltext: 'register.company.sign.download-contract'">
+      </span>
+    </a>
+    <toggle params="value: agreed,
+                    prefix: 'blockbox',
+                    testId: 'register-company-agree',
+                    ltext: 'register.company.sign.terms-accepted'"></toggle>
+    <div class="register-company-confirmation">
+      <div>
+        <i class="lupicon-arrow-right"></i>
+        <span id="register-confirmation-text" data-bind="text: confirmationText"></span>
+      </div>
+    </div>
+    <form method="POST"
+          data-bind="attr: {action: form().postTo}">
+      <input id="customer" name="customer" type="hidden"
+             data-bind="value: form().customerId"/>
+      <input id="data" name="data" type="hidden" data-bind="value: form().data"/>
+      <input id="iv" name="iv" type="hidden" data-bind="value: form().iv"/>
+      <input id="return_failure" name="return_failure" type="hidden"
+             data-bind="value: form().failureUrl"/>
+      <icon-button params="ltext: 'cancel',
+                           icon: 'chevron-left',
+                           buttonClass: 'secondary',
+                           click: cancelClick,
+                           testId: 'register-company-cancel'"></icon-button>
+      <icon-button params="ltext: 'register.company.sign.sign',
+                           icon: 'pen',
+                           buttonClass: 'primary',
+                           enable: agreed,
+                           type: 'submit',
+                           testId: 'register-company-sign'"></icon-button>
+    </form>
+  </div>
+  <div class="register-company-container">
+    <h3 data-bind="ltext: 'register.company.vismasign.title'"></h3>
+    <p data-bind="ltext: 'register.company.vismasign.desc'"></p>
+    <p data-bind="ltext: 'register.company.vismasign.poweredby'"></p>
+    <a href="https://allekirjoitus.visma.fi" target="_blank">
+      <img src="/lp-static/img/visma_sign.png"
+           class="logo"
+           alt="Visma Sign"></img>
+    </a>
+  </div>
+</script>

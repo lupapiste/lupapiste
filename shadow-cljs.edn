@@ -1,0 +1,21 @@
+;; shadow-cljs configuration
+{:lein     {:profile "+shadow"}
+ :npm-deps {:install false}
+ :builds   {:front {:target           :browser
+                    :output-dir       "resources/public/lp-static/js/"
+                    :asset-path       "/lp-static/js/"
+                    :modules          {:cljs-main {:entries [lupapalvelu.ui.ui-components
+                                                             lupapalvelu.next.router]}}
+                    :devtools         {:preloads   [lupafront.dev devtools.preload]
+                                       :watch-dir  "resources/public/lp-static/"
+                                       :watch-path "/lp-static"}
+                    :closure-defines  {goog.LOCALE "fi"}
+                    :compiler-options {:infer-externs :auto}
+                    :dev              {:closure-defines {goog.DEBUG true}}
+                    ;; release aka prod (advanced compilation)
+                    ;; use `npx shadow-cljs release front --debug` to de-munge mystical names
+                    ;; if you see errors with with advanced compilation
+                    :release          {:compiler-options
+                                       {:warnings-as-errors true
+                                        :closure-warnings   {:useless-code :off}
+                                        :source-map         true}}}}}

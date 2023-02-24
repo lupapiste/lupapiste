@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-calculation-template">
+  <!-- ko ifnot: showError  -->
+  <span class="calculation-result"
+        data-bind="text: _.round(calculationResult(), 2),
+                   testId: testId"></span>
+  <!-- /ko -->
+  <!-- ko if: showError  -->
+  <i class="calculation-error lupicon-warning"></i>
+  <!-- /ko -->
+</script>

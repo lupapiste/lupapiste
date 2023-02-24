@@ -1,0 +1,65 @@
+
+/* hide stuff without resorting to display:none; */
+.hide {
+  visibility:hidden;
+  width:0!important;
+  height:0!important;
+  line-height:0!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+/* Pretty &amp; s */
+.amp {
+  font-family: 'Goudy Old Style', Baskerville, Palatino, 'Palatino Linotype', 'Book Antiqua', serif;
+  font-style:italic;
+}
+
+
+/* micro clearfix */
+.cf {
+  *zoom:1;
+  &:before, &:after {
+    content:"";
+    display:table;
+  }
+  &:after {
+    clear:both;
+  }
+}
+
+#ajax-loader-container {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: #ffffff;
+  z-index: 8000;
+
+  div {
+    margin-top: 50px;
+    padding-top: 100px;
+    background: url(/lp-static/img/ajax-loader.gif) no-repeat center center;
+  }
+
+  p {
+    margin-top: 50px;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.hr {
+  width: 100%;
+  border-bottom: 1px solid $gray221;
+  margin: {
+    top: $marginM;
+    bottom: $marginM;
+  }
+}
+
+.text-right {
+  text-align: right;
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="reports">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <section class="authority-admin-reports">
+
+          <section data-bind="visible: !_.isEmpty(organization.attachmentExportFiles())">
+            <h2 data-bind="ltext: 'authorityAdmin.attachment-exports'"></h2>
+            <table>
+              <tbody data-bind="foreach: organization.attachmentExportFiles">
+                <tr>
+                  <td><a data-bind="text: $data.filename,
+                                    attr: {href: $data.url}"></a></td>
+                  <td data-bind="text: $data.size"></td>
+                  <td data-bind="text: $data.created"></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'open-applications-xlsx',
+                      ltitle:     'authorityAdmin.openApplicationsReport.title',
+                      lcaption:   'authorityAdmin.openApplicationsReport.caption',
+                      lbutton:    'authorityAdmin.openApplicationsReport.buttonText'">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'applications-between-xlsx',
+                      ltitle:     'authorityAdmin.applicationsReportTimeperiod.title',
+                      lcaption:   'authorityAdmin.applicationsReportTimeperiod.caption',
+                      lbutton:    'authorityAdmin.applicationsReportTimeperiod.buttonText',
+                      lstartDate: 'authorityAdmin.applicationsReportTimeperiod.startTs',
+                      lendDate:   'authorityAdmin.applicationsReportTimeperiod.endTs',
+                      startTs:    reportsModel.startComputed,
+                      endTs:      reportsModel.endComputed,
+                      startDate:  reportsModel.startDate,
+                      endDate:    reportsModel.endDate">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'parties-between-xlsx',
+                      ltitle:     'authorityAdmin.partiesReports.title',
+                      lcaption:   'authorityAdmin.partiesReports.caption',
+                      lbutton:    'authorityAdmin.applicationsReportTimeperiod.buttonText',
+                      lstartDate: 'authorityAdmin.applicationsReportTimeperiod.startTs',
+                      lendDate:   'authorityAdmin.applicationsReportTimeperiod.endTs',
+                      startTs:    reportsModel.partiesStartComputed,
+                      endTs:      reportsModel.partiesEndComputed,
+                      startDate:  reportsModel.partiesStartDate,
+                      endDate:    reportsModel.partiesEndDate">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'post-verdict-xlsx',
+                      ltitle:     'authorityAdmin.postVerdictReports.title',
+                      lcaption:   'authorityAdmin.postVerdictReports.caption',
+                      lbutton:    'authorityAdmin.applicationsReportTimeperiod.buttonText',
+                      lstartDate: 'authorityAdmin.postVerdictReports.timePeriod.startTs',
+                      lendDate:   'authorityAdmin.postVerdictReports.timePeriod.endTs',
+                      startTs:    reportsModel.verdictsStartComputed,
+                      endTs:      reportsModel.verdictsEndComputed,
+                      startDate:  reportsModel.verdictsStartDate,
+                      endDate:    reportsModel.verdictsEndDate">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'store-billing-report',
+                      ltitle:     'authorityAdmin.storeBillingReports.title',
+                      lcaption:   'authorityAdmin.storeBillingReports.caption',
+                      lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                      lstartDate: 'authorityAdmin.storeBillingReports.timePeriod.startTs',
+                      lendDate:   'authorityAdmin.storeBillingReports.timePeriod.endTs',
+                      startTs:    reportsModel.storeBillingStartComputed,
+                      endTs:      reportsModel.storeBillingEndComputed,
+                      startDate:  reportsModel.storeBillingStartDate,
+                      endDate:    reportsModel.storeBillingEndDate">
+            </organization-report-form>
+            <!-- Last month's billing shortcut form -->
+            <organization-report-form
+              params="action:  'store-billing-report',
+                      lbutton: 'authorityAdmin.storeBillingReports.lastMonthButtonText',
+                      startTs: reportsModel.lastMonthStart,
+                      endTs:   reportsModel.lastMonthEnd">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'store-downloads-report',
+                      ltitle:     'authorityAdmin.storeDownloadsReports.title',
+                      lcaption:   'authorityAdmin.storeDownloadsReports.caption',
+                      lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                      lstartDate: 'authorityAdmin.storeDownloadsReports.timePeriod.startTs',
+                      lendDate:   'authorityAdmin.storeDownloadsReports.timePeriod.endTs',
+                      startTs:    reportsModel.storeDownloadsStartComputed,
+                      endTs:      reportsModel.storeDownloadsEndComputed,
+                      startDate:  reportsModel.storeDownloadsStartDate,
+                      endDate:    reportsModel.storeDownloadsEndDate">
+            </organization-report-form>
+            <!-- Last month's downloads shortcut form -->
+            <organization-report-form
+              params="action:  'store-downloads-report',
+                      lbutton: 'authorityAdmin.storeBillingReports.lastMonthButtonText',
+                      startTs: reportsModel.lastMonthStart,
+                      endTs:   reportsModel.lastMonthEnd">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action: 'invoices-between-xlsx',
+                      ltitle:     'authorityAdmin.invoicesReport.title',
+                      lcaption:   'authorityAdmin.invoicesReport.caption',
+                      lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                      lstartDate: 'authorityAdmin.invoicesReport.timePeriod.startTs',
+                      lendDate:   'authorityAdmin.invoicesReport.timePeriod.endTs',
+                      startTs:    reportsModel.invoicesReportStartComputed,
+                      endTs:      reportsModel.invoicesReportEndComputed,
+                      startDate:  reportsModel.invoicesReportStartDate,
+                      endDate:    reportsModel.invoicesReportEndDate">
+            </organization-report-form>
+            <!-- Last month's downloads shortcut form -->
+            <organization-report-form
+              params="action:  'invoices-between-xlsx',
+                      lbutton: 'authorityAdmin.invoicesReport.lastMonthButtonText',
+                      startTs: reportsModel.lastMonthStart,
+                      endTs:   reportsModel.lastMonthEnd">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="ltitle:   'authorityAdmin.authoritiesReport.title',
+                      lcaption: 'authorityAdmin.authoritiesReport.caption',
+                      lbutton:  'authorityAdmin.authoritiesReport.buttonText',
+                      action:   'authorities-report'">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="ltitle: 'archival-report.title',
+                      lcaption: 'archival-report.description',
+                      lbutton: 'authorityAdmin.authoritiesReport.buttonText',
+                      action:   'archival-report',
+                      lstartDate: 'archival-report.start-date',
+                      lendDate:   'archival-report.end-date',
+                      startTs:    reportsModel.archivalStartComputed,
+                      endTs:      reportsModel.archivalEndComputed,
+                      startDate:  reportsModel.archivalStartDate,
+                      endDate:    reportsModel.archivalEndDate">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <organization-report-form
+              params="action:     'onkalo-applications-xlsx',
+                      ltitle:     'authorityAdmin.onkaloApplicationsReport.title',
+                      lcaption:   'authorityAdmin.onkaloApplicationsReport.caption',
+                      lbutton:    'authorityAdmin.onkaloApplicationsReport.buttonText',
+                      lstartDate: 'authorityAdmin.onkaloApplicationsReport.timePeriod.startTs',
+                      lendDate:   'authorityAdmin.onkaloApplicationsReport.timePeriod.endTs',
+                      startTs:    reportsModel.onkaloStartComputed,
+                      endTs:      reportsModel.onkaloEndComputed,
+                      startDate:  reportsModel.onkaloStartDate,
+                      endDate:    reportsModel.onkaloEndDate">
+            </organization-report-form>
+          </section>
+
+          <section>
+            <h2 data-bind="ltext: 'auth-admin.waste-report.title'"></h2>
+            <div data-bind="ltext: 'auth-admin.waste-report.description'"></div>
+            <form action="/api/raw/waste-report"
+                  method="get">
+              <input type="hidden" name="organizationId"
+                     data-bind="value: reportsModel.organizationId">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <label for="waste-report-year"
+                         class="lux"
+                         data-bind="ltext: 'auth-admin.waste-report.year'"></label>
+                  <input type="text" class="lux" id="waste-report-year"
+                         name="year"
+                         data-bind="textInput: reportsModel.wasteReportYear">
+                </div>
+                <div class="labeled-input cell">
+                  <icon-button params="type: 'submit',
+                                       ltext: 'authorityAdmin.onkaloApplicationsReport.buttonText',
+                                       icon: 'download',
+                                       disable: reportsModel.badYear">
+                  </icon-button>
+                </div>
+              </div>
+            </form>
+          </section>
+        </section>
+      </div>
+    </section>
+  </body>
+</html>

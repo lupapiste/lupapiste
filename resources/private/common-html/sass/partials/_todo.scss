@@ -1,0 +1,18 @@
+// feature class for marking unfinished content
+// the class can be reverted with .feature--no-border.
+
+.feature:not(.feature--no-border) {
+  border: orange dotted medium !important;
+  border-radius: 10px;
+  min-height: 42px;
+  .legend {
+    display: inline-block;
+    position: relative;
+    top: -20px;
+    right: -10px;
+    background-color: orange;
+    color: black;
+    padding: 3px;
+    border-radius: 5px;
+  }
+}

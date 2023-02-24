@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="application" role="main">
+      <div class="summary-container">
+          <div class="flex-preamble"
+               data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true ),
+                          css: {'map--extended': $root.isMapExtended()}">
+            <!-- ko if:  $root.isMapExtended -->
+            <preamble-title class="w--100"
+                            params="application: $root.application"></preamble-title>
+            <!-- /ko -->
+            <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' -->
+            <div class="preamble--map-container"
+                 data-bind="template: 'preamble-map-template'">
+            </div>
+            <!-- ko ifnot: $root.isMapExtended -->
+            <preamble-summary params="rootApplication: $root">
+            </preamble-summary>
+            <!-- /ko -->
+            <!-- /ko -->
+          </div>
+          <card params="deck: 'summary',
+                        card: 'edit-handlers'">
+            <edit-handlers></edit-handlers>
+          </card>
+          <card params="deck: 'summary',
+                        card: 'add-link-permit'">
+            <add-link-permit></add-link-permit>
+          </card>
+      </div>
+
+      <div class="container">
+        <!-- ko if: lupapisteApp.services.cardService.showCard( 'summary', 'info') -->
+        <h3 data-bind="ltext: 'a11y.application.tabs'"
+            id="a11y-application-tabs"></h3>
+        <!-- /ko -->
+        <div role="tablist"
+             class="breadcrumbs gap--v3"
+             id="applicationTabs"
+             aria-labelledby="a11y-application-tabs"
+             data-bind="with: application,
+                        visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
+
+          <!-- ko if: $root.authorization.ok('application-info-tab-visible') -->
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'info',
+                             disable: $parent.selectedTabName() === 'info'"
+                  role="tab"
+                  data-target="info"
+                  data-test-id="application-open-info-tab"
+                  id="application-open-info-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: $root.application.tabInfoLocKey"></span>
+            <span data-bind="if: nonpartyDocumentIndicator">
+              <span data-bind="text: nonpartyDocumentIndicator"
+                    id="applicationNonpartyDocumentIndicator"
+                    class="bread-indicator"></span>
+            </span>
+          </button>
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <!-- /ko -->
+
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'parties',
+                             disable: $parent.selectedTabName() === 'parties'"
+                  role="tab"
+                  data-target="parties"
+                  data-test-id="application-open-parties-tab"
+                  id="application-open-parties-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: titleForPartiesOrSupervisor"></span>
+            <span data-bind="if: partyDocumentIndicator">
+              <span data-bind="text: partyDocumentIndicator"
+                    id="applicationPartyDocumentIndicator"
+                    class="bread-indicator"></span>
+            </span>
+          </button>
+
+          <!-- ko if: $root.authorization.ok('tasks-tab-visible') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'tasks',
+                             disable: $parent.selectedTabName() === 'tasks'"
+                  role="tab"
+                  data-target="tasks"
+                  data-test-id="application-open-tasks-tab"
+                  id="application-open-tasks-tab"
+                  class="breadcrumb">
+            <!-- ko if: $root.authorization.ok('ya-application') -->
+            <span data-bind="ltext: 'application.tabConstructionTimeTasksYA'"></span>
+            <!-- /ko -->
+            <!-- ko if: !$root.authorization.ok('ya-application') -->
+            <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
+            <!-- /ko -->
+            <span data-bind="if: $data.tasksRequiringAction">
+              <span data-bind="text: tasksRequiringAction"
+                    id="applicationTasksRequiringAction"
+                    class="bread-indicator"></span>
+            </span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok( 'location-operations') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'structures',
+                             disable: $parent.selectedTabName() === 'structures'"
+                  role="tab"
+                  data-target="structures"
+                  data-test-id="application-open-structures-tab"
+                  id="application-open-structures-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'location.structures'"></span>
+          </button>
+          <!-- /ko -->
+
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'attachments',
+                             disable: $parent.selectedTabName() === 'attachments'"
+                  role="tab"
+                  data-target="attachments"
+                  data-test-id="application-open-attachments-tab"
+                  id="application-open-attachments-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'application.tabAttachments'"></span>
+            <span data-bind="if: attachmentsRequiringAction">
+              <span data-bind="text: attachmentsRequiringAction"
+                    id="applicationAttachmentsRequiringAction"
+                    class="bread-indicator"></span>
+            </span>
+          </button>
+
+          <!-- ko if: requiredFieldSummaryButtonVisible -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             css: {highlight: requiredFieldSummaryButtonHighlight},
+                             ariaSelected: $parent.selectedTabName() === 'requiredFieldSummary',
+                             disable: $parent.selectedTabName() === 'requiredFieldSummary'"
+                  role="tab"
+                  data-target="requiredFieldSummary"
+                  data-test-id="application-open-requiredFieldSummary-tab"
+                  id="application-open-requiredFieldSummary-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: requiredFieldSummaryButtonKey"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok('application-statement-tab-visible') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'statement',
+                             disable: $parent.selectedTabName() === 'statement'"
+                  role="tab"
+                  data-target="statement"
+                  data-test-id="application-open-statement-tab"
+                  id="application-open-statement-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'application.tabStatement'"></span>
+            <span data-bind="if: unseenStatements">
+              <span data-bind="text: unseenStatements"
+                    id="applicationUnseenStatements"
+                    class="bread-indicator"></span>
+            </span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok( 'pate-verdict-tab') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button  data-bind="click: changeTab,
+                              ariaSelected: $parent.selectedTabName() === 'verdict',
+                              disable: $parent.selectedTabName() === 'verdict'"
+                   role="tab"
+                   data-target="verdict"
+                   data-test-id="application-open-verdict-tab"
+                   id="application-open-verdict-tab"
+                   class="breadcrumb">
+            <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
+            <!-- ko if: unseenVerdicts -->
+            <span data-bind="text: unseenVerdicts"
+                  id="applicationUnseenVerdists"
+                  class="bread-indicator"></span>
+            <!-- /ko -->
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok( 'invoices-tab') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button  data-bind="click: changeTab,
+                              ariaSelected: $parent.selectedTabName() === 'invoice',
+                              disable: $parent.selectedTabName() === 'invoice'"
+                   role="tab"
+                   data-target="invoice"
+                   data-test-id="invoice-tab"
+                   id="application-open-invoices-tab"
+                   class="breadcrumb">
+            <span data-bind="ltext: 'application.tabInvoice'"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- In post-verdict states plus 'canceled' -->
+          <!-- ko if: $root.authorization.ok('application-summary-tab-visible') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'applicationSummary',
+                             disable: $parent.selectedTabName() === 'applicationSummary'"
+                  role="tab"
+                  data-target="applicationSummary"
+                  data-test-id="application-open-applicationSummary-tab"
+                  id="application-open-applicationSummary-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'application.applicationSummary',
+                             visible: !$root.application.isArchivingProject()"></span>
+            <span data-bind="ltext: 'application.archivingProject.tabInfo',
+                             visible: $root.application.isArchivingProject()"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- Can be shown if calendars are active in the target municipality and sector -->
+          <!-- ko if: $root.calendarConfig.initialized -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'calendar',
+                             disable: $parent.selectedTabName() === 'calendar'"
+                  role="tab"
+                  data-target="calendar"
+                  data-test-id="application-open-calendar-tab"
+                  id="application-open-calendar-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'application.tabCalendar'"></span>
+            <span data-bind="if: calendarNotificationIndicator">
+              <span data-bind="text: calendarNotificationIndicator"
+                    id="applicationCalendarNotificationIndicator"
+                    class="bread-indicator"></span>
+            </span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok('archiving-operations-enabled') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'archival',
+                             disable: $parent.selectedTabName() === 'archival'"
+                  role="tab"
+                  data-target="archival"
+                  data-test-id="application-open-archival-tab"
+                  id="application-open-archival-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'arkistointi'"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok('filebank-enabled') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'filebank',
+                             disable: $parent.selectedTabName() === 'filebank'"
+                  role="tab"
+                  data-target="filebank"
+                  data-test-id="application-open-filebank-tab"
+                  id="application-open-filebank-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'application.tabFilebank'"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: tosFunction() && $root.authorization.ok('permanent-archive-enabled') && $root.authorization.ok('case-file-data') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'caseFile',
+                             disable: $parent.selectedTabName() === 'caseFile'"
+                  role="tab"
+                  data-target="caseFile"
+                  data-test-id="application-open-caseFile-tab"
+                  id="application-open-caseFile-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'caseFile.tab'"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'inspectionSummaries',
+                             disable: $parent.selectedTabName() === 'inspectionSummaries'"
+                  role="tab"
+                  data-target="inspectionSummaries"
+                  data-test-id="application-open-inspectionSummaries-tab"
+                  id="application-open-inspectionSummaries-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok('bulletin-for-application-verdict-enabled') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'bulletin',
+                             disable: $parent.selectedTabName() === 'bulletin'"
+                  role="tab"
+                  data-target="bulletin"
+                  data-test-id="application-open-bulletin-tab"
+                  id="application-open-bulletin-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'bulletin'"></span>
+          </button>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok('ymp-publish-bulletin-enabled') -->
+          <div class="bread-separator" aria-hidden="true">/</div>
+          <button data-bind="click: changeTab,
+                             ariaSelected: $parent.selectedTabName() === 'ymp-bulletin',
+                             disable: $parent.selectedTabName() === 'ymp-bulletin'"
+                  role="tab"
+                  data-target="ymp-bulletin"
+                  data-test-id="application-open-ymp-bulletin-tab"
+                  id="application-open-ymp-bulletin-tab"
+                  class="breadcrumb">
+            <span data-bind="ltext: 'bulletin'"></span>
+          </button>
+          <!-- /ko -->
+        </div>
+      </div>
+
+      <div class="container"
+           data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
+        <div class="tab-content-container content">
+
+          <!-- Application info tab -->
+
+          <div id="application-info-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-info-tab"
+               class="tab-content" data-bind="with: application">
+            <div>
+              <h1 data-bind="ltext: $root.application.tabInfoLocKey"></h1>
+              <span data-bind="component: {
+                               name: 'help-toggle',
+                               params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
+                               }"></span>
+            </div>
+            <!-- ko if: $parent.selectedTabName() === 'info' && $root.authorization.ok("create-assignment") -->
+            <create-assignment data-test-id="create-assignment-component"
+                               params="authorities: $root.authorities,
+                                       applicationId: id,
+                                       initialTarget: 'documents',
+                                       targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+            <!-- /ko -->
+            <div data-bind="if: $root.application.state() == 'draft'">
+              <p data-bind="lhtml: 'application.state.draft.help'"></p>
+            </div>
+
+            <!-- ko if: $root.application.isArchivingProject -->
+            <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                        applicationId: $root.application.id,
+                                        authModel: $root.authorization"></backend-id-manager>
+            <!-- /ko -->
+
+            <div class="operation-info">
+              <!-- ko if: !$root.authorization.ok('link-permit-required') && permitType() -->
+              <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
+                <div class="help-box">
+                  <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
+                  <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="positive">
+                    <i class="lupicon-circle-plus"></i>
+                    <span data-bind="ltext: 'application.addOperation'"></span>
+                  </button>
+                </div>
+              </div>
+              <!-- /ko -->
+              <div data-bind="if: $root.authorization.ok('link-permit-required')">
+                <div class="help-box margins-m">
+                  <p data-bind="ltext: 'help.AddPermit'"></p>
+                  <button data-bind="click: $root.application.gotoLinkPermitCard,
+                                     testId: 'add-required-link-permit',
+                                     enable: $root.authorization.ok('link-permit-required'),
+                                     visible: $root.authorization.ok('add-link-permit')"
+                          class="positive">
+                    <i class="lupicon-circle-plus"></i>
+                    <span data-bind="ltext: 'application.addLinkPermit'"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p class="top-marginM" data-bind="lhtml: 'required.field.desc'"></p>
+            <!-- docgen generated content: -->
+            <div class="application_section">
+              <div id="applicationDocgen" class="docgen-content">
+                <!-- This is where generated document will be placed. -->
+              </div>
+            </div>
+
+            <div class="process-nav">
+              <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
+                <span data-bind="ltext: 'application.next-tab'"></span>
+                <i class="lupicon-chevron-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Parties tab -->
+
+          <div aria-labelledby="application-open-parties-tab"
+               role="tabpanel"
+               data-bind="template: 'parties-tab-template'"></div>
+
+          <!-- Attachments tab -->
+
+          <!-- ko if: selectedTabName() === 'attachments' && $root.authorization.ok( "attachments" ) -->
+          <div id="application-attachments-tab"
+               aria-labelledby="application-open-attachments-tab"
+               role="tabpanel"
+               class="tab-content">
+            <drop-zone></drop-zone>
+             <attachments-view></attachments-view>
+          </div>
+          <!-- /ko -->
+
+          <!-- Required field summary tab -->
+
+          <!-- ko if: selectedTabName() === 'requiredFieldSummary' -->
+          <div aria-labelledby="application-open-requiredFieldSummary-tab"
+               role="tabpanel"
+               data-bind="template: 'required-fields-summary-tab-template'"></div>
+          <!-- /ko -->
+
+
+          <!-- Application summary tab -->
+
+          <div id="application-applicationSummary-tab"
+               aria-labelledby="application-open-applicationSummary-tab"
+               role="tabpanel"
+               data-bind="with: $root.application" class="tab-content" >
+
+            <h1 data-bind="ltext: 'application.tabApplicationSummary', visible: !$root.application.isArchivingProject()"></h1>
+            <h1 data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></h1>
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.application.summary'}
+                             }"></span>
+
+            <div data-bind="if: $root.application.isArchivingProject" style="margin-bottom: 2em;">
+              <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                          applicationId: $root.application.id,
+                                          authModel: $root.authorization"></backend-id-manager>
+            </div>
+
+            <div class="application_section">
+              <div id="applicationAndPartiesDocgen" class="docgen-content">
+                <!-- This is where the generated documents will be placed. -->
+              </div>
+            </div>
+
+            <!-- ko ifnot: $root.application.isArchivingProject -->
+            <section class="accordion" id="accordion-application-summary-statements">
+              <button onclick="accordion.click(this)"
+                      data-test-id="accordion-application-summary-statements-header"
+                      class="secondary accordion-toggle"
+                      data-bind="css: { toggled: lupapisteApp.models.applicationAuthModel.ok('enable-accordions')}">
+                <i class="lupicon-chevron-down"></i>
+                <i class="lupicon-chevron-up toggle"></i>
+                <span class="bar-text" data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
+              </button>
+              <div class="accordion_content"
+                   data-bind="
+                              attr: {'data-accordion-state': lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'open' : 'closed'},
+                              css: { expanded: lupapisteApp.models.applicationAuthModel.ok('enable-accordions')}
+                              ">
+                <div class="accordion-fields">
+                  <div id="application-summary-statements-table" data-bind="if: summaryAvailable">
+                    <div data-bind="component: {name: 'statements-table',
+                                    params: {application: $data,
+                                    statements: $data.statements,
+                                    authModel: $root.authorization,
+                                    localisationKeys: {missing: 'application.statement.missing-from-prev-permit'}}}"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="accordion">
+              <button onclick="accordion.click(this)" class="accordion-toggle secondary"
+                      data-bind="css: { toggled: lupapisteApp.models.applicationAuthModel.ok('enable-accordions')}">
+                <i class="lupicon-chevron-down"></i>
+                <i class="lupicon-chevron-up toggle"></i>
+                <span class="bar-text" data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
+              </button>
+              <div class="accordion_content" data-accordion-state="closed"
+                   data-bind="
+                              attr: {'data-accordion-state': lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'open' : 'closed'},
+                              css: { expanded: lupapisteApp.models.applicationAuthModel.ok('enable-accordions')}">
+                <div class="accordion-fields" data-bind="if: summaryAvailable">
+                  <div class="application-neighbors">
+                    <neighborhood params="missing: 'neighbors.missing-from-prev-permit'"></neighborhood>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- /ko -->
+
+            <div class="process-nav">
+              <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+                <i class="lupicon-chevron-left"></i>
+                <span data-bind="ltext: 'application.previous-tab'"></span>
+              </a>
+            </div>
+
+          </div>
+
+          <!-- Pate verdict tab -->
+
+          <!-- ko if: selectedTabName() === 'verdict' && lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorization.ok( 'pate-verdict-tab' ) -->
+          <div id="application-verdict-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-verdict-tab"
+               class="tab-content">
+            <!-- ko if: $root.authorization.ok( 'pate-contract-tab') -->
+            <cljs-pate_verdicts params="contracts: true"></cljs-pate_verdicts>
+            <!-- /ko -->
+            <!-- ko ifnot: $root.authorization.ok( 'pate-contract-tab') -->
+            <cljs-pate_verdicts></cljs-pate_verdicts>
+            <!-- /ko -->
+
+          </div>
+          <!-- /ko -->
+
+          <!-- Pate invoice tab -->
+
+          <!-- ko if: selectedTabName() == 'invoice' && $root.authorization.ok( 'invoices-tab') -->
+          <div id="application-invoice-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-invoices-tab"
+               class="tab-content">
+            <cljs-invoices_invoices></cljs-invoices_invoices>
+          </div>
+          <!-- /ko -->
+
+          <!-- Statements tab -->
+
+          <!-- ko if: selectedTabName() === 'statement' && application.id() -->
+          <div id="application-statement-tab"
+               aria-labelledby="application-open-statement-tab"
+               role="tabpanel"
+               class="tab-content">
+            <div data-bind="component: {name: 'statements-tab',
+                            params: {application: application,
+                            authModel: $root.authorization}}"></div>
+          </div>
+          <!-- /ko -->
+
+          <!-- Filebank tab -->
+
+          <!--ko if: selectedTabName() === 'filebank' && $root.authorization.ok("filebank-enabled") -->
+          <div id="application-filebank-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-filebank-tab"
+               class="tab-content">
+            <cljs-filebank_view params="{authModel:     $root.authorization,
+                                        applicationId: $root.application.id,
+                                        userId:        lupapisteApp.models.currentUser.id()}">
+            </cljs-filebank_view>
+          </div>
+          <!-- /ko -->
+
+
+          <!-- Archival tab -->
+
+          <!--ko if: selectedTabName() === 'archival' && $root.authorization.ok("archiving-operations-enabled") -->
+          <div id="application-archival-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-archival-tab"
+               class="tab-content">
+            <div>
+              <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('case-file-data') && application.id -->
+          <div id="application-caseFile-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-caseFile-tab"
+               class="tab-content">
+            <div>
+              <div data-bind="component: {name: 'case-file', params: {application: application, authModel: $root.authorization}}"></div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <!-- ko if: selectedTabName() === 'inspectionSummaries' && !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application') -->
+          <div id="application-inspectionSummaries-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-inspectionSummaries-tab"
+               class="tab-content">
+            <cljs-inspection-summaries params="{app: $data.application, authModel: $root.authorization}"></cljs-inspection-summaries>
+          </div>
+          <!-- /ko -->
+
+          <!-- YMP Bulletin tab -->
+          <!-- ko if: selectedTabName() === 'ymp-bulletin' && $root.authorization.ok('ymp-publish-bulletin-enabled') -->
+          <div id="application-ymp-bulletin-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-ymp-bulletin-tab"
+               data-bind="with: application" class="tab-content">
+            <div data-bind="component: {name: 'ymp-bulletin-tab',
+                            params: {appId: id,
+                            appState: state,
+                            authModel: $root.authorization,
+                            bulletinService: lupapisteApp.services.publishBulletinService}}"></div>
+          </div>
+
+          <!-- /ko -->
+          <!-- / Bulletin tab -->
+
+          <!-- Generic Bulletin tab -->
+          <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('bulletin-for-application-verdict-enabled') -->
+          <div id="application-bulletin-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-bulletin-tab"
+               data-bind="with: application"
+               class="tab-content">
+            <generic-bulletin-tab></generic-bulletin-tab>
+          </div>
+
+          <!-- /ko -->
+          <!-- / Bulletin tab -->
+
+          <!-- Tasks tab -->
+          <!-- ko if: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible') -->
+          <div id="application-tasks-tab"
+               aria-labelledby="application-open-tasks-tab"
+               role="tabpanel"
+               data-bind="with: $root.application"
+               class="tab-content" >
+
+            <!-- ko if: $root.authorization.ok('ya-application') -->
+            <h1 data-bind="ltext: 'application.tabConstructionTimeTasksYA'"></h1>
+            <!-- /ko -->
+            <!-- ko if: !$root.authorization.ok('ya-application') -->
+            <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
+            <!-- /ko -->
+
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
+                             }"></span>
+
+            <extension-applications></extension-applications>
+
+            <div data-bind="if: $root.authorization.ok('set-building-extinct') && _.some(buildings())">
+              <h2 data-bind="ltext: 'application.buildingsAndStructures'"></h2>
+              <table>
+                <col>
+                <col style="width: 30em">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'applications.operation'"></th>
+                    <th data-bind="ltext: 'applications.raukeamisPvm'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: buildings()">
+                  <tr>
+                    <td>
+                      <span data-bind="ltext: operation.nameKey"></span>
+                      <!--ko if: operation.description -->
+                      &ndash; <!--ko text: operation.description--><!--/ko-->
+                      <!--/ko-->
+                    </td>
+                    <td>
+                      <!--ko if: isInEditMode -->
+                      <form class="button-input"
+                            data-bind="submit: save">
+                        <input type="text"
+                               class="lux dateinput"
+                               data-bind="datepicker: extinctInputValue,
+                                          ariaLtext: 'applications.raukeamisPvm'">
+                        <button type="submit" class="positive">
+                          <i aria-hidden="true" class="lupicon-check"></i>
+                          <span data-bind="ltext: 'save'"></span>
+                        </button>
+                        <button class="secondary" data-bind="click: cancel">
+                          <i aria-hidden="true" class="lupicon-remove"></i>
+                          <span data-bind="ltext: 'cancel'"></span>
+                        </button>
+                      </form>
+                      <!--/ko-->
+                      <!--ko ifnot: isInEditMode -->
+                      <span data-bind="dateString: operation.extinct"></span>
+                      <!-- <icon-button params="icon: lupicon-pen"></icon-button> -->
+                      <button data-bind="click: edit,
+                                         ariaLtext: 'edit',
+                                         clickBubble: false"
+                              class="secondary no-border">
+                        <i aria-hidden="true" class="lupicon-pen"></i>
+                      </button>
+                      <!--/ko-->
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div data-bind="if: _.some( _js.buildings ) && $root.authorization.ok('inform-building-construction-started')">
+              <h2 data-bind="ltext:'application.aloitusilmoitukset'"></h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.buildingStatus'"></th>
+                    <th data-bind="ltext: 'application.buildingOperation'"></th>
+                    <th data-bind="ltext: 'application.buildingStartedDate'"></th>
+                    <th data-bind="ltext: 'application.buildingStartedBy'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: buildings">
+                  <tr>
+                    <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
+                    <td data-bind="text: util.buildingName($data)"></td>
+                    <td>
+                      <span data-bind="if: !$data.constructionStarted">
+                        <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a>
+                      </span>
+                      <span data-bind="if: $data.constructionStarted">
+                        <span data-bind="dateString: $data.constructionStarted"></span>
+                      </span>
+                    </td>
+                    <td data-bind="fullName: $data.startedBy"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- YA: Info about construction started and construction ready occasions -->
+            <div data-bind="if: $root.authorization.ok('info-construction-status')">
+              <h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'"></h2>
+              <table class="table-even-odd">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.constructionStateChangeOperation'"></th>
+                    <th data-bind="ltext: 'application.constructionStateChangeDate'"></th>
+                    <th data-bind="ltext: 'application.constructionStateChangedBy'"></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  <!-- Hanke aloitettu -->
+                  <tr>
+                    <td><span data-bind="ltext: 'constructionStarted'"></span></td>
+                    <td>
+                      <span data-bind="if: $data.started">
+                        <span data-bind="dateString: $data.started"
+                              data-test-id="construction-state-change-info-started"></span>
+                      </span>
+                    </td>
+                    <td data-bind="fullName: $data.startedBy"
+                        data-test-id="task-started-by"></td>
+                    <td>
+                      <button class="btn btn-primary"
+                              data-test-id="application-inform-construction-started-btn"
+                              data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
+                                         ltext: $data.started() ? 'edit' : 'application.button.informConstructionStarted',
+                                         visible: $root.authorization.ok('inform-construction-started'),
+                                         enable: $root.authorization.ok('inform-construction-started')"></button>
+                    </td>
+                  </tr>
+
+                  <!-- Hanke valmistunut -->
+                  <tr>
+                    <td><span data-bind="ltext: 'closed'"></span></td>
+                    <td>
+                      <span data-bind="if: $data.closed">
+                        <span data-bind="dateString: $data.closed"
+                              data-test-id="construction-state-change-info-closed"></span>
+                      </span>
+                    </td>
+                    <td data-bind="fullName: $data.closedBy"
+                        data-test-id="task-closed-by"></td>
+                    <td>
+                      <button class="btn btn-primary"
+                              data-test-id="application-inform-construction-ready-btn"
+                              data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
+                                         ltext: 'application.button.informConstructionReady',
+                                         visible: $root.authorization.ok('inform-construction-ready'),
+                                         enable: $root.authorization.ok('inform-construction-ready')"></button>
+                    </td>
+                  </tr>
+                  <!-- ko component: "warranty" -->
+                  <!-- /ko -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- ko if: $root.foreman.isVisible -->
+            <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
+            <!-- /ko -->
+
+
+            <notice-forms></notice-forms>
+
+            <review-tasks params="openTask: openTask"></review-tasks>
+
+            <div class="tasks-content">
+              <div data-bind="foreach: taskGroups">
+                <h2 data-bind="text: name"></h2>
+                <div aria-hidden="true"
+                     class="stacked legends">
+                  <div class="like-btn">
+                    <i class="lupicon-circle-check"></i>
+                    <span data-bind="ltext: 'task.ok.title'"></span>
+                  </div>
+                  <div class="like-btn">
+                    <i class="lupicon-circle-attention"></i>
+                    <span data-bind="ltext: 'task.missing.title'"></span>
+                  </div>
+                </div>
+                <table class="tasks" data-test-id="lupamaaraykset">
+                  <thead>
+                    <tr>
+                      <th data-bind="ltext: 'application.taskState'"></th>
+                      <th data-bind="ltext: 'application.taskDisplayName'"></th>
+                      <th data-bind="ltext: 'application.taskClosed'"></th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: tasks">
+                    <tr data-bind="attr: {'data-test-type': schema.info.name}">
+                      <td data-bind="ariaLtext: ['task', statusName, 'title']">
+                        <i aria-hidden="true"
+                           data-bind="attr: {
+                                      'class': LUPAPISTE.statusIcon(statusName),
+                                      'data-test-state': $data.state,
+                                      'title': loc(['task', statusName, 'title'])}"></i></td>
+                      <td><a href="#" class="task-title"
+                             data-bind="click: openTask, text: displayName"></a></td>
+                      <td data-bind="text: util.getIn($data, ['data', 'katselmus', 'pitoPvm', 'value'])"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <button class="positive"
+                    data-test-id="application-new-task"
+                    data-bind="click: _.partialRight( $root.createTask.createTask, true ),
+                               ltext: 'task.create',
+                               visible: $root.authorization.ok('create-task'),
+                               enable: $root.authorization.ok('create-task')"></button>
+          </div>
+          <!-- /ko -->
+          <!-- ko if: $root.hasEditableDocs -->
+          <div id="construction-time-documents" data-bind="visible: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible')">
+            <p data-bind="lhtml: 'required.field.desc'"></p>
+            <div class="application_section">
+              <div id="constructionTimeDocgen" class="docgen-content">
+                <!-- This is where generated document will be placed. -->
+              </div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <!-- Structures tab -->
+          <!-- ko if: selectedTabName() === 'structures' && $root.authorization.ok('location-operations') -->
+          <div id="application-structures-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-structures-tab"
+               class="tab-content">
+            <h1 data-bind="ltext: 'location.structures'"></h1>
+
+            <cljs-location.locations-operations
+                    params="applicationId: application.id(),
+                            applicationLocation: application.location()">>
+            </cljs-location.locations-operations>
+
+          </div>
+          <!-- /ko -->
+
+          <!-- Calendars tab -->
+          <!-- ko if: selectedTabName() === 'calendar' && lupapisteApp.models.rootVMO.currentPage() === 'application' && calendarConfig.initialized -->
+          <div id="application-calendar-tab"
+               role="tabpanel"
+               aria-labelledby="application-open-calendar-tab"
+               data-bind="visible: $root.authorization.ok('calendars-enabled')"
+               class="tab-content">
+            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+            <application-authority-calendar params="calendarConfig: calendarConfig">
+            </application-authority-calendar>
+            <!-- /ko -->
+            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+            <applicant-calendar params="calendarConfig: calendarConfig">
+            </applicant-calendar>
+            <!-- /ko -->
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+      <div id="boxes">
+        <div id="dialog-terminate-foreman" class="window autosized">
+          <!-- ko with: $root.foreman -->
+          <div class="dialog-header">
+            <p data-bind="ltext: 'foreman.terminate.header'"></p>
+            <span class="dialog-close close lupicon-remove"></span>
+          </div>
+          <div class="dialog-content">
+            <div class="dialog-desc-wider">
+              <p data-bind="lhtml: 'foreman.terminate.pending'"></p>
+              <p data-bind="html: $data.inspectionSummaryHTML"></p>
+              <p data-bind="ltext: 'foreman.terminate.tip'"></p>
+            </div>
+            <br/>
+
+            <!-- ko with: selectedForTermination -->
+            <table>
+              <thead></thead>
+              <tbody>
+                <tr>
+                  <td class="strong" data-bind="text: loc('application.parties.foreman') + ':'"></td>
+                  <td data-bind="text: $data.fullName"></td>
+                </tr>
+                <tr>
+                  <td class="strong" data-bind="text: loc('osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label') + ':'"></td>
+                  <td data-bind="text: $data.displayRole"></td>
+                </tr>
+                <tr>
+                  <td class="strong" data-bind="text: loc('osapuoli.patevyys-tyonjohtaja.patevyysvaatimusluokka._group_label') + ':'"></td>
+                  <td data-bind="text: $data.requirementClass"></td>
+                </tr>
+                <tr>
+                  <td class="strong" data-bind="text: loc('foreman.tasks') + ':'"></td>
+                  <td data-bind="text: $data.responsibilities"></td>
+                </tr>
+                <tr>
+                  <td class="strong" data-bind="text: loc('foreman.termination.status.not-requested') + ':'"></td>
+                  <td data-bind="text: $data.started"></td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- /ko -->
+
+            <span data-bind="ltext: 'foreman.termination.reason'"></span>
+            <br/>
+            <textarea autofocus data-bind="textInput: $data.terminationReason"></textarea>
+            <button class="btn btn-primary btn-dialog"
+                    data-test-id="application-terminate-foreman"
+                    data-bind="click: submitTermination,
+                               disable: terminateDisabled">
+              <i class="lupicon-check"></i>
+              <span data-bind="ltext: 'foreman.terminate'"></span>
+              <em data-bind="visible: pending"
+                  class="button-loader"></em>
+            </button>
+            <icon-button class="btn-dialog"
+                         params="buttonClass: 'secondary close',
+                                 icon:  'remove',
+                                 ltext: 'cancel'">
+            </icon-button>
+          </div>
+          <!-- /ko -->
+        </div>
+
+
+        <div id="dialog-invite-foreman" class="window autosized">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'application.parties.addForeman'"></p>
+            <button class="tertiary close btn-icon-only btn-no-border"
+                    data-bind="focusPrevious: '.dialog-content button:visible:last',
+                               ariaLtext: 'close'">
+              <i class="lupicon-remove" aria-hidden="true"></i>
+            </button>
+          </div>
+          <!-- ko with: $root.foreman -->
+          <div class="dialog-content">
+            <!-- ko if: finished -->
+            <div class="finished">
+              <p class="dialog-desc-wider"
+                 data-bind="lhtml: 'invite.foreman.finished'"></p>
+              <button class="btn btn-dialog btn-primary secondary"
+                      data-bind="ltext: 'application.return',
+                                 click: function() { LUPAPISTE.ModalDialog.close(); }">
+              </button>
+              <button data-test-id="application-invite-foreman-close-dialog"
+                      class="btn btn-dialog primary"
+                      autofocus
+                      data-bind="ltext: 'button.ok',
+                                 focusNext: '.dialog-header button.close:visible',
+                                 click: function() {
+                                 openApplication(finished());
+                                 LUPAPISTE.ModalDialog.close(); }">
+              </button>
+            </div>
+            <!-- /ko -->
+            <!-- ko if: pending -->
+            <div class="pending">
+              <div class="ajax"></div>
+              <div data-bind="ltext: 'invite.foreman.pending'"></div>
+            </div>
+            <!-- /ko -->
+            <!-- ko ifnot: finished -->
+            <form>
+              <p data-bind="lhtml: 'invite.foreman.desc'"
+                 class="dialog-desc-wider"></p>
+              <label for="foreman-role"
+                     data-bind="ltext: 'foreman.role'"></label>
+              <select name="foreman-role" autofocus
+                      id="foreman-role"
+                      class="lux form-input combobox"
+                      data-bind="optionsText:     'optionsText',
+                                 options:         foremanRoles,
+                                 optionsValue:    'name',
+                                 value:           selectedRole,
+                                 optionsCaption:  loc('choose')">
+              </select>
+
+              <label data-bind="ltext: 'userinfo.email'"
+                     class="form-label"
+                     for="invite-foreman-email"></label>
+              <input class="lux form-input"
+                     id="invite-foreman-email"
+                     type="text"
+                     data-bind="textInput: email">
+              <div data-bind="visible: error" >
+                <div data-bind="ltext: error" class="context-error"></div>
+              </div>
+              <button class="btn btn-primary btn-dialog"
+                      data-test-id="application-invite-foreman"
+                      data-bind="click: submitInvitation,
+                                 disable: inviteDisabled">
+                <i aria-hidden="true" class="lupicon-check"></i>
+                <span data-bind="ltext: 'application.parties.addForeman'"></span>
+                <em data-bind="visible: pending"
+                    class="button-loader"></em>
+              </button>
+              <icon-button class="btn-dialog"
+                           params="buttonClass: 'secondary close',
+                                   testId:      'cancel-foreman-dialog',
+                                   icon:        'remove',
+                                   focusNext: '.dialog-header button.close:visible',
+                                   ltext:       'cancel'">
+              </icon-button>
+            </form>
+            <!-- /ko -->
+          </div>
+          <!-- /ko -->
+        </div>
+
+        <div id="dialog-add-attachment-templates" class="window autosized selectm-dialog">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+          <div class="dialog-content">
+            <div class="attachment-templates"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <div style="display:none;">
+      <div id="dialog-company-user-op" class="window autosized">
+        <div class="dialog-header">
+          <p data-bind="text: title"></p>
+          <p class="dialog-close close lupicon-remove"></p>
+        </div>
+        <div class="dialog-content">
+
+          <div>
+            <span data-bind="html: message"></span>
+          </div>
+
+          <div data-bind="visible: pending">
+            <em class="button-loader" style="position: relative;"></em>
+            <span data-bind="ltext: 'company.user.op.pending'"></span>
+          </div>
+
+          <button data-bind="click: ok,
+                             enable: !pending(),
+                             ltext: 'yes'"
+                  class="positive btn-dialog"
+                  data-test-id="dialog-company-user-op.ok">
+          </button>
+          <button data-bind="enable: !pending(),
+                             ltext: 'no'"
+                  class="secondary btn-dialog close">
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+
+  </body>
+</html>

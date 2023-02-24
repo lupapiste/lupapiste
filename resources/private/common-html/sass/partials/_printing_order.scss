@@ -1,0 +1,219 @@
+@use 'sass:math';
+
+$pate-grid-margin: 10px;
+
+@mixin order-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * math.div(100%, $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $pate-grid-margin * 3;
+
+  div.radio-wrapper {
+    width: 100%;
+  }
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+@mixin order-grid ($columns) {
+  .order-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    .row {
+      @include clearfix;
+      padding: $pate-grid-margin 0;
+      @for $i from 1 through $columns {
+        .col-#{$i} {
+          @include order-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
+    }
+  }
+}
+
+@for $i from 1 through 12 {
+  @include order-grid( $i );
+}
+
+span.order-grid-header {
+  font-size: 17px;
+  font-weight: bold;
+  width: 100%;
+  display: inline-block;
+}
+
+div.order-summary-contacts-block {
+  box-sizing: border-box;
+  border: 1px solid $gray187;
+  padding: 0px math.div($baseline, 2);
+}
+
+span.order-summary-line {
+  width: 100%;
+  display: inline-block;
+}
+
+div.order-section {
+  padding-bottom: $pate-grid-margin * 2;
+
+  div.attachments-table-container {
+    padding:0;
+  }
+}
+
+.order-summary-pricing-block {
+  background-color: $gray247;
+  border-top: 1px solid $gray221;
+
+  table {
+    margin-bottom: 0px;
+
+    tr {
+      background: none;
+      border: none;
+    }
+
+    td.first, td.half {
+      width: 50%;
+    }
+
+    td.second {
+      width: 35%;
+      text-align: right;
+    }
+
+    td.third {
+      width: 15%;
+    }
+  }
+}
+
+div.printing-order-footer {
+  width: 100%;
+  background-color: $light-gray-link;
+  padding: $baseline auto $baseline auto;
+
+  > div button:first-child {
+    padding-left: 0px;
+    padding-right: $baseline * 2;
+  }
+
+  > div {
+    margin: math.div($baseline,2);
+
+    button {
+      width: auto;
+      display: inline-block;
+      padding-right: math.div($baseline,2);
+    }
+
+    h2 {
+      font-weight: normal;
+    }
+  }
+
+  .open-pricelist-btn {
+    min-width: 200px;
+    h3 {
+      color: $orange;
+    }
+  }
+
+  div.pricelist-panel {
+    position: absolute;
+    right: 0px;
+    bottom: $btn-height * 1.75;
+    min-width: 250px;
+
+    > div:first-child {
+      right: 6px;
+      position: absolute;
+      background-color: white;
+      color: black;
+      border: solid 2px $lp-orange;
+      z-index: 99;
+    }
+
+    div.row {
+      padding: 0px 10px;
+      line-height: 2;
+    }
+
+    .arrow {
+      position: absolute;
+      z-index: 101;
+      left: 31px;
+      top: -28px;
+      transform: rotate(180deg);
+    }
+
+    .arrow:after, .arrow:before {
+      bottom: 100%;
+      left: 50%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+      z-index: 100;
+      overflow-y: visible;
+    }
+
+    .arrow:before {
+      display: block;
+      border-color: transparentize( $lp-orange, 1);
+      border-top-color: $lp-orange;
+      border-width:  14px;
+      margin-left:  -14px;
+    }
+
+    .arrow:after {
+      border-color: transparentize( white, 1);
+      border-top-color: white;
+      border-width:  16px;
+      margin-left:  -16px;
+    }
+
+  }
+}

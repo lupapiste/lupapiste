@@ -1,0 +1,90 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-group-template">
+  <div class="inline" data-bind="template: componentTemplate"></div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="default-docgen-group-template">
+  <div class="form-group" data-bind="attr: {id: groupId}">
+
+    <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
+
+    <!-- ko if: groupHelp -->
+    <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+    <!-- /ko -->
+
+    <div data-bind="foreach: subSchemas">
+      <!-- ko if: !$data.hidden -->
+      <span class="form-entry"
+            data-bind="component: { name: uicomponent,
+                       params: { schema: $data,
+                       path: path,
+                       i18npath: i18npath,
+                       applicationId: applicationId,
+                       documentId: documentId,
+                       authModel: $component.authModel,
+                       service: $component.service }}">
+      </span>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="form-grid-docgen-group-template">
+
+  <div class="form-grid" data-bind="css: css">
+    <!-- ko if: groupHelp -->
+    <div class="row">
+      <span class="group-help-text" data-bind="lhtml: groupHelp"></span>
+    </div>
+    <!-- /ko -->
+
+    <!-- ko foreach: rowSchemas -->
+    <!-- ko if: _.size( ko.unwrap( $data.warnings )) -->
+    <div class="">
+      <warnings params="warnings: $data.warnings"></warnings>
+    </div>
+    <!-- /ko -->
+    <div class="row"
+         data-bind="css: $data.rowCss">
+
+      <!-- ko if: $data.ltext -->
+      <div data-bind="ltext: $data.ltext,
+                      css: $data.css,
+                      attr: {id: $data.ltext}"></div>
+      <!-- /ko -->
+      <!-- ko ifnot: $data.tag -->
+      <div data-bind="foreach: $data.row">
+        <div class="col--vertical" data-bind="css: $data.colClass,
+                                              component: { name: $data.uicomponent,
+                                              params: { schema: $data,
+                                              path: $data.path,
+                                              i18npath: $data.i18npath,
+                                              applicationId: $data.applicationId,
+                                              documentId: $data.documentId,
+                                              authModel: $component.authModel,
+                                              service: $component.service,
+                                              ariaErrorMessage: true}}">
+
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+    <!-- /ko -->
+  </div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="simple-docgen-group-template">
+  <div data-bind="foreach: subSchemas">
+    <!-- ko ifnot: $data.hidden -->
+    <span data-bind="component: { name: uicomponent,
+                     params: { schema: $data,
+                     path: path,
+                     i18npath: i18npath,
+                     applicationId: applicationId,
+                     documentId: documentId,
+                     authModel: $component.authModel,
+                     service: $component.service }}">
+    </span>
+    <!-- /ko -->
+  </div>
+</script>

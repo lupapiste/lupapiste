@@ -1,0 +1,23 @@
+#inspection-summary-targets {
+  margin-top: 20px;
+}
+
+#inspection-summary th {
+  text-align: left;
+}
+
+#inspection-summary #name {
+  width: 25%;
+}
+
+#inspection-summary #finished {
+  width: 20%;
+}
+
+#inspection-summary #finished-date {
+  width: 15%;
+}
+
+#inspection-summary #finished-by {
+  width: 15%;
+}

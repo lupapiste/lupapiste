@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kyyh:Yhteystiedot xmlns:y="http://xml.nls.fi/ktjkir/yhteinen/2013/03/01"
+                  xmlns:kyyh="http://xml.nls.fi/ktjkir/kysely/yhteystiedot/2013/11/01"
+                  xmlns:tryh="http://xml.nls.fi/ktjkir/yhteystiedot/2013/11/01"
+                  xmlns:trpt="http://xml.nls.fi/ktjkir/perustiedot/2013/03/01"
+                  xmlns:muti="http://xml.nls.fi/ktjkir/yhteystiedot_muti/2013/03/01">
+  <tryh:Rekisteriyksikko>
+      <tryh:kohteenHenkilot>
+        <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+              <y:henkilolaji>LU</y:henkilolaji>
+              <y:etunimet>Ahma Kyösti Jaakkima</y:etunimet>
+              <y:sukunimi>Voller</y:sukunimi>
+              <y:syntymapvm>1974-03-10</y:syntymapvm>
+              <y:ulkomaalainen>false</y:ulkomaalainen>
+            </y:henkilonTiedot>
+            <muti:Osoite>
+              <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+              <muti:postinumero>00100</muti:postinumero>
+              <muti:paikkakunta>Helsinki</muti:paikkakunta>
+            </muti:Osoite>
+        </y:Henkilo>
+        <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+              <y:henkilolaji>LU</y:henkilolaji>
+              <y:etunimet>Jaakko Jaakkima Jorma</y:etunimet>
+              <y:sukunimi>Pakkanen</y:sukunimi>
+              <y:syntymapvm>1980-02-15</y:syntymapvm>
+              <y:ulkomaalainen>true</y:ulkomaalainen>
+            </y:henkilonTiedot>
+            <muti:Osoite>
+              <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+              <muti:postinumero>00100</muti:postinumero>
+              <muti:paikkakunta>Helsinki</muti:paikkakunta>
+            </muti:Osoite>
+        </y:Henkilo>
+      </tryh:kohteenHenkilot>
+  </tryh:Rekisteriyksikko>
+  
+</kyyh:Yhteystiedot>

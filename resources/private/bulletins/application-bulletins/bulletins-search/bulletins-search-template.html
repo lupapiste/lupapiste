@@ -1,0 +1,26 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="bulletins-search-template">
+      <div class="bulletins-search">
+        <h3 data-bind="ltext: 'bulletins.search'"></h3>
+        <div class="form-grid form-grid--no-border form-grid--columns-3">
+          <div class="row">
+            <div class="col-1">
+              <div data-test-id="bulletin-search-field"
+                   data-bind="component: {name: 'search-field',
+                                          params: {value: searchText, maxlength: LUPAPISTE.config.searchTextMaxLength}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-test-id="municipalities-filter-component"
+                   data-bind="component: {name: 'autocomplete-municipalities',
+                                          params: {selected: municipality,
+                                                   municipalities: municipalities}}"></div>
+            </div>
+            <div class="col-1">
+              <div data-test-id="states-filter-component"
+                   data-bind="component: {name: 'autocomplete-states',
+                                          params: {selected: state,
+                                                   states: states}}"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+</script>

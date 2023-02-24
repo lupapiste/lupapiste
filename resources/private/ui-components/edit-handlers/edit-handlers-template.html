@@ -1,0 +1,68 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="edit-handlers-template">
+  <div class="edit-handlers-container">
+    <icon-button params="icon: 'chevron-start',
+                         buttonClass: 'secondary',
+                         ltext: 'back',
+                         click: back,
+                         testId: 'edit-handlers-back'"></icon-button>
+    <hr>
+    <div class="tabby"
+         data-bind="visible: _.size( handlers() )">
+      <div class="tabby__row">
+        <div class="tabby__cell tabby--40">
+          <label data-bind="ltext: 'person-selector'"></label>        
+        </div>
+        <div class="tabby__cell tabby--40">
+          <label data-bind="ltext: 'application.handlers.select'"></label>        
+        </div>
+        <div class="tabby__cell"></div>
+      </div>
+      <!-- ko foreach: handlers -->
+      <div class="tabby__row">
+        <div class="tabby__cell">
+          <div data-bind="component: {name: 'base-autocomplete',
+                          params: {options: $parent.getComplete( $data.id).persons,
+                          optionsText: 'name',
+                          query: $parent.getComplete( $data.id).queryPerson,
+                          selectedOption: $parent.getComplete( $data.id).selectedPerson,
+                          lPlaceholder: 'search', 
+                          nullable: false,
+                          disable: $parent.isDisabled( $data),
+                          maxHeight: '16em'}},
+                          testId: 'edit-person-' + $index()"
+               class="handler-autocomplete"></div>
+        </div>
+        <div class="tabby__cell">
+          <div data-bind="component: {name: 'base-autocomplete',
+                          params: {options: $parent.getComplete( $data.id).roles,
+                          optionsText: 'name',
+                          query: $parent.getComplete( $data.id).queryRole,
+                          selectedOption: $parent.getComplete( $data.id).selectedRole,
+                          lPlaceholder: 'search',           
+                          nullable: false,
+                          disable: $parent.isDisabled( $data ),
+                          maxHeight: '16em'}},
+                          testId: 'edit-role-' + $index()"
+               class="handler-autocomplete"></div>
+        </div>
+        <div class="tabby__cell">
+              <icon-button params="icon: 'remove',
+                                   buttonClass: 'secondary',
+                                   ltext: 'remove',
+                                   click: _.partial( $parent.remove, $data),
+                                   testId: 'remove-handler-' + $index(),
+                                   disable: lupapisteApp.services.handlerService.pending">
+              </icon-button>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+    <icon-button params="icon: 'circle-plus',
+                         buttonClass: 'positive',
+                         enable: canAdd(),
+                         click: add,
+                         ltext: 'handler-roles.add',
+                         testId: 'add-handler'"></icon-button>
+  </div>
+</script>

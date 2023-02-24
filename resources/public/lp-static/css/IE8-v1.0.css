@@ -1,0 +1,19 @@
+button, .btn {
+	overflow: hidden !important;
+}
+
+.btn-nav-back::after {
+	display: none !important;
+}
+
+.btn-nav-forward::before {
+	display: none !important;
+}
+
+.btn-nav-forward .icon.right-align {
+	right: 0 !important;
+}
+
+.btn-nav-back .icon.left-align {
+	left: 4px !important;
+}

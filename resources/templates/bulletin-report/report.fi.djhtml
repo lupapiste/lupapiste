@@ -1,0 +1,139 @@
+<h1>Lupapiste: Julkipanon tiedot</h1>
+<h2>Hakemustunnukset</h2>
+<p>
+  {{application-id}} / {{address}}
+</p>
+<p>
+  Julkipano hakemukselle
+  {% if past-start-date? %} on alkanut {% else %} alkaa {% endif %}
+  {{start-date|date:"cccc":fi}}na {{start-date|date:"d.M.YYYY 'klo' HH:mm":fi}}
+  ja
+  {% if past-end-date? %} päättyi {% else %} päättyy {% endif %}
+  {{end-date|date:"cccc":fi}}na {{end-date|date:"d.M.YYYY 'klo' HH:mm":fi}}.
+</p>
+<p>
+  Ajankohdat ovat määräytyneet päätöksen
+  {% if section %}
+    §{{section}}
+  {% endif %}
+  päivämäärien mukaisesti.
+  {% if verdict-date %}
+    Päätös on kirjattu {{verdict-date|date:"cccc":fi}}na
+    {{verdict-date|date:"d.M.YYYY":fi}}.
+  {% endif %}
+  {% if given-date %}
+    Päätöksen antopäivä on {{given-date|date:"cccc d.M.YYYY":fi}}.
+  {% endif %}
+</p>
+<h2>Vierailut julkipanolle {{application-id}}</h2>
+<p>
+  Lupapisteen kirjanpidon mukaan kyseistä julkipanoa
+  {% if visits %}
+    on käyty katsomassa
+    {% if visit-count = 1 %}
+      yhden kerran seuraavana ajankohtana.
+    {% else %}
+      {{visit-count}} kertaa seuraavina ajankohtina.
+      {% if visit-limit %}
+        Listassa näkyy {{visit-limit}} ensimmäistä katseluajankohtaa.
+      {% endif %}
+    {% endif %}
+    <table class="visits">
+      <tbody>
+        {% for visit in visits %}
+          <tr>
+            <td class="weekday">{{visit|date:"ccc":fi}}</td>
+            <td class="date">{{visit|date:"d.M.YYYY"}}</td>
+            <td class="klo">klo</td>
+            <td class="time">{{visit|date:"HH:mm:ss"}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    ei ole käyty kertaakaan katsomassa.
+  {% endif %}
+</p>
+<h2>Julkipanon sisältö</h2>
+Osa päätöstiedoista näkyy ainoastaan tunnistautuneille käyttäjille.
+
+<div class="bulletin">
+  <table class="details">
+    <tbody>
+      <tr class="below-one above-one">
+        <td><strong>{{address}}</strong></td>
+        <td>{{description-html|safe}}</td>
+      </tr>
+      <tr>
+        <td class="left">Kiinteistötunnus</td>
+        <td class="right">{{property-id}}</td>
+      </tr>
+      <tr>
+        <td class="left">Asiointikunta</td>
+        <td class="right">{% loc municipality %}</td>
+      </tr>
+      {% if kuntalupatunnus %}
+        <tr>
+          <td class="left">Kuntalupatunnus</td>
+          <td class="right">{{kuntalupatunnus}}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td class="left">Annettu</td>
+        <td class="right">{{given-date|date:"d.M.YYYY"}}</td>
+      </tr>
+      <tr class="below-two">
+        <td class="left">Muutoksenhakuaika päätty</td>
+        <td class="right">{{end-date|date:"d.M.YYYY"}}</td>
+      </tr>
+      {% for paatos in paatokset %}
+        {% for pk in paatos.poytakirjat %}
+          <tr>
+            <td class="left">
+              <strong>Päätös</strong>
+            </td>
+            <td class="right">
+              {% if pk.section %}
+                §{{pk.section}}
+              {% endif %}
+              {{pk.paatoskoodi}}
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>{{pk.text-html|safe}}</td>
+          </tr>
+          <tr class="below-one">
+            <td class="left">Päätöksentekijä</td>
+            <td>
+              {{pk.paatoksentekija}}<br>
+              {{pk.verdict-date|date:"d.M.YYYY"}}
+            </td>
+          </tr>
+        {% endfor %}
+        {% if paatos.lupamaaraykset %}
+          {% for m in paatos.lupamaaraykset %}
+            <tr>
+              <td class="left">
+                {% loc m.loc-fn %}
+              </td>
+              <td class="right">
+                <ul>
+                  {% for item in m.items %}
+                    <li>
+                      {% if m.safe? %}
+                        {{item|safe}}
+                      {% else %}
+                        {{item}}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+    </tbody>
+  </table>
+      {% endfor %}
+</div>

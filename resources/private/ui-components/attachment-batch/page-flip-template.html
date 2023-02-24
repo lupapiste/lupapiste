@@ -1,0 +1,26 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="page-flip-template">
+  <!-- ko if: pageCount() > 1 -->
+  <div>
+    <icon-button params="click: previousPage,
+                         buttonClass: 'tertiary',
+                         iconOnly: true,
+                         ltext: 'a11y.previous-page',
+                         icon: 'chevron-left',
+                         enable: canPreviousPage,
+                         testId: testId( 'previous')">
+    </icon-button>
+    <span class="like-btn"
+          data-bind="text: pageText,
+                     testId: testId( 'text')"></span>
+    <icon-button params="click: nextPage,
+                         buttonClass: 'tertiary',
+                         iconOnly: true,
+                         ltext: 'a11y.next-page',
+                         icon: 'chevron-right',
+                         enable: canNextPage,
+                         testId: testId( 'next')">
+    </icon-button>
+  </div>
+  <!-- /ko -->
+</script>

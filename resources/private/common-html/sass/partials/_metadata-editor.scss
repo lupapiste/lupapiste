@@ -1,0 +1,102 @@
+.metadata-editor-container {
+  margin-top: 15px;
+  width: 100%;
+  .editor {
+    background-color: #f5f5f4;
+    font-size: 14px;
+
+    .editor-header {
+      width: 100%;
+      display: table;
+      div {
+        vertical-align: middle;
+        display: table-cell;
+      }
+      .edit-button-container {
+        width: 28px;
+        .edit-button {
+          cursor: pointer;
+        }
+        i {
+          margin: 0;
+        }
+      }
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      color: white;
+      background-color: $lp-dark-grey;
+      padding: 15px;
+      min-height: 65px;
+    }
+
+    .editor-form {
+      padding: 0 15px 15px 15px;
+      select, input {
+        width: 100%;
+        box-sizing: border-box;
+        height: 30px;
+      }
+      input[type=checkbox] {
+        width: auto;
+        height: auto;
+        vertical-align: middle;
+      }
+      input[type=number] {
+        width: 6em;
+        text-align: center;
+        display: inline-block;
+      }
+      label {
+        display: inline-block;
+        margin: 5px 0 5px 0;
+        font-weight: 700;
+      }
+      .text-input-container {
+        div {
+          display: inline-block;
+          margin: 0;
+        }
+        .form-input {
+          margin: 0;
+        }
+      }
+    }
+
+    button {
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+
+    .invalid {
+      border: 2px solid #ff0643;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .subtable {
+      background-color: #e8e8e7;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      h4 {
+        font-size: 16px;
+        margin-top: 0;
+      }
+      h5 {
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+    }
+    .editor-buttons {
+      @include clearfix;
+      padding-top: 15px;
+      .save {
+        float: left;
+      }
+      .delete {
+        float: right;
+      }
+    }
+  }
+}

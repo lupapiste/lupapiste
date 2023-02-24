@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="users" >
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <section>
+          <h2 data-bind="ltext: 'auth-admin.admins'"></h2>
+          <div class="admin-users-table"></div>
+          <div class="clear spacerM"></div>
+          <button data-bind="click: organizationUsers.addUserToOrganization, enable: lupapisteApp.models.globalAuthModel.ok('upsert-organization-user')"
+                  class="positive" data-test-id="authadmin-add-authority">
+            <i class="lupicon-circle-plus"></i><span data-bind="ltext: 'add.authority'"></span>
+          </button>
+
+          <div id="add-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'auth-admin.add-dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: organizationUsers">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label" for="auth-admin.admins.add.email"></label>
+                  <input class="form-input" data-bind="textInput: email" id="auth-admin.admins.add.email" type="email"/>
+
+                  <label data-bind="ltext: 'userinfo.firstName'" class="form-label" for="auth-admin.admins.add.firstName"></label>
+                  <input class="form-input" data-bind="textInput: firstName" id="auth-admin.admins.add.firstName" type="text"/>
+
+                  <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="auth-admin.admins.add.lastName"></label>
+                  <input class="form-input" data-bind="textInput: lastName" id="auth-admin.admins.add.lastName" type="text"/>
+
+                  <h4 data-bind="ltext: 'auth-admin.add-dialog.roles'"></h4>
+                  <div data-bind="foreach: availableUserRoles">
+                    <div>
+                      <label>
+                        <input type="checkbox" name="userRoles" data-bind="value: $data, checked: $parent.userRoles">
+                        <span data-bind="ltext: ['authorityrole', $data]"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'auth-admin.add-dialog.continue'" class="btn btn-primary btn-dialog" data-test-id="authadmin-add-authority-continue"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'auth-admin.add-dialog.searching'"></h2>
+                <h2 data-bind="visible: userAdded, ltext: 'auth-admin.add-dialog.userAdded'"></h2>
+                <h2 data-bind="visible: invitationSent, ltext: 'auth-admin.add-dialog.invitationSent'"></h2>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close" data-test-id="authadmin-add-authority-ok"></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section data-bind="component: {name: 'guest-authorities'}"></section>
+
+        <section data-bind="component: {name: 'organization-person-list',
+                                        params: {listed: 'statement-giver',
+                                                 ltextHeader: 'auth-admin.statement-persons',
+                                                 ltextColumns: ['userinfo.statement-type',
+                                                                'auth-admin.statement-person.name',
+                                                                'userinfo.email'],
+                                                 ltextAdd: 'auth-admin.statement-person.add',
+                                                 ltextEdit: 'edit',
+                                                 fields: ['text', 'name', 'email'],
+                                                 disabledFields: {'edit': ['email']},
+                                                 model: $root.statementGivers,
+                                                 people: $root.statementGivers.data()
+                                                 }}">
+        </section>
+      </div>
+    </section>
+  </body>
+</html>

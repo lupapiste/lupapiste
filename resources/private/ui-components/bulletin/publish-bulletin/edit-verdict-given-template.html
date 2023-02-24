@@ -1,0 +1,41 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="edit-verdict-given-template">
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: verdictGivenAt,
+                                             lLabel: 'bulletin.verdict.verdictGivenAt',
+                                             lPlaceholder: 'choose',
+                                             required: true,
+                                             id: 'verdictGivenAt'}}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: appealPeriodStartsAt,
+                                             lLabel: 'bulletin.verdict.appealPeriodStartsAt',
+                                             lPlaceholder: 'choose',
+                                             required: true,
+                                             id: 'appealPeriodStartsAt'}}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: appealPeriodEndsAt,
+                                             lLabel: 'bulletin.verdict.appealPeriodEndsAt',
+                                             lPlaceholder: 'choose',
+                                             required: true,
+                                             id: 'appealPeriodEndsAt'}}"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        <div data-bind="component: {name: 'textarea-field',
+                                    params: {value: verdictGivenText,
+                                             lPlaceholder: 'bulletin.appeal.text.placeholder',
+                                             lLabel: 'application.tabInstructions.verdictGiven',
+                                             required: true,
+                                             id: 'verdictGivenText',
+                                             maxlength: 5000}}"></div>
+      </div>
+    </div>
+  </div>
+</script>

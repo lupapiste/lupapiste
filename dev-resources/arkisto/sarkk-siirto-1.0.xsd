@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.lupapiste.fi/sarkk-siirto"
+        elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ah="http://www.lupapiste.fi/sarkk-siirto" version="1.0"
+        xmlns:lp="http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1">
+
+  <import namespace="http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1"
+          schemaLocation="https://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1"/>
+
+  <element name="UusiAsia" type="ah:AsiaType">
+    <annotation>
+      <documentation>Uuden asian ilmoittaminen.</documentation>
+    </annotation>
+  </element>
+
+  <complexType name="AsiaType">
+    <sequence>
+      <element name="Tyyppi" type="ah:AsianTyyppiType" maxOccurs="1" minOccurs="1"/>
+      <element name="Kuvaus" type="string" maxOccurs="1" minOccurs="1">
+        <annotation>
+          <documentation>Esimerkiksi hakemuksen nimi</documentation>
+        </annotation>
+      </element>
+      <element name="Kuntanumero" type="ah:Kuntanumero" maxOccurs="1" minOccurs="1"/>
+      <element name="Hakijat" type="ah:HakijatType" maxOccurs="1" minOccurs="1"/>
+      <element name="Maksaja" type="ah:MaksajaType" maxOccurs="1" minOccurs="0"/>
+      <element name="HakemusTunnus" type="string" maxOccurs="1" minOccurs="1">
+        <annotation>
+          <documentation>Lupapisteen tunnus</documentation>
+        </annotation>
+      </element>
+      <element name="VireilletuloPvm" type="date" maxOccurs="1" minOccurs="1"/>
+      <element name="Liitteet" type="ah:LiitteetType" maxOccurs="1" minOccurs="0"/>
+      <element name="Asiointikieli" type="ah:KieliType" minOccurs="0"/>
+      <element name="Toimenpiteet" type="ah:ToimenpiteetType" maxOccurs="1" minOccurs="1"/>
+      <element name="Viiteluvat" type="ah:ViiteluvatType" maxOccurs="1" minOccurs="0"/>
+      <element name="Sijainti" type="ah:SijaintiType" maxOccurs="1" minOccurs="0"/>
+      <element name="Kiinteistotunnus" type="ah:KiinteistotunnusType" maxOccurs="1" minOccurs="0"/>
+      <element name="CaseFile" type="ah:CaseFileType" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+    <attribute name="version" type="string">
+      <annotation>
+        <documentation>Käytettävän skeeman versio</documentation>
+      </annotation>
+    </attribute>
+  </complexType>
+
+  <complexType name="CaseFileType">
+    <sequence>
+      <element ref="lp:Created" maxOccurs="unbounded"/>
+      <element ref="lp:NativeId"/>
+      <element ref="lp:Language" maxOccurs="unbounded"/>
+      <element ref="lp:Restriction"/>
+      <element ref="lp:Title"/>
+      <element ref="lp:RetentionPeriod"/>
+      <element ref="lp:RetentionReason"/>
+      <element ref="lp:RetentionPeriodEnd" minOccurs="0"/>
+      <element ref="lp:Status"/>
+      <element ref="lp:ClassificationScheme"/>
+      <element ref="lp:Function"/>
+      <element ref="lp:Agent" maxOccurs="unbounded"/>
+      <element ref="lp:Action" maxOccurs="unbounded"/>
+      <element ref="lp:Custom" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="HakijatType">
+    <sequence>
+      <element name="Hakija" type="ah:HakijaType" maxOccurs="unbounded" minOccurs="1"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="HakijaType">
+    <sequence>
+      <choice>
+        <element name="Henkilo" type="ah:HenkiloType"/>
+        <element name="Yritys" type="ah:YritysType"/>
+      </choice>
+    </sequence>
+  </complexType>
+
+  <complexType name="MaksajaType">
+    <sequence>
+      <choice>
+        <element name="Henkilo" type="ah:HenkiloType"/>
+        <element name="Yritys" type="ah:YritysType"/>
+      </choice>
+      <element name="Laskuviite" type="ah:LaskuviiteType" minOccurs="0"/>
+      <element name="Verkkolaskutustieto" type="ah:VerkkolaskutustietoType" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="YhteyshenkiloType">
+    <sequence>
+      <element name="Etunimi" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Sukunimi" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="Yhteystiedot" type="ah:YhteystiedotType" maxOccurs="1" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="HenkiloType">
+    <complexContent>
+      <extension base="ah:YhteyshenkiloType">
+        <sequence>
+          <element name="Henkilotunnus" minOccurs="1" maxOccurs="1">
+            <simpleType>
+              <restriction base="string">
+                <pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][-+A][0-9][0-9][0-9][A-Y0-9]"/>
+              </restriction>
+            </simpleType>
+          </element>
+          <element name="VainSahkoinenAsiointi" type="boolean" maxOccurs="1" minOccurs="0"/>
+          <element name="Turvakielto" type="boolean" maxOccurs="1" minOccurs="0"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="YhteystiedotType">
+    <sequence>
+      <element name="Jakeluosoite" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Postinumero" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Postitoimipaikka" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Maa" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Email" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Puhelinnumero" type="string" maxOccurs="1" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="YritysType">
+    <sequence>
+      <element name="Nimi" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="Ytunnus" maxOccurs="1" minOccurs="1">
+        <simpleType>
+          <restriction base="string">
+            <pattern
+                value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][\-][0-9]" />
+          </restriction>
+        </simpleType>
+      </element>
+      <element name="Yhteystiedot" type="ah:YhteystiedotType" maxOccurs="1" minOccurs="0"/>
+      <element name="Yhteyshenkilo" type="ah:YhteyshenkiloType" maxOccurs="1" minOccurs="1"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="VerkkolaskutustietoType">
+    <sequence>
+      <element name="OVT-tunnus" type="string" minOccurs="0"/>
+      <element name="Verkkolaskutunnus" type="string" minOccurs="0"/>
+      <element name="Operaattoritunnus" type="string" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="LiitteetType">
+    <sequence>
+      <element name="Liite" type="ah:LiiteType" maxOccurs="unbounded" minOccurs="1"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="LiiteType">
+    <sequence>
+      <element name="Kuvaus" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="KuvausFi" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="KuvausSv" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Tyyppi" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="LinkkiLiitteeseen" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="Luotu" type="date" maxOccurs="1" minOccurs="0">
+        <annotation>
+          <documentation>Liitteen toimitusaika</documentation>
+        </annotation>
+      </element>
+      <element name="Metatiedot" type="ah:MetatiedotType" maxOccurs="1" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="MetatiedotType">
+    <sequence>
+      <element name="Metatieto" type="ah:MetatietoType" maxOccurs="unbounded" minOccurs="1"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="MetatietoType">
+    <sequence>
+      <element name="Avain" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="Arvo" type="string" maxOccurs="1" minOccurs="1"/>
+    </sequence>
+  </complexType>
+
+  <element name="AsianPaatos" type="ah:AsianPaatosType" >
+    <annotation>
+      <documentation>Päätös asiaan.</documentation>
+    </annotation>
+  </element>
+
+  <complexType name="AsianPaatosType">
+    <sequence>
+      <element name="HakemusTunnus" type="string" maxOccurs="1"   minOccurs="1">
+        <annotation>
+          <documentation>Lupapisteen tunnus</documentation>
+        </annotation>
+      </element>
+      <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="1">
+        <annotation>
+          <documentation>Asianhallintajärjestelmän tunnus</documentation>
+        </annotation>
+      </element>
+      <element name="PaatoksenTunnus" type="string" maxOccurs="1" minOccurs="1"/>
+      <element name="PaatoksenPvm" type="date" maxOccurs="1" minOccurs="1"/>
+      <element name="PaatosKoodi" type="string" maxOccurs="1" minOccurs="0">
+        <annotation>
+          <documentation>Järjestelmille, jotka pystyvät toimittamaan</documentation>
+        </annotation>
+      </element>
+      <element name="PaatoksenTekija" type="string" maxOccurs="1" minOccurs="0">
+        <annotation>
+          <documentation>Viranhaltija</documentation>
+        </annotation>
+      </element>
+      <element name="Pykala" type="string" maxOccurs="1" minOccurs="0"/>
+      <element name="Liitteet" type="ah:LiitteetType" maxOccurs="1" minOccurs="0"/>
+    </sequence>
+    <attribute name="version" type="string">
+      <annotation>
+        <documentation>Käytettävän skeeman versio</documentation>
+      </annotation>
+    </attribute>
+  </complexType>
+
+  <simpleType name="AsianTyyppiType">
+    <restriction base="string">
+      <enumeration value="KasiteltavaHakemus"/>
+      <enumeration value="Tiedoksianto"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="KieliType">
+    <restriction base="string">
+      <enumeration value="fi"/>
+      <enumeration value="sv"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="Kuntanumero">
+    <restriction base="string">
+      <pattern value="[0-9][0-9][0-9]"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="ToimenpideType">
+    <sequence>
+      <element name="ToimenpideTunnus" type="string">
+        <annotation>
+          <documentation>Lupapisteen tunnus toimenpiteelle</documentation>
+        </annotation>
+      </element>
+      <element name="ToimenpideTeksti" type="string">
+        <annotation>
+          <documentation>Selväkielinen toimenpiteen lokalisointiteksti</documentation>
+        </annotation>
+      </element>
+    </sequence>
+  </complexType>
+
+  <complexType name="ToimenpiteetType">
+    <sequence>
+      <element name="Toimenpide" type="ah:ToimenpideType" maxOccurs="unbounded" minOccurs="1"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="ViiteluvatType">
+    <sequence>
+      <element name="Viitelupa" type="ah:ViitelupaType" maxOccurs="unbounded" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="ViitelupaType">
+    <choice>
+      <element name="AsianTunnus" type="string">
+        <annotation>
+          <documentation>Asianhallintajärjestelmän tunnus</documentation>
+        </annotation>
+      </element>
+      <element name="MuuTunnus" type="ah:MuuTunnusType"/>
+    </choice>
+  </complexType>
+
+  <complexType name="MuuTunnusType">
+    <annotation>
+      <documentation>Tunnustieto muista sovelluksista. Esimerkiksi Lupapisteestä tunnuksena LP-XXX-XXXX-XXXXX ja sovelluksena "Lupapiste"</documentation>
+    </annotation>
+    <sequence>
+      <element name="Tunnus" type="string"/>
+      <element name="Sovellus" type="string"/>
+    </sequence>
+  </complexType>
+
+  <element name="AsianTunnusVastaus" type="ah:AsianTunnusResponse">
+    <annotation>
+      <documentation>Vastaussanoma, jolla välitetään Lupapisteeseen asianhallintajärjestelmän asiointitunnus</documentation>
+    </annotation>
+  </element>
+
+  <complexType name="AsianTunnusResponse">
+    <sequence>
+      <element name="HakemusTunnus" type="string" maxOccurs="1" minOccurs="1">
+        <annotation>
+          <documentation>Lupapisteen tunnus</documentation>
+        </annotation>
+      </element>
+      <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="1">
+        <annotation>
+          <documentation>Asianhallintajärjestelmän tunnus</documentation>
+        </annotation>
+      </element>
+      <element name="VastaanotettuPvm" type="date"/>
+    </sequence>
+    <attribute name="version" type="string">
+      <annotation>
+        <documentation>Käytettävän skeeman versio</documentation>
+      </annotation>
+    </attribute>
+  </complexType>
+
+  <simpleType name="PisteType">
+    <annotation>
+      <documentation>Koordinaatisto ETRS-TM35FIN: x (itä) ja y (pohjoinen) metreinä, esimerkkiarvo: 411933,3125 6689060,5</documentation>
+    </annotation>
+    <list itemType="double"/>
+  </simpleType>
+
+  <complexType name="SijaintiType">
+    <sequence>
+      <element name="Sijaintipiste" type="ah:PisteType"/>
+    </sequence>
+  </complexType>
+
+  <simpleType name="KiinteistotunnusType">
+    <restriction base="string">
+      <pattern value="(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="LaskuviiteType">
+    <restriction base="string">
+      <maxLength value="30" />
+    </restriction>
+  </simpleType>
+</schema>

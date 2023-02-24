@@ -1,0 +1,19 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-buttons-template">
+  <div class="register-company-buttons-group">
+    <icon-button params="ltext: 'cancel',
+                         icon: 'chevron-left',
+                         buttonClass: 'secondary',
+                         click: cancelClick,
+                         testId: 'register-company-cancel'"></icon-button>
+    <icon-button params="ltext: 'continue',
+                         icon: 'chevron-right',
+                         right: true,
+                         buttonClass: 'primary',
+                         click: continueClick,
+                         waiting: waiting,
+                         testId: 'register-company-continue',
+                         enable: continueEnable"
+                 data-bind="visible: showContinue"></icon-button>
+  </div>
+</script>

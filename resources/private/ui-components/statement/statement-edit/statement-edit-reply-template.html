@@ -1,0 +1,57 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="statement-edit-reply-template">
+    <div class="headerarea" data-test-id="header-statement-edit-reply">
+      <div>
+        <h1>
+          <span>
+            <span data-bind="ltext: 'statement.tab.' + tab"></span>:
+          </span>
+          <span>
+            <span data-bind="text: applicationTitle"></span>
+          </span>
+          <span data-bind="with: data">
+            <!-- ko if: $data.person -->
+            (<span data-bind="text: person.text"></span>)
+            <!-- /ko -->
+          </span>
+        </h1>
+        <span data-bind="visible: isDraft" class="statement-state-indicator">
+          <i aria-hidden="true" class="lupicon-circle-attention"></i>
+          <span data-bind="ltext: 'luonnos'">Luonnos</span>
+        </span>
+      </div>
+      <div id="statement-reply-cover-note"
+           class="gap--t1">
+        <p data-bind="text: coverNote"></p>
+      </div>
+      <p id="statement-reply-draft-is-not-visible-info" data-bind="visible: !replyVisible(),
+                                                                   ltext: 'statement.reply-draft-not-visible'">Luonnosta ei nayteta</p>
+    </div>
+
+    <div class="statement-info" data-bind="visible: replyVisible">
+      <form>
+        <div class="checkbox-wrapper wrapper--break">
+          <input id="statement-nothing-to-add"
+                 type="checkbox"
+                 class="form-input checkbox"
+                 data-bind="checked: nothingToAdd,
+                            disable: !enabled()">
+          <label for="statement-nothing-to-add" class="checkbox-label"
+                 data-test-id="statement-nothing-to-add">
+            <span data-bind="ltext: 'statement.nothing-to-add.label'">Ei lisattavaa</span>
+          </label>
+        </div>
+        <div data-bind="!nothingToAdd()">
+          <label class="lux form-label" for="statement-reply-text"
+                 data-bind="ltext: 'statement.' + tab + '.text'"></label>
+          <textarea
+            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
+                       textInput: text,
+                       readonly: !enabled()"
+            id="statement-reply-text"
+             rows="15"
+             class="lux">
+          </textarea>
+        </div>
+      </form>
+    </div>
+</script>

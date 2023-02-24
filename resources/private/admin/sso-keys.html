@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="single-sign-on-keys">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2>Single Sign On -avaimet</h2>
+        <div>
+          <table data-test-id="sso-table">
+            <thead>
+              <tr>
+                <th>IP</th>
+                <th>Avain</th>
+                <th>Kommentti</th>
+                <th>Tallenna</th>
+                <th>Poista</th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: $data.ssoKeys">
+              <tr>
+                <td><input type="text" data-bind="value: $data.ip, attr: {'data-test-id': 'sso-ip-' + $data.id()}" class="form-input"></td>
+                <td><input type="password" placeholder="Ei n&auml;ytet&auml;" data-bind="value: $data.key, attr: {'data-test-id': 'sso-key-' + $data.id()}" class="form-input"></td>
+                <td><input type="text" data-bind="value: $data.comment, attr: {'data-test-id': 'sso-commment-' + $data.id()}" class="form-input" ></td>
+                <td><button class="btn positive" data-bind="click: $root.update">P&auml;ivit&auml;</button></td>
+                <td class="action-column">
+                  <i class="lupicon-remove primary" data-bind="click: $root.remove, attr: {'data-test-id': 'sso-remove-' + $data.id()}"></i>
+                </td>
+              </tr>
+            </tbody>
+            <tbody data-bind="with: $data.newRow">
+              <tr>
+                <td><input type="text" data-bind="value: $data.ip, attr: {'data-test-id': 'sso-ip-new'}" class="form-input"></td>
+                <td><input type="password" data-bind="value: $data.key, attr: {'data-test-id': 'sso-key-new'}" class="form-input"></td>
+                <td><input type="text" data-bind="value: $data.comment, attr: {'data-test-id': 'sso-commment-new'}" class="form-input" ></td>
+                <td><button class="btn positive" data-bind="click: $root.add">Lis&auml;&auml;</button></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+  </body>
+</html>

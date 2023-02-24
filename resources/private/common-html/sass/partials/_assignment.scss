@@ -1,0 +1,37 @@
+div.automatic-assignments {
+  color: black;
+  margin: 0 auto;
+  margin-bottom: $marginM;
+  min-height: $grid-min-height;
+  .assignment-container {
+    border: 1px solid $gray221;
+    border-top: none;
+    padding: $marginS $marginS;
+    &:first-child {
+      border-top: 1px solid $gray221;
+    }
+    background-color: white;
+  }
+  .assignment {
+    width: 100%;
+    display: block;
+    > * {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 $marginS;
+    }
+    > .assignment-text {
+      width: 100%; // let text take all the space it can have as it's dynamic
+    }
+    div.no-wrap-whitespace button:first-child {
+      margin-right: $marginS;
+    }
+    .editor {
+      display: table-row;
+    }
+  }
+}
+
+span.assignment-target-group + span.assignment-target-group {
+  margin-top: .5em;
+}

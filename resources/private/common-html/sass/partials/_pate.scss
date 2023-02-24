@@ -1,0 +1,1113 @@
+@use 'sass:math';
+
+$pate-grid-margin: 10px;
+
+@mixin pate-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * math.div(100%, $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $pate-grid-margin;
+
+  .pate-label.required:after,
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+  input.required {
+    border-color: $input-required-border-color;
+  }
+
+  input.warning,
+  textarea.warning,
+  select.warning {
+    border-color: $negative;
+    background-color: transparentize( $negative, 0.95 );
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+
+@mixin pate-grid ($columns) {
+  .pate-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    > .row {
+      @include clearfix;
+      padding: $pate-grid-margin 0;
+      @for $i from 1 through $columns {
+       > .col-#{$i} {
+          @include pate-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
+      &.row--extra-tight {
+        padding: 0;
+        margin: 0;
+      }
+      &.row--indent {
+        padding-left: $marginL;
+        padding-top: 0;
+      }
+      &:empty {
+        display: none;
+        height: 0;
+      }
+    }
+  }
+}
+
+@for $i from 1 through 24 {
+  @include pate-grid( $i );
+}
+
+@mixin required-after {
+  content: " *";
+  color: $label-required-star-color;
+  padding-right: $marginS;
+}
+
+.pate-list {
+  > .item {
+    display: inline-block;
+  }
+  > .item + .item {
+    margin-left: $pate-grid-margin;
+  }
+  > .item.item--full {
+    display: block;
+  }
+  .item--full > * {
+    width: 100%;
+  }
+  .item--right > * {
+    float: right;
+  }
+  .item--left > * {
+    float: left;
+  }
+  .item--center {
+    text-align: center;
+    > * {
+      display: inline-block;
+    }
+  }
+}
+
+.pate-list.list--sparse {
+  > .item + .item {
+    margin-left: 4 * $pate-grid-margin;
+  }
+}
+
+// toggle-helper is defined in _inputs.scss
+ @include toggle-helper ( pate-checkbox, "e604", "e603",
+                         $wrapper-display: inline-block ){}
+
+.pate-checkbox-wrapper {
+  border: none;
+  $margin-right: $marginS;
+  $margin-bottom: $marginS;
+}
+
+
+@include toggle-helper (pate-radio, "e635", "e634", $wrapper-display: block) {}
+
+.pate-radio-wrapper {
+  border: none;
+}
+
+.pate-buttons {
+    float: right;
+    > button {
+      margin-left: $marginS;
+    }
+}
+
+$section-border: 1px solid $gray51;
+
+.pate-section {
+  div.section-header {
+    padding-left: $marginM;
+    padding-right: $marginM;
+    border: $section-border;
+    background-color: transparentize( $orange-dark, 0.6);
+    .section-title {
+      font-size: 17px;
+      font-weight: bold;
+    }
+  }
+  > .pate-buttons {
+    margin-top: $marginS;
+  }
+  div.section-body {
+    padding: {
+      left: $marginM;
+      right: $marginM;
+    }
+    border: {
+      left: $section-border;
+      right: $section-border;
+      bottom: $section-border;
+    }
+  }
+}
+
+.pate-section + .pate-section {
+  .section-header {
+    border-top: none;
+  }
+}
+
+.pate-template-help {
+  padding: .5em .5em;
+  background-color: transparentize( $orange-dark, 0.9);
+  border-left: $section-border;
+  border-right: $section-border;
+}
+
+.pate-verdict {
+  .pate-section {
+    min-height: 64px;
+  }
+}
+
+.pate--view {
+  .pate-condition-box + .pate-condition-box:before {
+    content: ", ";
+  }
+}
+
+span.formatted {
+  white-space: pre-wrap;
+  display: inline-block;
+  &.warning {
+    color: $negative;
+  }
+}
+
+span.disabled {
+  color: $gray85;
+}
+
+span.markup {
+  display: inline-block;
+  p {
+    margin-bottom: $marginS;
+    color: $gray51;
+  }
+  span.underline {
+    text-decoration-line: underline;
+  }
+  ul, ol, blockquote {
+    margin-bottom: $marginS;
+  }
+}
+
+@mixin pate-default-label() {
+  font-size: $grid-font-size;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.pate-label {
+  @include pate-default-label;
+}
+
+.pate-label.spaced {
+  display: inline-block;
+  margin-top: $marginM;
+  margin-bottom: $marginS;
+}
+
+
+// Meta status classes
+.pate--edit {}
+.pate--view {}
+
+.row-text {
+  line-height: $btn-height;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.row-text--margin {
+  margin-right: $marginL;
+}
+
+div.verdict-template {
+  span.pen-input--edit, span.pen-input--view {
+    margin-left: $marginS;
+  }
+  span.header {
+    font-size: 17px;
+    font-weight: bold;
+  }
+}
+
+span.saved-info,
+span.scheduled-for-publishing {
+  color: get-gray( 6 );
+  margin-left: $marginS;
+}
+
+.date-delta-plus {
+  padding-top: 30px;
+  text-align: left;
+  width: 100%;
+  > span {
+    font-size: 2em;
+  }
+}
+
+div.pate-template-list {
+  .checkbox-wrapper {
+    margin-top: $marginL;
+    margin-bottom: $marginL;
+  }
+  table.pate-templates-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+  }
+
+}
+
+// Settings
+
+div.pate-settings {
+  h2.pate-settings-title {
+    margin-top: 0;
+  }
+  .section-header {
+    background-color: initial;
+    border-bottom: none;
+  }
+  // .section-body {
+  //   border: none;
+  // }
+}
+
+// Reviews
+
+div.pate-settings-editor {
+  padding-top: $marginS;
+  margin-bottom: $marginL;
+  .checkbox-wrapper {
+    margin-bottom: $marginS;
+  }
+  table.pate-editor-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+    margin-top: 0;
+  }
+}
+
+// Verdicts
+
+div.pate-verdict-page {
+  //padding: 2em 2em;
+}
+
+div.pate-spin {
+  $size: 160px;
+  width: 100%;
+  text-align: center;
+  > i {
+    margin: 0;
+  }
+  > i:before {
+    display: inline-block;
+    color: $gray238;
+    @include rotate( spin );
+    font-size: $size - 4px;
+    vertical-align: middle;
+    text-align: center;
+    width: $size;
+    min-width: $size;
+    max-width: $size;
+    min-height: $size;
+    max-height: $size;
+    padding-bottom: 2px;
+  }
+
+}
+
+table.pate-verdicts-table {
+  width: 100%;
+  @include no-row-hover;
+  tr {
+    border: none;
+  }
+  td.replaced {
+    padding-left: 4em;
+  }
+  td.verdict-buttons {
+    button {
+      margin: 4px 4px;
+      margin-right: $marginL;
+    }
+  }
+}
+
+div.pate-verdict {
+  div.pate-section {
+    div.section-header {
+      background-color: initial;
+      border: none;
+      border-top: 1px solid $gray221;
+      &.pate-section--no-border {
+        border-top: none;
+      }
+      padding: 0;
+      div.verdict-buttons {
+        padding-top: $marginS;
+        position: absolute;
+        right: 0;
+        z-index: 888;
+      }
+    }
+    div.section-body {
+      border: none;
+      padding: 0;
+    }
+  }
+}
+
+// Phrases
+
+div.pate-phrases {
+  margin-top: $marginL;
+  table.pate-phrases-table {
+    @include no-row-hover;
+    margin-top: $marginL;
+    th,
+    th > div.like-btn {
+      cursor: pointer;
+      i.icon-placeholder {
+        min-width: 22px;
+      }
+    }
+    td.category {
+      white-space: nowrap;
+    }
+    td.phrase {
+      width: 100%;
+      max-width: 0;
+      text-overflow: ellipsis;
+      overflow-x: hidden;
+    }
+  }
+}
+
+div.phrase-edit-mode {
+  a:last-child,
+  label:last-child {
+    margin-left: $marginL;
+  }
+  a.required:after {
+    @include required-after;
+  }
+}
+
+// Typically used together with .markdown.
+span.phrase-preview {
+  border: 1px solid $gray187;
+  padding: 6px 12px;
+  background-color: $gray247;
+}
+
+$tab-border-color: $gray238;
+
+div.phrase-edit {
+  border: 1px solid $tab-border-color;
+  border-top: none;
+  padding: 10px 10px;
+  > * {width: 100%;}
+  > textarea {
+    min-height: 20em;
+  }
+}
+
+div.pate-tabbar {
+  display: table;
+  div.pate-tab {
+    display: table-cell;
+    border: 1px solid $tab-border-color;;
+    border-bottom: 1px solid $tab-border-color;
+    padding: 0 6px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: $gray247;
+  }
+  div.pate-tab__space {
+    display: table-cell;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid $tab-border-color;
+  }
+  div.pate-tab__divider {
+    display: table-cell;
+    border: none;
+    border-bottom: 1px solid $tab-border-color;
+    min-width: 3px;
+    max-width: 3px;
+  }
+  div.pate-tab.pate-tab--active {
+    border: 1px solid $tab-border-color;
+    border-bottom: none;
+    background-color: initial;
+  }
+}
+
+// Autocomplete
+
+button.autocomplete {
+  @include styled-input( "dropdown");
+  @include colors-and-border( "dropdown", "autocomplete");
+  padding: 0;
+}
+
+div.pate-autocomplete {
+  position: relative;
+  display: inline-block;
+  // Without border-collapse fix, height would be 41px within tables
+  // (e.g., attachment-batch-table)
+  border-collapse: initial;
+  .ac--combobox {
+    display: table;
+    width: 100%;
+    input {
+      width: 100%;
+    }
+  }
+  .ac__tabby {
+    display: table;
+    width: 100%;
+    .ac__row {
+      display: table-row;
+      width: 100%;
+      .ac__cell {
+        vertical-align: top;
+        display: table-cell;
+      }
+    }
+  }
+  .ac--selected {
+    // min-height: 40px;
+    // max-height: 40px;
+    // line-height: 40px;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: $white;
+    span {
+      font-size: $grid-font-size;
+      box-sizing: border-box;
+      //border: 1px solid $input-border-color;
+      border-right: none;
+      //min-height: 40px;
+      //max-height: 40px;
+      //height: 40px;
+      line-height: 38px;
+      padding: {
+        left: 12px;
+      }
+      min-width: 10em;
+      width: 100%;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+    i {
+      box-sizing: border-box;
+      min-width: 22px;
+      width: 32px;
+    }
+    i.ac--chevron {
+      font-weight: bold;
+      //border: 1px solid $input-border-color;
+      border-left: none;
+    }
+    i.ac--clear {
+      padding-left: 12px;
+    }
+  }
+  .ac--selected.disabled {
+    //pointer-events: none;
+    span, i {
+      background-color: $input-disabled-background-color;
+      border-color: $input-disabled-border-color;
+    }
+    i {
+      color: $input-select-disabled-icon
+    }
+  }
+  .ac--selected.required {
+    span, i {
+      border-color: $input-required-border-color;
+    }
+  }
+  .ac__menu {
+    background-color: resolve-color( "listbox", "default", "background");
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 20em;
+    width: 100%;
+    border: 1px solid resolve-color( "listbox", "default", "border" );
+    div.ac__term {
+      padding: 4px 4px 4px 4px;
+      width: 100%;
+      input {
+        font-size: $grid-font-size;
+        width: 100%;
+      }
+    }
+    ul.ac__items {
+      max-height: 10em;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      list-style-type: none;
+      padding-left: 0;
+      padding-right: 0;
+      padding-bottom: 4px;
+      li {
+        cursor: default;
+        font-size: $grid-font-size;
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        padding-top: 2px;
+        padding-right: 2px;
+        padding-left: 4px;
+        &.ac--current {
+          background-color: resolve-color( "listbox", "selected", "background");
+          color: resolve-color( "listbox", "selected", "text");
+        }
+        &.ac--group {
+          font-weight: bold;
+        }
+        &.ac--grouped {
+          padding-left: 10px;
+        }
+      }
+    }
+  }
+}
+
+// For debugging
+.pprint {
+  margin-top: $marginS;
+  padding: 4px;
+  font-size: 12px;
+  line-height: initial;
+  border: 1px solid $red-dark;
+  > .title {
+    text-align: center;
+    margin-top: -13px;
+    > h4 {
+      font-family: Consolas, "Lucida Console", monospace;
+      display: inline-block;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: $red-dark;
+      text-align: center;
+      background-color: $white;
+      padding-left: 1em;
+      padding-right: 1em;
+    }}
+  > .code {
+    font-family: Consolas, "Lucida Console", monospace;
+    white-space: pre-wrap;
+  }
+  > a {
+    @include styled-input( "danger" );
+    float: right;
+  }
+}
+
+// The default input width is browser specific and the dateinput
+// especially does not play nicely with pate-grid.
+.dateinput.dateinput--safe {
+  max-width: 90%;
+}
+
+.tabby.statements {
+  margin: 0;
+  width: initial;
+  .tabby__row.statement > .tabby__cell {
+    vertical-align: top;
+    padding-top: 0;
+    padding-bottom: 0;
+    white-space: nowrap;
+  }
+}
+
+.neighbor-states {
+  margin: 0;
+  .tabby__row.neighbor > .tabby__cell {
+    vertical-align: top;
+    padding-top: 0;
+    padding-bottom: 0;
+    &.property-id {
+      white-space: nowrap;
+    }
+  }
+}
+
+// Attachments (see also _tables.scss)
+
+.col--vertical div.add-file-div label.btn.batch--add-file {
+  display: inline-block;
+  margin-top: $marginS;
+}
+
+.pate-batch-table {
+  @include no-row-hover;
+  .td-center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
+
+  td.batch--file {
+    max-width: 40em;
+    vertical-align: middle;
+    div.batch--filedata {
+      line-height: 1.1;
+      .batch--filename {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-x: hidden;
+        display: inline-block;
+      }
+      .batch--fileinfo {
+        white-space: nowrap;
+      }
+    }
+  }
+  td.batch--progress {
+    width: 100%;
+    div {
+      width: 100%;
+      border: solid 1px get-gray( 11 );
+      height: 24px;
+      span {
+        height: 22px;
+        background-color: get-signal( "blue" );
+        display: inline-block;
+      }
+    }
+  }
+  td > div.pate-autocomplete {
+    vertical-align: middle;
+  }
+  td.batch--type {
+    min-width: 15em;
+  }
+  td.batch--contents {
+    min-width: 15em;
+  }
+  td.batch--error {
+    color: $negative;
+    min-width: 20em;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+  }
+  tfoot.batch--buttons {
+    tr {
+      border: none;
+    }
+    td {
+      padding-top: $marginS;
+      padding-right: 0;
+      text-align: right;
+      button {
+        margin-left: $marginM;
+      }
+    }
+  }
+}
+
+table.pate-attachments {
+  width: initial;
+  tr {
+    border: none;
+  }
+  @include no-row-hover;
+  .td--center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  span.uploader-info {
+    white-space: nowrap;
+  }
+}
+
+span.verdict-published {
+  font-weight: bold;
+}
+
+@mixin patenote( $vmargin, $padding) {
+  border-left: 4px solid get-signal( "blue" );
+  margin-top: $vmargin;
+  margin-bottom: $vmargin;
+  padding: $padding;
+  display: inline-block;
+}
+
+div.pate-note {
+  @include patenote( $marginS, $marginS);
+  background-color: $gray247;
+}
+
+div.error-note {
+  @include patenote( $marginS, $marginS);
+  display: block;
+  border-left: 4px solid get-signal( "red" );
+  background-color: get-red( 19 );
+}
+
+div.primary-note {
+  @include patenote( $marginS, $marginS);
+  display: block;
+  border-left: 4px solid $primary;
+  background-color: unset;
+}
+
+div.danger-note {
+  @include patenote( $marginS, $marginS);
+  display: block;
+  border-left: 4px solid get-signal( "red" );
+  background-color: unset;
+}
+
+div.pate-note-frame {
+  margin: $marginM $marginM;
+  display: block;
+}
+
+div.pate-required-fields-note {
+  @include patenote( 0, 0);
+  padding-left: $marginS;
+  margin-right: $marginS;
+  &:after {
+    @include required-after;
+  }
+}
+
+div.pate-published-note {
+  @include patenote( 0, 0);
+  padding-left: $marginS;
+  margin-right: 4em;
+}
+
+div.pate-unordered-list {
+  ul {
+    list-style-type: square;
+  }
+}
+
+// Application attachments
+
+div.pate-select-application-attachments {
+  margin-top: $marginS;
+  border: solid 1px $gray238;
+  display: inline-block;
+  padding: $marginS;
+}
+
+@include toggle-helper ( pate-attachment-group, "e604", "e603",
+                         $wrapper-display: inline-block);
+
+.pate-attachment-group-wrapper {
+  border: none;
+  .pate-attachment-group-label {
+    font-weight: bold;
+  }
+}
+
+@include toggle-helper ( pate-attachment-check, "e604", "e603",
+                         $wrapper-display: inline-block);
+
+.pate-attachment-check-wrapper {
+  border: none;
+  .pate-attachment-check-label {
+    padding-left: 36px;
+  }
+}
+
+.tabby.pate-application-attachments {
+  display: inline-block;
+  div.amount {
+    text-align: right;
+  }
+}
+
+h3.pate-published-title {
+  padding-top: $marginM;
+  margin-top: $marginM;
+  border-top: 1px solid black;
+}
+
+.pate-left-space {
+  margin-left: $marginM;
+}
+
+.pate-right-space {
+  margin-right: $marginM;
+}
+
+.pate-bottom-space {
+  margin-bottom: $marginM;
+}
+
+.pate-sandwich {
+  white-space: nowrap;
+  .sandwich--before {
+    padding-right: .5em;
+  }
+  .sandwich--after {
+    padding-left: .5em;
+  }
+  &.sandwich__view {
+    .sandwich--before {
+      padding-right: 0;
+    }
+    .sandwich--after {
+      padding-left: .25em;
+    }
+  }
+}
+
+input.date-delta {
+  max-width: 50%;
+}
+
+// Hide number input arrows in Firefox, since its implementation
+// allows changing the value without focusing the element (and thus
+// not triggering blur event).
+input[type="number"].date-delta {
+  -moz-appearance: textfield;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
+}
+
+textarea.grid-style-input.pate-textarea {
+  height: initial;
+}
+
+span.text-and-button > input {
+  line-height: $btn-height;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+tr.verdict-signatures {
+  div.tabby {
+    vertical-align: top;
+    margin-left: 1em;
+    //max-width: 30em;
+    div.tabby__cell {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .cell--right {
+      text-align: right;
+    }
+  }
+  label {
+    display: block;
+  }
+  .text-and-button {
+    > input {
+      min-width: 16em;
+    }
+    > button.negative {
+      border: resolve-border( "input", "error");
+    }
+    > button {
+      margin-left: 2px;
+    }
+  }
+  button.cancel-signing {
+    margin-left: 2em;
+  }
+}
+
+
+// Copied from/influenced by the style definitions in pdf_html.clj
+
+div.published-verdict {
+  padding: {
+    left: 2em;
+    right: 2em;
+  }
+  .section {display: table;
+            width:   100%;
+            &.border-top {
+              margin-top:  1em;
+              border-top:  1px solid black;
+              padding-top: 1em;
+            }
+            &.border-bottom {
+              margin-bottom:  1em;
+              border-bottom:  1px solid black;
+              padding-bottom: 1em;
+            }
+            &.header {
+              padding: 0;
+              border-bottom: 1px solid black;
+            }
+            >.row {
+              display: table-row;
+
+              &.border-top >.cell {
+                border-top: 1px solid black;
+              }
+              &.border-bottom >.cell {
+                border-bottom: 1px solid black;
+              }
+              &.pad-after >.cell {
+                padding-bottom: 0.5em;
+              }
+              &.pad-before >.cell {
+                padding-top: 0.5em
+              }
+              .cell {
+                display:       table-cell;
+                white-space:   pre-wrap;
+                padding-right: 1em;
+                vertical-align: top;
+
+                &:last-child {
+                  padding-right: 0;
+                }
+                &.right {
+                  text-align: right;
+                }
+                &.center {
+                  text-align: center;
+                }
+                &.bold {
+                  font-weight: bold;
+                }
+                &.nowrap {
+                  white-space: nowrap;
+                }
+                &.page-number {
+                  display: none;
+                }}
+              @for $i from 2 through 20 {
+                .cell.cell--#{$i * 5} {
+                  width: $i * 5%;
+                }
+              }
+              &.spaced {
+                .row + .row {
+                  .cell {
+                    padding-top: 0.5em;
+                  }
+                }
+              }
+            }}}
+
+// Appeals
+
+table.pate-appeals {
+  @include no-row-hover;
+  td {
+    vertical-align: top;
+  }
+  tr.pate-appeal-row.odd {
+    background-color: $gray247;
+  }
+  tr.pate-appeal-row.even {
+    background-color: $white;
+  }
+  tr.pate-appeal-row.note-or-form {
+    background-color: $white;
+  }
+  td.align--right {
+    text-align: right;
+  }
+  td.align--half {
+    width: 50%;
+  }
+  div.pate-appeal-note {
+    white-space: pre-wrap;
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+  span.empty {
+    color: get-gray( 6 );
+    font-style: italic;
+  }
+  a.pate-appeal-operation {
+    padding-right: 2em;
+    white-space: nowrap;
+  }
+  &.form-files {
+    width: initial;
+    margin-bottom: 0;
+    td {
+      vertical-align: middle;
+    }
+    tr {
+      border: none;
+    }
+  }
+}
+
+div.pate-appeal-border {
+  border: 1px solid $gray187;
+  padding: 2em 2em;
+}

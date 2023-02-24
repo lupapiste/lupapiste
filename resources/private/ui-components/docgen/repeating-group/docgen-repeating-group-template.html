@@ -1,0 +1,53 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="docgen-repeating-group-template">
+      <div data-bind="foreach: groups">
+        <div class="form-group" data-bind="attr: {id: $component.groupId + '-row-' + index}">
+
+          <div class="group-buttons">
+            <span data-bind="component: { name: 'docgen-button',
+                                         params: { id: $component.groupId + '-row-' + index + '-remove-button',
+                                                   className: 'secondary is-right',
+                                                   icon: 'lupicon-remove',
+                                                   label: 'remove',
+                                                   index: index,
+                                                   clickFn: $component.removeGroup }},
+                             visible: $component.groupsRemovable($data.schema)">
+            </span>
+          </div>
+
+          <label class="form-label form-label-group" data-bind="ltext: $component.groupLabel"></label>
+
+          <!-- ko if: $component.groupHelp -->
+          <span class="group-help-text" data-bind="ltext: $component.groupHelp"></span>
+          <!-- /ko -->
+
+          <div data-bind="component: { name: 'docgen-group',
+                                       params: { schema: $data.schema,
+                                                 path: $data.path,
+                                                 i18npath: $component.i18npath,
+                                                 applicationId: $component.applicationId,
+                                                 documentId: $component.documentId,
+                                                 authModel: $component.authModel,
+                                                 service: $component.service }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group" data-bind="visible: updatable()">
+        <span data-bind="component: { name: 'docgen-button',
+                                      params: { id: groupId + '-append-button',
+                                                className: 'positive',
+                                                icon: 'lupicon-circle-plus',
+                                                label: appendLabel,
+                                                clickFn: addGroup,
+                                                testId: schemaName + '-append-button' }}">
+        </span>
+        <span data-bind="component: { name: 'docgen-button',
+                                      params: { id: groupId + '-copy-button',
+                                                className: 'secondary',
+                                                icon: 'lupicon-circle-plus',
+                                                label: copyLabel,
+                                                clickFn: duplicateLastGroup,
+                                                testId: schemaName + '-copy-button' }}">
+        </span>
+      </div>
+</script>

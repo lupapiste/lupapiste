@@ -1,0 +1,51 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="operation-tree-template">
+  <div class="operation-tree-container">
+    <!-- ko if: error -->
+    <p class="error"
+       data-bind="text: error"></p>
+    <!-- /ko -->
+    <!-- ko ifnot: error -->
+    <h3 class="operation-tree" data-bind="text: treeTitle"> </h3>
+    <!-- ko ifnot: ready -->
+    <div class="spin-container">
+      <div class="pate-spin"><i class="lupicon-refresh"></i></div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: items -->
+    <ul class="operation-tree"
+        data-bind="foreach: items">
+      <li><button class="operation-tree-button"
+                  data-bind="click: $parent.select">
+          <span data-bind="text: $parent.operationText( $data )"></span>
+          <i class="lupicon-chevron-right"></i>
+      </button></li>
+    </ul>
+    <!-- /ko -->
+    <!-- ko if: _.isEmpty( items() ) && hasPath() -->
+    <div class="last-page"
+         data-bind="component: {name: lastPage,
+                    params: lastPageParams}"></div>
+    <!-- /ko -->
+    <!-- /ko -->
+    <div>
+      <!-- ko if: hasPath -->
+      <button class="secondary gap--r1"
+              data-bind="click: back">
+        <i class="lupicon-chevron-left"></i>
+        <span data-bind="ltext: 'tree.back'"></span>
+      </button>
+      <button class="secondary gap--r1"
+              data-bind="click: start">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'tree.start'"></span>
+      </button>
+      <!-- /ko -->
+      <!-- ko if: cancelFn -->
+      <button class="plain"
+              data-bind="click: cancelFn,
+                         ltext: 'cancel'"></button>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>

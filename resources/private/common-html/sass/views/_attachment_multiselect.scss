@@ -1,0 +1,39 @@
+div.nav-back-container {
+  overflow: auto;
+}
+
+div.attachment-multiselect-content {
+  margin-top: $marginL;
+
+  .attachment-multiselect-buttons {
+    margin-top: 10px;
+  }
+
+  tr.attachment-group-header {
+    font-weight: normal;
+  }
+}
+
+
+#stamping-component-container {
+  div.stamp-info-container {
+    overflow: auto;
+  }
+  .stamp-status {
+    margin-top: 2em;
+    span {
+      font-size: $baseline * 0.75;
+    }
+    i {
+      padding-right: $marginS;
+    }
+  }
+  form#stamp-info {
+    select {
+      display: block;
+    }
+    .invalid-margin {
+      background: #f06464;
+    }
+  }
+}

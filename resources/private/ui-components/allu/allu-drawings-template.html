@@ -1,0 +1,35 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="allu-drawings-template">
+  <div class="allu-drawings">
+    <!-- ko if: authOk() && selectedType() !== "custom" -->
+    <div class="tabby">
+      <div class="tabby__row">
+        <div class="tabby__cell tabby--100">
+          <simple-autocomplete params="value: selectedSite,
+                                       items: sites,
+                                       lCaption: 'choose'">
+          </simple-autocomplete>
+        </div>
+        <div class="tabby__cell">
+          <icon-button params="icon: 'circle-plus',
+                               enable: selectedSite,
+                               ltext: 'allu.add-site',
+                               click: selectFn"></icon-button>
+        </div>
+      </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: selectedType() !== "custom" -->
+    <drawings-table params="drawings: alluDrawings,
+                            ltitle: 'allu.locations',
+                            deleteFn: deleteFn,
+                            locateFn: locateFn"></drawings-table>
+    <!-- /ko -->
+    <!-- ko if: selectedType() !== "fixed" -->
+    <drawings-table params="drawings: userDrawings,
+                            ltitle: 'allu.user-locations',
+                            deleteFn: confirmationDeleteFn,
+                            locateFn: locateFn"></drawings-table>
+    <!-- /ko -->
+  </div>
+</script>

@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-allu-application-kind-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
+  <allu-application-kind
+    data-bind="attr: {class: schemaCss}"
+    params="value: value,
+            disable: disabled() || readonly(),
+            testId: path.join('.'),
+            applicationType: schema.applicationType">
+  </allu-application-kind>
+  <span data-bind="saveIndicator: indicator, label: false"></span>
+</script>

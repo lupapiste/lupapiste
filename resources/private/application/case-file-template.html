@@ -1,0 +1,65 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="case-file-template">
+    <div class="table case-file-table">
+    <h1 data-bind="ltext: 'caseFile.heading'"></h1>
+    <table>
+      <thead>
+      <tr>
+        <th data-bind="ltext: 'caseFile.action'"></th>
+        <th data-bind="ltext: 'caseFile.event'"></th>
+        <th data-bind="ltext: 'caseFile.documentDate'"></th>
+        <th data-bind="ltext: 'user'"></th>
+      </tr>
+      </thead>
+      <tbody data-bind="foreach: caseFile">
+      <tr>
+        <td data-bind="text: action"></td>
+        <td></td>
+        <td data-bind="dateString: start"></td>
+        <td data-bind="text: user"></td>
+      </tr>
+      <!-- ko foreach: documents -->
+      <tr>
+        <td></td>
+        <td>
+          <span class="event-title">
+            <span data-bind="if: category == 'document'"><span data-bind="ltext: 'caseFile.documentSubmitted'"></span>:</span>
+            <span data-bind="if: category == 'request-statement'"><span data-bind="ltext: 'caseFile.operation.statement.request'"></span>:</span>
+            <span data-bind="if: category == 'request-neighbor'"><span data-bind="ltext: 'caseFile.operation.neighbor.request'"></span>:</span>
+            <span data-bind="if: category == 'request-neighbor-done'"><span data-bind="ltext: 'caseFile.operation.neighbor.request.done'"></span>:</span>
+            <span data-bind="if: category == 'request-neighbor-responded'"><span data-bind="ltext: 'caseFile.operation.neighbor.responded'"></span>:</span>
+            <span data-bind="if: category == 'request-review'"><span data-bind="ltext: 'caseFile.operation.review.request'"></span>:</span>
+            <span data-bind="if: category == 'review'"><span data-bind="ltext: 'caseFile.operation.review'"></span>:</span>
+            <span data-bind="if: category == 'tos-function-change'"><span data-bind="ltext: 'caseFile.tosFunctionChange'"></span>:</span>
+            <span data-bind="if: category == 'tos-function-correction'"><span data-bind="ltext: 'caseFile.tosFunctionCorrection'"></span>:</span>
+            <span data-bind="if: category == 'handler-change'"><span data-bind="ltext: 'caseFile.handlerChange'"></span>:</span>
+            <span data-bind="if: category == 'handler-added'"><span data-bind="ltext: 'caseFile.handlerAdded'"></span>:</span>
+            <span data-bind="if: category == 'handler-removed'"><span data-bind="ltext: 'caseFile.handlerRemoved'"></span>:</span>
+          </span>
+
+          <span data-bind="if: $data.text"><span data-bind="text: text"></span></span>
+          <span data-bind="if: _.isString($data.type)"><span data-bind="ltext: type"></span></span>
+          <span data-bind="if: _.isObject($data.type)">
+            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span><span data-bind="if: contents">, <span data-bind="text: contents"></span></span>, v. <span data-bind="version: version"></span>
+          </span>
+        </td>
+        <td data-bind="dateString: ts"></td>
+        <td data-bind="text: $data.user"></td>
+      </tr>
+      <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
+  <div data-bind="if: $root.authorization.ok('store-tos-metadata-for-process')">
+      <button class="btn" data-bind="click: toggleTosMetadata, testId: 'show-tos-metadata'">
+        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                            'lupicon-chevron-small-down': showTosMetadata}"></i>
+        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+      </button>
+
+      <div class="tos-metadata-content" data-bind="slider: showTosMetadata">
+        <div data-bind="component: {name: 'metadata-editor',
+                                    params: {metadata: application.processMetadata, application: application, caseFile: true}}">
+        </div>
+      </div>
+  </div>
+</script>

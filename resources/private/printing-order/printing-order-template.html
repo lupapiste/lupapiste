@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container" role="main" id="printing-order">
+  <div id="container">
+    <div class="nav-back-container">
+      <a class="btn secondary"
+         data-bind="click: backToApplication"
+         data-test-id="back-to-application-from-printing-order">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'application.return'"></span>
+      </a>
+    </div>
+    <div class="hr"></div>
+
+    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'printing-order' && !_.isEmpty(applicationModel.id()) -->
+    <cljs-printing-order_composer params="{appId: applicationModel.id()}"></cljs-printing-order_composer>
+    <!-- /ko -->
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-string-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label,
+                    ltext: label,
+                    css: labelClasses,
+                    attr: {'for': id}"></label>
+  <span data-bind="css: schema.unit ? 'form-input-and-unit' : ''">
+    <!-- ko if: readonly -->
+    <span class="lux"
+          data-bind="text: value,
+                     css: inputClasses"></span>
+    <!-- /ko -->
+    <!-- ko ifnot: readonly -->
+    <input type="text"
+           class="lux"
+           data-bind="value: value,
+                      css: inputClasses,
+                      event: events,
+                      disable: disabled,
+                      required: required,
+                      ariaLtext: ariaLabel,
+                      ariaErrorMessage: errorMessageId,
+                      testId: testId,
+                      attr: { 'readonly': readonly,
+                      'maxlength': inputOptions.maxLength,
+                      'max': inputOptions.max,
+                      'min': inputOptions.min,
+                      id: id,
+                      placeholder: inputOptions.placeholder}"/>
+    <!-- /ko -->
+    <!-- ko if: schema.unit -->
+    <span class="form-string-unit" data-bind="ltext: 'unit.' + schema.unit"></span>
+    <!-- /ko -->
+  </span>
+  <ping aria-hidden="true"
+        params="indicator: indicator,
+                mode: 'icon'"></ping>
+</script>

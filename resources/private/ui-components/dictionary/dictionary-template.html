@@ -1,0 +1,58 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="dictionary-template">
+  <div class="dictionary">
+    <div class="tabby">
+      <div class="tabby__row dictionary--header">
+        <div class="tabby__cell"
+             data-bind="ltext: textTitle,
+                        css: textColumnCss()"></div>
+        <div class="tabby__cell"
+             data-bind="ltext: valueTitle,
+                        css: valueColumnCss()"></div>
+        <!-- ko ifnot: isFixed -->
+        <div class="tabby__cell"></div>
+        <!-- /ko -->
+      </div>
+      <!-- ko foreach: rows -->
+      <div class="tabby__row">
+        <div class="tabby__cell">
+          <!-- ko ifnot: $parent.isFixed -->
+          <input class="grid-style-input"
+                 type="text"
+                 data-bind="value: $data[$parent.textField],
+                            disable: $parent.isDisabled,
+                            testId: $parent.testId( 'text', $index())">
+          <!-- /ko -->
+          <!-- ko if: $parent.isFixed -->
+          <div class="dictionary--fixed" data-bind="text: $data[$parent.textField]"></div>
+          <!-- /ko -->
+        </div>
+        <div class="tabby__cell">
+          <input class="grid-style-input"
+                 type="text"
+                 data-bind="value: $data[$parent.valueField],
+                            disable: $parent.isDisabled,
+                            testId: $parent.testId( 'value', $index())">
+        </div>
+        <!-- ko ifnot: $parent.isFixed -->
+        <div class="tabby__cell dictionary--action"
+             data-bind="ifnot: $parent.isDisabled()">
+          <icon-button params="icon: 'remove',
+                               ltext: 'remove',
+                               buttonClass: 'secondary',
+                               testId: $parent.testId( 'remove', $index()),
+                               click: _.wrap( $data, $parent.removeRow )"></icon-button>
+        </div>
+        <!-- /ko -->
+      </div>
+      <!-- /ko -->
+    </div>
+    <!-- ko ifnot: isDisabled() || isFixed -->
+    <icon-button params="icon: 'circle-plus',
+                         testId: testId( 'add'),
+                         buttonClass: 'positive',
+                         ltext: addRowTitle,
+                         click: addRow"></icon-button>
+    <!-- /ko -->
+  </div>
+</script>

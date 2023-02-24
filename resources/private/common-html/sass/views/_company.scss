@@ -1,0 +1,23 @@
+#company-content {
+  .tab-content-container {
+    //background-color: $panel-background;
+    padding-top: $marginL;
+  }
+  .user-limit-reached {
+    color: get-signal( "red" );
+  }
+  div.form-group {
+    padding: 0 0;
+    padding-bottom: .5em;
+  }
+  h2 {
+    margin-top: 1em;
+    margin-bottom: .5em;
+  }
+  #edit-company-buttons {
+    margin-top: $marginL;
+    icon-button {
+      margin-right: 2em;
+    }
+  }
+}

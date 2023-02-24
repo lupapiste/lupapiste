@@ -1,0 +1,91 @@
+ <script type="text/x-jquery-tmpl" class="ko-template" id="statements-table-template">
+
+      <div data-bind="if: !$data.statements || _.isEmpty($data.statements())">
+          <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-statements"></p>
+      </div>
+
+      <div data-bind="if: $data.statements && !_.isEmpty($data.statements())">
+          <table class="table table-striped tablesorter" data-test-id="application-statements">
+              <thead>
+                  <tr>
+                      <th aria-hidden="true"></th>
+                      <th data-bind="ltext: 'application.statement.desc'"></th>
+                      <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                      <th data-bind="ltext: 'application.statement.requested'"></th>
+                      <th data-bind="ltext: 'application.statement.maaraaika'"></th>
+                      <th data-bind="ltext: 'application.statement.given'"></th>
+                      <th data-bind="ltext: 'application.statement.status'"></th>
+                      <th data-bind="ltext: 'application.statement.reply', visible: $component.repliesEnabled"></th>
+                      <!-- ko if: showDeleteColumn -->
+                      <th data-test-id="delete-statement-column"
+                          data-bind="ltext: 'remove'"></th>
+                      <!-- /ko -->
+                  </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.statements">
+                <tr class="statement-row"
+                    data-bind="attr: {'data-test-email':$data.person.email(),
+                               'data-message-id':$data.external && $data.external.messageId(),
+                               'data-statement-id':$data.id(), }">
+                  <td aria-hidden="true">
+                    <i class="lupicon-paperclip"
+                       data-bind="visible: $component.hasAttachment($data),
+                                  attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
+                  </td>
+                  <td>
+                    <span data-bind="if: $component.canAccessStatement($data)">
+                      <a href="#"
+                         data-bind="click: _.partial($component.openStatement, 'statement'),
+                                    text: $data.person.text,
+                                    attr: {'data-test-email' : 'open-statement-' + $data.person.email()}"></a>
+                    </span>
+                    <span data-bind="ifnot: $component.canAccessStatement($data)">
+                      <span data-bind="text: $data.person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
+                    </span>
+                  </td>
+                  <td>
+                    <span data-bind="text: $data.person.name" data-test-id="statement-giver-name"></span>
+                    <!-- ko if: $component.isExternal($data) -->
+                    <br>
+                    <span data-bind="text: $component.getExternalText($data)" data-test-id="external-received"></span>
+                    <!-- /ko -->
+                  </td>
+                  <td data-bind="dateString: $data.requested"></td>
+                  <td data-bind="dateString: $data.dueDate,
+                                 css: {negative: $component.isStatementOverDue($data)}"></td>
+                  <td data-bind="dateString: $data.given"></td>
+                  <td>
+                    <!-- ko if: $component.isGiven($data) -->
+                    <span data-bind="text: $data.status && $data.status() && loc(['statement', $data.status()]),
+                                     attr: {'data-test-id' : 'statement-status-' + $index()}" data-test-class="statement-status"></span>
+                    <!-- /ko -->
+                  </td>
+                  <td data-bind="visible: $component.repliesEnabled">
+                    <!-- ko if: $component.isReplyable($data) && !$component.showReplyState($data) -->
+                    <a href="#" data-bind="ltext: 'statement.reply.give-reply-link',
+                                           click: _.partial($component.openStatement, 'reply'),
+                                           clickBubble: false,
+                                           attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
+                    <!-- /ko -->
+                    <!-- ko if: $component.showReplyState($data) -->
+                    <span data-bind="text: loc(['statement', 'reply', 'state', $data.state()]),
+                                     attr: {'data-test-id' : 'statement-reply-state-' + $index()}"></span>
+                    <!-- /ko -->
+                  </td>
+                  <!-- ko if: $parent.showDeleteColumn -->
+                  <td align="center"
+                      data-bind="if: $parent.isRemovable( $data )">
+                    <icon-button params="click: _.partial( $component.openDeleteDialog, $data ),
+                                         iconOnly: true,
+                                         buttonClass: 'secondary no-border',
+                                         icon: 'remove',
+                                         ltext: 'statement.delete',
+                                         testId: 'delete-statement-' + $index()"></icon-button>
+                  </td>
+                  <!-- /ko -->
+                </tr>
+
+              </tbody>
+          </table>
+      </div>
+</script>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.8/yhteiset.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta/2.2.2/rakennusvalvonta.xsd"
+  xmlns:kiito="http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.kuntatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:mkos="http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:ppst="http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ymi="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymm="http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymv="http://www.kuntatietopalvelu.fi/gml/ymparisto/vesihuoltolaki">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2022-01-01</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.17880">
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>1986-05-19Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>1900-01-01Z</yht:pvm>
+          <yht:tila>ei tiedossa</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>0777-88-D</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200088-0777</yht:VRKLupatunnus>
+          <yht:saapumisPvm>1986-05-19Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:yritys>
+                <yht:nimi>Virpa Vesiväri</yht:nimi>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>Esimerkkikuja 1</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>01670</yht:postinumero>
+                    <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+              <yht:postitetaanKytkin>false</yht:postitetaanKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.00000">
+          <yht:yksilointitieto>0000000</yht:yksilointitieto>
+          <yht:alkuHetki>2013-01-01T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Manhattan</yht:kylanimi>
+                  <yht:kiinteistotunnus>000000</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="0" srsName="urn:x-ogc:def:crs:EPSG:0000">
+                  <gml:pos>0.0000000E0 0000000.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:kerrosala>0000</yht:kerrosala>
+          <yht:rakennusoikeusYhteensa>0000</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>000</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Puumäki</yht:teksti>
+              <yht:teksti xml:lang="sv">Trädbacka</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>0</yht:osoitenumero>
+            <yht:postinumero>00000</yht:postinumero>
+            <yht:postitoimipaikannimi>BONUSKAUPUNKI</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="0" srsName="urn:x-ogc:def:crs:EPSG:0000">
+          <gml:pos>0.0000000E0 0000000.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+          <rakval:rakentamisentiedot>
+            <rakval:uusiaAsuntojaLkm>0</rakval:uusiaAsuntojaLkm>
+            <rakval:uusiaRakennuksiaLkm>0</rakval:uusiaRakennuksiaLkm>
+            <rakval:tilavuus>0</rakval:tilavuus>
+          </rakval:rakentamisentiedot>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:rakennusvalvontaasianKuvaus>TESTIPAIKKOJEN TESTAUKSESTA LUOPUMINEN VIIKON SISÄÄN</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

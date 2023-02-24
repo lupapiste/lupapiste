@@ -1,0 +1,32 @@
+<div style="width: 100%;">
+<style>
+div.footer {
+  font-family: 'Mulish';
+  font-size: 7pt;
+  margin: 0 4em;
+  border-top: 1px solid black;
+  padding: 0.5em 0 0 0;
+}
+div.footer .left {
+  float: left;
+  padding: 0 0 1em 0;
+}
+div.footer .right {
+  float: right;
+  padding: 0;
+}
+div.footer a {
+  color: black;
+  text-decoration: none;
+}
+</style>
+<div class="footer">
+  <div class="left">
+    Lupapiste<br>
+    Hämeenkatu 13a<br>
+    33100 Tampere<br>
+    <a href="https://www.lupapiste.fi">www.lupapiste.fi</a>
+  </div>
+  <div class="right"><span class="pageNumber"></span> / <span class="totalPages"></span></div>
+</div>
+</div>

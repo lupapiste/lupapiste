@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container" id="new-company-user">
+    <div class="register-company-wizard">
+      <h2 data-bind="ltext: 'new-company-user.title'"></h2>
+      <div class="register-company-container">
+        <form data-bind="submit: send">
+          <div data-bind="visible: loading">
+            <p data-bind="lhtml: 'new-company-user.loading'"></p>
+          </div>
+
+          <div data-bind="visible: error">
+            <h3 data-bind="lhtml: 'new-company-user.not-found.title'"></h3>
+            <p data-bind="lhtml: error"></p>
+          </div>
+
+          <div data-bind="visible: loaded" class="form-group">
+
+            <p data-bind="lhtml: 'new-company-user.info'"></p>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'new-company-user.company-name'" class="form-label"></label>
+              <span data-bind="text: companyName" class="form-input" ></span>
+            </div>
+            <div class="form-entry">
+              <label data-bind="ltext: 'new-company-user.company-y'" class="form-label"></label>
+              <span data-bind="text: companyY" class="form-input" ></span>
+            </div>
+            <br>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'new-company-user.firstName'" class="form-label"></label>
+              <span data-bind="text: firstName" class="form-input" ></span>
+            </div>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'new-company-user.lastName'" class="form-label"></label>
+              <span data-bind="text: lastName" class="form-input" ></span>
+            </div>
+            <br>
+            <div>
+              <label data-bind="ltext: 'new-company-user.email'" class="form-label"></label>
+              <span data-bind="text: email" class="form-input" ></span>
+            </div>
+
+            <h3 data-bind="lhtml: 'new-company-user.setpw'" data-test-id="company-setpw-header"></h3>
+            <set-password params="password: password"></set-password>
+
+            <icon-button params="ltext: 'register.company.confirm-account',
+                                 icon: 'check',
+                                 buttonClass: 'positive',
+                                 click: send,
+                                 testId: 'testCompanyUserSubmitPassword',
+                                 enable: password"></icon-button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="page container" id="invite-company-user">
+    <h1 data-bind="ltext: 'invite-company-user.title'"></h1>
+
+    <div data-bind="visible: pending">
+      <p data-bind="lhtml: 'new-company-user.loading'"></p>
+    </div>
+
+    <div data-bind="visible: ok">
+      <p data-bind="ltext: 'invite-company-user.success'" data-test-id="invite-company-user-success"></p>
+      <a data-bind="ltext: 'invite-company-user.login',
+                    attr: {href: '/login/' + loc.getCurrentLanguage()}"></a>
+    </div>
+
+    <div data-bind="visible: fail">
+      <p>
+        <span data-bind="ltext: 'invite-company-user.fail'"></span>
+        <span data-bind="ltext: error"></span>
+      </p>
+    </div>
+  </section>
+
+  <section class="page container" id="accept-company-invitation">
+    <h1 data-bind="ltext: 'accept-company-invitation.title'"></h1>
+
+    <div data-bind="visible: pending">
+      <p data-bind="lhtml: 'accept-company-invitation.loading'"></p>
+    </div>
+
+    <div data-bind="visible: ok">
+      <p data-bind="ltext: 'accept-company-invitation.success'"></p>
+      <a data-bind="ltext: 'accept-company-invitation.login',
+                    attr: {href: '/login/' + loc.getCurrentLanguage()}"></a>
+    </div>
+
+    <div data-bind="visible: fail">
+      <p>
+        <span data-bind="ltext: 'accept-company-invitation.fail'"></span>
+        <span data-bind="ltext: error"></span>
+      </p>
+    </div>
+  </section>
+</body>
+</html>

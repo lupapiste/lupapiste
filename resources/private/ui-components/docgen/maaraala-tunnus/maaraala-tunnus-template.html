@@ -1,0 +1,20 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="maaraala-tunnus-template">
+      <label style="display: block;" class="form-label" data-bind="text: propertyIdLabel"></label> <!-- TODO: style -->
+      <span class="kiintun-and-maaraalatunnus">
+        <span class="form-maaraala" data-bind="propertyId: propertyId"></span>
+        <span data-bind="visible: isMaaraala">-M</span>
+        <span data-bind="component: {name: 'docgen-input',
+                         params: { schema: schema,
+                         applicationId: applicationId,
+                         documentId: documentId,
+                         path: path,
+                         isDisabled: isDisabled,
+                         authModel: authModel,
+                         template: 'docgen-inline-string-template'}},
+                         style: {visibility: visibilityState}"></span>
+      </span>
+      <div class="form-warning-message" data-bind="visible: propertyIdEnteredManually">
+        <i class="lupicon-circle-attention negative"></i>
+        <span data-bind="ltext: 'application.property-id.entered-manually'"></span>
+      </div>
+</script>

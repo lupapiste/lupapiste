@@ -1,0 +1,248 @@
+// Separate upwards bubble arrow that is stacked with
+// the bubble opening element (e.g., button).
+// Parameters:
+// $csl: name for the generated arrow class
+// $border: bubble border color
+// $bg: bubble background color
+// $size: arrow size.
+@mixin bubble-arrow( $cls, $border, $bg, $size: 15px ) {
+  .#{$cls} {
+  position: relative;
+  z-index: 100;
+}
+
+  .#{$cls}:after,
+  .#{$cls}:before {
+                    bottom: 100%;
+                    left: 50%;
+                    border: solid transparent;
+                    content: " ";
+                    height: 0;
+                    width: 0;
+                    position: absolute;
+                    pointer-events: none;
+                    z-index: 100;
+                    overflow-y: visible;
+                  }
+
+  .#{$cls}:after {
+    border-color: transparentize( $bg, 1);
+    border-bottom-color: $bg;
+    border-width: $size - 1px; //14px;
+    margin-left:  -$size + 1px; //-14px;
+  }
+  .#{$cls}:before {
+    border-color: transparentize( $border, 1);
+    border-bottom-color: $border;
+    border-width: $size; //15px;
+    margin-left:  -$size //-15px;
+  }
+
+
+  .stacked .#{$cls},
+  .stacked--inline .#{$cls} {
+    overflow-y: visible;
+    margin-top: $size + 5px; //20px;
+    margin-bottom: -1px;
+  }
+}
+
+.bubble-dialog {
+  $border-color: $grid-border-color;
+  $bg-color: white;
+  $pad: 20px;
+
+  padding: $pad $pad $pad $pad;
+  margin-bottom: $pad;
+  position: relative;
+  background: $bg-color;
+  border: 1px solid $border-color;
+
+  .autocomplete-component {
+    margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+  }
+
+  .left-buttons {
+    margin-top: $pad;
+  }
+
+  label.mandatory:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  input[type=text], input[type=email], textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 4px;
+    display: block;
+    &:focus {
+      border-color: $input-focus-border-color;
+    }
+  }
+
+  textarea {
+    min-height: 8em;
+  }
+
+  input.mandatory {
+    border-color: $input-required-border-color;
+    margin-bottom: $pad;
+  }
+
+  .error {
+    margin-top: $pad;
+    border: 1px solid red;
+    color: red;
+    padding: $pad;
+  }
+
+  table {
+    tr {
+      background-color: initial;
+      td {
+        background-color: none;
+      }
+      td.full {
+        width: 33%;
+      }
+    }
+  }
+
+  table.mandatory {
+    td {
+      border: 1px solid $input-required-border-color;
+    }
+  }
+}
+
+// Bubble dialog arrow
+@include bubble-arrow( bubble-dialog-arrow, $grid-border-color, white, 20px);
+
+.operation-bubble {
+  margin-top: 24px;
+  max-width: 50%;
+}
+
+@mixin top-nubbin ($bg, $border, $nubbin ) {
+  margin-top: 1.5 * $nubbin;
+  &:after, &:before {
+    bottom: 100%;
+  }
+  &:after {
+    border-bottom-color: $bg;
+    margin-left: -$nubbin;
+  }
+  &:before {
+    border-bottom-color: $border;
+    margin-left: -$nubbin - 1px;
+  }
+}
+
+@mixin bottom-nubbin ($bg, $border, $nubbin ) {
+  margin-bottom: 1.5 * $nubbin;
+  &:after, &:before {
+    top: 100%;
+  }
+  &:after {
+    border-top-color: $bg;
+    margin-left: -$nubbin;
+  }
+  &:before {
+    border-top-color: $border;
+    margin-left: -$nubbin - 1px;
+  }
+}
+
+@mixin right-nubbin ($bg, $border, $nubbin ) {
+  margin-right: 1.5 * $nubbin;
+  &:after, &:before {
+    left: 100%;
+  }
+  &:after {
+    border-left-color: $bg;
+    margin-bottom: -$nubbin;
+  }
+  &:before {
+    border-left-color: $border;
+    margin-bottom: -$nubbin - 1px;
+  }
+}
+
+@mixin left-nubbin ($bg, $border, $nubbin ) {
+  margin-left: 1.5 * $nubbin;
+  &:after, &:before {
+    right: 100%;
+  }
+  &:after {
+    border-right-color: $bg;
+    margin-bottom: -$nubbin;
+  }
+  &:before {
+    border-right-color: $border;
+    margin-bottom: -$nubbin - 1px;
+  }
+}
+
+// Bubble with a nubbin. The nubbin location is determined by given
+// direction ("up", "right", "down", "left").
+@mixin bubble ($bg, $border, $direction, $nubbin: 10px,
+               $left: null, $bottom: null) {
+  position: relative;
+  background-color: $bg;
+  border: 1px solid $border;
+  &:after, &:before {
+    left: $left;
+    bottom: $bottom;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    //pointer-events: none;
+  }
+
+  &:after {
+    border-color: transparentize( $bg, 1);
+    border-width: $nubbin;
+  }
+  &:before {
+    border-color: transparentize( $border, 1 );
+    border-width: $nubbin + 1px;
+  }
+  @if $direction == "up" {
+    @include top-nubbin( $bg, $border, $nubbin );
+  }
+  @if $direction == "right" {
+    @include right-nubbin( $bg, $border, $nubbin );
+  }
+  @if $direction == "down" {
+    @include bottom-nubbin( $bg, $border, $nubbin );
+  }
+  @if $direction == "left" {
+    @include left-nubbin( $bg, $border, $nubbin );
+  }
+}
+
+.test-top-bubble {
+  padding: 4em 4em;
+  @include bubble( yellow, red, "up", $left: 5%);
+}
+
+.test-right-bubble {
+  padding: 4em 4em;
+  @include bubble( white, green, "right", $bottom: 50%);
+}
+
+.test-bottom-bubble {
+  padding: 4em 4em;
+  @include bubble( lightgreen, black, "down", $left: 5%);
+}
+
+.test-left-bubble {
+  padding: 4em 4em;
+  @include bubble( orange, black, "left", $bottom: 10%);
+}

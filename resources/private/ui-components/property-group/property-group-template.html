@@ -1,0 +1,42 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="property-group-template">
+      <div class="form-group" data-bind="attr: {id: self.groupId}">
+        <div class="property-group-header">
+          <label class="form-label form-label-property-group" data-bind="ltext: groupLabel"></label>
+          <toggle params="ltext: 'kiinteisto.maaraala',
+                          value: isMaaraala,
+                          prefix: 'buttonbox',
+                          enable: isEnabled"></toggle>
+        </div>
+
+        <!-- ko if: isMaaraala -->
+        <div class="pate-note"
+             data-bind="ltext: 'rakennuspaikka.kiinteisto.maaraalaTunnus.help'"></div>
+        <!-- /ko -->
+
+        <!-- ko if: maaraalaSchema -->
+          <div class="form-entry"
+               data-bind="component: { name: 'maaraala-tunnus',
+                                       params: { schema: maaraalaSchema,
+                                                 path: maaraalaSchema.path,
+                                                 applicationId: applicationId,
+                                                 documentId: documentId,
+                                                 isMaaraala: isMaaraala,
+                                                 propertyId: propertyId(),
+                                                 propertyIdSource: propertyIdSource(),
+                                                 isDisabled: isDisabled,
+                                                 authModel: authModel }}"></div>
+
+        <!-- /ko -->
+
+        <span data-bind="foreach: otherSchemas">
+          <div class="form-entry"
+               data-bind="component: { name: uicomponent,
+                                       params: { schema: $data,
+                                                 path: path,
+                                                 applicationId: applicationId,
+                                                 documentId: documentId,
+                                                 isDisabled: $component.isDisabled,
+                                                 authModel: $component.authModel }}"></div>
+        </span>
+      </div>
+</script>

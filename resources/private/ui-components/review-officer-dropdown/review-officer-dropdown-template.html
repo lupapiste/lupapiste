@@ -1,0 +1,30 @@
+<script type="text/x-jquery-tmpl" id="review-officer-dropdown-template"
+        class="ko-template">
+  <!-- ko if: useList -->
+  <select class="dropdown form-input"
+          data-bind="testId: 'katselmus.pitaja',
+                     value: selectedValue,
+                     id: id,
+                     options: officers,
+                     optionsText: optionsText,
+                     optionsValue: optionsValue,
+                     optionsCaption: optionsCaption">
+  </select>
+  <!-- /ko -->
+  <!-- ko if: useText -->
+  <input type="text"
+         class="lux form-input"
+         data-bind="testId: 'katselmus.pitaja',
+                    id: id,
+                    attr: {placeholder: lupapisteApp.models.currentUser.displayName()},
+                    value: value"/>
+   <!-- /ko -->
+   <!-- ko if: isDisabled -->
+   <input type="text"
+          class="lux form-input"
+          data-bind="testId: 'katselmus.pitaja',
+                     id: id,
+                     disable: true,
+                     value: disabledValue" />
+   <!-- /ko -->
+</script>

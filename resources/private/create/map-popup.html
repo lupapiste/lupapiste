@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+  <section class="page container" id="map-popup-content">
+     <div class="map-select-info">
+       <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
+       <p data-bind="lhtml: 'create.search-check-prompt'"></p>
+       <div>
+         <div class="form-entry gap--t1">
+           <p class="warning-message" data-bind="visible: locationServiceUnavailable, ltext: 'create.location-service-unavailable.info'"></p>
+           <label class="lux"
+                  for="property-id-for-created-application"
+                  data-bind="ltext: 'newRequest.propertyId'"></label>
+           <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processing">
+           <input data-bind="textInput: propertyIdForCreateApplication,
+                             css: {'warn': propertyIdNotOk},
+                             attr: { 'readonly': !locationServiceUnavailable() }"
+                  id="property-id-for-created-application"
+                  data-test-id="create-property-id"
+                  type="text"
+                  class="lux gap--l05 gap--b1">
+           <p class="warning-message"
+              data-bind="visible: propertyIdNotOk, ltext: 'error.invalid-property-id'"></p>
+         </div>
+
+         <div class="form-entry gap--t1">
+           <label class="lux"
+                  for="address-for-created-application"
+                  data-bind="ltext: 'newRequest.address'"></label>
+           <input data-bind="textInput: address, css: {'ui-autocomplete-loading' : processingAddress}"
+                  data-test-id="create-address"
+                  id="address-for-created-application"
+                  type="text"
+                  class="lux gap--l05 gap--b1"/>
+         </div>
+
+         <div>
+           <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
+           <span data-bind="text: municipalityName, attr: {'data-test-value': municipalityCode}"
+                 data-test-id="create-municipality-select"></span>
+           <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processingAddress">
+         </div>
+
+         <!-- ko if: isArchiveProject() -->
+         <div class="checkbox-wrapper">
+           <input type="checkbox" data-bind="checked: refreshBuildings, attr: {'id': 'rakennukset'}"/>
+           <label class="inline-label checkbox-label" data-bind="ltext: 'newRequest.refreshBuildings', attr: {'for': 'rakennukset'}"></label>
+         </div>
+         <!-- /ko -->
+
+         <div data-bind="if: !municipalitySupported()">
+            <p class="err"
+               data-bind="ltext: 'municipality.unknown'">
+            </p>
+          </div>
+         <button data-bind="enable: addressOk() && propertyIdOk() && municipalitySupported(), click: proceed"
+                 class="positive"
+                 data-test-id="create-continue">
+           <span data-bind="ltext: 'continue'"></span>
+           <i aria-hidden="true" class="lupicon-chevron-right"></i>
+         </button>
+       </div>
+     </div>
+  </section>
+
+</body>
+</html>

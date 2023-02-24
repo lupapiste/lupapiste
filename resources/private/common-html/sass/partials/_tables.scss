@@ -1,0 +1,888 @@
+@use 'sass:math';
+
+// Default table
+//
+// Styleguide 4.1
+
+$tr-color-even:  get-gray(15);
+
+// Removes the default stylization from a table
+@mixin plain-table {
+  tr {
+    border: 0;
+
+    th, td {
+      background-color: white;
+      padding: 0;
+      border: 0;
+      height: auto;
+      min-height: auto;
+    }
+  }
+}
+
+@mixin selected-row() {
+  &.selected {
+    background-color: lighten($lp-orange, 20%);
+    color: black;
+
+    &:hover {
+      background-color: lighten($lp-orange, 25%);
+      color: black;
+    }
+  }
+}
+
+@mixin no-row-hover() {
+  tr {
+    &:hover {
+      background-color: white;
+    }
+    &:hover:nth-child(even) {
+      background: $tr-color-even;
+    }
+  }
+}
+
+// Note: the default table (without any classes) is extensively styled
+// due to legacy reasons. Use reset style to remove all the
+// default styling.
+
+table:not(.reset):not(.ui-datepicker-calendar) {
+  width: 100%;
+  margin-bottom: $marginL;
+  color: $gray51;
+
+  tbody.inspection-summary-template {
+    border: 1px solid $gray221;
+    &:nth-child(odd) {
+      background: white;
+    }
+    &:nth-child(even) {
+      background: $tr-color-even;
+    }
+    &:hover {
+      background-color: $gray238;
+      &:active {
+        background-color: $gray221;
+      }
+    }
+  }
+
+
+  th {
+    background: $gray221;
+    padding-left: $marginM;
+    padding-right: $marginM;
+    vertical-align: middle;
+  }
+
+  tr {
+    background: $white;
+    border: 1px solid $gray221;
+    &:nth-child(even) {
+      background: $tr-color-even;
+    }
+    // &:hover {
+    //   background-color: $gray238;
+    //   &:active {
+    //     background-color: $gray221;
+    //   }
+    // }
+    &.application-row {
+      &:hover {
+        background-color: resolve-color( "plain-button", "background", "enabled");
+
+        td {
+          color: $white;
+        }
+      }
+      &:active {
+        background-color: get-blue( 18 );
+      }
+    }
+    &.attachment-row {
+      cursor: pointer;
+
+      td:last-child {
+        text-align: right;
+      }
+    }
+
+    &.attachment-multiselect-row {
+      @include selected-row;
+
+      td.attachment-file-info {
+        span.attachment-file-name {
+          display: block;
+        }
+      }
+    }
+    &.inspection-summary-template-row {
+      background: inherit;
+      border: none;
+    }
+    &.not-in-printing-order {
+      color: get-gray( 6 );
+    }
+    &.warning {
+      background-color: $orange;
+    }
+  }
+
+  th, td {
+    padding:$marginS $marginM;
+    text-align:left;
+    height: $grid-min-height;
+    min-height: $grid-min-height;
+    &.btn{
+      margin-bottom: 0px;
+    }
+    .icon {
+      margin: $marginM $marginM $marginS $marginM;
+    }
+    &.actions {
+      a {
+        margin-right: $marginM;
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+table.no-stripes:not( .reset ) {
+  tr:nth-child(even) {
+    background: initial
+  }
+}
+
+th.action-column, td.action-column {
+  .icon {
+    margin: 0;
+  }
+}
+
+tbody, tfoot {
+  td {
+    vertical-align:middle;
+  }
+}
+
+
+.dataTables_wrapper {
+  position: relative;
+}
+.table-filter {
+  float: right;
+  position: absolute;
+  top: -$marginL*1.5;
+  right: 0;
+}
+
+table.tasks thead tr:first-child td {
+  padding-left: 0
+}
+
+.tasks-content {
+  margin-top: $marginM;
+  margin-bottom: $marginM;
+}
+
+table.tasks {
+  .task-state {
+    width: 22px;
+    .icon {
+      margin: $marginM $marginS $marginS $marginS;
+    }
+  }
+}
+
+// Main attachments table
+table.attachments-table {
+
+  .status-icon-text-line {
+    white-space: nowrap;
+  }
+}
+
+
+// Multiselect attachments table
+table.attachments-template-table {
+
+  .center {
+    text-align: center;
+  }
+
+  th {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  th:first-child {
+    padding-left: 16px;
+  }
+  th:last-child {
+    padding-right: 16px;
+  }
+
+  td {
+    &.attachmentState {
+      padding: 0 0 0 12px;
+      white-space: nowrap;
+
+      .icon {
+        margin: $marginS;
+        vertical-align: middle;
+      }
+    }
+    &.attachment-type-group, &.attachment-type-id, &.attachment-help-info, &.attachment-not-needed, &.attachment-file-info, &.attachment-file-changed {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+    &.attachment-group-select {
+      a {
+        font-size: $font-size-body;
+        font-weight: normal;
+        float: right;
+      }
+    }
+    &.attachment-type-group, &.attachment-type-id {
+      max-width: 150px;
+      word-wrap: break-word;
+    }
+    &.attachment-help-info {
+      max-width: 200px;
+      word-wrap: break-word;
+    }
+    &.attachment-file-info, &.attachment-file-changed {
+      max-width: 230px;
+      word-wrap: break-word;
+    }
+    &.attachment-version-info {
+      max-width: 60px;
+      word-wrap: break-word;
+    }
+  }
+}
+
+// Percentage width and px scroll height convenience
+// classes.
+@for $w from 1 through 21 {
+  .width-#{$w * 5} {
+    min-width: $w * 5%;
+    max-width: $w * 5%;
+    width:  $w * 5%;
+}
+  .scroll-#{$w * 50}px {
+    max-height: $w * 50px;
+    overflow-y: auto;
+  }
+}
+
+// Em scroll height convenience classes.
+@for $h from 1 through 101 {
+  .scroll-#{$h}em {
+    max-height: #{$h}em;
+    overflow-y: auto;
+  }
+}
+
+.header-table {
+  margin-top: 30px;
+  table {
+    margin: 0;
+  }
+}
+
+.header-table > tbody > tr > td {
+  padding: 0;
+}
+
+.header-table > tfoot > tr:hover {
+  background-color: transparent;
+}
+
+td.positive {
+  background-color: $positive;
+  color: $white;
+}
+td.negative {
+  background-color: $negative;
+  color: $white;
+}
+
+@mixin note-table($name) {
+  .#{$name}-table {
+    @extend .table;
+    td.#{$name}-table--action {
+      text-align: right;
+      a {
+        padding-right: 2em;
+      }
+    }
+    td.#{$name}-table--icons {
+      text-align: center;
+      color: $primary;
+    }
+    tr.#{$name}-table__note {
+      padding: {
+      left: 2em;
+      right: 2em;
+    }
+      &:active {
+        background-color: initial;
+      }
+      background-color: white;
+      td.#{$name}-table--extra {
+        white-space: pre-wrap;
+      }
+      td.#{$name}-table--no-extra {
+        color: $gray187;
+      }
+    }
+    div.bubble-dialog {
+      border: none;
+    }
+  }
+  @content;
+}
+
+@include note-table ( reviews ) {}
+
+table.review-buildings-table {
+  @extend .table;
+  th.review-buildings--description {
+    min-width: 20em;
+  }
+  select.dropdown {
+    min-width: 10em;
+  }
+  div.docgen-checkbox-wrapper {
+    border: none;
+    text-align: center;
+  }
+  div.docgen-checkbox-wrapper.wrapper--disabled {
+    // Initial value does not work with IE9.
+    background-color: transparent;
+  }
+}
+
+@include note-table ( company-users ) {}
+
+table.company-users-table {
+  select {
+    width: 10em;
+  }
+  tr:hover, tr:active {
+    background-color: transparent;
+  }
+}
+
+@mixin even-odd () {
+  @include no-row-hover;
+  tr.even-row,
+  tr.even-row:hover {
+    background-color: $tr-color-even;
+  }
+  tr.odd-row,
+  tr.odd-row:hover {
+    background-color: white;
+  }
+}
+
+table.table-even-odd {
+  @include even-odd;
+}
+
+table.reviews-table {
+  @include even-odd;
+}
+
+div.attachments-table-container {
+  padding: {
+  top: 1em;
+  right: .6em;
+  left: 0;
+  }
+  table.attachments-table {
+    th {
+      white-space: nowrap;
+    }
+    tr {
+      @include selected-row;
+      &.row--rejected {
+        border-bottom: none;
+        td {
+          padding-bottom: 0;
+        }
+      }
+
+      &.reject-note-row {
+        border-top: none;
+        padding: 0;
+        > td {
+          padding: {
+            top: 0;
+            left: 4px;
+            right: 0;
+            bottom: 4px;
+          }
+          min-height: 0;
+          height: auto;
+        }
+      }
+    }
+
+    margin-bottom: 1em;
+    .checkbox-wrapper {
+      border: none;
+      .checkbox-label {
+        padding-top: 2px;
+        padding-left: 0;
+        white-space: nowrap;
+      }
+    }
+    td {
+      vertical-align: top;
+    }
+    .attachments-table--wide {
+      width: 50%;
+    }
+    .attachments-table--widest {
+      width: 80%;
+    }
+    span.attachment-drawing-number {
+      display: block;
+      min-width: 4em;
+      max-width: 7em;
+      overflow-wrap: break-word;
+      margin-right: -1px;
+    }
+    input[type=text] {
+      padding-left: math.div($baseline, 4);
+      padding-right: math.div($baseline, 4);
+      width: $baseline;
+    }
+
+    #reject-edit-input {
+      width: 20em;
+    }
+
+    .amount-controls > [class^="lupicon-"]:before, [class*=" lupicon-"]:before {
+      position: relative;
+      top: math.div($baseline, 6);
+      margin: math.div($baseline, 4);
+      color: $orange-dark;
+      cursor: pointer;
+    }
+
+  }
+}
+
+table.suti-admin-table {
+  margin-top: $marginM;
+  td:nth-child(even) {
+    width: 50%;
+    input {
+      width: 90%;
+    }
+  }
+}
+
+div.suti-admin-container .serversettings--wide {
+  width: 50%;
+}
+
+.suti-display {
+  margin-bottom: $marginM;
+  .rollup-button {
+    span {
+      text-transform: uppercase;
+    }
+  }
+  .form-grid, .checkbox-wrapper {
+    border: none;
+  }
+  .suti-display--error {
+    color: $negative;
+  }
+}
+
+@mixin icon-bubble-hover($size: false, $marginleft: false, $border: $negative) {
+  .bubble-hover {
+    position: relative;
+    @if $marginleft {margin-left: $marginleft;}
+    @if $size {font-size: $size;}
+    cursor: default;
+  }
+  .bubble-hover .bubble-hover-text {
+    visibility: hidden;
+    width: 250px;
+    background-color: $white;
+    border: 2px solid $border;
+    color: $black;
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 1;
+    bottom: 100%;
+    left: 100%;
+    font-size: 15px;
+    // margin-top: -50px;
+    position: absolute;
+    white-space: pre-line;
+  }
+  .bubble-hover:hover .bubble-hover-text {
+    visibility: visible;
+  }
+}
+
+.view-with-download {
+  .download {
+    white-space: nowrap;
+    a:hover {
+      text-decoration: none;
+    }
+    a:hover > span {
+      text-decoration: underline;
+    }
+  }
+  @include icon-bubble-hover(15px, 5px);
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+  i {
+    margin-left: 1px;
+    margin-right: 1px;
+    cursor: default;
+  }
+  @include icon-bubble-hover($border: $positive);
+
+}
+
+th.full-width-column {
+  width: 100%;
+}
+
+@for $i from 1 through 10 {
+  th.column--#{$i}0 {width: 10% * $i; }
+}
+
+
+.form-table--waste {
+  @include no-row-hover;
+  table {
+    width: 100%;
+  }
+  .form-input {
+    height: initial;
+  }
+  th {
+    white-space: nowrap;
+    @media (max-width: 890px ) {
+      white-space: initial;
+    }
+  }
+  td.action-column {
+    text-align: center;
+    i {
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+  }
+  tfoot {
+    height: initial;
+    font-size: 16px;
+    tr {
+      border: none;
+    }
+    .footer-sum--total {
+      text-indent: 10px;
+      font-weight: bold;
+    }
+    .footer-sum--result {
+      //color: $gray119;
+      white-space: nowrap;
+    }
+    .footer-sum--error {
+      color: $red-dark;
+    }
+    .td-left {
+      text-indent: 10px;
+    }
+    .td-center {
+      text-align: center;
+    }
+  }
+}
+
+.form-table--waste.waste-report-table {
+  th {
+    white-space: initial;
+  }
+}
+
+select.waste-unit-select {
+  font-size: 16px;
+  width: 5em;
+}
+
+.batch-container {
+  margin-bottom: 10px;
+}
+
+.batch-password > input#batch-password {
+  width: 20em;
+}
+
+.attachment-batch-table {
+  @include no-row-hover;
+  td {
+    word-break: break-all;
+  }
+  .td-center {
+    text-align: center;
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
+  .batch-autocomplete {
+    @include autocomplete( attachment-type-autocomplete );
+  }
+  .batch-drawing {
+    max-width: 4em;
+  }
+  tfoot {
+    > tr {
+      border: none;
+      > td {
+        padding: 0;
+        word-break: normal;
+        a.link-btn {
+          white-space: normal;
+          text-align: center;
+        }
+      }
+    }
+  }
+  .fill-pin {
+    position: relative;
+    display: inline-block;
+    icon-button.fill-down {
+      position: absolute;
+      right: 0;
+      bottom: 100%;
+      z-index: 100;
+      button {
+        margin-bottom: 1px;
+        max-height: 100%;
+        height: 100%;
+      }
+    }
+  }
+  tr:nth-child(4n+3),
+  tr:nth-child(4n+4) {
+    background: $tr-color-even;
+  }
+  tr:nth-child(4n+1),
+  tr:nth-child(4n+2) {
+    background: #ffffff;
+    &:hover {
+      background: #ffffff;
+    }
+  }
+  tr.file {
+    border-bottom: 0;
+  }
+  tr.metadata {
+    border-top: 0;
+  }
+}
+
+div.handler-roles-container {
+  margin-bottom: $marginL;
+  table.handler-roles {
+    @include no-row-hover;
+    input {
+      width: 80%;
+    }
+    i.lupicon-undo {
+      cursor: pointer;
+    }
+    margin-top: $marginL;
+    margin-bottom: $marginS;
+  }
+
+  div.handler-role-warning {
+    text-align: center;
+    border: 1px solid $negative;
+    color: $negative;
+    width: 100%;
+    min-height: $btn-height;
+    line-height: $btn-height;
+    font-size: 16px;
+  }
+}
+
+.tabby {
+  display: table;
+  width: 100%;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  .tabby__row {
+    display: table-row;
+    width: 100%;
+    .tabby__cell {
+      display: table-cell;
+      padding: {
+        top: $marginS;
+        bottom: $marginS;
+        left: 2 * $marginS;
+        right: 0;
+      }
+      vertical-align: middle;
+      &:first-child {
+        padding-left: 0;
+      }
+      &.tabby--top {
+        vertical-align: top;
+      }
+    }
+  }
+}
+
+@each $i in 10, 20, 25, 33, 40, 50, 75, 80, 90, 100 {
+  .tabby--#{$i} {
+    width: $i * 1%;
+  }
+}
+
+table.company-report-table {
+  width: 45%;
+  margin-top: 10px;
+}
+
+td.users-table-actions {
+  white-space: nowrap;
+  i {
+    pointer-events: none;
+  }
+
+  span {
+    pointer-events: none;
+  }
+  button:first-child {
+    margin-right: 12px;
+  }
+}
+
+div.dictionary {
+  margin-bottom: $marginL;
+  .tabby {
+    margin-bottom: $marginL;
+  }
+  .tabby__row:nth-child(odd) {
+    background-color: $tr-color-even;
+  }
+  .tabby__row.tabby--white {
+    background-color: white;
+  }
+  .tabby > .tabby__row > .tabby__cell {
+    padding: {
+      left: 1em;
+      right: 1em;
+      top: .5em;
+      bottom: .5em;
+    }
+  }
+  .tabby__row.dictionary--header {
+    background-color: $gray221;
+    font-weight: bold;
+  }
+  .tabby__cell.dictionary--action {
+    text-align: center;
+  }
+  input {
+    width: 80%;
+  }
+  div.dictionary--fixed {
+    white-space: nowrap;
+  }
+}
+
+.huoneistot-table {
+  padding-top: $marginS;
+
+  .checkbox-label:before {
+    margin-right: 0 !important;
+  }
+
+  .readonly {
+    color: grey;
+  }
+
+  .checkbox-wrapper {
+    display: block;
+  }
+
+  .checkbox-label {
+    text-align: center;
+  }
+
+  .form-input.tiny {
+    width: $cols1 !important;
+  }
+
+  th {
+    span {
+      font-size: 13px;
+    }
+  }
+
+  .form-label {
+    display: inline;
+    width: initial;
+    vertical-align: initial;
+    font-weight: bold;
+  }
+
+  .checkbox-wrapper {
+    border: none;
+  }
+  .dropdown {
+    height: 30px;
+    min-width: 140px;
+    lineheight: default;
+  }
+
+  input[type=text] {
+    height: 26px;
+    min-width: 32px;
+  }
+
+
+  // .err {
+  //   color: red !important;
+  //   border-color: red !important;
+  //   border-width: 1px !important;
+  //   border-radius: 1px !important;
+  // }
+  // .warn {
+  //   border-color: red !important;
+  //   border-width: 1px !important;
+  //   border-radius: 0px !important;
+  // }
+  // .tip {
+  //   border-color: lighten($lp-orange, 10%);
+  //   border-width: 1px;
+  // }
+}

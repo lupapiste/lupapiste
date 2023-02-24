@@ -1,0 +1,238 @@
+/*
+ * Based OpenLayers default theme.
+ *
+ * Note: classes for some of the controls have been deleted!
+ *
+ */
+
+div.olMap {
+    z-index: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: default;
+}
+
+div.olMapViewport {
+    text-align: left;
+}
+
+div.olLayerDiv {
+   -moz-user-select: none;
+   -khtml-user-select: none;
+}
+
+.olControlScale {
+    right: 3px;
+    bottom: 3em;
+    display: block;
+    position: absolute;
+    font-size: smaller;
+}
+.olControlScaleLine {
+   display: block;
+   position: absolute;
+   left: 10px;
+   bottom: 15px;
+   font-size: xx-small;
+}
+.olControlScaleLineBottom {
+   border: solid 2px black;
+   border-bottom: none;
+   margin-top:-2px;
+   text-align: center;
+}
+.olControlScaleLineTop {
+   border: solid 2px black;
+   border-top: none;
+   text-align: center;
+}
+
+div.olControlMousePosition {
+    bottom: 0;
+    right: 3px;
+    display: block;
+    position: absolute;
+    font-family: Arial;
+    font-size: smaller;
+}
+
+.olLayerGeoRSSDescription {
+    float:left;
+    width:100%;
+    overflow:auto;
+    font-size:1.0em;
+}
+.olLayerGeoRSSClose {
+    float:right;
+    color:gray;
+    font-size:1.2em;
+    margin-right:6px;
+    font-family:sans-serif;
+}
+.olLayerGeoRSSTitle {
+    float:left;font-size:1.2em;
+}
+
+.olPopupContent {
+    padding:5px;
+    overflow: auto;
+}
+
+.olHandlerBoxZoomBox {
+    border: 2px solid red;
+    position: absolute;
+    background-color: white;
+    opacity: 0.50;
+    font-size: 1px;
+    filter: alpha(opacity=50);
+}
+.olHandlerBoxSelectFeature {
+    border: 2px solid blue;
+    position: absolute;
+    background-color: white;
+    opacity: 0.50;
+    font-size: 1px;
+    filter: alpha(opacity=50);
+}
+
+.olPopupCloseBox {
+  background: url("/lp-static/lib/openlayers2-img/close.gif") no-repeat;
+  cursor: pointer;
+}
+
+.olFramedCloudPopupContent {
+    padding: 5px;
+    overflow: hidden;
+    /* original:*/
+    /*overflow: auto;*/
+}
+
+.olControlNoSelect {
+ -moz-user-select: none;
+ -khtml-user-select: none;
+}
+
+.olImageLoadError {
+    background-color: pink;
+    opacity: 0.5;
+    filter: alpha(opacity=50); /* IE */
+}
+
+/**
+ * Cursor styles
+ */
+
+.olCursorWait {
+    cursor: wait;
+}
+.olDragDown {
+    cursor: move;
+}
+.olDrawBox {
+    cursor: crosshair;
+}
+.olControlDragFeatureOver {
+    cursor: move;
+}
+.olControlDragFeatureActive.olControlDragFeatureOver.olDragDown {
+    cursor: -moz-grabbing;
+}
+.olControlDrawFeaturePolygonActive > div:first-child,
+.olControlDrawFeaturePointActive > div:first-child,
+.olControlDrawFeatureCircleActive > div:first-child {
+    cursor: crosshair;
+}
+
+div.olControlZoom {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+div.olControlZoom a, .olControlLupapisteEditingToolbar div {
+    @include lupicon-font;
+
+    display: block;
+    height: 40px;
+    width: 40px;
+    line-height: 40px;
+
+    color: $orange-link;
+    text-align: center;
+    text-decoration: none;
+
+    border: 1px solid #ddd;
+    background-color: #fff;
+}
+div.olControlZoom a.olControlZoomOut {
+    border-top: 0;
+}
+div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
+    color: $orange-hover;
+}
+/*
+@media only screen and (max-width: 600px) {
+    div.olControlZoom a:hover {
+        background: rgba(0, 60, 136, 0.5);
+    }
+}
+*/
+
+/**
+ * Editing and navigation icons.
+ * (using the editing_tool_bar.png sprint image)
+ */
+.olControlLupapisteEditingToolbar {
+    left: 0;
+    top: 82px;
+}
+
+/* layouts */
+.olControlLupapisteEditingToolbar div {
+    line-height: 37px;
+    border-top-width: 0;
+    cursor: pointer;
+    width: 42px;
+
+}
+/* individual controls */
+.olControlLupapisteEditingToolbar .olControlNavigationItemInactive {
+  &:before{content: "\e642";}
+  border-top-width: 1px;
+}
+.olControlLupapisteEditingToolbar .olControlNavigationItemActive {
+  &:before{content: "\e642";}
+  border-top-width: 1px;
+  color:#000;
+}
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive:before {
+  content: "\e904";
+}
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemActive:before {
+  content: "\e904";
+  color:#000;
+}
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemInactive:before {
+  content: "\e63f";
+}
+.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemActive:before {
+  content: "\e63f";
+  color:#000;
+}
+.olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemInactive:before {
+  content: "\e903";
+}
+.olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemActive:before {
+  content: "\e903";
+  color:#000;
+}
+
+/**
+ * Animations
+ */
+
+.olLayerGrid .olTileImage {
+    -webkit-transition: opacity 0.2s linear;
+    -moz-transition: opacity 0.2s linear;
+    -o-transition: opacity 0.2s linear;
+    transition: opacity 0.2s linear;
+}

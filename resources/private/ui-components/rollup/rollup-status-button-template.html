@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="rollup-status-button-template">
+      <rollup-button params="open: params.open,
+                             css: statusStyles"
+                     class="rollup-status"
+                     data-bind="attr:{'data-rollup-status': status}">
+        <span class="rollup-status__text"
+              data-bind="text: $parent.text"></span>
+        <!-- ko if: $parent.extraText -->
+        <span class="rollup-status__extra-text"
+              data-bind="text: $parent.extraText"></span>
+        <!-- /ko -->
+        <span class="rollup-status__icon"
+              data-bind="ariaLtext: $parent.statusLtext">
+          <i aria-hidden="true"
+             data-bind="css: {'lupicon-check': $parent.isApproved() && $parent.showIndicators,
+                        'lupicon-circle-attention': $parent.isRejected() && $parent.showIndicators}"></i>
+        </span>
+      </rollup-button>
+</script>

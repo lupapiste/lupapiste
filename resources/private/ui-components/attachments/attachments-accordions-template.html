@@ -1,0 +1,36 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-accordions-template">
+  <div>
+    <h2 data-bind="ltext: 'application.attachments'"
+        class="attachments-title"></h2>
+    <button class="ghost right bottom-marginM"
+            data-bind="click: $data.toggleAll"
+            data-test-id="toggle-all-accordions">
+      <i class="lupicon-menu"></i>
+      <span data-bind="ltext: 'accordions.toggle-all'"></span>
+    </button>
+
+    <div id="attachments-accordions" class="attachments-accordions"
+         data-bind="foreach: $data.groups ">
+      <div data-bind="component: { name: 'attachments-listing-accordion',
+                                   params: { pageName: $parent.pageName,
+                                             path: $data.path,
+                                             upload: $parent.upload,
+                                             attachments: $parent.attachments,
+                                             options: $parent.options,
+                                             level: 0 } }"></div>
+    </div>
+    <button data-bind="visible: hasFile() && options.downloadableRows,
+                       click: $data.downloadAll"
+            class="secondary"
+            data-test-id="download-all-attachments-button">
+      <i class="lupicon-download"></i>
+      <span data-bind="text: $data.downloadAllText"></span>
+    </button>
+    <a data-bind="visible: hasFile() && options.selectableRows,
+                  ltext: areAllSelected() ? 'select-none' : 'select-all',
+                  testId: areAllSelected() ? 'select-none' : 'select-all',
+                  click: toggleSelectAll">
+    </a>
+  </div>
+</script>

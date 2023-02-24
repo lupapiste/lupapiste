@@ -1,0 +1,15 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-review-officer-dropdown-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label, ltext: label, css: labelClasses,
+                    attr: {'for': id}"></label>
+  <review-officer-dropdown
+    data-bind="attr: {class: schemaCss}"
+    params="value: value,
+            id: id,
+            disable: disabled() || readonly(),
+            testId: path.join('.'),
+            maxHeight: schema['max-height']">
+  </review-officer-dropdown>
+  <ping params="indicator: indicator, mode: 'icon'"></ping>
+</script>

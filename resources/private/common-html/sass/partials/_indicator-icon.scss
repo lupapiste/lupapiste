@@ -1,0 +1,40 @@
+#indicator-icon {
+  .indicator-icon {
+    display: none;
+    position: fixed;
+    bottom: 70px;
+    right: 70px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 24px;
+    z-index: 2002;
+    color: #fff;
+    font-size: 18px;
+    box-sizing: border-box;
+  }
+
+  .indicator-box {
+    max-width: $application-max-width;
+    margin: 0 auto;
+    padding: $marginM;
+  }
+
+  .indicator-icon.positive {
+    background-color: $positive;
+  }
+
+  .indicator-icon.negative {
+    background-color: $negative;
+
+  }
+
+  .indicator-info {
+    float: left;
+    margin-right: $marginL;
+  }
+
+  .indicator-message {
+    float: left;
+  }
+
+}

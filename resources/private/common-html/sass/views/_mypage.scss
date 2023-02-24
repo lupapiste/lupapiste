@@ -1,0 +1,35 @@
+#mypage .accordion-container {
+  .button-group {
+    margin-bottom: 20px;
+    position: relative;
+  }
+  padding:0 $marginL;
+
+  .architect-toggle, .allowDirectMarketing-toggle {
+    height: 55px;
+    margin: 9px 0;
+    display: block;
+    width: 100%;
+
+    label, input {
+     display: inline;
+     width: $cols1;
+    }
+    input {
+      margin-right: $marginM;
+      display: inline;
+    }
+  }
+  .form-group {
+    padding: $marginM;
+  }
+}
+
+#mypage-register-company, #mypage-company {
+  p {
+    // TODO not needed after all links are changed
+    a {
+      @include link;
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{:global       {:oirAuthority #{:comment/read
+                                :comment/mark-answered
+                                :comment/add}}
+ :organization {:commenter #{:comment/read
+                             :comment/set-target
+                             :comment/add}
+                :authority #{:comment/read
+                             :comment/set-target
+                             :comment/mark-answered
+                             :comment/add}}
+ ; old comment-user-authz-roles
+ :application  {:writer             #{:comment/add
+                                      :comment/read}
+                :foreman            #{:comment/add
+                                      :comment/read}
+                :statementGiver     #{:comment/add
+                                      :comment/read}
+                :financialAuthority #{:comment/add
+                                      :comment/read}}
+ :foreman-app  {:foreman #{:comment/add}}}

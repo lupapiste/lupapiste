@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="allu-application-kind-template">
+  <!-- ko ifnot: isDisabled  -->
+  <select class="dropdown"
+          data-bind="testId: testId,
+                     value: value,
+                     optionsCaption: loc('choose'),
+                     options: kinds,
+                     optionsText: kindText,
+                     valueAllowUnset: true,
+                     disable: isDisabled"></select>
+  <!-- /ko -->
+  <!-- ko if: isDisabled -->
+  <input type="text" disabled data-bind="value: kindText( value())">
+  <!-- /ko -->
+</script>

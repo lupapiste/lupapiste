@@ -1,0 +1,17 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="yes-no-select-dialog-template">
+  <div class="content">
+    <p data-bind="html: text" class="dialog-desc"></p>
+    <select data-bind="options: options,
+                       optionsText: optionsText,
+                       optionsValue: optionsValue,
+                       value: value,
+                       optionsCaption: optionsCaption,
+                       valueAllowUnset: valueAllowUnset"></select>
+  </div>
+  <div data-bind="component: {name:'yes-no-button-group',
+                              params: {yesFn: yes,
+                                       noFn:  no,
+                                       yesEnabled: yesEnabled,
+                                       yesTitle: yesTitle,
+                                       noTitle: noTitle}}"></div>
+</script>

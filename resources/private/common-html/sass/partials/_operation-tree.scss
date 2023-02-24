@@ -1,0 +1,29 @@
+operation-tree {
+  max-width: 40em;
+  //min-width: 20em;
+  width: 100%;
+
+  div.operation-tree-container {
+    margin-left: 0;
+    margin-right: 2em;
+    div.spin-container {margin-top: 1em;
+                        margin-bottom: 1em;
+                        width: 100%;}
+    h3.operation-tree {
+      background-color: resolve-color( "navi", "background", "enabled");
+      color: resolve-color( "navi", "text", "enabled" );
+      padding: .2em .2em;
+    }
+    ul.operation-tree {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 2em;}
+  }
+}
+
+div.last-page {
+  .last-page--create-buttons {
+    margin-top: 2em;
+    margin-bottom: 2em;
+  }
+}

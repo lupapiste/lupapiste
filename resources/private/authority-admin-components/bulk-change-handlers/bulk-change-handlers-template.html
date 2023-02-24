@@ -1,0 +1,81 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="bulk-change-handlers-template">
+  <h2 data-bind="ltext: 'bulk-change-handlers.title'"></h2>
+  <div class="pate-note-frame pate-note"
+       data-bind="ltext: 'bulk-change-handlers.info'"></div>
+  <div class="dictionary">
+    <div class="tabby">
+      <div class="tabby__row">
+        <div class="tabby__cell dictionary--fixed"
+             data-bind="ltext: 'bulk-change-handlers.old-handler'">
+        </div>
+        <div class="tabby__cell tabby--100">
+          <simple-autocomplete params="value: oldHandler,
+                                       items: allAuthorities,
+                                       disable: waiting,
+                                       testId: 'old-handler',
+                                       lCaption: 'choose'">
+          </simple-autocomplete>
+        </div>
+      </div>
+      <div class="tabby__row">
+        <div class="tabby__cell dictionary--fixed"
+             data-bind="ltext: 'bulk-change-handlers.new-handler'">
+        </div>
+        <div class="tabby__cell">
+          <simple-autocomplete params="value: newHandler,
+                                       items: enabledAuthorities,
+                                       disable: waiting,
+                                       testId: 'new-handler',
+                                       lCaption: 'choose'">
+          </simple-autocomplete>
+        </div>
+      </div>
+      <div class="tabby__row">
+        <div class="tabby__cell dictionary--fixed"
+             data-bind="ltext: 'bulk-change-handlers.handler-role'">
+        </div>
+        <div class="tabby__cell">
+          <select class="dropdown"
+                  data-bind="options: handlerRoles,
+                             optionsCaption: loc( 'triggers.no.handler' ),
+                             optionsText: 'text',
+                             optionsValue: 'id',
+                             disable: waiting,
+                             testId: 'handler-role',
+                             value: handlerRole">
+          </select>
+        </div>
+      </div>
+      <div class="tabby__row">
+        <div class="tabby__cell dictionary--fixed"
+             data-bind="ltext: 'bulk-change-handlers.states'">
+        </div>
+        <div class="tabby__cell"
+             data-bind="foreach: states">
+          <toggle params="value: value,
+                          text: text,
+                          testId: state,
+                          prefix: 'buttonbox',
+                          disable: $parent.waiting"
+                  class="no-border"></toggle>
+        </div>
+      </div>
+      <div class="tabby__row tabby--white">
+        <div class="tabby__cell">
+          <icon-button params="ltext: 'bulk-change-handlers.button',
+                               icon: 'hammer',
+                               enable: canExecute,
+                               waiting: waiting,
+                               testId: 'change-handler',
+                               click: changeHandler"></icon-button>
+        </div>
+        <div class="tabby__cell"
+             data-bind="if: resultText">
+          <em data-bind="text: resultText,
+                         testId: 'change-result'"></em>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

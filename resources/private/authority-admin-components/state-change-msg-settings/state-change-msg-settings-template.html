@@ -1,0 +1,74 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="state-change-msg-settings-template">
+  <div>
+    <h2 data-bind="ltext: 'auth-admin.state-change-msg-title'"></h2>
+
+    <table class="table admin-settings">
+      <thead>
+        <tr>
+          <th data-bind="ltext: 'auth-admin.state-change-url'"></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="value">
+            <input data-bind="value: url" class="grid-style-input"
+                   id="state-change-url" type="url"/>
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th colspan="4" data-bind="ltext: 'auth-admin.auth-type.title'"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="4">
+            <select name="auth-type"
+                    class="dropdown"
+                    data-bind="options: authTypes,
+                               optionsText: function(auth) {return loc('auth-admin.auth-type.' + auth);},
+                               optionsValue: authTypes,
+                               optionsCaption: loc( 'choose' ),
+                               value: authType"></select>
+          </td>
+        </tr>
+        <!-- ko if: basicAuth() -->
+        <tr>
+          <td data-bind="ltext: 'auth-admin.server.username'"></td>
+          <td>
+            <input type="text" data-bind="value: basicUser" class="form-input">
+          </td>
+          <td data-bind="ltext: 'auth-admin.server.password'"></td>
+          <td>
+            <input data-bind="value: basicPassword,
+                             attr: {placeholder:passwordPlaceholder,
+                             'data-test-id': 'basic-password'}"
+                   type="password">
+          </td>
+        </tr>
+         <!-- /ko -->
+      </tbody>
+    </table>
+
+    <h3 data-bind="ltext: 'auth-admin.header-param-title'"></h3>
+    <dictionary params="entries: headers,
+                        textProperty: 'name',
+                        textTitle: 'auth-admin.header-param-name',
+                        valueTitle: 'auth-admin.header-param-value',
+                        addTitle: 'auth-admin.add-header-param',
+                        enable: lupapisteApp.models.globalAuthModel.ok( 'set-organization-state-change-endpoint' )">
+    </dictionary>
+
+    <button class="positive"
+            data-bind="click: save">
+      <span data-bind="ltext: 'save'"></span>
+    </button>
+
+  </div>
+</script>

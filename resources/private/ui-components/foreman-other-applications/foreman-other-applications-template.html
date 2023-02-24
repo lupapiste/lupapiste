@@ -1,0 +1,71 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="foreman-other-applications-template">
+      <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
+      <table data-bind="attr: {'class': _.last(path) + '-table'}" data-test-id="foreman-other-applications-table">
+        <thead>
+          <tr>
+            <th colspan="5"></th>
+            <th colspan="4" data-bind="ltext: 'tyonjohtaja.muutHankkeet.ajantarve'"></th>
+            <th></th>
+          </tr>
+          <tr>
+            <!-- ko foreach: { data: params.schema.body, as: 'header' } -->
+            <th data-bind="visible: !header.hidden, ltext: header.i18nkey"></th>
+            <!-- /ko -->
+            <th></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: { data: autoupdatedRows, as: 'row' }">
+          <tr>
+            <!-- ko foreach: { data: $component.subSchemasAutoupdated, as: 'schema' } -->
+            <td data-bind="visible: !schema.hidden,
+                           component: { name: uicomponent,
+                                        params: { schema: $data,
+                                                  path: $parent.path.concat(name),
+                                                  i18npath: i18npath,
+                                                  applicationId: applicationId,
+                                                  documentId: documentId }}"></td>
+            <!-- /ko -->
+            <td class="action-column">
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody data-bind="visible: rows().length === 0 && autoupdatedRows().length === 0">
+          <tr>
+            <td data-bind="attr: { colspan: params.schema.body.length }, ltext: 'tyonjohtaja.noProjects'"></td>
+          </tr>
+        </tbody>
+
+        <tbody data-bind="foreach: { data: rows, as: 'row' }">
+          <tr>
+            <!-- ko foreach: { data: $component.subSchemas, as: 'schema' } -->
+              <!-- ko ifnot: schema.hidden -->
+              <td><span class="form-entry form-input"
+                        data-bind="component: { name: uicomponent,
+                                                params: { schema: $data,
+                                                          isDisabled: $component.disableWhileUpdating(),
+                                                          path: $parent.path.concat(name),
+                                                          i18npath: i18npath,
+                                                          applicationId: applicationId,
+                                                          documentId: documentId }},
+                           attr: { 'data-test-col-name': schema.name }"></span></td>
+              <!-- /ko -->
+            <!-- /ko -->
+
+            <td class="action-column">
+              <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
+                                                           visible: $component.groupsRemovable($data)"></i>
+
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="button-group" data-bind="visible: updatable()">
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-append-button',
+                                               className: 'positive',
+                                               icon: 'lupicon-circle-plus',
+                                               label: appendLabel,
+                                               clickFn: addGroup }}">
+        </span>
+</script>

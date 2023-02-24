@@ -1,0 +1,357 @@
+.application-row {
+  cursor: pointer;
+}
+
+.inforequest-row {
+  cursor: pointer;
+}
+
+.assignment-row {
+  cursor: pointer;
+}
+
+@mixin missing-type ( $left, $right ) {
+  padding: {
+    left: $left;
+    right: $right;
+  }
+  min-height: 250px;
+}
+
+.applications-empty-state {
+  margin-top: $baseline;
+  margin-right: $marginL * 3;
+  width: 100%;
+  .app-type-box {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 32%;
+    margin: {
+      left: auto;
+      right: auto;
+    }
+    vertical-align: top;
+    position: relative;
+
+  }
+
+  .app-type-button {
+    @extend .app-type-box;
+    margin-top: 0;
+    padding-bottom: 0 !important;
+  }
+
+  .missing-wrapper {
+    width: 100%;
+  }
+
+  .first-box {
+    @include missing-type( 0, $marginL );
+  }
+
+  .middle-box {
+    @include missing-type( $marginL, $marginL );
+    border-left: 1px dotted $gray153;
+    border-right: 1px dotted $gray153;
+    padding-bottom: 95px;
+  }
+
+  .last-box {
+    @include missing-type( $marginL, 0 );
+    p {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.applications-empty-state.wide {
+  .app-type-box {
+    width: 33%;
+  }
+
+  .last-box {
+    border-right: none;
+  }
+
+  .missing-prev-permit-box {
+    display: none;
+  }
+}
+
+.first-box.app-type-button,
+.middle-box.app-type-button,
+.last-box.app-type-button {
+  min-height: 0;
+}
+
+
+
+#applications-list_paginate, .dataTables_paginate {
+  display: inline-block;
+  width: $cols3;
+  float: left;
+  .paginate_button.previous {
+    margin-right: $marginM;
+  }
+}
+
+#applications-list_length {
+  width: $cols3;
+  position: absolute;
+  left: $cols3;
+  bottom: -27px;
+  select {
+    width: $cols1*1.5;
+    margin-right: $marginS;
+  }
+}
+
+.sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
+  cursor: pointer;
+  position: relative;
+}
+.sorting_asc:after, .sorting.asc:after {
+  content:"";
+  display: block;
+  position: absolute;
+  @include spite-bg;
+  background-position: 0px -3393px;
+  height:22px;
+  width: 10px;
+  top: 7px;
+  right: 2px;
+}
+.sorting_desc:after, .sorting.desc:after {
+  content:"";
+  display: block;
+  position: absolute;
+  @include spite-bg;
+  background-position: 0px -3293px;
+  height:22px;
+  width: 10px;
+  top: 7px;
+  right: 2px;
+}
+
+.dataTables_info {
+  width: $cols3;
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  bottom: $baseline * 0.5;
+}
+
+.invitations {
+  margin-bottom: $baseline;
+  .invitation {
+    display: table-row;
+    span {
+      margin-right: $marginM;
+    }
+    div {
+      padding-right: $marginL;
+      display: table-cell;
+      .btn {
+        margin: 0 $marginS 0 $marginS;
+      }
+    }
+    p {
+      max-width: $breakpoint5;
+      margin-bottom: $marginS;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    h3 {
+      max-width: $breakpoint5;
+      margin-top: $marginM;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .invitation-actions {
+      white-space: nowrap;
+    }
+  }
+}
+.filter-controls {
+  div {
+    display: inline-block;
+    margin-bottom: $marginL;
+  }
+  label {
+    display: block;
+  }
+  select {
+    display: block;
+  }
+}
+
+#applications-list, .applications-table {
+  .indicator-count {
+    padding-left: 0;
+    padding-right: 0;
+    font-weight: bold;
+    color: $primary;
+    text-align: center;
+    width: 22px;
+    padding: 3px;
+  }
+  div {padding-top: 3px; height: 30px;}
+  span.handlers {
+    display: block;
+  }
+}
+
+.clearable{
+    position:relative;
+    display: inline-block;
+    vertical-align: bottom;
+}
+.applications-search {
+    padding-right:17px; /* add space for the 'x' icon*/
+}
+.applications-search::-ms-clear {
+    display: none;
+}
+span.icon_clear {
+    position:absolute;
+    right: 12px;
+    top: 8px;
+    display:none;
+
+    /* now go with the styling */
+    cursor:pointer;
+    font: bold 1em sans-serif;
+    color:#38468F;
+    &:before {
+     color:#f52;
+    }
+}
+
+#application-structures-tab {
+
+  .version-link {
+    min-width: 40px;
+  }
+  table.model-table {
+    border-collapse: separate;
+    border-spacing: 0 0.7em;
+    width: 100%;
+
+    tr {
+      margin: 5px 5px;
+    }
+
+    thead tr:hover {
+      background: none;
+    }
+
+    tbody tr {
+      background: white;
+    }
+
+    tbody tr:hover {
+      background: snow;
+    }
+
+    td:nth-child(1),
+    th:nth-child(1) {
+      width: calc(min(30vw, 490px));
+    }
+
+    td:nth-child(2),
+    th:nth-child(2) {
+      width: 20vw;
+    }
+
+    td:nth-child(3)
+    th:nth-child(3) {
+      width: 20vw;
+    }
+
+
+    thead tr {
+      text-align: left;
+      height: 2em;
+    }
+
+    td,
+    th {
+      padding: 6px 4px 2px 8px;
+    }
+
+    a.download-model {
+      color: #0f3fd2;
+      text-decoration: none;
+      max-width: calc(min(30vw, 490px) - 4px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    @media screen and (max-width: 850px) {
+      & {
+        border: 0;
+      }
+
+      a.download-model {
+        max-width: calc(90vw - (2 * 30px));
+      }
+
+      td:nth-child(1),
+      th:nth-child(1) {
+        width: calc(90vw - (2 * 30px));
+      }
+
+      caption {
+        font-size: 1.3em;
+      }
+
+      thead {
+        border: none;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      tr {
+        display: flex;
+        width: 100%;
+        border-bottom: 3px solid #ddd;
+        display: block;
+        margin-bottom: .625em;
+      }
+
+      td {
+        border-bottom: 1px solid #ddd;
+        display: block;
+        // width: 100%;
+        width: auto !important;
+        font-size: .8em;
+        text-align: left;
+      }
+
+
+      td::before {
+        /*
+        * aria-label has no advantage, it won't be read inside a table
+        content: attr(aria-label);
+        */
+        content: attr(data-label);
+        float: left;
+        width: 40vw;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      table td:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
+}

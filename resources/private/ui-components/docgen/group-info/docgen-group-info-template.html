@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-group-info-template">
+  <div class="docgen-group-info">
+    <!-- ko if: groupTitle -->
+    <span class="group-title"
+          data-bind="text: groupTitle,
+                     css: {'help-adjacent-title': helpHtml}"></span>
+    <!-- /ko -->
+    <!-- ko if: helpHtml -->
+    <help-toggle params="html: helpHtml"></help-toggle>
+    <!-- /ko -->
+    <warnings params="warnings: warnings"></warnings>
+  </div>
+</script>

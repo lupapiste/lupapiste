@@ -1,0 +1,139 @@
+<script class="ko-template" id="review-tasks-template" type="text/x-jquery-tmpl">
+  <div class="review-tasks"
+       data-bind="visible: _.size( reviews() ),
+                  if: _.size( reviews() )">
+    <h2 data-bind="ltext: 'task-katselmus._group_label'"></h2>
+    <div class="flex--between flex--align-end flex--wrap flex--gap1">
+      <div aria-hidden="true"
+           class="flex--column gap--l2">
+        <div class="like-btn">
+          <i class="lupicon-circle-check"></i>
+          <span data-bind="ltext: 'review.state.ok'"></span>
+        </div>
+        <div class="like-btn">
+          <i class="lupicon-circle-attention"></i>
+          <span data-bind="ltext: 'review.state.not-ok'"></span>
+        </div>
+      </div>
+      <!-- ko if: hasFaulty -->
+      <toggle params="ltext: 'task.show-faulty-tasks',
+                      value: showFaulty"></toggle>
+      <!-- /ko -->
+    </div>
+
+    <table class="reviews-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+          <th data-bind="ltext: 'application.taskDisplayName'"></th>
+          <th data-bind="ltext: 'date'"></th>
+          <th data-bind="ltext: 'review.author'"></th>
+          <th data-bind="ltext: 'review.state'"></th>
+          <th data-bind="ltext: 'review.condition'"></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: reviews">
+        <tr data-test-type="task-katselmus"
+            data-bind="attr: {'data-test-index': $index},
+                       css: {'faulty': taskState === 'faulty_review_task',
+                       'even-row': !isOddRow,
+                       'odd-row': isOddRow}">
+          <td class="reviews-table--icons"
+              data-bind="if: icons.state,
+                         ariaLtext: icons.ltext">
+            <i aria-hidden="true" data-bind="css: icons.state"></i>
+          </td>
+          <td class="reviews-table--icons"
+              data-bind="if: icons.attachment">
+            <i aria-hidden="true" data-bind="css: icons.attachment"></i>
+          </td>
+          <td data-test-column="requirement">
+            <a href="#"
+               data-bind="text: name,
+                          click: $parent.openTask"></a>
+          </td>
+          <!-- ko if: assignments -->
+          <td colspan="2">
+            <a href="#"
+               data-bind="text: requested,
+                          toggleClick: showRequestDetails"></a>
+          </td>
+          <td colspan="3">
+            <!-- ko foreach: assignments -->
+            <div class="assignment-note">
+              <strong data-bind="text: name"></strong>
+              <span data-bind="ltext: 'automatic.reviews.title'"></span>
+              <button class="primary btn-small"
+                      data-bind="ltext: 'review-request.mark-done',
+                                 click: closeFn,
+                                 enable: enabled"></button>
+            </div>
+            <!-- /ko -->
+          </td>
+          <!-- /ko -->
+          <!-- ko ifnot: assignments -->
+          <td data-test-column="date" data-bind="text: date"></td>
+          <td data-test-column="name" data-bind="text: author"></td>
+          <td data-test-column="state" data-bind="if: state">
+            <span data-bind="ltext: 'task-katselmus.katselmus.tila.' + state"></span>
+          </td>
+          <td data-test-column="condition" data-bind="if: condition">
+            <span data-bind="ltext: 'yes'"></span>
+          </td>
+          <!-- ko if: requested -->
+          <td>
+            <a  data-bind="text: requested,
+                           toggleClick: showRequestDetails"></a>
+          </td>
+          <!-- /ko -->
+          <!-- ko if: canRequest -->
+          <td>
+            <button class="ghost"
+                    data-bind="ltext: 'review-request.request',
+                               click: _.wrap( id, $parent.requestForm )"></button>
+          </td>
+          <!-- /ko -->
+          <!-- ko ifnot: requested || canRequest -->
+          <td data-bind="if: notes" class="reviews-table--action">
+            <a data-bind="ltext: 'review.show-notes',
+                          attr: {'data-test-id': 'show-review-note-' + $index()},
+                          toggleClick: notesVisible"></a></td>
+          <!-- /ko -->
+          <!-- /ko -->
+        </tr>
+        <!-- ko if: showRequestForm -->
+        <tr data-bind="css: {'even-row': !isOddRow, 'odd-row': isOddRow}">
+          <td colspan="2"></td>
+          <td colspan="6">
+            <review-request params="taskId: id"></review-request>
+          </td>
+        </tr>
+        <!-- /ko -->
+        <!-- ko if: showRequestDetails -->
+        <tr data-bind="css: {'even-row': !isOddRow, 'odd-row': isOddRow}">
+          <td colspan="2"></td>
+          <td colspan="6">
+            <review-request-summary params="taskId: id,
+                                            details: requestDetails">
+            </review-request-summary>
+          </td>
+        </tr>
+        <!-- /ko -->
+
+        <!-- ko if: notesVisible -->
+        <tr class="reviews-table__note"
+            data-bind="css: {'even-row': !isOddRow, 'odd-row': isOddRow}">
+          <td colspan="2"></td>
+          <td colspan="6"
+              class="reviews-table--extra"
+              data-bind="text: notes,
+                         attr: {'data-test-id': 'review-note-' + $index()}"></td>
+        </tr>
+        <!-- /ko -->
+      </tbody>
+    </table>
+    <div data-test-id="reviews-table-end"></div>
+  </div>
+</script>

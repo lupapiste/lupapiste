@@ -1,0 +1,26 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-property-list-template">
+  <div class="application-map-container">
+    <div data-bind="if: _.isObject(window.MapLibrary)">
+      <div data-bind="react: {component: lupapalvelu.ui.property_list.view.property_list,
+                              props:     {'map-props':
+                                            {applicationID:  $root.applicationId,
+                                             mapRefresher:   'extended',
+                                             center:         $root.location,
+                                             requestHeaders: {'x-anti-forgery-token': $.cookie('anti-csrf-token')}},
+                                          'create-fn':         $data.createRow,
+                                          'update-fn':         $data.updateField,
+                                          'delete-fn':         $data.deleteRow,
+                                          'fetch-fns':         $data.fetchFns,
+                                          'property-id-field': $data.propertyIdField,
+                                          validation:          $data.validationResults,
+                                          title:               $data.title,
+                                          fields:              $root.schema.body,
+                                          properties:          $data.properties,
+                                          path:                $root.path,
+                                          loc:                 window.loc,
+                                          disabled:            $data.disabled
+                                         }}"></div>
+    </div>
+  </div>
+</script>

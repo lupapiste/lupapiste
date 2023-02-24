@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <nav style="visibility: hidden;">
+      <div class="nav-top">
+        <div class="nav-box">
+          <div class="brand">
+            <a href="#"
+               data-bind="click: $data.openStartPage"
+               aria-label="Lupapiste"
+               class="logo lupapiste-logo narrow-hide"></a>
+            <a href="#"
+               data-bind="click: $data.openStartPage"
+               aria-label="Lupapiste"
+               class="logo lupapiste-logo-no-text narrow-show"></a>
+          </div>
+          <div id="language-select" class="header-dropdown"
+               data-bind="css: {active: $root.languageMenuVisible}">
+            <button class="navi" href="#" data-test-id="language-link"
+                    aria-haspopup="true"
+                    data-bind="click: $root.toggleLanguageMenu,
+                               clickBubble: false,
+                               ariaText: $root.currentLanguage">
+              <span data-bind="text: $root.currentLanguage"
+                    aria-hidden="true"
+                    style="text-transform: uppercase"></span>
+              <i aria-hidden="true"
+                 data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
+                            'lupicon-chevron-small-up': $root.languageMenuVisible}"></i>
+            </button>
+            <ul class="language-menu"
+                role="menu"
+                data-bind="ariaExpanded: $root.languageMenuVisible,
+                           foreach: $root.languages">
+              <li>
+                <button role="menuitem"
+                        class="navi"
+                        data-bind="click: $root.changeLanguage,
+                                   text: $data.toUpperCase() + ' - ' + loc( $data )"></button>
+              </li>
+            </ul>
+          </div>
+          <div class="header-menu" data-bind="if: $root.showUserMenu" data-test-id="user-nav-menu">
+            <!-- ko if: lupapisteApp.models.currentUser.isBiller -->
+            <a href="/invoicing"
+               class="btn navi wide-icon-only"
+               data-bind="attr: {title: loc('billing')}">
+              <i class="lupicon-shopping-cart"></i>
+              <span data-bind="ltext: 'billing'"></span>
+            </a>
+
+            <!-- /ko -->
+            <!-- ko if: lupapisteApp.models.globalAuthModel.ok( "applications-search" ) -->
+            <button class="navi wide-icon-only"
+                    data-bind="click: $data.openStartPage, attr: {title: loc('navigation.dashboard')}">
+              <i class="lupicon-documents"></i>
+              <span data-bind="ltext: 'navigation.dashboard'"></span>
+            </button>
+            <!-- /ko -->
+            <!-- ko if: $root.showCalendarMenuOptions -->
+            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+            <a href="#!/mycalendar"
+               class="btn navi wide-icon-only"
+               data-bind="attr: {'title': loc('Ajanvaraus')}">
+              <i class="lupicon-calendar"></i>
+              <span data-bind="ltext: 'Ajanvaraus'"></span>
+            </a>
+            <!-- /ko -->
+            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+            <a href="#!/new-appointment"
+               class="btn navi wide-icon-only"
+               data-bind="attr: {'title': loc('Ajanvaraus')}">
+              <i class="lupicon-calendar"></i>
+              <span data-bind="ltext: 'Ajanvaraus'"></span>
+            </a>
+            <!-- /ko -->
+            <!-- /ko -->
+
+            <!-- ko if: $root.showArchiveMenuOptions -->
+            <a class="btn navi wide-icon-only"
+               data-bind="attr: {href: loc('document.search.url'), title: loc('Dokumentit')}">
+              <i class="lupicon-archives"></i>
+              <span data-bind="ltext: 'Dokumentit'"></span>
+            </a>
+
+            <a class="btn navi wide-icon-only"
+               data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
+              <i class="lupicon-tree-path"></i>
+              <span data-bind="ltext: 'Tiedonohjaus'"></span>
+            </a>
+            <!-- /ko -->
+
+            <side-panel-control></side-panel-control>
+
+            <a class="btn navi wide-icon-only"
+               data-bind="attr: {href: loc( 'path.guide' ), title: loc('help')}" target="_blank">
+              <i class="lupicon-circle-question"></i>
+              <span data-bind="ltext: 'help'"></span>
+            </a>
+
+            <div id="header-user-dropdown" class="header-dropdown"
+                 data-bind="with: $root.userMenu,
+                            css: {active:  $root.userMenu.open()}">
+              <button class="navi"
+                      aria-haspopup="true"
+                      data-bind="click: $data.toggleOpen,
+                                 clickBubble: false,
+                                 ariaText: lupapisteApp.models.currentUser.displayName">
+                <i class="lupicon-user" aria-hidden="true"></i>
+                <span id="user-name"
+                      aria-hidden="true"
+                      data-bind="text: lupapisteApp.models.currentUser.displayName,
+                                 attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
+                <i aria-hidden="true"
+                   data-bind="css: {'lupicon-chevron-small-down': !$data.open(),
+                              'lupicon-chevron-small-up': $data.open()}"></i>
+              </button>
+              <ul role="menu"
+                  class="user-dropdown"
+                  data-bind="ariaExpanded: $root.userMenu.open()">
+                <!-- ko if: $data.alternativeUsagePurposes().length > 0 -->
+                <!-- ko foreach: $data.alternativeUsagePurposes() -->
+                <li>
+                  <a class="btn navi" data-bind="attr: {href: $data.href}">
+                    <i aria-hidden="true"
+                       data-bind="css: $data.iconClasses"></i>
+                    <span data-bind="ltext: $data.name"></span>
+                  </a>
+                  <!-- ko if: $data.orgName -->
+                  <span class="usage-purpose-org-name pad--l4 pad--r2"
+                        data-bind="text: $data.orgName"></span>
+                  <!-- /ko -->
+                </li>
+                <!-- /ko -->
+                <li class="spacer"></li>
+                <!-- /ko -->
+                <li>
+                  <a class="btn navi"
+                     id="mypage-button" href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
+                    <i aria-hidden="true" class="lupicon-user"></i>
+                    <span data-bind="ltext: 'mypage.title'"></span>
+                  </a>
+                </li>
+                <!-- ko ifnot: $root.externalApiInUse -->
+                <li>
+                  <a class="btn navi"
+                     id="logout-button"
+                     data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
+                    <i aria-hidden="true" class="lupicon-log-out"></i>
+                    <span data-bind="ltext: 'logout'"></span>
+                  </a>
+                </li>
+                <!-- /ko -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="notification">
+      <div class="nav-notification" id="sys-notification" style="display: none"
+           data-bind="visible: $data.screenMessage && screenMessage.messages && screenMessage.messages().length > 0,
+                      click: $root.screenMessage ? $root.screenMessage.hide : _.noop">
+        <div class="nav-box" data-bind="if: $data.screenMessage">
+          <div class="notification-info"><span class="lupicon-circle-info"></span></div>
+          <div class="notification-list">
+            <ul class="wrapper" data-bind="foreach: $data.screenMessage.messages">
+              <li data-test-id="test-screenmessage">
+                <span data-bind="html: $data[loc.getCurrentLanguage()],
+                                 clickBubble: false,
+                                 click: _.constant( true )"></span>
+              </li>
+            </ul>
+          </div>
+          <div class="notification-close">
+            <span class="lupicon-remove" data-bind="click: $root.screenMessage.hide"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

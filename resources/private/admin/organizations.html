@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organizations">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2>Organisaatiot</h2>
+
+        <label for="organisation-search">Haku</label>
+        <div class="organizations-search">
+          <input type="text" class="textinput textinput--big"
+                 data-bind="textInput: organizationsModel.searchTerm, hasFocus: organizationsModel.searchFocus"
+                 data-test-id="organization-search-term">
+          <button class="function"
+                  data-bind="click: organizationsModel.showAll"
+                  data-test-id="organization-show-all">
+            <i class="lupicon-document-list"></i>
+            <span>N&auml;yt&auml; kaikki</span></button>
+          <button class="function"
+                  data-bind="click: organizationsModel.createOrganization"
+                  data-test-id="organization-create">
+            <i class="lupicon-circle-plus"></i>
+            <span>Lis&auml;&auml; organisaatio</span></button>
+        </div>
+        <p data-bind="text: organizationsModel.countText"
+           data-test-id="organization-result-count"></p>
+        <!-- ko if: organizationsModel.newOrganization() -->
+        <div class="container">
+          <h3>Uusi organisaatio</h3>
+          <form data-bind="with: organizationsModel.newOrganization">
+            <div>
+              <input type="text" name="newOrganizationId" placeholder="Tunnus (735-R)" data-bind="value: $data.orgId" class="form-input">
+            </div>
+            <div>
+              <input type="text" name="newOrganizationMunicipality" placeholder="Kuntanumero (753)" data-bind="value: $data.municipality" class="form-input">
+            </div>
+            <div>
+              <input type="text" name="newOrganizationName" placeholder="Nimi (Sipoon rakennusvalvonta)" data-bind="value: $data.name" class="form-input long">
+            </div>
+            <div>
+              <input type="text" name="newOrganizationPermitTypes" placeholder="Lupatyypit (R P YA KT MM YI YL VVVL MAL YM)" data-bind="value: $data.permitTypes" class="form-input long">
+            </div>
+
+            <div class="form-buttons">
+              <button data-bind="click: $data.save, ltext: 'save', enable: $data.isValid()"
+                      data-test-id="save-new-organization"
+                      class="positive btn"></button>
+
+              <button data-bind="click: $parent.organizationsModel.cancelCreate, ltext: 'cancel'"
+                      data-test-id="cancel-new-organization"
+                      class="secondary btn"></button>
+            </div>
+          </form>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: !_.isUndefined(organizationsModel.searchTerm()) && _.some( organizationsModel.selectedOrganizations()) -->
+        <table data-test-id="organizations-table"
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'organization.id'"></th>
+              <th data-bind="ltext: 'organization.name'"></th>
+              <th data-bind="ltext: 'login.with-rights'"></th>
+              <th data-bind="ltext: 'organization.archive.header'"></th>
+              <!-- ko if: features.enabled('ajanvaraus') -->
+              <th data-bind="ltext: 'organization.calendars.enabled'"></th>
+              <!-- /ko -->
+              <th data-bind="ltext: 'admin.municipality'"></th>
+              <th data-bind="ltext: 'organization.scope'"></th>
+              <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
+              <th data-bind="ltext: 'organization.application.enabled'"></th>
+              <th data-bind="ltext: 'organization.openinforequest.email'"></th>
+              <th data-bind="ltext: 'organization.krysp.ftp-user'"></th>
+              <th data-bind="ltext: 'bulletin'"></th>
+              <th>Palvelu avataan</th>
+              <th data-bind="ltext: 'admin.organization.backend-system'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: { data: organizationsModel.selectedOrganizations, as: 'organization' }">
+            <!-- ko foreach: scope -->
+            <tr>
+              <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
+                <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
+                <td data-bind="attr: {'rowspan': organization.scope.length}">
+                  <a data-bind="text: organization.name[loc.getCurrentLanguage()], click: _.partial(pageutil.openPage, 'organization', $parent.id), attr: {'data-test-id': 'edit-organization-' + organization.id}" href="#"></a>
+                </td>
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
+                </td>
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  <span data-bind="text: $data['permanent-archive-enabled'] ? 'arkisto' : '-'"></span><br>
+                  <span data-bind="text: $data['digitizer-tools-enabled'] ? 'digitointi' : '-'"></span>
+                </td>
+                <!-- ko if: features.enabled('ajanvaraus') -->
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  <span data-bind="text: $data['calendars-enabled'] ? 'varaus' : '-'"></span>
+                </td>
+                <!-- /ko -->
+              <!-- /ko -->
+              <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
+              <td><abbr data-bind="text: $data.permitType, attr: {'title':loc($data.permitType)}"></abbr></td>
+              <td data-bind="text: $data['inforequest-enabled'] ? ($data['open-inforequest'] ? 'vain avoin neuvonta': 'neuvonta') : '-', attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['new-application-enabled'] ? 'hakemukset' : '-', attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: util.getIn(organization, ['krysp', $data.permitType, 'ftpUser']), attr: {'data-test-id': 'krysp-ftpUser-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="with: $data['bulletins']">
+                <!-- ko if: enabled -->
+                <abbr data-bind="attr: {'title': $root.organizationsModel.julkipanoTemplate($data)}">
+                  Julkipano päällä
+                </abbr>
+                <!-- /ko -->
+              </td>
+              <td data-bind="dateString: $data['opening']"></td>
+              <td data-bind="ltext: 'backend-system.' + util.getIn(organization, ['krysp', $data['permitType'], 'backend-system'], 'unknown')"></td>
+            </tr>
+            <!-- /ko -->
+          </tbody>
+        </table>
+<!-- /ko -->
+
+
+        <p><a href="/api/raw/admin-attachment-report-csv">Lataa liitetiedostoraportti</a></p>
+      </div>
+
+      <div id="dialog-login-as" class="window autosized" data-bind="with: loginAsModel">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'loginframe.login'"></p>
+          <p class="dialog-close close lupicon-remove"></p>
+        </div>
+
+        <div class="dialog-content">
+          <form>
+            <div>
+              <input type="radio" name="role" value="authority" data-bind="checked: role" id="impersonateAuthority">
+              <label data-bind="ltext: 'authority'" for="impersonateAuthority"></label>
+            </div>
+            <div>
+              <input type="radio" name="role" value="authorityAdmin" data-bind="checked: role" id="impersonateAuthorityAdmin">
+              <label data-bind="ltext: 'authorityAdmin'" for="impersonateAuthorityAdmin"></label>
+            </div>
+            <div>
+              <input type="radio" name="role" value="archivist" data-bind="checked: role" id="impersonateArchvist">
+              <label data-bind="ltext: 'authorityrole.archivist'" for="impersonateArchvist"></label>
+            </div>
+            <div>
+              <input type="radio" name="role" value="biller" data-bind="checked: role" id="impersonateBiller">
+              <label data-bind="ltext: 'authorityrole.biller'" for="impersonateBiller"></label>
+            </div>
+
+            <div>
+              <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
+              <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" autofocus="autofocus">
+            </div>
+
+            <button data-bind="click: login, ltext: 'loginframe.login'"
+                    data-test-id="submit-login-as"
+                    class="positive btn-dialog" ></button>
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+          </form>
+        </div>
+      </div>
+
+
+    </section>
+  </body>
+</html>

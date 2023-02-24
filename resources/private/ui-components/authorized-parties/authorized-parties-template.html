@@ -1,0 +1,91 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="authorized-parties-template">
+        <div class="authorized-parties">
+          <div  class="parties-list">
+            <table class="auth-table">
+              <thead>
+                <th data-bind="ltext: 'application.authorizedParties'"></th>
+                <th data-bind="ltext: 'application-guests.inviter'"></th>
+                <th data-bind="ltext: 'guest-authority.description'"></th>
+                <th data-bind="ltext: 'authorized.invite'"></th>
+                <th data-bind="ltext: 'application-guests.notifications'"></th>
+                <th data-bind="ltext: 'application.edit-auth'"></th>
+              </thead>
+              <tbody data-bind="foreach: authorizedParties">
+                <tr class="party">
+                  <td data-bind="text: $parent.nameInformation( $data )"></td>
+                  <td data-bind="text: $parent.inviterInformation( $data )"></td>
+                  <td data-bind="text: $parent.roleInformation( $data )"> </td>
+                  <td>
+                    <span data-bind="if: $data.invite">
+                      <span class="user-invite" data-bind="ltext: 'invited'"></span>
+                    </span>
+                    <span data-bind="if: !$data.invite">
+                      <span data-bind="visible: $data.inviteAccepted, ltext: 'accepted'"></span>
+                      <!-- ko if: $data.inviteAccepted -->
+                      <span data-test-id="invite-accepted-span"
+                            data-bind="dateTimeString: $data.inviteAccepted"></span>
+                      <!-- /ko -->
+                    </span>
+                  </td>
+                  <td data-bind="if: $parent.showSubscriptionStatus($data)">
+                    <button class="ghost"
+                       data-test-id="subscribeNotifications"
+                       data-bind="visible: !$parent.subscriptionOn( $data ),
+                                  click: $root.application.subscribeNotifications,
+                                  ltext: 'subscribeNotifications'"></button>
+                    <button class="ghost"
+                       data-test-id="unsubscribeNotifications"
+                       data-bind="visible: $parent.subscriptionOn( $data ),
+                                  click: $root.application.unsubscribeNotifications,
+                                  ltext: 'unsubscribeNotifications'"></button>
+                  </td>
+                  <td>
+                    <button class="secondary"
+                            data-bind="visible: $parent.showRemove( $data ),
+                                       click: $parent.removeAuth,
+                                       attr: {'data-test-id':'remove-auth-' + $data.username()},
+                                       ltext: 'remove'"></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="stacked--inline">
+              <button class="positive"
+                      data-test-id="application-invite-person"
+                      data-bind="visible: showInviteButton,
+                                 click: togglePersonBubble">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'personSelector.invite'"></span>
+              </button>
+              <div class="bubble-dialog-arrow"
+                   data-bind="visible: personBubble"></div>
+            </div>
+
+            <div class="stacked--inline">
+              <button class="positive"
+                      data-test-id="application-invite-company"
+                      data-bind="visible: showInviteButton,
+                                 click: toggleCompanyBubble">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'company-invite.invite'"></span>
+              </button>
+              <div class="bubble-dialog-arrow"
+                   data-bind="visible: companyBubble"></div>
+            </div>
+            <div data-bind="component: {name: 'person-invite',
+                            params: {
+                            bubbleVisible: personBubble,
+                            error: error,
+                            waiting: waiting
+                            }}"></div>
+            <div data-bind="component: {name: 'company-invite-bubble',
+                            params: {
+                            bubbleVisible: companyBubble,
+                            error: error,
+                            waiting: waiting
+                            }}"></div>
+
+          </div>
+        </div>
+</script>

@@ -1,0 +1,35 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="add-link-permit-template">
+  <div class="edit-handlers-container application_summary_info" data-test-id="add-link-permit-card">
+    <icon-button params="icon: 'chevron-start',
+                         buttonClass: 'secondary',
+                         ltext: 'application.return',
+                         click: back,
+                         testId: 'add-link-permit-back'"></icon-button>
+    <h1 data-bind="ltext: 'linkPermit.' + prefix() + 'dialog.header'"></h1>
+    <p data-bind="lhtml: 'linkPermit.' + prefix() + 'dialog.helpParagraph'"></p>
+
+    <link-permit-autocomplete params="list: appMatches,
+                                      value: selectedLinkPermit,
+                                      disable: _.trim(kuntalupatunnus()),
+                                      prefix: prefix()"></link-permit-autocomplete>
+
+    <!-- ko ifnot: permitTypeIstKT -->
+    <div data-bind="ltext: 'linkPermit.dialog.or'" class="or top-marginM"></div>
+    <label class="form-label" data-bind ="ltext: 'linkPermit.dialog.kuntalupatunnus'"></label>
+    <input data-bind="textInput: kuntalupatunnus,
+                      disable: selectedLinkPermit"
+           data-test-id="application-kuntalupatunnus-for-link-permit"
+           type="text" maxlength="100" class="form-input grid-style-input">
+    <!-- /ko -->
+    <br />
+
+    <div data-bind="if: errorMessage" >
+      <div data-bind="ltext: errorMessage" class="context-error"></div>
+    </div>
+    <icon-button params="icon: 'check',
+                         buttonClass: 'positive',
+                         click: addLinkPermit, enable: ok, disable: processing,
+                         ltext: 'done',
+                         testId: 'button-link-permit-dialog-add'"></icon-button>
+  </div>
+</script>

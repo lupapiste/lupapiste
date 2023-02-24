@@ -1,0 +1,418 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-huoneistot-table-template">
+
+  <group-approval params="docModel: docModel,
+                          subSchema: schema,
+                          path: path,
+                          model: model"></group-approval>
+  <div class="form-table huoneistot-table">
+
+    <div>
+      <span class="group-title" data-bind="ltext: groupLabel"></span>
+      <span data-bind="component: { name: 'help-toggle', params: {html: tableHelp } }"></span>
+    </div>
+
+
+    <!-- ko if: groupHelp -->
+    <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+    <!-- /ko -->
+    <!-- ko if:  isChangePermit -->
+    <br>
+    <div class="pate-note"
+         id="change-permit-premises-note"
+         data-test-id="change-permit-premises-note"
+         data-bind="ltext: 'application.change-permit.premises.note'"></div>
+    <!-- /ko -->
+    <!-- ko if: showPremisesUpload  -->
+    <br>
+    <span class="group-help-text">
+      <span data-bind="ltext: 'huoneistot.premisesInfoText'"></span>
+      <a data-bind="attr: {href: premisesExcelDownloadUrl($parent.applicationId) }, ltext: 'huoneistot.premisesDownloadLink'"></a>
+    </span>
+
+    <!-- /ko -->
+
+    <!-- ko if: highlightChanges  -->
+    <div class="show-changes-container">
+      <p class="legend-description" data-bind="ltext: 'huoneistot.legendDescription'"></p>
+      <div class="legend-item">
+        <span class="legend-rectangle legend-new"></span>
+        <p class="legend-text" data-bind="ltext: 'huoneistot.legendNew'"></p>
+      </div>
+      <div class="legend-item">
+        <span class="legend-rectangle legend-edited"></span>
+        <p class="legend-text" data-bind="ltext: 'huoneistot.legendEdit'"></p>
+      </div>
+      <div class="legend-item">
+        <span class="legend-rectangle legend-removed"></span>
+        <p class="legend-text" data-bind="ltext: 'huoneistot.legendRemoval'"></p>
+      </div>
+
+      <div class="checkbox-wrapper show-changes">
+        <input type="checkbox"
+               class="always-enabled"
+               data-bind="id: documentId + '-show-changed-only',
+                          checked: showChangesOnly,
+                          ariaText: showChangesOnlyLabel">
+        <label class="inline-label checkbox-label show-changes-label"
+               data-bind="for: documentId + '-show-changed-only',
+                          text: showChangesOnlyLabel"
+               aria-hidden="true"></label>
+      </div>
+    </div>
+    <!-- /ko -->
+
+    <table data-bind="attr: {'class': _.last(path) + '-table'}">
+      <thead>
+        <tr>
+          <!-- ko if: isChangePermit -->
+          <th>
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     aria-labelledby="change-permit-premises-note"
+                     data-bind="checked: allInChanges,
+                                disabled: disabled,
+                                attr: {id: documentId + '-all-in-changes'}">
+              <label data-bind="attr: {'for': documentId + '-all-in-changes'}"
+                     class="checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </th>
+          <!-- /ko -->
+          <!-- ko foreach: columnHeaders -->
+          <th>
+            <span data-bind="ltext: name"></span>
+            <span data-bind="visible: required , css: {readonly: readonly}">*</span>
+          </th>
+          <!-- /ko -->
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: rows">
+        <!-- ko if: _.size( warnings() ) && isVisible() -->
+        <tr>
+          <td data-bind="attr: {colspan: $parent.columnCount}">
+            <warnings class="table-warnings"
+                      params="warnings: warnings"></warnings>
+          </td>
+        </tr>
+        <!-- /ko -->
+        <tr data-bind="attr: {'data-test-id': $component.schemaName + '-row-' + index},
+                       css: rowCss,
+                       visible: isVisible">
+
+          <!-- ko if: $parent.isChangePermit-->
+          <td data-bind="if: showInChanges">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     aria-labelledby="change-permit-premises-note"
+                     data-bind="checked: inChanges,
+                                disable: $parent.disabled,
+                                attr: {'id': $component.documentId + '-huoneistot-muutos-' + $index()}">
+              <label data-bind="attr: {'for': $component.documentId + '-huoneistot-muutos-' + $index()}" class="inline-label checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </td>
+          <!-- /ko -->
+
+          <!--Huoneiston tyyppi-->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <select data-bind="options: huoneistoTyyppi.schema.body,
+                                   ariaLtext: $parent.columnName( huoneistoTyyppi.schema ),
+                                   optionsText: $component.selectOptionsTextFn('huoneistoTyyppi'),
+                                   optionsValue: 'name',
+                                   css: huoneistoTyyppi.info.css(),
+                                   event: huoneistoTyyppi.info.events,
+                                   value: huoneistoTyyppi.model,
+                                   valueAllowUnset: true,
+                                   optionsCaption: loc('selectone'),
+                                   disable: fieldsDisabled,
+                                   testId: huoneistoTyyppi.path.join('.'),
+                                   attr: {'title': huoneistoTyyppi.info.tooltip}"
+                        class="dropdown form-input short">
+                </select>
+              </div>
+            </span>
+          </td>
+
+          <!--Porras-->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <input type="text",
+                       data-bind="textInput: porras.model,
+                                  ariaLtext: $parent.columnName( porras.schema ),
+                                  disable: fieldsDisabled,
+                                  css: porras.info.css(),
+                                  event: porras.info.events,
+                                  ariaErrorMessage: porras.info.errorMessageId,
+                                  testId: porras.path.join('.'),
+                                  attr: { 'maxlength': porras.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                          'title': porras.info.tooltip}"
+                       class="lux form-input tiny"/>
+              </div>
+            </span>
+          </td>
+
+          <!--Huoneiston numero-->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <input type="text"
+                       data-bind="textInput: huoneistonumero.model,
+                                  disable: fieldsDisabled,
+                                  ariaLtext: $parent.columnName( huoneistonumero.schema ),
+                                  css: huoneistonumero.info.css(),
+                                  event: huoneistonumero.info.events,
+                                  testId: huoneistonumero.path.join('.'),
+                                  ariaErrorMessage: huoneistonumero.info.errorMessageId,
+                                  attr: { 'maxlength': huoneistonumero.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                          'title': huoneistonumero.info.tooltip}"
+                       class="lux form-input tiny"/>
+              </div>
+            </span>
+          </td>
+
+          <!-- Jakokirjain -->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <input type="text"
+                       data-bind="textInput: jakokirjain.model,
+                                  disable: fieldsDisabled,
+                                  ariaLtext: $parent.columnName( jakokirjain.schema ),
+                                  css: jakokirjain.info.css(),
+                                  event: jakokirjain.info.events,
+                                  testId: jakokirjain.path.join('.'),
+                                  ariaErrorMessage: jakokirjain.info.errorMessageId,
+                                  attr: { 'maxlength': jakokirjain.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                          'title': jakokirjain.info.tooltip}"
+                       class="lux form-input tiny"/>
+              </div>
+            </span>
+          </td>
+
+          <!--Huoneluku-->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <input type="text"
+                       data-bind="textInput: huoneluku.model,
+                                  ariaLtext: $parent.columnName( huoneluku.schema ),
+                                  disable: fieldsDisabled,
+                                  css: huoneluku.info.css(),
+                                  event: huoneluku.info.events,
+                                  testId: huoneluku.path.join('.'),
+                                  ariaErrorMessage: huoneluku.info.errorMessageId,
+                                  attr: { 'maxlength': huoneluku.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                          'max': huoneluku.schema.max,
+                                          'min': huoneluku.schema.min,
+                                          'title': huoneluku.info.tooltip}"
+                       class="lux form-input tiny"/>
+              </div>
+            </span>
+          </td>
+
+          <!--Keittion tyyppi-->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <select data-bind="options: keittionTyyppi.schema.body,
+                                   optionsText: $component.selectOptionsTextFn('keittionTyyppi'),
+                                   optionsValue: 'name',
+                                   ariaLtext: $parent.columnName( keittionTyyppi.schema ),
+                                   value: keittionTyyppi.model,
+                                   valueAllowUnset: true,
+                                   optionsCaption: loc('selectone'),
+                                   disable: fieldsDisabled,
+                                   css: keittionTyyppi.info.css(),
+                                   event: keittionTyyppi.info.events,
+                                   testId: keittionTyyppi.path.join('.'),
+                                   attr: {'title': keittionTyyppi.info.tooltip}"
+                        class="dropdown form-input short">
+                </select>
+              </div>
+            </span>
+          </td>
+
+          <!--Huoneistoala m2-->
+          <td class="content-column">
+            <span class="form-entry form-input">
+              <div class="inline">
+                <input type="text"
+                       data-bind="textInput: huoneistoala.model,
+                                  disable: fieldsDisabled,
+                                  ariaLtext: $parent.columnName( huoneistoala.schema ),
+                                  css: huoneistoala.info.css(),
+                                  event: huoneistoala.info.events,
+                                  testId: huoneistoala.path.join('.'),
+                                  ariaErrorMessage: huoneistoala.info.errorMessageId,
+                                  attr: { 'maxlength': huoneistoala.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                          'max': huoneistoala.schema.max,
+                                          'min': huoneistoala.schema.min,
+                                          'title': huoneistoala.info.tooltip}"
+                       class="lux form-input tiny"/>
+              </div>
+            </span>
+          </td>
+
+          <!--WC-->
+          <td class="content-column">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="checked: WCKytkin.model,
+                                disable: fieldsDisabled,
+                                ariaLtext: $parent.columnName( WCKytkin.schema ),
+                                css: WCKytkin.info.css(),
+                                event: WCKytkin.info.events,
+                                attr: {'id': $component.documentId + '-huoneistot-wc-' + $index()}">
+              <label data-bind="attr: {'for': $component.documentId + '-huoneistot-wc-' + $index()}"
+                     class="inline-label checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </td>
+
+          <!--Amme/Suihku-->
+          <td class="content-column">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="checked: ammeTaiSuihkuKytkin.model,
+                                disable: fieldsDisabled,
+                                ariaLtext: $parent.columnName( ammeTaiSuihkuKytkin.schema ),
+                                css: ammeTaiSuihkuKytkin.info.css(),
+                                event: ammeTaiSuihkuKytkin.info.events,
+                                attr: {'id': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}">
+              <label data-bind="attr: {'for': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}"
+                     class="inline-label checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </td>
+
+          <!--Sauna-->
+          <td class="content-column">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="checked: saunaKytkin.model,
+                                disable: fieldsDisabled,
+                                ariaLtext: $parent.columnName( saunaKytkin.schema ),
+                                css: saunaKytkin.info.css(),
+                                event: saunaKytkin.info.events,
+                                attr: {'id': $component.documentId + '-huoneistot-sauna-' + $index()}">
+              <label data-bind="attr: {'for': $component.documentId + '-huoneistot-sauna-' + $index()}"
+                     class="inline-label checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </td>
+
+          <!--Parveke/terassi-->
+          <td class="content-column">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="checked: parvekeTaiTerassiKytkin.model,
+                                disable: fieldsDisabled,
+                                ariaLtext: $parent.columnName( parvekeTaiTerassiKytkin.schema ),
+                                css: parvekeTaiTerassiKytkin.info.css(),
+                                event: parvekeTaiTerassiKytkin.info.events,
+                                attr: {'id': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}">
+              <label data-bind="attr: {'for': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}"
+                     class="inline-label checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </td>
+
+          <!--Lammin vesi-->
+          <td class="content-column">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="checked: lamminvesiKytkin.model,
+                                disable: fieldsDisabled,
+                                ariaLtext: $parent.columnName( lamminvesiKytkin.schema ),
+                                css: lamminvesiKytkin.info.css(),
+                                event: lamminvesiKytkin.info.events,
+                                attr: {'id': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}">
+              <label data-bind="attr: {'for': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}"
+                     class="inline-label checkbox-label"
+                     aria-hidden="true"></label>
+            </div>
+          </td>
+
+          <!--Pysyva huoneistotunnus-->
+          <td class="content-column">
+            <span data-bind="text: pysyvaHuoneistotunnus.model,
+                             testId: pysyvaHuoneistotunnus.path.join('.')">
+            </span>
+          </td>
+
+          <!--Poista-->
+          <td class="action-column">
+
+            <!-- ko if: isNewRow -->
+            <button class="secondary icon-only no-border"
+                    data-bind="click: $component.removeGroup,
+                               ariaLtext: 'remove',
+                               visible: $component.groupsRemovable($data.schema, true),
+                               attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+            </button>
+            <!-- /ko -->
+
+            <!-- ko ifnot: notInChanges -->
+            <!-- ko if: isEditedRow() || isToBeRemoved() -->
+            <button class="secondary icon-only no-border"
+                    data-bind="click: $component.revertChanges,
+                               ariaLtext: 'undo',
+                               visible: $component.groupsRemovable($data.schema, true),
+                               attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}">
+              <i aria-hidden="true" class="lupicon-undo"></i>
+            </button>
+            <!-- /ko -->
+
+            <!-- Previously accepted premise without new changes -->
+            <!-- ko if: (!isNewRow() && !isEditedRow() && !isToBeRemoved()) -->
+            <button class="secondary icon-only no-border"
+                    data-bind="click: $component.markAsRemoved,
+                               ariaLtext: 'remove',
+                               visible: $component.groupsRemovable($data.schema, true),
+                               attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+            </button>
+            <!-- /ko -->
+            <!-- /ko -->
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="button-group">
+    <span data-bind="visible: updatable(),
+                     component: { name: 'docgen-button',
+                     params: { id: $component.documentId + '-huoneistot-append-button',
+                     className: 'positive',
+                     icon: 'lupicon-circle-plus',
+                     label: appendLabel,
+                     clickFn: addNewRow,
+                     testId: schemaName + '-append-button' }}">
+    </span>
+    <!-- ko ifnot: tableIsEmpty -->
+    <span data-bind="visible: updatable(),
+                     component: { name: 'docgen-button',
+                     params: { id: $component.documentId + '-huoneistot-copy-button',
+                     className: 'secondary',
+                     icon: 'lupicon-copy',
+                     label: copyLabel,
+                     clickFn: copyLastRow,
+                     testId: schemaName + '-copy-button' }}">
+    </span>
+    <!-- /ko -->
+    <!-- ko if: showPremisesUpload -->
+    <span data-bind="component: { name: 'premises-upload',
+                     params: { id: $component.documentId + '-huoneistot-upload-button',
+                     applicationId: $parent.applicationId,
+                     doc: $component.documentId,
+                     testId: schemaName + '-upload-button' }}">
+    </span>
+    <!-- /ko -->
+  </div>
+</script>

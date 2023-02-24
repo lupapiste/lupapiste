@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="assignments">
+    <div class="container container--authority-admin"
+         data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+      <section>
+        <div data-bind="component: {name: 'handler-roles',
+                        params: {organization: organization}}"></div>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.assignments.title'"></h2>
+        <toggle params="value: organization.assignmentsEnabled,
+                        ltext: 'auth-admin.assignments.enabled',
+                        prefix: 'blockbox',
+                        testId: 'assignments-enabled',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-assignments')"></toggle>
+      </section>
+
+      <!-- ko if: organization.assignmentsEnabled -->
+      <section>
+        <cljs-auth-admin_automatic-assignments_view
+          params="automaticAssignments: automatic">
+        </cljs-auth-admin_automatic-assignments_view>
+      </section>
+      <!-- /ko -->
+    </div>
+  </section>
+</body>
+</html>

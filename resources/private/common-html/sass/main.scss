@@ -1,0 +1,297 @@
+/*!
+ * ajk's Hot New Template
+ * Made by ajk (ajk.fi)
+ */
+
+@import "partials/_frameless";
+
+// Style wide settings
+
+// Mixins
+@mixin image-replacement {
+  text-indent:100%;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+@mixin clearfix() {
+  *zoom: 1;
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+@mixin disable-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin spite-bg {
+  background-image: url('/lp-static/img/icons-sprite-1.18.png');
+  background-repeat: no-repeat;
+}
+
+/* RESET
+----------------------------------------------------------------------------- */
+@import "partials/_reset";
+
+/*------------------------------------*\
+    ELEMENTS
+\*------------------------------------*/
+
+/* BASE
+----------------------------------------------------------------------------- */
+@import "partials/_base";
+
+/* RUDIMENTARY RESPONSIVENESS SUPPORT
+----------------------------------------------------------------------------- */
+@import "partials/_responsive";
+
+
+/* THEME (colors and others)
+----------------------------------------------------------------------------- */
+@import "partials/_colors";
+@import "partials/_svg";
+@import "partials/_theme";
+
+/* TYPOGRAPHY
+----------------------------------------------------------------------------- */
+@import "partials/_typography";
+
+/* ABSTRACTIONS (OOCSS style)
+----------------------------------------------------------------------------- */
+@import "partials/_abstractions";
+
+/* LINKS */
+@import "partials/_links";
+
+/*------------------------------------*\
+    OBJECTS
+\*------------------------------------*/
+
+/* ICONS & ANIMATIONS
+----------------------------------------------------------------------------- */
+@import "partials/_icons";
+@import "partials/_lupicons";
+
+/* NAV
+----------------------------------------------------------------------------- */
+@import "partials/_header";
+@import "partials/_sidebar";
+@import "partials/_footer";
+
+/*------------------------------------*\
+    COMPONENTS
+\*------------------------------------*/
+
+@import "partials/_grid";
+@import "partials/_bubble";
+@import "partials/_buttons";
+@import "partials/_inputs";
+@import "partials/_forms";
+@import "partials/_tables";
+@import "partials/_tabs";
+@import "partials/_conversation";
+@import "partials/_modal";
+@import "partials/_map";
+@import "partials/_errors";
+@import "partials/_help";
+@import "partials/_autocomplete";
+@import "partials/_operation-tree";
+@import "partials/_accordion";
+@import "partials/_assignment";
+@import "partials/_datepicker";
+@import "partials/_screenmessage";
+@import "partials/_selectm";
+@import "partials/_user_notification";
+@import "partials/_tags_editor";
+@import "partials/_metadata-editor";
+@import "partials/_archival-summary";
+@import "partials/_applications_search";
+@import "partials/_indicator";
+@import "partials/_indicator-icon";
+@import "partials/_guests";
+@import "partials/_case-file";
+@import "partials/_rollup";
+@import "partials/_stamp_editor";
+@import "partials/_pate";
+@import "partials/_printing_order";
+@import "partials/_ribbons";
+@import "partials/_allu";
+@import "partials/_notice-forms";
+@import "partials/_location";
+@import "partials/_change_permit";
+@import "partials/_login";
+
+/* VIEWS
+------------------------------------------------------------------------------*/
+@import "views/_welcome";
+@import "views/_applications";
+@import "views/_application";
+@import "views/_create_application";
+@import "views/_attachment";
+@import "views/_statement";
+@import "views/_mypage";
+@import "views/_admin";
+@import "views/_authority_admin";
+@import "views/_neighbor";
+@import "views/_register";
+@import "views/_login_frame";
+@import "views/_verdict";
+@import "views/_side_panel";
+@import "views/_company";
+@import "views/_attachment_multiselect";
+@import "views/_openlayers2";
+@import "views/_calendars";
+@import "views/_attachments";
+@import "views/_inspection_summary";
+@import "views/_oauth";
+@import "views/_invoices";
+@import "views/_price_catalogue";
+@import "views/_building_extra_attributes";
+@import "views/_filebank";
+
+// Bulletins depend on application
+@import "partials/_bulletins";
+@import "partials/_bulletin-comments";
+
+/*------------------------------------*\
+    OTHER
+\*------------------------------------*/
+
+/* ALL THE REST
+----------------------------------------------------------------------------- */
+@import "partials/_other";
+@import "partials/_todo";
+
+/*
+  Lupapalvelu CSS:
+*/
+
+.page {
+  display: none;
+  margin-top: $header-height + 2px; // header-dropdown mixin has padding top+bottom 1px
+}
+
+// missing key in localization
+.ltext-error {
+  color: lighten(orange,25%) !important;
+  font-weight:bold !important;
+  text-shadow: 0px 1px 0 black !important;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.inline {
+  display: inline;
+}
+
+.template {
+  display: none;
+}
+
+#main-nav-bar {
+  display:  none;
+}
+
+.inert-table tbody tr:hover td,
+.inert-table tbody tr:hover th {
+  background-color: #ffffff;
+}
+
+#application table input {
+  margin: 0px;
+}
+
+.droparea {
+  width: 150px;
+  height: 100px;
+  border: 5px #858585 dotted;
+  color: #858585;
+  border-radius: 15px;
+  vertical-align: middle;
+  text-align: center;
+  display: table-cell;
+}
+
+.droparea-hover {
+  border-color: #101010;
+  color: #101010;
+}
+
+/* basic styles*/
+
+
+.table{
+    font-size: 16px;
+    line-height: $baseline;
+}
+
+.strong, b, dt {
+  font-weight: bold;
+}
+
+/* map zoomer fix */
+div.pzbDiv {
+    right: 8px;
+    top: 10px;
+}
+
+.dev-debug {
+  z-index: 3000;
+  width: 170px;
+  position: fixed !important;
+  right: 8px;
+  bottom: 8px;
+  background-color: white;
+  padding: 8px;
+  border: 1px solid black;
+  box-shadow: 3px 4px 7px;
+  font-size: 0.8em;
+  color: $primary-text;
+}
+
+footer .dev-debug p {
+  color: $primary-text;
+  margin-bottom: 4px;
+  a {
+    display: block;
+  }
+}
+
+#ui-datepicker-div {
+  display: none;
+}
+
+/* find address and poi list: */
+.create-find {
+  font-size: 12px;
+  .type {
+    color: #555;
+    font-style: italic;
+    &:before { content: " ("; }
+    &:after { content: ")"; }
+  }
+  .number {
+    &:before { content: " "; }
+  }
+  .municipality {
+    color: #555;
+    &:before { content: ", "; }
+  }
+}

@@ -1,0 +1,150 @@
+{:global        {:applicant    #{:application/create}
+                 :authority    #{:application/create}
+                 :oirAuthority #{:application/read
+                                 :application/show-inforequest-markers
+                                 :application/cancel
+                                 :application/cancel-in-restricted-states
+                                 :application/mark-everything-seen
+                                 :application/change-location-in-pre-verdict-states
+                                 :application/edit-drawings}}
+ :organization  {:authorityAdmin #{}
+                 :authority      #{:application/read
+                                   :application/mark-everything-seen
+                                   :application/invite
+                                   :application/submit
+                                   :application/request-for-complement
+                                   :application/cancel
+                                   :application/cancel-in-restricted-states
+                                   :application/undo-cancelation
+                                   :application/edit
+                                   :application/edit-auth
+                                   :application/edit-drawings
+                                   :application/edit-operation
+                                   :application/edit-permit-subtype
+                                   :application/edit-permit-subtype-in-ya
+                                   :application/edit-restricting-auth
+                                   :application/edit-warranty-dates
+                                   :application/edit-handlers
+                                   :application/remove-link-permit
+                                   :application/remove-extra-link-permit
+                                   :application/access-backend
+                                   :application/show-authorities
+                                   :application/show-commenters
+                                   :application/show-foreman-history
+                                   :application/show-inforequest-markers
+                                   :application/change-location-in-pre-verdict-states
+                                   :application/change-location-in-post-verdict-states
+                                   :application/change-state
+                                   :application/set-urgency
+                                   :application/set-authority-notice
+                                   :application/read-authority-notice
+                                   :application/create-change-permit
+                                   :application/create-continuation-period-permit
+                                   :application/create-encumbrance-permit
+                                   :application/create-foreman-app-in-pre-verdict-states
+                                   :application/create-foreman-app-in-post-verdict-states
+                                   :application/convert-to-application
+                                   :application/check-final-archiving-state
+                                   :application/check-within-archiving-time-limit
+                                   :application/remove-buildings-in-archiving-projects
+                                   :application/manage-inspection-summary
+                                   :application/edit-inspection-summary
+                                   :application/get-user-contact-info
+                                   :application/confirm-foreman-termination
+                                   :application/remove-foreman-from-list
+                                   :application/create-property-formation-app
+                                   :application/set-operation-location
+                                   :application/inform-construction-state
+                                   :application/edit-construction-state
+                                   :application/filebank-read
+                                   :application/filebank-edit}
+                 :approver       #{:application/approve}
+                 :commenter      #{:application/read
+                                   :application/mark-everything-seen
+                                   :application/show-foreman-history
+                                   :application/read-authority-notice}
+                 :reader         #{:application/read
+                                   :application/mark-everything-seen
+                                   :application/show-foreman-history
+                                   :application/read-authority-notice
+                                   :application/filebank-read}
+                 :biller         #{:application/read
+                                   :application/mark-everything-seen
+                                   :application/show-foreman-history
+                                   :application/read-authority-notice
+                                   :application/filebank-read}
+                 :tos-publisher  #{:application/mark-everything-seen}
+                 :tos-editor     #{:application/edit-tos-function
+                                   :application/mark-everything-seen}
+                 :archivist      #{:application/archive
+                                   :application/mark-everything-seen
+                                   :application/check-final-archiving-state
+                                   :application/check-within-archiving-time-limit}
+                 :digitizer      #{:application/show-authorities
+                                   :application/mark-everything-seen}
+                 :statementGiver #{:application/set-urgency
+                                   :application/set-authority-notice
+                                   :application/read-authority-notice}
+                 :reporter       #{}}
+ :application   {:writer             #{:application/read
+                                       :application/accordions-open
+                                       :application/edit-draft
+                                       :application/invite
+                                       :application/submit
+                                       :application/cancel-in-restricted-states
+                                       :application/edit
+                                       :application/edit-auth
+                                       :application/edit-drawings
+                                       :application/edit-operation
+                                       :application/edit-permit-subtype
+                                       :application/remove-extra-link-permit
+                                       :application/change-location-in-pre-verdict-states
+                                       :application/create-change-permit
+                                       :application/create-continuation-period-permit
+                                       :application/create-encumbrance-permit
+                                       :application/create-foreman-app-in-post-verdict-states
+                                       :application/convert-to-application
+                                       :application/remove-buildings-in-archiving-projects
+                                       :application/edit-inspection-summary
+                                       :application/request-foreman-termination
+                                       :application/create-property-formation-app
+                                       :application/inform-construction-state}
+                 :reader             #{:application/read
+                                       :application/accordions-open}
+                 :foreman            #{:application/read
+                                       :application/accordions-open
+                                       :application/edit-draft
+                                       :application/submit
+                                       :application/invite
+                                       :application/cancel-in-restricted-states
+                                       :application/edit
+                                       :application/edit-auth
+                                       :application/edit-drawings
+                                       :application/edit-operation
+                                       :application/edit-permit-subtype
+                                       :application/remove-extra-link-permit
+                                       :application/change-location-in-pre-verdict-states
+                                       :application/create-change-permit
+                                       :application/create-continuation-period-permit
+                                       :application/create-foreman-app-in-post-verdict-states
+                                       :application/convert-to-application
+                                       :application/remove-buildings-in-archiving-projects
+                                       :application/edit-inspection-summary
+                                       :application/request-foreman-termination
+                                       :application/create-property-formation-app}
+                 :guest              #{:application/read
+                                       :application/accordions-open}
+                 :guestAuthority     #{:application/read
+                                       :application/accordions-open}
+                 :financialAuthority #{:application/read
+                                       :application/accordions-open}
+                 :statementGiver     #{:application/read
+                                       :application/accordions-open}}
+ :authorization {:auth-owner #{:application/edit-restricting-auth}}
+ :inforequest   {:writer #{:application/cancel}}
+ :canceled-app  {:canceler #{:application/undo-cancelation}}
+ :foreman-app   {:foreman #{:application/edit-draft
+                            :application/submit
+                            :application/cancel-in-restricted-states
+                            :application/edit
+                            :application/edit-permit-subtype}}}

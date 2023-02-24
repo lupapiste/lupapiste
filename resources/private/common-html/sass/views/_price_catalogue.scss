@@ -1,0 +1,166 @@
+.price-catalogue {
+
+  .row-operation {
+    background-color: $lp-orange;
+    box-sizing: border-box;
+    color: white;
+    display: inline-block;
+    margin-right: 0.5em;
+    padding-right: 0.5em;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 1em;
+  }
+
+  .view-switch {
+    margin-bottom: 2em;
+    float: left;
+  }
+
+  td.action-buttons {
+      white-space: nowrap;
+      button {border: none;}
+      div.row-move-buttons {
+        display: inline-block;
+        vertical-align: middle;
+        button {
+          display: block;}
+      }
+      button.remove {display: inline-block;
+                     vertical-align: middle;}
+
+  }
+
+  div.price-catalogue-operations  {
+    table {
+      @include no-row-hover;
+      margin-top: 1em;
+      margin-bottom: 0;
+    }
+    select {
+      margin-top: $marginS;
+      width: 100%;}
+  }
+
+  table.price-catalogue-table {
+    @include no-row-hover;
+    th.required {
+      white-space: nowrap;
+    }
+    th.required:after {
+      content: " *";
+      color: $label-required-star-color;
+    }
+
+    td input.warning {
+      background-color: transparentize( $negative, 0.95 );
+    }
+    label.product-constant-label {
+      white-space: nowrap;
+      &:after {content: ":";}
+    }
+    .dropdown.unit-select {
+      max-width: 8em;
+    }
+  }
+
+  .view-switch-guide-text {
+    padding-right: 1em;
+  }
+
+  .view-switch-selected {
+    background-color: $primary;
+    color: $white;
+    border: 1px solid $primary;
+  }
+
+  .view-switch-unselected {
+    background-color: $white;
+    color: $primary;
+    border: 1px solid $primary;
+  }
+
+  .catalogue-content {
+    clear: both;
+  }
+
+  .edit-buttons {
+    display: inline-block;
+    float: right;
+  }
+
+  .catalogue-button {
+    margin-left: 1em;
+  }
+
+  .right-button {
+    display: inline-block;
+    float: right;
+  }
+
+  .add-row-to-operation {
+    padding: 0.5em;
+    border-bottom: 1px dashed $lp-light-grey;
+    border-left: 1px dashed $lp-light-grey;
+    border-right: 1px dashed $lp-light-grey;
+  }
+
+  .operations-container {
+    margin-bottom: 2em;
+  }
+
+  .operations-table {
+    margin-bottom: 0px;
+  }
+
+  .operation-product-select {
+    width: 100%;
+  }
+
+  .operation-header-operation {
+    width: 35%;
+  }
+
+  .operation-header-unit-price {
+    width: 12%;
+  }
+
+  .operation-header-discount-percent {
+    width: 12%;
+  }
+
+  .operation-header-nimimum {
+    width: 12%;
+  }
+
+  .operation-header-maximum {
+    width: 12%;
+  }
+
+  .operation-header-unit {
+    width: 12%;
+  }
+
+  .operation-header-remove {
+    width: 5%;
+  }
+
+  .operation-header-remove {
+    width: 5%;
+  }
+
+  .catalogue-select {
+    width: 20em;
+  }
+
+  .pointer {
+    cursor: pointer;
+  }
+
+  table.no-billing-periods-table {
+    @include no-row-hover;
+    width: auto;
+    margin-bottom: $marginS;
+  }
+
+}

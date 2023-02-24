@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="cell-select-template">
+  <select class="dropdown"
+          data-bind="attr: attributes,
+                     testId: testId,
+                     required: isRequired,
+                     ariaInvalid: isInvalid,
+                     options: params.options,
+                     optionsCaption: loc( 'choose' ),
+                     optionsText: optionsText,
+                     optionsValue: optionsValue,
+                     value: value"></select>
+</script>

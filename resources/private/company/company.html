@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="company">
+    <div role="main"
+         id="company-content"
+         data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'company'"
+         class="accordion-container">
+      <div>
+        <icon-button params="buttonClass: 'secondary',
+                             click: backClick,
+                             testId: 'company-back',
+                             icon: 'chevron-start',
+                             ltext: 'back'"></icon-button>
+      </div>
+      <div class="hr"></div>
+      <div class="header">
+        <h1 data-bind="text: info.model().name"></h1>
+      </div>
+      <!-- ko if: info.isLocked -->
+      <div class="like-btn spacerL"
+           data-test-id="company-is-locked">
+        <i aria-hidden="true" class="lupicon-lock"></i>
+        <span data-bind="ltext: 'company.locked'"></span>
+      </div>
+      <!-- /ko -->
+      <tag-toggles params="selected: currentView,
+                           prefix: 'plain-bold-tag',
+                           toggles: toggles"></tag-toggles>
+
+      <div class="tab-content-container content">
+
+        <!-- =================== -->
+        <!-- info:               -->
+        <!-- =================== -->
+
+        <div data-bind="if: currentView() === 'info'">
+          <div data-bind="with: info" data-test-id="company-info-tab">
+            <div class="form-group label--top item--wide">
+              <div class="form-entry">
+                <label class="lux" for="account-type"
+                       data-bind="ltext: 'register.company.form.accountType'"></label>
+
+                <!-- ko ifnot: model().customAccountLimit -->
+                <select id="account-type"
+                        class="lux"
+                        data-test-id="company-account-select"
+                        data-bind="options: accountTypes,
+                                   optionsText: 'displayName',
+                                   optionsValue: 'name',
+                                   value: model().accountType,
+                                   optionsAfterRender: setAccountTypeOptionDisable,
+                                   enable: edit,
+                                   valueAllowUnset: true"></select>
+                <!-- /ko -->
+                <!-- ko if: model().customAccountLimit -->
+                <div>
+                  <span data-test-id="company-custom-account"
+                        data-bind="text: loc('register.company.' + model().accountType() + '.title')"></span>
+                  <span data-test-id="company-custom-account-limit"
+                        data-bind="text: '(' + loc('company.custom.limit', model().customAccountLimit()) + ')'"></span>
+                </div>
+                <!-- /ko -->
+              </div>
+            </div>
+            <div class="form-group label--top item--wide">
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().name,
+                                lLabel: 'register.company.form.companyName',
+                                enable: edit
+                                }}"></div>
+              </div>
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().y,
+                                lLabel: 'register.company.form.companyY',
+                                enable: false
+                                }}"></div>
+              </div>
+            </div>
+
+            <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
+
+            <div class="form-group label--top item--wide">
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().address1,
+                                lLabel: 'register.company.form.billing.address',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().zip,
+                                lLabel: 'register.company.form.billing.zip',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().po,
+                                lLabel: 'register.company.form.billing.po',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().country,
+                                lLabel: 'register.company.form.billing.country',
+                                enable: edit
+                                }}"></div>
+              </div>
+            </div>
+
+            <div class="form-group label--top item--wide">
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().reference,
+                                lLabel: 'register.company.form.billing.reference',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().netbill,
+                                lLabel: 'osapuoli.yritys.verkkolaskutustieto.verkkolaskuTunnus',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry"
+                   data-test-id="company-pop">
+                <span data-bind="component: {name: 'invoice-operator-selector',
+                                 params: {selected: model().pop,
+                                 enabled: edit}}"></span>
+              </div>
+            </div>
+
+            <h2 data-bind="ltext: 'register.company.form.contact'"></h2>
+
+            <div class="form-group label--top item--wide">
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().contactAddress,
+                                lLabel: 'register.company.form.contactAddress',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                maxLength: 5,
+                                value: model().contactZip,
+                                lLabel: 'register.company.form.contactZip',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().contactPo,
+                                lLabel: 'register.company.form.contactPo',
+                                enable: edit
+                                }}"></div>
+              </div>
+
+              <div class="form-entry">
+                <div data-bind="component: {
+                                name: 'text-field',
+                                params: {
+                                value: model().contactCountry,
+                                lLabel: 'register.company.form.contactCountry',
+                                enable: edit
+                                }}"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="edit-company-buttons">
+            <!-- ko ifnot: info.edit -->
+            <icon-button params="enable: info.canStartEdit,
+                                 click: function() { info.startEdit();},
+                                 ltext: 'edit',
+                                 testId: 'company-details-edit',
+                                 icon: 'pen'">
+            </icon-button>
+            <!-- /ko -->
+            <!-- ko if: info.edit -->
+            <icon-button params="enable: info.canSubmit,
+                                 click: function() { info.submit(); },
+                                 type: 'submit',
+                                 testId: 'company-details-save',
+                                 icon: 'save',
+                                 waiting: pending,
+                                 ltext: 'save'">
+            </icon-button>
+            <button data-bind="enable: info.edit,
+                               click: info.cancelEdit,
+                               ltext: 'cancel'"
+                    type="button" class="secondary"
+                    data-test-id="company-details-cancel"></button>
+            <!-- /ko -->
+          </div>
+
+        </div>
+
+        <!-- =================== -->
+        <!-- users:              -->
+        <!-- =================== -->
+
+        <div data-bind="if: currentView() === 'users'">
+
+          <h2 data-bind="ltext: 'register.company.invitation.denied.title'"></h2>
+
+          <div>
+            <toggle params="value: info.model().invitationDenied,
+                            ltext: 'register.company.invitation.denied.label',
+                            prefix: 'blockbox',
+                            enable: isAdmin,
+                            callback: setDenied,
+                            testId: 'checkbox-invitations-denied'">
+            </toggle>
+          </div>
+
+          <br/>
+
+          <span data-bind="text: loc('company.users.count',
+                                      invitations().length + users().length,
+                                      info.accountType() ? info.accountType().limit : info.model().customAccountLimit())"></span>
+
+          <table data-bind="visible: !pending()" class="company-users-table" data-test-id="company-users-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'company.user.lastName'"></th>
+                <th data-bind="ltext: 'company.user.firstName'"></th>
+                <th data-bind="ltext: 'company.user.email'"></th>
+                <th data-bind="ltext: 'company.user.enabled'"></th>
+                <th data-bind="ltext: 'company.user.role'"></th>
+                <th data-bind="ltext: 'company.user.submit'"></th>
+                <th data-bind="visible: isAdmin,
+                               ltext: 'users.table.actions'"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- ko foreach: invitations -->
+              <tr>
+                <td data-bind="text: lastName,
+                               attr: {'data-test-id': 'invitation-lastname-' + $index()}"></td>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'invitation-firstname-' + $index()}"></td>
+                <td data-bind="text: email,
+                               attr: {'data-test-id': 'invitation-email-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.invited',
+                               attr: {'data-test-id': 'invitation-invited-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.role.' + role,
+                               attr: {'data-test-id': 'invitation-role-' + $index()}"></td>
+                <td data-bind="ltext: submit ? 'yes' : 'no',
+                               attr: {'data-test-id': 'invitation-submit-' + $index()}"></td>
+                <td class="company-users-table--action"
+                    data-bind="visible: opsEnabled">
+                  <button class="tertiary"
+                          data-bind="click: deleteInvitation,
+                                     ltext: 'company.user.op.delete.invitation',
+                                     testId: 'company-user-uninvite-' + $index()"></button>
+                </td>
+              </tr>
+              <!-- /ko -->
+              <!-- ko foreach: users -->
+              <tr>
+                <td data-bind="text: lastName,
+                               attr: {'data-test-id': 'company-user-lastname-' + $index()}"></td>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'company-user-firstname-' + $index()}"></td>
+                <td data-bind="text: email,
+                               attr: {'data-test-id': 'company-user-email-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled,
+                               attr: {'data-test-id': 'company-user-enabled-' + $index()}"></td>
+                <!-- ko if: editing -->
+                <td>
+                  <select data-bind="options: $parent.userEditor.roles,
+                                     optionsText: $parent.userEditor.roleText,
+                                     ariaLtext: 'company.user.role',
+                                     value: $parent.userEditor.role,
+                                     attr: {'data-test-id': 'company-user-edit-role-' + $index()}"
+                          class="lux"></select>
+                </td>
+                <td>
+                  <select data-bind="options: [true, false],
+                                      optionsText: $parent.userEditor.submitText,
+                                      ariaLtext: 'company.user.submit',
+                                      value: $parent.userEditor.submit,
+                                      attr: {'data-test-id': 'company-user-edit-submit-' + $index()}"
+                          class="lux"></select>
+                </td>
+                <td data-bind="visible: $parent.isAdmin"
+                    class="company-users-table--action">
+                  <div data-bind="if: opsEnabled"
+                       class="dsp--flex flex--gap2 flex--wrap">
+                    <icon-button params="click: $parent.userEditor.save,
+                                         testId: 'company-user-save-' + $index(),
+                                         icon: 'save',
+                                         ltext: 'save'">
+                    </icon-button>
+                    <icon-button params="click: $parent.userEditor.clear,
+                                         testId: 'company-user-cancel-' + $index(),
+                                         buttonClass: 'secondary',
+                                         icon: 'remove',
+                                         ltext: 'cancel'"></icon-button>
+                  </div>
+                </td>
+                <!-- /ko -->
+                <!-- ko ifnot: editing -->
+                <td data-bind="ltext: 'company.user.role.' + role(),
+                               attr: {'data-test-id': 'company-user-role-' + $index()}"></td>
+                <td data-bind="ltext: submit() ? 'yes' : 'no',
+                               attr: {'data-test-id': 'company-user-submit-' + $index()}"></td>
+                <td data-bind="visible: $parent.isAdmin"
+                    class="company-users-table--action">
+                  <div data-bind="if: opsEnabled">
+                    <button class="tertiary"
+                            data-bind="ltext: 'edit',
+                                       click: edit,
+                                       visible: !$parent.info.isLocked(),
+                                       testId: 'company-user-edit-' + $index()"></button>
+                    <button class="tertiary"
+                            data-bind="click: deleteUser,
+                                       ltext: 'company.user.op.delete',
+                                       testId:'company-user-delete-' + $index()"></button>
+                  </div>
+                </td>
+                <!-- /ko -->
+              </tr>
+              <!-- /ko -->
+            </tbody>
+          </table>
+          <div data-bind="visible: isAdmin()  && !info.isLocked()">
+            <button class="btn btn-primary"
+                    data-test-id="company-add-user"
+                    data-bind="click: openNewUser,
+                               enable: lupapisteApp.models.globalAuthModel.ok('company-add-user')">
+              <i aria-hidden="true" class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'register.company.add-user.open'"></span>
+            </button>
+            <span class="user-limit-reached"
+                  data-bind="ltext: 'register.company.user-limit.reached',
+                             visible: isAdmin() && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
+          </div>
+          <button class="negative"
+                  data-bind="visible: lupapisteApp.models.globalAuthModel.ok( 'company-user-delete-all'),
+                             click: nukeAll"
+                  data-test-id="company-nuke-all">
+            <i aria-hidden="true" class="lupicon-warning"></i>
+            <span data-bind="ltext: 'company.delete-all'"></span>
+          </button>
+        </div>
+        <div data-bind="if: currentView() === 'tags'">
+          <div data-bind="component: {name: 'company-tags-editor'}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dialog-company-new-user" role="dialog" class="window autosized">
+      <div class="dialog-header flex--between flex--align-end">
+        <p data-bind="ltext: 'register.company.add-user.message'"></p>
+        <icon-button params="buttonClass: 'tertiary close',
+                             icon: 'remove',
+                             ltext: 'close',
+                             iconOnly: true,
+                             id: 'dialog-company-new-user-close',
+                             focusPrevious: 'button.close:visible:last'">
+        </icon-button>
+      </div>
+      <div class="dialog-content dialog-content--no-padding">
+        <form>
+          <text-field class="dsp--block gap--b1"
+                      params="value: email,
+                              enable: showSearchEmail,
+                              extraClass: 'w--100',
+                              lLabel: 'company.user.email'">
+          </text-field>
+          <div data-bind="visible: showSearchEmail"
+               class="inner-margins dialog-content__footer">
+            <icon-button params="enable: canSearchUser,
+                                 click: searchUser,
+                                 waiting: pending,
+                                 type: 'submit',
+                                 testId: 'company-search-email',
+                                 icon: 'search',
+                                 ltext: 'register.company.add-user.searchUser'">
+            </icon-button>
+            <icon-button class="gap--l4"
+                         params="buttonClass: 'secondary close',
+                                 id: 'dialog-company-new-user-cancel',
+                                 focusNext: '#dialog-company-new-user-close',
+                                 icon: 'remove',
+                                 ltext: 'cancel'">
+            </icon-button>
+          </div>
+        </form>
+
+        <div data-bind="visible: showUserInCompany">
+          <span data-bind="ltext: 'register.company.add-user.already-in'"></span>
+          <div class="dialog-content__footer">
+            <icon-button params="buttonClass: 'positive close',
+                                 testId: 'company-add-user-already-in-close',
+                                 icon: 'check',
+                                 ltext: 'ok',
+                                 focusNext: '#dialog-company-new-user-close'">
+            </icon-button>
+          </div>
+        </div>
+
+        <div data-bind="visible: showUserAlreadyInvited">
+          <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
+          <div class="dialog-content__footer">
+            <icon-button params="buttonClass: 'positive close',
+                                 testId: 'company-user-already-invited-close-dialog',
+                                 icon: 'check',
+                                 ltext: 'ok',
+                                 focusNext: '#dialog-company-new-user-close'">
+            </icon-button>
+          </div>
+        </div>
+
+        <div data-bind="visible: showUserNotApplicant,
+                        testId: 'user-not-applicant'">
+          <span data-bind="text: loc('register.company.add-user.not-applicant', email())"></span>
+          <div class="dialog-content__footer">
+            <icon-button params="buttonClass: 'positive close',
+                                 testId: 'close-not-applicant',
+                                 icon: 'check',
+                                 ltext: 'ok',
+                                 focusNext: '#dialog-company-new-user-close'">
+            </icon-button>
+          </div>
+        </div>
+
+        <form data-bind="visible: showUserDetails" id="companyUserDetails">
+
+          <text-field class="dsp--block gap--b1"
+                      params="lLabel: 'company.user.firstName',
+                              value: firstName,
+                              disable: done() || (!isDummy() && oldUser()),
+                              extraClass: 'w--100'">
+          </text-field>
+          <text-field class="dsp--block gap--b1"
+                      params="lLabel: 'company.user.lastName',
+                              value: lastName,
+                              disable: done() || (!isDummy() && oldUser()),
+                              extraClass: 'w--100'">
+          </text-field>
+          <toggle class="dsp--block gap--b1"
+                  params="value: admin,
+                          disable: done,
+                          id: 'company-new-user-admin',
+                          ltext: 'register.company.add-user.admin'"></toggle>
+
+          <toggle class="dsp--block gap--b1"
+                  params="value: submit,
+                          disable: done,
+                          id: 'company-new-user-submit',
+                          ltext: 'register.company.add-user.can-submit'"></toggle>
+
+          <div data-bind="visible: pending"
+               class="dialog-content__footer">
+            <h3>
+              <span data-bind="ltext: 'register.company.add-user.pending'"></span>
+            </h3>
+          </div>
+
+          <div data-bind="visible: done"
+               class="dialog-content__footer"
+               data-test-id="company-add-user-done">
+            <h3 data-bind="ltext: 'register.company.add-user.done.header'"
+                id="testCompanyAddUserDone"></h3>
+            <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
+            <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
+          </div>
+
+          <div class="inner-margins dialog-content__footer">
+            <icon-button class="gap--r4"
+                         params="enable: canSubmit,
+                                 click: sendInvite,
+                                 type: 'submit',
+                                 testId: 'company-user-send-invite',
+                                 icon: 'envelope',
+                                 ltext: 'register.company.add-user.submit'">
+            </icon-button>
+
+            <icon-button params="enable: canClose,
+                                 focusNext: '#dialog-company-new-user-close',
+                                 id: 'dialog-company-invited-user-close',
+                                 buttonClass: 'secondary close',
+                                 testId: 'company-new-user-invited-close-dialog',
+                                 icon: 'remove',
+                                 ltext: 'close'">
+            </icon-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+  <section class="page container" role="main" id="company-reports">
+    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "company-reports" -->
+    <div>
+      <button class="secondary"
+              data-bind="click: function() { history.go(-1); }"
+              data-test-id="back-button">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'back'"></span>
+      </button>
+    </div>
+    <div class="hr"></div>
+    <cljs-company_reports></cljs-company_reports>
+    <!-- /ko -->
+  </section>
+</body>
+</html>

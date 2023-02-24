@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="rollup-button-template">
+      <button class="rollup-button"
+              data-bind="toggleClick: open,
+                         css: css,
+                         attr: attr,
+                         ariaExpanded: open">
+        <!-- ko ifnot: open -->
+        <i aria-hidden="true" class="lupicon-chevron-down"></i>
+        <!-- /ko -->
+        <!-- ko if: open -->
+        <i aria-hidden="true" class="toggle lupicon-chevron-up"></i>
+        <!-- /ko -->
+        <!-- ko if: text -->
+        <span data-bind="text: text"></span>
+        <!-- /ko -->
+        <!-- ko ifnot: text -->
+        <!-- ko template: {nodes: $componentTemplateNodes} -->
+        <!-- /ko -->
+        <!-- /ko -->
+      </button>
+</script>

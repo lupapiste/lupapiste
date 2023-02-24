@@ -1,0 +1,29 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-person-select-template">
+  <div class="form-entry personSelector">
+    <div class="person-select-box">
+      <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+      <label data-bind="ltext: 'person-selector',
+                        css: labelClasses,
+                        attr: {for: id}"></label>
+      <select data-bind="options: personOptions,
+                         optionsText: optionsText,
+                         optionsValue: 'id',
+                         value: selectValue,
+                         valueAllowUnset: true,
+                         optionsCaption: loc('selectone'),
+                         disable: disabled() || readonly() || !setUserToDocumentOk(),
+                         css: inputClasses,
+                         testId: path.join('.'),
+                         attr: {id: id}"
+              class="lux align--middle gap--r1-half long">
+      </select>
+      <!-- ko if: inviteWithRoleOk -->
+      <button class="positive"
+              data-bind="ltext: 'personSelector.invite',
+                         testId: 'application-invite-' + documentSchema.info.name,
+                         click: invite"></button>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>

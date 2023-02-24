@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="register">
+    <div class="container">
+      <h1 data-bind="ltext: 'register.header-top'"></h1>
+      <p data-bind="lhtml: 'register.info'" class="register-info"></p>
+
+      <h1 data-bind="ltext: 'register.header1'"></h1>
+
+      <!-- ko if: lupapisteApp.models.globalAuthModel.ok("register-user") -->
+      <p data-bind="lhtml: 'register.info1'" class="register-info"></p>
+
+      <p data-bind="component: {name: 'vetuma-init', params: vetuma}"></p>
+      <p data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'register-', errorLocPrefix: 'register'}}"></p>
+
+      <h1 data-bind="ltext: 'register.company.header'"></h1>
+      <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
+      <p data-bind="lhtml: 'register.company.create.help'" class="register-info"></p>
+
+      <a href="#" class="btn btn-primary" data-test-id="register-company-start"
+         data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"></a>
+      <!-- /ko -->
+      <!-- ko ifnot: lupapisteApp.models.globalAuthModel.ok("register-user") -->
+      <p data-bind="ltext: 'error.service-lockdown'" class="error-message"></p>
+      <!-- /ko -->
+    </div>
+  </section>
+</body>
+</html>

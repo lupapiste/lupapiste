@@ -1,0 +1,25 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="company-invite-dialog-template">
+      <div data-bind="ifnot: confirm">
+        <div class="content">
+          <p data-bind="ltext: 'company-invite.desc'" class="dialog-desc"></p>
+          <div data-bind="component: {name: 'base-autocomplete', params: {options: companiesProvider.data, query: companiesProvider.query, selectedOption: selected}}"></div>
+        </div>
+        <div data-bind="component: {name:'submit-button-group',
+                                    params: { isSubmitVisible: isConfirmVisible,
+                                              isSubmitEnabled: isConfirmEnabled,
+                                              submit: openConfirm,
+                                              lSubmitTitle: 'continue'}}"></div>
+      </div>
+
+      <div data-bind="if: confirm">
+        <div class="content" data-test-id="company-invite-confirm-help">
+          <p data-bind="text: confirmText" class="dialog-desc"></p>
+        </div>
+        <div data-bind="component: {name:'submit-button-group',
+                                    params: { isSubmitVisible: isSubmitVisible,
+                                              isSubmitEnabled: isSubmitEnabled,
+                                              submit: submit,
+                                              lSubmitTitle: 'company-invite.invite'}}"></div>
+      </div>
+
+</script>

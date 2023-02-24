@@ -1,0 +1,120 @@
+
+.autocomplete-component {
+  width: 100%;
+  position: relative;
+  .autocomplete-selection-wrapper {
+    &.active {
+      border-color: resolve-color( "dropdown", "border", "active");
+    }
+    &.disabled {
+      border-color: resolve-color( "dropdown", "border", "disabled");
+      background-color: resolve-color( "dropdown", "background", "disabled");
+      i.tag-chevron {
+        color: resolve-color( "dropdown", "text", "disabled");
+      }
+    }
+    position: relative;
+    width: inherit;
+    min-height: $grid-input-height;
+    border: resolve-border( "dropdown", "enabled" );
+    min-height: $grid-input-height;
+    background-color: resolve-color( "dropdown", "background", "autocomplete" );
+    span.autocomplete-selection {
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+      box-sizing: border-box;
+      ul.tags {
+        list-style: none;
+        padding: 0 0;
+        padding-right: 30px;
+        li {
+          display: inline-block;
+          max-width: 100%;
+          margin: 1px 1px;
+          button {
+            overflow: hidden;
+            max-width: 100%;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+
+    span.caption, span.selection-text {
+      cursor: default;
+      line-height: $grid-input-height - 2;
+      padding-left: 6px;
+    }
+    i.tag-chevron {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      cursor: pointer;
+      color: resolve-color( "dropdown", "text", "enabled");
+      margin: 0;
+    }
+  }
+
+  .autocomplete-dropdown {
+    width: inherit;
+    position: absolute;
+    z-index: 10;
+    input.autocomplete-input {
+      width: 100%;
+      height: $grid-input-height;
+      margin-top: -1px;
+      display: block;
+      box-sizing: border-box;
+    }
+    ul.autocomplete-result {
+      position: absolute;
+      top: $grid-input-height - 2; // autocomplete-input height - margin
+      z-index: 1000;
+      width: inherit;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: auto;
+      padding: 0;
+      border: resolve-border( "dropdown", "enabled");
+      box-sizing: border-box;
+      background-color: $white;
+      color: resolve-color( "dropdown", "text", "enabled");
+
+      &.autocomplete-result-grouped {
+        li.autocomplete-result-item {
+          padding: 0 $marginS*2;
+        }
+      }
+
+      li {
+        height: $grid-input-height;
+        line-height: 40px;
+      }
+
+      li.autocomplete-result-item, li.autocomplete-result-empty {
+        cursor: default;
+        display: list-item;
+        list-style-type: none;
+        padding: 0 $marginS;
+      }
+      li.autocomplete-result-item {
+        cursor: pointer;
+        position: relative;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding-right: $marginS;
+      }
+      li.autocomplete-result-item.active {
+        background-color: resolve-color( "dropdown", "background", "autocomplete:select");
+        color: $white;
+      }
+      li.autocomplete-group-header {
+        font-weight: 700;
+        padding-left: $marginS;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+  }
+}

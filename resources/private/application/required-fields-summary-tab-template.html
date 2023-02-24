@@ -1,0 +1,243 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="required-fields-summary-tab-template">
+  <div id="application-requiredFieldSummary-tab" data-bind="with: $root.application" class="tab-content">
+      <div>
+          <!-- ko if: $root.authorization.ok('approve-application') || $root.authorization.ok('bulletin-will-be-published-for-verdict') -->
+          <h1 data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'" data-test-id="h1-afterSubmitted"></h1>
+          <!-- /ko -->
+          <!-- ko ifnot: $root.authorization.ok('approve-application') || $root.authorization.ok('bulletin-will-be-published-for-verdict') -->
+          <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
+          <!-- /ko -->
+
+          <div class="clear spacerM"></div>
+          <!-- ko if: municipalityHearsNeighborsVisible -->
+          <div class="form-grid form-grid--no-border">
+            <div class="row">
+              <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <!-- ko if: submitRestrictionForOtherAuthsVisible -->
+          <div class="form-grid form-grid--no-border">
+            <div class="row">
+              <div data-bind="component: {name: 'checkbox-field', params: {value: optionSubmitRestrictionForOtherAuths, id: 'optionSubmitRestrictionForOtherAuths', lLabel: 'application.applySubmitRestrictionForOthers', disable: optionSubmitRestrictionForOtherAuthsDisabled}}" ></div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <!-- ko ifnot: missingSomeInfo -->
+          <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
+          <div class="clear spacerM"></div>
+          <!-- /ko -->
+
+          <!-- ko if: $root.authorization.ok('app-bulletin-op-description-required') -->
+          <div class="form-grid form-grid--no-border">
+            <div class="row">
+              <div class="col-2">
+                <label for="bulletin-op-description"
+                       class="lux form-label"
+                       data-bind="ltext: 'application.bulletinOpDescription.backendVerdicts',
+                                  valueRequired: $root.application.bulletinOpDescription"></label>
+                <input type="text" class="lux" id="bulletin-op-description"
+                  data-bind="textInput: $root.application.bulletinOpDescription,
+                             enable: $root.authorization.ok('update-app-bulletin-op-description'),
+                             valueRequired: $root.application.bulletinOpDescription"
+                  data-test-id="bulletin-op-description-summaryTab">
+                <span aria-hidden="true"
+                      class="save-indicator"
+                      data-bind="saveIndicator: opDescriptionIndicator, label: false"></span>
+              </div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <div class="auth-actions stacked inner-margins">
+              <button data-bind="click: toApproveApplication,
+                                 visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                                 attr: {'title': loc('tooltip.approveApplication')}"
+                      data-test-id="approve-application-summaryTab"
+                      class="positive">
+                  <span data-bind="ltext: 'application.approveApplication'"></span>
+                  <i aria-hidden="true" class="lupicon-circle-arrow-right"></i>
+              </button>
+              <button data-bind="click: approveExtension,
+                                 visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                                 attr: {'title': loc('tooltip.approveApplication')}"
+                      data-test-id="approve-extension-summaryTab"
+                      class="positive">
+                  <i aria-hidden="true" class="lupicon-circle-check"></i>
+                  <span data-bind="ltext: 'application.extension.approve'"></span>
+              </button>
+
+              <button data-bind="click: toAsianhallinta,
+                                 visible: $root.authorization.ok('application-to-asianhallinta'),
+                                 enable: !processing() && $root.authorization.ok('application-to-asianhallinta'),
+                                 attr: {'title': loc('tooltip.toAsianhallinta')}"
+                      data-test-id="to-asianhallinta-summaryTab"
+                      class="positive">
+                  <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+                  <i aria-hidden="true" class="lupicon-circle-arrow-right"></i>
+              </button>
+
+              <button data-test-id="application-return-to-draft-btn"
+                      data-bind="click: returnToDraft,
+                                 visible: $root.authorization.ok( 'return-to-draft' ),
+                                 enable: !processing() && $root.authorization.ok( 'return-to-draft' )"
+                      class="secondary">
+                <i aria-hidden="true" class="lupicon-circle-arrow-left"></i>
+                <span data-bind="ltext: 'application.returnToDraft'"></span>
+              </button>
+          </div>
+
+          <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('application-submittable')" data-test-id="submit-errors-container">
+            <h2 data-bind="ltext: 'application.not-submittable'"></h2>
+            <div data-bind="foreach: submitErrors">
+              <div class="info-line like-btn">
+                  <i aria-hidden="true" class="lupicon-circle-attention"></i>
+                  <span data-bind="lhtml: $data.text, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data.text}"></span>
+                  <!-- ko if: $data.user -->
+                  &nbsp;<span data-bind="lhtml: 'application.contact-to-authorized-user.' + $data.user.type"></span>
+                  &nbsp;<b data-bind="html: $data.user.name, attr: {'data-test-id': 'submit-error-user-' + $index(), 'data-submit-error-user': $data.user.id}"></b>
+                  <!-- /ko -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ko if: $root.authorization.ok('approve-application') || $root.authorization.ok('bulletin-will-be-published-for-verdict') -->
+          <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear" data-test-id="non-approved-designers-list">
+            <h2 data-bind="ltext: 'application.designers-not-approved'" class="missing-info-title"></h2>
+            <div class="info-line">
+              <div class="like-btn">
+                <i aria-hidden="true" class="lupicon-circle-attention"></i>
+                <span data-bind="ltext: 'application.designers-not-approved-help'" class="non-approved-designers"></span>
+              </div>
+              <ul data-bind="foreach: nonApprovedDesigners" class="non-approved-designers">
+                <li data-bind="text: $data"></li>
+              </ul>
+            </div>
+            <div class="clear spacerM"></div>
+          </div>
+
+          <div data-bind="visible: !_.isEmpty(lupapisteApp.services.assignmentService.incompleteAssignments())">
+            <h2 data-bind="ltext: 'application.incomplete-assignments'" class="missing-info-title"></h2>
+            <table class="assignments-search-result__table">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.assignment.subject'"></th>
+                  <th data-bind="ltext: 'application.assignment.type'"></th>
+                  <th data-bind="ltext: 'application.assignment.recipient.label'"></th>
+                  <th data-bind="ltext: 'application.assignment.description.placeholder'"></th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: lupapisteApp.services.assignmentService.incompleteAssignments()">
+              <tr data-test-id="incomplete-assignment">
+                <td data-bind="ltext: 'application.assignment.type.' + $data.targets[0]['group'], testId: 'target-group'"></td>
+                <td data-bind="ltext: $data.targets[0]['type-key'], testId: 'target-type'"></td>
+                <td data-bind="text: $data.recipient ? util.partyFullName($data.recipient) : '', testId: 'recipient'"></td>
+                <td data-bind="text: $data.description, testId: 'description'"></td>
+                <td><a data-bind="ltext: 'view', click: _.partial($root.application.open, $data.targetTab),
+                                  testId: 'show-assignment'" href="#"></a></td>
+              </tr>
+              </tbody>
+            </table>
+            <div class="clear spacerM"></div>
+          </div>
+          <!-- /ko -->
+
+          <button class="positive top-marginM"
+                  data-test-id="application-submit-btn"
+                  data-bind="click: submitButtonFunction(),
+                             visible: submitButtonFunction,
+                             ariaLtext: submitButtonKey,
+                             enable: submitButtonEnabled">
+            <i class="lupicon-download"
+               aria-hidden="true"></i>
+            <span data-bind="ltext: submitButtonKey"></span>
+          </button>
+
+
+          <!-- missing information -->
+
+          <!-- ko if: hasFieldWarnings -->
+          <div id="applicationWarnings" data-test-id="test-application-warnings">
+            <h2 data-bind="ltext: 'application.warningsInDocument'" class="missing-info-title"></h2>
+            <!-- ko foreach: fieldWarnings -->
+              <div data-bind="with: $data[0]">
+                 <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
+              </div>
+              <!-- ko foreach: $data -->
+                <div class="info-line warning">
+                    <div class="like-btn">
+                        <i aria-hidden="true" class="lupicon-circle-attention"></i>
+                        <span class="required-field-error-element-name"
+                              data-bind="ltext: element.locKey,
+                                         testId: 'missing-' + document.name + '-' + element.locKey"></span>
+                    </div>
+                    <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+                </div>
+              <!-- /ko -->
+            <!-- /ko -->
+          </div>
+          <!-- /ko -->
+
+          <!-- ko if: hasIncorrectlyFilledRequiredFields -->
+          <div id="applicationRequiredFields" data-test-id="test-application-required-fields">
+            <h2 data-bind="ltext: 'application.requiredDataMissing'" class="missing-info-title"></h2>
+            <!-- ko foreach: incorrectlyFilledRequiredFields -->
+              <div data-bind="with: $data[0]">
+                  <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
+              </div>
+              <!-- ko foreach: $data -->
+              <div class="info-line">
+                  <div class="like-btn">
+                      <i aria-hidden="true" class="lupicon-circle-attention"></i>
+                      <span class="required-field-error-element-name"
+                            data-bind="ltext: element.locKey,
+                                       testId: 'missing-' + document.name + '-' + element.locKey"></span>
+                  </div>
+                  <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+              </div>
+              <!-- /ko -->
+            <!-- /ko -->
+          </div>
+          <!-- /ko -->
+
+          <!-- ko if: hasMissingRequiredAttachments -->
+          <div id="applicationRequiredAttachments" data-test-id="test-application-required-attachments">
+            <h2 data-bind="ltext: 'application.missingRequiredAttachments'" class="missing-info-title"></h2>
+            <!-- ko foreach: missingRequiredAttachments -->
+              <h3 class="required-field-error-doc"
+                  data-bind="text: loc(['attachmentType', $data[0], '_group_label'])"></h3>
+              <!-- ko foreach: $data[1] -->
+                <div class="info-line">
+                    <div class="like-btn">
+                        <i aria-hidden="true" class="lupicon-circle-attention"></i>
+                        <span class="required-field-error-element-name"
+                              data-bind="attachmentType: $data,
+                                         testId: 'missing-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id'])">
+                        </span>
+                    </div>
+                    <a data-bind="ltext: 'view',
+                                  testId: 'missing-attachment-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id']),
+                                  attr: {href: lupapisteApp.services.ramService.attachmentUrl( $data.id)}"></a>
+                </div>
+              <!-- /ko -->
+            <!-- /ko -->
+          </div>
+          <!-- /ko -->
+
+      </div>
+
+      <!-- /missing information -->
+
+      <div class="process-nav">
+          <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+              <i aria-hidden="true" class="lupicon-chevron-left"></i>
+              <span data-bind="ltext: 'application.previous-tab'"></span>
+          </a>
+      </div>
+  </div>
+</script>

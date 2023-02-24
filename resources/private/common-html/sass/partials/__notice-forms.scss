@@ -1,0 +1,185 @@
+div.notice-form-configuration {
+  div.notice-form-configuration__details {
+    padding-left: $marginL;
+    padding-right: $marginL;
+    table {
+      @include no-row-hover;
+      td.details-label {
+        white-space: nowrap;
+        font-weight: bold;
+      }
+      td.details-value {
+        width: 100%;
+      }
+      textarea {
+        width: 100%;
+        height: 5em;
+      }
+      select {
+        min-width: 30em;
+        vertical-align: middle;
+      }
+      select.details-role {
+        margin-left: $marginL;
+      }
+      simple-autocomplete {
+        margin-left: $marginL;
+        min-width: 20em;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      margin-top: $marginM;
+      margin-bottom: $marginM;
+    }
+  }
+}
+
+div.notice-form-container {
+  width: 80%;
+  padding: $marginL $marginL;
+  border: 1px solid $gray119;
+  h3, h4 {
+    font-weight: bold;
+  }
+  p {
+    white-space: pre-wrap;
+  }
+  div.notice-form-foremen {
+    padding: $marginS $marginS;
+    border: 1px solid $gray187
+  }
+  div.like-btn {
+    display: block;
+    margin-bottom: 4px;
+    margin-top: 4px;
+  }
+  div.like-btn.foremen-warning {
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+  label.mandatory {
+    display: block;
+    margin-top: $marginS;
+    margin-bottom: $marginS;
+  }
+  textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: $marginL;
+  }
+  div.building-separator {
+    min-height: 8px;
+  }
+  div.notice-form-buttons {
+    padding-top: $marginL;
+    button {
+      margin-right: $marginL;
+    }
+  }
+}
+
+div.notice-forms-container {
+  div.notice-form-wrapper {
+    margin-bottom: $marginS;
+  }
+  div.new-form-buttons {
+    padding-top: $marginS;
+    icon-button {
+      margin-right: $marginS;
+    }
+  }
+  div.notice-form-details {
+    border: 1px solid $gray221;
+    padding: {
+      left: $marginL;
+      right: $marginS;
+      top: $marginS;
+      bottom: $marginS;
+    }
+    ul {
+      margin-bottom: $marginS;
+    }
+    div.notice-form-state-buttons {
+      white-space: nowrap;
+      button {
+        margin-left: 4px;
+      }
+    }
+    table.notice-form-attachments {
+      @include no-row-hover;
+      width: auto;
+      tr {
+        border: none;
+      }
+      td {
+        white-space: nowrap;
+      }
+    }
+    div.tabby {
+      margin: 0;
+      div.tabby__row {
+        padding: 0;
+        div.tabby__cell {
+          padding: 0;
+          vertical-align: top;
+          span.notice-form-note {
+            color: $negative;
+          }
+          span.notice-form-note + button {
+            margin-left: 2em;
+          }
+        }
+      }
+    }
+    blockquote {
+      white-space: pre-wrap;
+    }
+    div.notice-form-editor {
+      white-space: nowrap;
+      margin-right: $marginL;
+      input {
+        padding-right: 0;
+        min-width: 20em;
+      }
+      button {
+        margin-left: 0;
+        margin-right: $marginL;
+      }
+    }
+  }
+  div.notice-form-assignment {
+    margin-top: $marginL;
+    margin-bottom: $marginS;
+    border: 1px solid $gray221;
+    background-color: $gray238;
+    padding-left: $marginS;
+    padding-top: $marginS;
+    padding-bottom: $marginS;
+    padding-right: $marginL;
+    display: table;
+    strong {
+      margin-left: 1em;
+      margin-right: 1em;
+    }
+    span, i {
+      display: table-cell;
+      vertical-align: middle;
+    }
+    span {
+      padding-left: $marginS;
+    }
+  }
+
+  .notice-form-assignment + .notice-form-assignment {
+    margin-top: $marginS;
+  }
+}
+
+rollup.notice-form-rollup {
+  rollup-status-button {
+    button.ghost.secondary {
+      span.rollup-status__text {
+        text-decoration-line: line-through;
+      }
+    }}
+}

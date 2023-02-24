@@ -1,0 +1,7 @@
+{:organization {:authority #{:invoice/read
+                             :invoice/edit}
+                :reader    #{:invoice/read}
+                :commenter #{:invoice/read}
+                :biller    #{:invoice/read
+                             :invoice/edit
+                             :invoice/transfer-batch}}}

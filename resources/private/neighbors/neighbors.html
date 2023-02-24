@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="neighbors">
+    <div id="neighbors-content">
+
+      <div class="map map-large" id="neighbors-map"></div>
+      <span data-bind="visible: areasLoading" style="margin-top: -28px; padding: 2px 10px; position: absolute; z-index: 1000; background-color: #fff">
+        <img src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12" style="margin-right: 5px" align="bottom">
+        <span data-bind="ltext: 'neighbors.areas.loading'"></span>
+      </span>
+
+      <div style="margin-top: 5px" >
+      <!-- ko if: permitType -->
+      <h1 data-bind="lhtml: 'application.' + permitType() + '.neighbors'" class="help-adjacent-title"></h1>
+      <!-- /ko -->
+      <span data-bind="component: {name: 'help-toggle', params: {show: true, lhtml: ['help.neighbors.map.p1', 'help.neighbors.map.p2']}}"></span>
+      </div>
+
+      <table class="application-neighbors"
+             data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors',
+                        visible: _.some( neighbors())">
+        <thead>
+          <tr>
+            <th data-bind="ltext: 'neighbors.propertyId'"></th>
+            <th data-bind="ltext: 'neighbors.owner'"></th>
+            <th data-bind="ltext: 'neighbors.status'"></th>
+            <th data-bind="ltext: 'neighbors.actions'"></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: neighbors">
+          <tr data-bind="attr: {'data-test-id': 'manage-neighbors-email-' + owner.email}">
+            <td data-bind="propertyId: propertyId"></td>
+            <td data-bind="with: owner">
+              <!-- ko if: nameOfDeceased -->
+              <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
+              -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
+              <br/>
+              <!-- /ko -->
+              <span data-bind="text: name" class="owner-name"></span>
+              <!-- ko if: businessID -->
+              (<span data-bind="text: businessID" class=""></span>)
+              <!-- /ko -->
+              <span data-bind="text: address.street" class="owner-street"></span>
+              <span data-bind="text: address.zip" class="owner-zip"></span>
+              <span data-bind="text: address.city" class="owner-city"></span>
+              <span data-bind="text: email" class="owner-email"></span>
+            </td>
+            <td data-bind="with: _.last(status)">
+              <span data-bind="text: loc(['neighbor.state', state])" class="status-state"></span>
+              <span data-bind="dateTimeString: created" class="status-time"></span>
+            </td>
+            <td>
+              <button class="secondary gap--r1"
+                      data-bind="testId:'manage-neighbors-edit-' + $index(),
+                                 click: $root.edit,
+                                 ltext: 'edit'"></button>
+              <button class="secondary"
+                      data-test-id="manage-neighbors-remove"
+                      data-bind="click: $root.remove,
+                                 ltext: 'remove'"></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <icon-button params="click: $root.add,
+                           ltext: 'neighbors.add',
+                           testId: 'manager-neighbors-add',
+                           icon: 'circle-plus'"></icon-button>
+
+      <icon-button params="click: $root.done,
+                           ltext: 'neighbors.done',
+                           testId: 'manager-neighbors-done',
+                           icon: 'chevron-start',
+                           buttonClass: 'secondary dsp--block gap--t1'"></icon-button>
+
+    </div>
+  </section>
+
+</body>
+</html>

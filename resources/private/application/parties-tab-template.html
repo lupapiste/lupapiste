@@ -1,0 +1,80 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="parties-tab-template">
+  <div id="application-parties-tab" class="tab-content" data-bind="with: application">
+
+    <h1 data-bind="ltext: titleForPartiesOrSupervisor"></h1>
+    <help-toggle params="lhtml: [descForPartiesOrSupervisor, 'company-invite.help']"></help-toggle>
+
+    <!-- ko if: $parent.selectedTabName() === 'parties' && $root.authorization.ok("create-assignment") -->
+    <create-assignment data-test-id="create-assignment-component"
+                       params="authorities: $root.authorities,
+                               applicationId: id,
+                               initialTarget: 'parties',
+                               targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+    <!-- /ko -->
+
+    <div class="application_section">
+        <div class="application_section_content content_expanded">
+            <div data-bind="component: {name: 'authorized-parties'}"></div>
+        </div>
+    </div>
+
+    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" && !$data.isArchivingProject() -->
+    <div data-bind="component: 'application-guests'"></div>
+    <!-- /ko -->
+
+    <button data-bind="click: partiesAsKrysp,
+                       visible: $root.authorization.ok('parties-as-krysp'),
+                       enable: !stateChanged() && !processing() && $root.authorization.ok('parties-as-krysp'),
+                       attr: {'title': loc('tooltip.partiesAsKrysp')}"
+            data-test-id="parties-to-krysp"
+            class="positive caps">
+        <i class="lupicon-circle-arrow-right"></i>
+        <span data-bind="ltext: 'application.partiesAsKrysp'"></span>
+    </button>
+
+    <p data-bind="lhtml: 'required.field.desc'"></p>
+
+    <!-- docgen generated content: -->
+    <div class="application_section">
+        <div id="partiesDocgen" class="docgen-content">
+            <!-- This is where generated document will be placed. -->
+        </div>
+        <!-- ko if: $root.foreman.isVisible -->
+        <section class="accordion" id="accordion-application-foreman">
+            <button onclick="accordion.click(this)"
+                    data-test-id="accordion-application-foreman-header"
+                    class="accordion-toggle plain">
+                <i class="lupicon-chevron-down"></i>
+                <i class="lupicon-chevron-up toggle"></i>
+                <span class="bar-text" data-bind="ltext: 'application.parties.foreman'"></span>
+            </button>
+            <div class="accordion_content" data-accordion-state="closed">
+                <div class="accordion-fields">
+                    <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
+                </div>
+            </div>
+        </section>
+        <!-- /ko -->
+    </div>
+
+    <!-- ko ifnot: $data.isArchivingProject() -->
+    <button data-bind="click: $parent.addPartyModel.init, visible: $parent.authorization.ok('create-doc')"
+            class="secondary modal"
+            data-test-id="add-party">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'application.addParty'"></span>
+    </button>
+    <!-- /ko -->
+
+    <div class="process-nav">
+        <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+            <span data-bind="ltext: 'application.next-tab'"></span>
+            <i class="lupicon-chevron-right"></i>
+        </a>
+        <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="info">
+            <i class="lupicon-chevron-left"></i>
+            <span data-bind="ltext: 'application.previous-tab'"></span>
+        </a>
+    </div>
+  </div>
+</script>

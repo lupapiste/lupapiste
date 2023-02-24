@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="areas" >
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <section class="authority-admin-alueelliset-organisaatiot">
+          <h2 data-bind="ltext: 'auth-admin.alueelliset-organisaatiot'"></h2>
+
+          <div class="organization-areas">
+            <!-- ko if: organization.features -->
+            <div class="organization-areas-map" data-bind="component: {name: 'openlayers-map', params: {geoJsonFeatures: organization.features}}"></div>
+            <!-- /ko -->
+            <div data-bind="component: {name: 'area-upload', params: {onSuccess: function(res) {organization.features(res.areas);}}}"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </body>
+</html>

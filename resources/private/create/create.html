@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+  <!-- Phase 1: -->
+
+  <section class="page container" id="create-part-1">
+    <h1 data-bind="ltext: 'newRequest.topic'"></h1>
+    <div class="create-application-search-box">
+      <p data-bind="ltext: 'newRequest.locationInfo'"></p>
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
+             id="create-search" type="text" class="lux address-search" autofocus="autofocus" />
+      <button data-bind="click: searchNow" class="positive" data-test-id="create-search-button">
+          <i class="lupicon-search"></i>
+          <span data-bind="ltext: 'search'"></span>
+      </button>
+    </div>
+    <div id="create-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
+    <!-- FIXME: embed new map component here -->
+    <!-- <div data-bind="react: {component: window.MapLibrary.ApplicationMap, props: {locFn: window.loc, testProps: 'these props are from lupis'}}, feature: 'next-gen-map'"></div> -->
+    <!-- Use react: bindinghandler:  <div data-bind="react: {component: Komponentti, props: {mun: "propsi"}}"><div> -->
+    <!-- this is the "phase 1" of creating application: selecting location -->
+  </section>
+
+  <!-- Phase 2: -->
+
+  <section class="page container" id="create-part-2">
+    <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
+    <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text"></p>
+    <operation-tree params="operationTree: operationTree,
+                            selected: operation,
+                            lastPageComponent: 'last-page-create-application',
+                            lastPageParams: lastPageParams"></operation-tree>
+
+  </section>
+
+  <!-- Phase 3: -->
+
+  <section class="page container" id="create-part-3">
+    <h1 data-bind="ltext: ('createApplication.project-description-header' + infoRequestLocKeyPostfix())"></h1>
+    <div>
+      <p data-bind="ltext: ('newRequest.create.desc' + infoRequestLocKeyPostfix())"></p>
+      <form class="tree-intend">
+        <h3 data-bind="ltext: ('newRequest.messageTitle' + infoRequestLocKeyPostfix())"></h3>
+        <p data-bind="ltext: ('newRequest.inforequestMessage' + infoRequestLocKeyPostfix())"></p>
+        <textarea
+            class="lux lux--wide"
+            data-bind="textInput: message,
+                       required: true"
+            rows="6"
+            autofocus="autofocus"
+            data-test-id="create-inforequest-message">
+        </textarea>
+        <h3 data-bind="ltext: 'newRequest.attachments.title'"></h3>
+        <p data-bind="ltext: 'newRequest.attachments.desc'"></p>
+        <button
+            data-bind="click: createInfoRequest, enable: message().length > 0,
+                       css: {waiting: pending}"
+            class="positive"
+            data-test-id="create-inforequest">
+            <i class="lupicon-circle-question"></i>
+            <span data-bind="ltext: 'application.startConversation'"></span>
+            <i class="wait spin lupicon-refresh"></i>
+        </button>
+      </form>
+      <br>
+      <button data-bind="click: returnPhase2" class="secondary" data-test-id="create-back" id="create-inforequest-back">
+          <i class="lupicon-chevron-left"></i>
+          <span data-bind="ltext: 'tree.back'"></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="page" id="create-page-prev-permit">
+    <div class="container">
+      <h1 data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></h1>
+      <form class="previous-permit-form">
+        <div class="help-box"
+             data-bind="ltext: 'previous-permit-cleanup-note'">
+        </div>
+        <div class="previous-permit-form__entry">
+          <label data-bind="ltext: 'prev-permit-label-kuntalupatunnus'" class="form-label" for="prev-permit-kuntalupatunnus"></label><br>
+          <input data-bind="textInput: kuntalupatunnusFromPrevPermit"
+                 id="prev-permit-kuntalupatunnus" data-test-id="test-prev-permit-kuntalupatunnus"
+                 type="text" class="grid-style-input--wide" autofocus="autofocus" />
+        </div>
+        <div class="previous-permit-form__entry">
+          <toggle params="value: authorizeApplicants,
+                          prefix: 'blockbox',
+                          ltext: 'newRequest.authorizeApplicants',
+                          testId: 'authorize-applicants'"></toggle>
+        </div>
+        <div class="previous-permit-form__entry"
+             data-bind="visible: !needMorePrevPermitInfo()">
+          <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label><br>
+          <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+                  class="dropdown dropdown--full-width"
+                  data-bind="options: organizationOptions,
+                             optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
+                             optionsValue: 'id',
+                             value: selectedPrevPermitOrganization,
+                             optionsCaption: loc('choose')">
+          </select>
+        </div>
+
+        <div class="previous-permit-form__entry"
+             data-bind="visible: needMorePrevPermitInfo">
+          <p class="more-prev-app-info-needed-desc" data-bind="ltext:'more-prev-app-info-needed-desc'"></p>
+          <label data-bind="ltext: 'prev-permit-label-address'" class="form-label" for="prev-permit-address-search"></label>
+          <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
+                 id="prev-permit-address-search" type="text" class="grid-style-input--wide" autofocus="autofocus" />
+        </div>
+        <button data-bind="click: createApplicationWithPrevPermit,
+                           enable: creatingAppWithPrevPermitOk,
+                           css: {waiting: pending}"
+                type="submit"
+                data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="positive">
+          <i class="lupicon-search"></i>
+          <i class="wait spin lupicon-refresh"></i>
+
+          <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
+        </button>
+        <button data-bind="click: convertApplication,
+                           css: {waiting: pending},
+                           feature: 'conversion-debug'"
+                type="submit"
+                data-test-id="" class="positive">
+          <i class="lupicon-search"></i>
+          <i class="wait spin lupicon-refresh"></i>
+
+          <span data-bind="text: 'Konvertoi'"></span>
+        </button>
+      </form>
+    </div>
+
+  </section>
+
+</body>
+</html>

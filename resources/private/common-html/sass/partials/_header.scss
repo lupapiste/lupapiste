@@ -1,0 +1,334 @@
+$header-padding: 12px;
+$header-height: 60px;
+$language-bg: $navi-background;
+$link-color: resolve-color( "navi", "text", "enabled");
+$link-hover: resolve-color( "navi", "text", "hover");
+$link-active: resolve-color( "navi", "text", "active");
+
+@mixin header-padding {
+  padding: {
+    left: $header-padding;
+    right: $header-padding;
+  }
+}
+
+@mixin nav-link( $link: $link-color,
+                 $hover: $link-hover,
+                 $hover-bg: inherit,
+                 $active: $link-active ) {
+  a {
+    font-size: 16px;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    // Reminder of order: link, visited, hover, active
+    &:link, &:visited {
+      color: $link;
+      text-decoration: none;
+      span {
+        color: $link;
+      }
+    }
+    &:focus {
+      @include colors-and-border( "navi", "focus");
+    }
+    &:hover, &:active {
+      background-color: $hover-bg;
+    }
+    &:hover {
+      color: $hover;
+      span {
+        color: $hover;
+      }
+    }
+    &:active {
+      color: $active;
+      span {
+        color: $active;
+      }
+    }
+    span {
+      vertical-align: middle;
+    }
+  }
+}
+
+@mixin header-dropdown( $link: $link-color,
+                        $hover: $link-hover,
+                        $bg: inherit,
+                        $hover-bg: $language-bg ) {
+  display: inline-block;
+  > button.navi {
+    min-height:  $header-height;
+    max-height:  $header-height;
+    line-height: $header-height;
+
+    i {
+      line-height: $header-height;
+    }
+  }
+  > .header-dropdown-button {
+    display: inline-block;
+    @include header-padding;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    height: $header-height;
+    line-height: $header-height;
+    color: $link;
+    text-decoration: none;
+
+    > span { vertical-align: middle; }
+
+    &:hover { color: $hover; }
+    &:focus { outline: none; }
+  }
+  &.active > .header-dropdown-button {
+    background-color: $hover-bg;
+    color: $hover;
+
+    &:hover { color: $link; }
+  }
+
+  > ul {
+    display: none;
+    position: fixed;
+    padding: 0;
+    background-color: $navi-background;
+    border: 1px solid $navi-background;
+    list-style-type: none;
+
+    > li {
+      display: table;
+      width: 100%;
+      button, a.navi {
+        width: 100%;
+      }
+
+      &.spacer {
+        height: 1px;
+        background-color: $link;
+      }
+    }
+  }
+  &.active > ul {
+    z-index: 2;
+    display: block;
+  }
+}
+
+.usage-purpose-org-name {
+  display: block;
+  font-size: smaller;
+  color: resolve-color( "navi", "text", "enabled" );
+  max-width: 400px;
+}
+
+@mixin nav-row( $bg ) {
+  width: 100%;
+  background-color: $bg;
+  display: block;
+  clear: both;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.nav-wrapper {
+    width: 100%;
+    @media print {
+      display: none;
+    }
+}
+
+.nav-box {
+  width: 100%;
+  // max-width: $application-max-width;
+  min-width: $application-min-width;
+  margin: 0 auto;
+  position: relative;
+  box-sizing: border-box;
+  padding: {
+    left: $marginM;
+    right: $marginM;
+  }
+  margin: {
+    left: auto;
+    right: auto;
+  }
+}
+
+.lupapiste-logo {
+  width: 164px;
+  height: 35px;
+  background: {
+    image: svg-url("lupapiste-logo", $white);
+    repeat: no-repeat;
+    size: contain;
+    position: left center;
+  }
+}
+
+.julkipano-logo {
+  width: 164px;
+  background: {
+    // For some reason, svg-url approach does not work with this svg.
+    image: url("/lp-static/img/julkipano-logo.svg" );
+    repeat: no-repeat;
+    size: contain;
+    position: left center;
+  }
+}
+
+
+.lupapiste-logo-no-text {
+  width: 40px;
+  height: 35px;
+  background: {
+    image: svg-url("lupapiste-logo-no-text", $white);
+    repeat: no-repeat;
+    size: contain;
+    position: left center;
+  }
+}
+
+nav {
+  position: fixed;
+  top: 0;
+  z-index: 2010;
+  box-sizing: border-box;
+  width: 100%;
+  .nav-top {
+    @include nav-row( $navi-background );
+  }
+  .brand {
+    position: relative;
+    display: inline-block;
+    float: left;
+    a.logo {
+      float: left;
+      height: 35px;
+      margin: 12px;
+      &:focus {
+        outline-offset: 8px;
+        outline: 2px solid get-blue( 15 );
+      }
+    }
+  }
+  .header-menu {
+    display: inline-block;
+    position: absolute;
+    right: 20px;
+
+    .header-box {
+      @include nav-link;
+      @include header-padding;
+      display: inline-block;
+      height: $header-height;
+      a {
+        max-width: 300px;
+        outline: 0;
+      }
+      a, span {
+        line-height: $header-height;
+      }
+    }
+  }
+
+  .header-dropdown { @include header-dropdown; }
+}
+
+nav.nav-flex {
+  @include nav-row( $navi-background );
+  display: flex;
+  .logo {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+}
+
+ul.user-dropdown {
+  top: 60px;
+  position: fixed;
+  right: 20px;
+}
+
+nav {
+  .julkipano-brand {
+    .header-box {
+      @include nav-link();
+    }
+    .brand a.logo.julkipano-logo.narrow-hide {
+      height: 56px;
+      margin: 2px 12px;
+     }
+     #header-user-menu {
+       display: inline-block;
+       position: absolute;
+       right: 0px;
+     }
+     .header-box, .julkipano-user {
+       font-size: 16px;
+       vertical-align: middle;
+       white-space: nowrap;
+       position: relative;
+       display: inline-block;
+       overflow: hidden;
+       text-overflow: ellipsis;
+      line-height: 60px;
+      color: #fff;
+      margin-right: $marginL;
+      span {
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+// The margins/paddings may seem arbitrary, but
+// they are due to rendering differences between
+// different browsers.
+$notification-bg: get-signal( "violet" );
+$notification-top: 62px;
+$notification-bottom: -62px;
+
+.nav-notification {
+  @include nav-row( $notification-bg );
+  padding: {
+    top: $header-padding;
+    bottom: $header-padding;
+  }
+  margin: {
+    top: $notification-top;
+    bottom: $notification-bottom;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+// Admin & authority admin nav is different, so tweaking is needed.
+.admin, .authority-admin {
+  .nav-notification {
+    margin: {
+      top: 106px; // same as _.base.scss - body.admin
+      bottom: $notification-bottom + 12px;
+    }
+  }
+
+  .breadcrumb {
+    background-color: #4F4F4F;
+    .container {margin-top: 0;}
+    a.selected {color: #000}
+  }
+
+  h2 {margin-top: $marginM}
+}
+
+/* Louhi and Facta themes */
+
+.louhi,
+.facta {
+  // Both use default Lupapiste styles.
+}

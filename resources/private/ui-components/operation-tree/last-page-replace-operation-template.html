@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="last-page-replace-operation-template">
+  <div>
+    <div class="gap--t1 gap--b1"
+         data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
+
+    <div class="info-line">
+      <i class="lupicon-circle-attention"></i>
+      <span data-bind="ltext: 'operations.replaceOperationWarningText'"></span>
+    </div>
+
+    <div class="last-page--create-buttons">
+      <icon-button params="click: replaceOperation,
+                           waiting: processing,
+                           testId: 'replace-operation',
+                           icon: 'check',
+                           ltext: 'operations.replace'"></icon-button>
+    </div>
+
+  </div>
+</script>

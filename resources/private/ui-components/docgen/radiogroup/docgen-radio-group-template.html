@@ -1,0 +1,29 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-radio-group-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <!-- Empty label for alignment purposes -->
+  <label class="empty-label" data-bind="visible: label, css: labelClasses"></label>
+  <div role="radiogroup"
+       data-bind="attr: {'aria-labelledby': schema['labelled-by']},
+                  ariaLtext: schema['aria-label']">
+    <!-- ko foreach: radios -->
+    <div class="radio-wrapper"
+         data-bind="attr: {'class': 'radio-wrapper ' + $parent.inputClasses()},
+                    css: {'wrapper--disabled': $parent.disabled() || $parent.readonly()}">
+      <input type="radio" data-bind="checked: $parent.value,
+                                     disable: $parent.disabled() || $parent.readonly(),
+                                     ariaText: label,
+                                     attr: {name: $parent.path.join( '-' ),
+                                     id: id,
+                                     value: value}" />
+      <label class="radio-label"
+             aria-hidden="true"
+             data-bind="text: label,
+                        attr: {'for': id}"></label>
+    </div>
+    <!-- /ko -->
+    <ping aria-hidden="true"
+          params="indicator: indicator, mode: 'icon'"></ping>
+  </div>
+</script>

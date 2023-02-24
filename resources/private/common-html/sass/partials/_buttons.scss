@@ -1,0 +1,1024 @@
+
+$btn-radius: 6px;
+
+button.btn-dialog,
+.btn-dialog {
+  border-radius: $btn-radius;
+  position: absolute;
+  display: table;
+   text-align: center;
+   bottom: 0;
+   right: 6px;
+   width: auto;
+   min-width: 48%;
+   max-width: 48%;
+   //margin-left: $marginS;
+   min-height: 40px;
+   //max-height: 40px;
+   line-height: 40px;
+
+   &.cancel {
+    width: auto;
+   }
+}
+
+.btn-dialog > span {
+   min-width: $cols2;
+   max-width: $cols3;
+}
+
+.btn-dialog.btn-primary,
+.btn-dialog.positive {
+  left: 0;
+  text-transform: uppercase;
+}
+
+// ajax loader for buttons
+// Should no longer be used with buttons. See
+// the waiting mechanism below. This class is retained,
+// because it still has some legacy uses.
+.button-loader {
+  white-space: nowrap;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url("/lp-static/img/ajax-loader-grey-small.gif");
+  position: absolute;
+  top: 6px;
+  right: 8px;
+}
+
+// New buttons
+
+$btn-spacer: 12px;
+$btn-height: 40px;
+$icon-pad: 10px;
+
+@mixin btn-height( $height: $btn-height ) {
+  min-height: $height;
+  max-height: $height;
+  line-height: $height;
+}
+
+.btn-base {
+  @include btn-height;
+  border: 0;
+  box-sizing: border-box;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: $font-size;  // _typography.scss
+  white-space: nowrap;
+  text-align: left;
+  text-decoration: none;
+  padding: {
+    left: $btn-spacer;
+    top: 0;
+    bottom: 0;
+    right: $btn-spacer;
+  }
+  i {
+    line-height: $btn-height;
+  }
+  span, i {
+    vertical-align: middle;
+    // Inline-block would be more intuitive and proper
+    // alternative, but for some reason it results in
+    // one or two pixel vertical gap. This might be somehow
+    // system-related since the main.css works fine
+    // with inline-block on its own.
+    display: table-cell;
+    margin: 0;
+  }
+  :first-child {
+    padding: {
+      right: $icon-pad;
+    }
+  }
+  :last-child {
+    padding: {
+      right: 0px !important;
+    }
+  }
+}
+
+[type=submit], .btn, button {
+  @extend .btn-base;
+  cursor: pointer;
+}
+
+i.btn {
+  margin: 0;
+  font-size: $lupicon-size;
+}
+
+@mixin small {
+  min-height: $lupicon-size + 4;
+  //max-height: $lupicon-size + 4;
+  line-height: $lupicon-size + 4;
+  font-size: $font-size - 2px;
+  i {
+    line-height: $lupicon-size + 4;
+    font-size: $lupicon-size - 2px;
+  }
+}
+
+// Layout like button, but semantically is not.
+// This is useful when displaying text with icons,
+// for example.
+.like-btn {
+  @extend .btn-base;
+  cursor: default;
+  padding: 0;
+  @include small;
+}
+
+.btn-small {
+  @include small;
+  // Padding adjusted to make i.btn-small.lupicon-xxx square.
+  padding: {
+    left: 4px;
+    right: 4px;
+  }
+  i {
+    font-size: $lupicon-size - 4px;
+  }
+}
+
+i.btn-small {
+  font-size: $lupicon-size - 4px;
+}
+
+.caps {
+  text-transform: uppercase;
+}
+
+// Sometimes the "automatic" padding for icon
+// causes extra spacing. One typical case:
+// No icon, but waiting icon on the right.
+.no-icon-pad {
+  :first-child {
+    padding-right: 0;
+  }
+}
+
+// If the button does not include span, we'll make the button
+// rectangular.
+.btn-icon-only {
+  padding: {
+    left: 9px;
+    right: 9px;
+  }
+  i {padding: 0 0;}
+}
+
+// You probably still need to tweak
+// the vertical properties case by case, since
+// the combination of center alignment and
+// (automatically) stacking letters is problematic.
+// Especially the letter-spacing breaks the alignment.
+// The most robust approach is to insert spaces between
+// letters (see the lspaced binding in ko.init.js).
+.vertical {
+  line-height: normal;
+  word-break: break-all;
+  max-height: none;
+  white-space: normal;
+  word-spacing: 2em;
+  text-align: center;
+  vertical-align: default;
+  padding: {
+    top: $btn-spacer;
+    left: 0;
+    right: 0;
+    bottom: $btn-spacer;
+  }
+  :first-child {
+    // Undo the icon spacing.
+    padding-right: 0;
+  }
+  span {
+    padding: 0;
+    display: block;
+    text-align: center;
+    max-width: 16px;
+    margin: {
+      left: auto;
+      right: auto;
+      top: $btn-spacer;
+    }
+  }
+}
+
+@mixin disabled( $color: white, $bg: $gray221, $border: null ) {
+  // !importants are needed in order to make sure
+  // that sibling classes are overriden.
+  // For example, <div class="btn primary disabled">
+  cursor: not-allowed !important;
+  color: $color !important;
+  background-color: $bg !important;
+  border: $border;
+  i {
+    cursor: not-allowed;
+  }
+}
+
+.disabled {
+  // Empty class. Just used for "signaling", but provided
+  // here in order to avoid confusion ("What .disabled?").
+}
+
+@mixin button-a ($name) {
+  button.#{$name} { @content; }
+  a.btn.#{$name} { @content; }
+}
+
+@mixin styled-input ($type, $radius: 0 ) {
+  $text-disabled: resolve-color( $type, "text", "disabled" );
+  $bg-disabled: resolve-color( $type, "background", "disabled" );
+  $border-disabled: resolve-border( $type, "disabled" );
+
+  @include colors-and-border( $type, "enabled" );
+
+  border-radius: $radius;
+
+  &:link, &:visited {
+    @include colors-and-border( $type, "enabled" );
+  }
+  &:hover {
+    @include colors-and-border( $type, "hover" );
+    text-decoration: none;
+  }
+  &:active, &.active {
+    @include colors-and-border( $type, "active" );
+  }
+  &:focus {
+    @include colors-and-border( $type, "focus" );
+  }
+
+  &:disabled, &.disabled, &.waiting {
+    @include disabled( $text-disabled, $bg-disabled, $border-disabled);
+  }
+}
+
+@mixin styled-button( $button-type, $radius: 0) {
+  $bg-disabled: resolve-color( $button-type, "background", "disabled");
+  $text-disabled: resolve-color( $button-type, "text", "disabled");
+  $border-disabled: resolve-border( $button-type, "disabled");
+
+  @include colors-and-border( $button-type, "enabled" );
+
+  border-radius: $radius;
+
+  &.no-radius {
+    border-radius: 0;
+  }
+  &:link, &:visited {
+    @include colors-and-border( $button-type, "enabled" );
+  }
+  &:hover {
+    @include colors-and-border( $button-type, "hover" );
+    text-decoration: none;
+  }
+  &:active, &.active {
+    @include colors-and-border( $button-type, "active" );
+  }
+  &:focus {
+    @include colors-and-border( $button-type, "focus" );
+  }
+  &:disabled, &.disabled, &.waiting {
+    outline: none;
+    @include disabled( $text-disabled, $bg-disabled, $border-disabled );
+  }
+}
+
+@mixin indicator-colors( $button-type, $state ) {
+  .indicator {
+    color: resolve-color( $button-type, "background", $state );
+    background-color: resolve-color( $button-type, "text", $state );
+    border: 4px solid resolve-color( $button-type, "text", $state );
+  }
+}
+
+@mixin selectable-button( $button-type ) {
+  $bg-disabled: resolve-color( $button-type, "background", "disabled");
+  $text-disabled: resolve-color( $button-type, "text", "disabled");
+  $border-disabled: resolve-border( $button-type, "disabled");
+
+  @include colors-and-border( $button-type, "enabled" );
+
+  @include indicator-colors( $button-type, "enabled" );
+
+  &:link, &:visited {
+    @include colors-and-border( $button-type, "enabled" );
+  }
+  &:hover {
+    @include colors-and-border( $button-type, "hover" );
+    text-decoration: none;
+    @include indicator-colors( $button-type, "hover" );
+  }
+  &.selected:hover,
+  &.active:hover,
+  &[aria-selected="true"]:hover {
+    @include colors-and-border( $button-type, "selected:hover" );
+    text-decoration: none;
+    @include indicator-colors( $button-type, "selected:hover" );
+  }
+  &:active, &.active,
+  &.selected,
+  &[aria-selected="true"] {
+    @include colors-and-border( $button-type, "selected" );
+    @include indicator-colors( $button-type, "selected" );
+  }
+  &:focus {
+    @include colors-and-border( $button-type, "focus" );
+    @include indicator-colors( $button-type, "focus" );
+  }
+  &:disabled, &.disabled, &.waiting {
+    outline: none;
+    @include disabled( $text-disabled, $bg-disabled, $border-disabled );
+    @include indicator-colors( $button-type, "disabled" );
+  }
+}
+
+// Upload button is actually a label
+@mixin upload-button( $button-type ) {
+  $bg-disabled: resolve-color( $button-type, "background", "disabled");
+  $text-disabled: resolve-color( $button-type, "text", "disabled");
+  $border-disabled: resolve-border( $button-type, "disabled");
+
+  input[type="file"] + label.#{$button-type} {
+    @extend .btn-base;
+    @include colors-and-border( $button-type, "enabled" );
+    @include indicator-colors( $button-type, "enabled" );
+    cursor: pointer;
+    border-radius: $btn-radius;
+  }
+
+  input[type="file"] + label.#{$button-type}:hover {
+    @include colors-and-border( $button-type, "hover" );
+    @include indicator-colors( $button-type, "hover" );
+  }
+
+  input[type="file"]:focus + label.#{$button-type} {
+    @include colors-and-border( $button-type, "focus" );
+    @include indicator-colors( $button-type, "focus" );
+  }
+
+  input[type="file"]:disabled + label.#{$button-type} {
+    @include disabled( $text-disabled, $bg-disabled, $border-disabled );
+    @include indicator-colors( $button-type, "disabled" );
+    outline: none;
+}
+
+}
+
+@include upload-button( "primary" );
+@include upload-button( "secondary" );
+@include upload-button( "tertiary" );
+
+
+@mixin tab-indicator() {
+  .indicator {
+    font-size: .8em;
+    margin-left: 1em;
+    display: inline;
+    padding: 0 0;
+    vertical-align: top;
+  }
+}
+
+@mixin balloon-indicator() {
+  .indicator {
+    font-size: .6em;
+    border-radius: 100%;
+    display: inline-block;
+    min-width: 2em;
+    text-align: center;
+    position: relative;
+    bottom: 1em;
+    margin-left: -.5em;
+    line-height: 1em;
+    padding: 0 0;
+    @media (max-width: $wide-breakpoint) {
+      margin-left: -1.5em;
+    }
+  }
+}
+
+
+// primary button class and its aliases:
+// positive, approve, btn-primary
+
+@include button-a ( primary ) {
+  @include styled-button( "primary", $btn-radius);
+}
+
+@include button-a (positive) {
+  @include styled-button( "primary", $btn-radius );
+}
+
+@include button-a (approve) {
+  @include styled-button( "primary", $btn-radius)
+}
+
+// This is used only for legacy support until the old definitions have been rooted out.
+@include button-a (btn-primary ) {
+  @include styled-button( "primary", $btn-radius)
+}
+
+
+@include button-a (secondary) {
+  @include styled-button( "secondary", $btn-radius );
+}
+
+@include button-a (ghost) {
+  @include styled-button( "secondary", $btn-radius );
+}
+
+
+@include button-a (help) {
+  @include styled-button( "help", $btn-radius );
+}
+
+@include button-a (tertiary) {
+  @include styled-button( "tertiary", 0 );
+}
+
+@include button-a ( plain ) {
+  @include styled-button( "plain-button", $btn-radius );
+}
+
+@include button-a ( plain-secondary ) {
+  @include styled-button( "plain-secondary", $btn-radius );
+}
+
+@include button-a ( navi ) {
+  @include styled-button( "navi" );
+}
+
+// See also _operation-tree.scss
+@include button-a ( operation-tree-button ) {
+  @include styled-button( "tertiary" );
+}
+
+@include button-a ( action ) {
+  @include styled-button( "action-button");
+}
+
+@include button-a ( plain-tab ) {
+  @include selectable-button( "plain-tab" );
+  @include tab-indicator;
+}
+
+@include button-a ( primary-tab ) {
+  @include selectable-button( "primary-tab" );
+  @include tab-indicator;
+}
+
+@include button-a ( white-button ) {
+  @include styled-button( "white-button", $btn-radius);
+}
+
+// Default tri-state button classes
+
+@include button-a ( tri-state-nil ) {
+  @include styled-button( "tri-state-nil", $btn-radius);
+  font-size: 15px;
+  font-weight: bold;
+}
+
+@include button-a ( tri-state-true ) {
+  @include styled-button( "tri-state-true", $btn-radius);
+  font-size: 15px;
+  font-weight: bold;
+}
+
+@include button-a ( tri-state-false ) {
+  @include styled-button( "tri-state-false", $btn-radius);
+  font-weight: bold;
+  font-size: 15px;
+  text-decoration: line-through;
+  &:hover {
+    text-decoration: line-through;
+  }
+}
+
+// @include button-a ( status-tag ) {
+//   @include selectable-button( "status-tag" );
+//   &[aria-selected="true"] {
+//     font-weight: bold;
+//   }
+// }
+
+
+@include button-a ( breadcrumb ) {
+  @include selectable-button( "breadcrumb");
+  padding-left: 2px;
+  padding-right: 2px;
+  > span {
+    padding-right: 0;
+  }
+  &[aria-selected="true"] {
+    font-weight: bold;
+    border-bottom: 2px solid $black;
+  }
+  &.highlight {
+    font-weight: bold;
+    &:disabled,
+    &:not(:hover) {
+      color: get-signal( "blue" ) !important;
+      border-bottom-color: get-signal( "blue" ) !important;
+    }
+    &:hover {
+      background-color: get-signal( "blue" );
+      color: $white;
+      border-bottom-color: $white;
+    }
+  }
+}
+
+div.breadcrumbs {
+  background-color: $white;
+  .bread-indicator {
+    padding-left: .5em;
+    &::before {
+      content: "(";
+    }
+    &::after {
+      content: ")";
+    }
+  }
+  .bread-separator {
+    @extend .btn-base;
+    padding-left: .5em;
+    padding-right: .5em;
+  }
+}
+
+$card-width: 4 * $btn-height;
+$card-height: 3 * $btn-height;
+$card-pad: 6px;
+
+.btn-card {
+  min-width: $card-width;
+  max-width: $card-width;
+  min-height: $card-height;
+  max-height: $card-height;
+  text-align: center;
+  overflow: hidden;
+  padding: {
+    top: $card-pad;
+    bottom: $card-pad;
+    left: 2 * $card-pad;
+    right: 2 * $card-pad;
+  }
+  > i,
+  > span {
+    display: block;
+    text-align: center;
+    white-space: normal;
+    hyphens: auto;
+    line-height: normal;
+    padding: {
+      top: $card-pad;
+      bottom: $card-pad;
+      left: 0;
+      right: 0;
+    }
+  }
+}
+
+button.btn-card {
+  border-radius: 0;
+}
+
+@include button-a ( navi-toggle ) {
+  @include selectable-button( "navi-toggle" );
+  @include balloon-indicator;
+  @media (max-width: $wide-breakpoint) {
+    i {
+      padding: 0;
+    }
+  }
+}
+
+@include button-a( register ) {
+  @include styled-button( "register", $btn-radius );
+  height: unset;
+  min-height: unset;
+  max-height: unset;
+  border: 4px solid transparent;
+  &[aria-pressed="true"] {
+    border-color: $primary;
+  }
+  &:focus {
+    background-color: $focus-background;
+    border-color: $blue-100;
+  }
+  &:hover {
+    border-color: $primary;
+  }
+}
+
+
+
+
+.operation-tree-button {
+  width: 100%;
+  max-height: none;
+  line-height: normal;
+  white-space: normal;
+  span {width: 100%;}
+}
+
+
+
+// danger class and its aliases:
+// negative, reject
+
+@include button-a ( danger ) {
+  @include styled-button( "danger", $btn-radius );
+}
+
+@include button-a ( negative ) {
+  @include styled-button( "danger", $btn-radius );
+}
+
+@include button-a ( reject ) {
+  @include styled-button( "danger", $btn-radius );
+}
+
+@include button-a ( authority ) {
+  @include styled-input( "primary", $btn-radius);
+}
+
+@include button-a ( bulletin ) {
+  @include styled-input( "primary", $btn-radius);
+}
+
+@include button-a ( bulletin-inverse ) {
+  @include styled-input( "primary", $btn-radius);
+}
+
+@include button-a ( th-button ) {
+  @include styled-input( "th-button", $btn-radius );
+  font-weight: bold;
+  span {
+    padding: 0;
+  }
+  i.placeholder {
+    visibility: hidden;
+  }
+}
+
+$sidebar-button-width: 326px;
+$sidebar-icon-width:   118px;
+$sidebar-button-color: $gray238;
+
+@mixin sidebar-button-dimensions {
+  border-bottom: 1px solid $gray221;
+  padding-left:  2 * $marginL;
+  padding-right: 2 * $marginL;
+  min-width: $sidebar-button-width;
+  max-width: $sidebar-button-width;
+  overflow: hidden;
+}
+
+@include button-a( sidebar-button ) {
+  @include styled-input( "primary");
+  @include sidebar-button-dimensions;
+}
+
+@include button-a( sidebar-button-light ) {
+  @include styled-input( "primary");
+  @include sidebar-button-dimensions;
+}
+
+.sidebar-button.sidebar-button--icon,
+.sidebar-button-light.sidebar-button--icon {
+  min-width: $sidebar-icon-width;
+  max-width: $sidebar-icon-width;
+}
+
+// Link button is a link that is laid out as button.
+// However, no background or borders.
+
+a.link-btn {
+  @extend .like-btn;
+  @include styled-input( "link");
+  // @include styled-input( none, none, none,
+  //                        $text: $orange-link, $hover-text: $orange-hover,
+  //                        $active-text: $orange-active, $disabled-bg: none);
+  cursor: pointer;
+}
+
+a.link-btn-inverse {
+  @extend .like-btn;
+  @include styled-input( "link" );
+  cursor: pointer;
+}
+
+.link-btn--link {
+  &:hover, &:active {
+    span {
+      text-decoration: underline;
+    }
+    label {
+      cursor: pointer;
+    }
+  }
+}
+
+a.link-btn-julkipano {
+  @extend .like-btn;
+  @include styled-input( "primary");
+  cursor: pointer;
+}
+
+// Waiting animation
+
+// Example:
+// <button class="primary">
+//    <i class="wait spin lupicon-refresh"></i>
+//    <span>Not waiting</span>
+// </button>
+
+// The waiting is started with waiting class.
+// <button class="primary waiting">
+//    <i class="wait spin lupicon-refresh"></i>
+//    <span>Waiting</span>
+// </button>
+//
+// Note: the icon element needs to have wait class.
+//       The class just hides the element when not waiting.
+//       Here the waiting shows spin animation (see below).
+@mixin rotate-frames( $name, $degrees: 360deg ) {
+  @-webkit-keyframes #{$name} {
+    100% {
+      -webkit-transform: rotate($degrees);
+    }
+  }
+  @-moz-keyframes #{$name} {
+    100% {
+      -moz-transform: rotate($degrees);
+    }
+  }
+  @keyframes #{$name}  {
+    100% {
+      -webkit-transform: rotate($degrees);
+      transform:rotate($degrees);
+    }
+  }
+}
+
+@mixin rotate( $name, $speed: 4s, $count: infinite ) {
+  -webkit-animation: $name $speed linear $count;
+  -moz-animation: $name $speed linear $count;
+  animation: $name $speed linear $count;
+}
+
+@include rotate-frames( spin );
+
+.spin {
+  @include rotate( spin );
+  vertical-align: middle;
+}
+i.wait {
+  display: none !important;
+  padding: 0 !important;
+}
+
+.waiting {
+  i {
+    display: none !important;
+  }
+  i.wait {
+    display: table-cell !important;
+  }
+}
+
+.waiting .wait + span {
+  padding-left: $icon-pad;
+}
+
+span + .waiting.wait {
+  padding-right: $icon-pad;
+}
+
+// icon-button spin
+.icon-spin {
+  @include rotate( spin );
+  vertical-align: middle;
+  padding: 0 !important;
+  margin: 0;
+  display: inline-block;
+}
+
+button > .icon-spin {
+  display: table-cell;
+}
+
+.icon-spin + span {
+  padding-left: $icon-pad;
+}
+
+// Toggle support
+// Very similar to waiting.
+
+i.toggle {
+  display: none;
+  padding: 0 !important;
+}
+
+// Since accordions are actually
+// divs that include button we must
+// be very specific.
+
+.toggled > i, .toggled > button > i {
+  display: none;
+}
+
+.toggled i.toggle {
+  display: table-cell;
+}
+
+.toggled .toggle + span {
+  padding-left: $icon-pad;
+}
+
+button.no-border,
+btn.no-border {
+  border: none;
+}
+
+// DataTable tweaks.
+
+.dataTables_paginate {
+  .paginate_button {
+    @extend .btn;
+    @extend .secondary;
+  }
+  .disabled {
+    @extend .btn;
+    @include disabled;
+  }
+}
+
+
+
+@mixin stacked {
+  display: table;
+  .btn-base, .btn, button {
+    width: 100%;
+    display: block;
+    margin: 0;
+  }
+  div {
+    overflow-y: hidden;
+  }
+}
+
+.stacked {
+  @include stacked;
+}
+
+.stacked--inline {
+  @include stacked;
+  display: inline-table;
+  vertical-align: top;
+}
+
+
+// Only inner margins
+.inner-margins {
+  .btn-base, .btn, button, div, a {
+    margin-left: $btn-spacer;
+  }
+  :first-child {
+    margin-left: 0;
+  }
+}
+
+@mixin stacked-gapped( $margin-top ) {
+  .btn-base, .btn, button, div, a {
+    margin-left: 0;
+    margin-top: $margin-top;
+  }
+  :first-child {
+    margin-top: 0;
+  }
+}
+
+.inner-margins.stacked {
+  @include stacked-gapped( $btn-spacer )
+}
+
+.stacked.gap--px {
+  @include stacked-gapped( 2px )
+}
+
+// Generic margins support
+.margins-s {
+  margin: $marginS $marginS $marginS $marginS;
+}
+
+.margins-m {
+  margin: $marginM $marginM $marginM $marginM;
+}
+
+.no-top {
+  margin-top: 0 !important;
+}
+
+// Margin between form buttons.
+
+.form-buttons button {
+  margin-left: $btn-spacer;
+}
+
+// Buttons between docgen sections
+div.docgen-content > section + button {
+  margin-bottom: $marginL;
+}
+
+button {
+  &:focus {
+    outline:0;
+  }
+}
+
+.remove-button {
+  position: relative;
+  .remove-button__row {
+    position: absolute;
+    top: 0;
+    right: 0;
+    white-space: nowrap;
+    width: 0px;
+    overflow: hidden;
+    z-index: 1;
+    &.remove-button--show {
+      width: auto;
+    }
+    button {
+      display: inline-block;
+      width: 105px !important;
+      &.primary {
+        margin-right: -3px;
+      }
+    }
+  }
+}
+
+// Could be done in @include button-a (positive), didn't want to add borders anywhere else
+.application_actions button.positive {
+  border: 1px solid $gray221;
+  &:hover, &:active {
+    border-color: $gray187;
+  }
+}
+
+.left-buttons > button {
+  margin-right: $btn-spacer;
+}
+
+// Mixin for a button row that wraps
+@mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
+  > .btn-base,
+  > .btn,
+  > button,
+  > div,
+  > a,
+  > .operation-button {
+    margin: {
+      right: $margin-right;
+      bottom: $margin-bottom;
+    }
+  }
+  :last-child {
+    margin-right: 0;
+  }
+}
+
+// Not supported well on IE
+// http://caniuse.com/#feat=pointer-events
+.no-events {
+   pointer-events: none;
+}
+
+// Attachments tab operation buttons.
+.operation-button-row {
+  @include button-row( $margin-bottom: 0);
+  margin-bottom: 20px;
+  display: block;
+  .stacked--inline {
+    float: left;
+  }
+}
+
+button.signature {
+  color: white;
+  background-color: #2ca92c;
+  margin-left: 12px;
+  margin-top: -2px;
+}

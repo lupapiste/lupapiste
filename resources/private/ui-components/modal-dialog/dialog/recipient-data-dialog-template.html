@@ -1,0 +1,124 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="recipient-data-dialog-template">
+  <div class="content">
+    <form class="pad--h05">
+      <div class="form-grid form-grid--no-border">
+        <div class="row">
+          <div class="col-3">
+            <div class="pate-note"
+                 data-bind="ltext: 'suomifi-messages.recipient-info.desc'"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="person-selector">
+            <div class="person-select-box">
+              <label for="suomifi-person-selector"
+                     data-bind="ltext: 'person-selector'"></label>
+              <select id="suomifi-person-selector"
+                      data-bind="options:         personOptions,
+                                 optionsText:     optionsText,
+                                 valueAllowUnset: true,
+                                 value:           selectPerson,
+                                 optionsCaption:  loc('selectone'),
+                             testId:          'suomifi-person-select'"
+                      class="form-input dropdown long">
+              </select>
+        </div>
+      </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <form-cell params="value: firstName,
+                               label: 'suomifi-messages.firstName',
+                               required: true,
+                               immediate: true,
+                               attr: {disabled: fixedPersonId},
+                               testId: 'recipient-firstName',
+                               cell: 'text'"></form-cell>
+          </div>
+          <div class="col-1">
+            <form-cell params="value: lastName,
+                               label: 'suomifi-messages.lastName',
+                               required: true,
+                               immediate: true,
+                               attr: {disabled: fixedPersonId},
+                               testId: 'recipient-lastName',
+                               cell: 'text'"></form-cell>
+          </div>
+          <div class="col-1">
+            <form-cell params="value: fixedPersonId() ? 'XXXXXX-XXXX' : personId,
+                               label: 'suomifi-messages.personId',
+                               required: true,
+                               attr: {disabled: fixedPersonId},
+                               warning: personIdWarning,
+                               testId: 'recipient-hetu',
+                               cell: 'text'"></form-cell>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <form-cell params="value: address,
+                               label: 'suomifi-messages.address',
+                               required: true,
+                               immediate: true,
+                               testId: 'recipient-address',
+                               cell: 'text'"></form-cell>
+          </div>
+          <div class="col-1">
+            <form-cell params="value: zipcode,
+                               label: 'suomifi-messages.zipcode',
+                               required: true,
+                               immediate: true,
+                               testId: 'recipient-zipcode',
+                               cell: 'text'"></form-cell>
+          </div>
+          <div class="col-1">
+            <form-cell params="value: city,
+                               label: 'suomifi-messages.city',
+                               required: true,
+                               immediate: true,
+                               testId: 'recipient-city',
+                               cell: 'text'"></form-cell>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <!-- ko if: info -->
+            <div data-bind="ltext: info"></div>
+            <!-- /ko -->
+
+            <!-- ko if: error -->
+            <div class="context-error"
+                 data-bind="ltext: error"></div>
+            <!-- /ko -->
+          </div>
+          <div class="col-1">
+            &nbsp;
+          </div>
+        </div>
+      </div>
+
+      <icon-button params="click:   sendMessage,
+                           ltext:   'suomifi-messages.send',
+                           disable: sendDisabled,
+                           icon:    'envelope',
+                           testId:  'recipient-submit'"
+                   data-bind="visible: sendVisible"></icon-button>
+
+      <icon-button params="click:   checkIfRecipientAllowsSuomifi,
+                           ltext:   'suomifi-messages.check-recipient-has-suomifi-msgs-allowed',
+                           disable: sendDisabled,
+                           visible: false,
+                           icon:    'envelope',
+                           testId:  'recipient-submit'"
+                   data-bind="visible: checkAllowedVisible"></icon-button>
+      <icon-button class="gap--l1"
+                   params="click: _.wrap( 'close-dialog', hub.send),
+                           ltext: 'cancel',
+                           icon: 'remove',
+                           buttonClass: 'secondary',
+                           focusNext: '#modal-dialog-button-close:visible'"></icon-button>
+
+    </form>
+  </div>
+</script>

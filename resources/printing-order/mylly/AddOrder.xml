@@ -1,0 +1,85 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:ord="http://kopijyva.fi/OrderingSystem.IntegrationService">
+    <soapenv:Header>
+        <ord:OrderHeader>
+            <ord:userToken>{{token}}</ord:userToken>
+        </ord:OrderHeader>
+    </soapenv:Header>
+    <soapenv:Body>
+        <ord:AddOrder>
+            <ord:order>
+                <Order xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <CAD>
+                        <NewProjectName>{{projectName}}</NewProjectName>
+                        <InternalDetails IntegrationSource="Lupapiste" IntegrationId="{{internalOrderId}}" />
+                        {{#orderer}}
+                        <Orderer>
+                            <CompanyName>{{companyName}}</CompanyName>
+                            <StreetAddress>{{streetAddress}}</StreetAddress>
+                            <PostalCode>{{postalCode}}</PostalCode>
+                            <City>{{city}}</City>
+                            <Country />
+                            <FirstName>{{firstName}}</FirstName>
+                            <Surname>{{lastName}}</Surname>
+                            <PhoneNumber>{{phoneNumber}}</PhoneNumber>
+                            <Email>{{email}}</Email>
+                            <AdditionalInformation>{{additionalInformation}}</AdditionalInformation>
+                        </Orderer>
+                        {{/orderer}}
+                        {{#payer}}
+                        <Payer>
+                            <CompanyName>{{companyName}}</CompanyName>
+                            <StreetAddress>{{streetAddress}}</StreetAddress>
+                            <PostalCode>{{postalCode}}</PostalCode>
+                            <City>{{city}}</City>
+                            <Country />
+                            <FirstName>{{firstName}}</FirstName>
+                            <Surname>{{lastName}}</Surname>
+                            <PhoneNumber>{{phoneNumber}}</PhoneNumber>
+                            <Email>{{email}}</Email>
+                            <AdditionalInformation>{{additionalInformation}}</AdditionalInformation>
+                        </Payer>
+                        {{/payer}}
+                        <DistributionInstruction>
+                            {{#delivery}}
+                            <Delivery>
+                                <CompanyName>{{companyName}}</CompanyName>
+                                <StreetAddress>{{streetAddress}}</StreetAddress>
+                                <PostalCode>{{postalCode}}</PostalCode>
+                                <City>{{city}}</City>
+                                <Country />
+                                <FirstName>{{firstName}}</FirstName>
+                                <Surname>{{lastName}}</Surname>
+                                <PhoneNumber>{{phoneNumber}}</PhoneNumber>
+                                <Email>{{email}}</Email>
+                                <AdditionalInformation>{{additionalInformation}}</AdditionalInformation>
+                                <DeliveryMethod>Post</DeliveryMethod>
+                                <DeliveryMaterials>
+                                    <PrintedMaterials>
+                                        {{#printedMaterials}}
+                                        <PrintedMaterial>
+                                            <FileId>{{fileId}}</FileId>
+                                            <AmountValue>{{copyAmount}}</AmountValue>
+                                            <FoldingType>Folded210mmSpine</FoldingType>
+                                        </PrintedMaterial>
+                                        {{/printedMaterials}}
+                                    </PrintedMaterials>
+                                </DeliveryMaterials>
+                            </Delivery>
+                            {{/delivery}}
+                        </DistributionInstruction>
+                        <Files>
+                            {{#files}}
+                            <File fileId="{{fileId}}" isColor="false" name="{{name}}" size="{{size}}">
+                                {{content}}
+                            </File>
+                            {{/files}}
+                        </Files>
+                        <LocationId>1</LocationId>
+                        <RegistrationLocationCode>5002</RegistrationLocationCode>
+                    </CAD>
+                </Order>
+            </ord:order>
+        </ord:AddOrder>
+    </soapenv:Body>
+</soapenv:Envelope>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"     content="width=device-width, initial-scale=1.0" />
+    <meta name="description"  content="Lupapiste" />
+    <meta name="author"       content="Cloudpermit Oy -- https://cloudpermit.com/" />
+
+    <!-- Cloak content until css is loaded -->
+    <style type="text/css">.page{display:none}</style>
+    <link id="fonts-css" href="/lp-static/css/fonts.css" rel="stylesheet"></link>
+    <link id="lupicons-css" href="/lp-static/css/lupicons.css" rel="stylesheet"></link>
+    <link class="release-css" href="/lp-static/css/main.css" rel="stylesheet"></link>
+    <link class="release-css" href="/lp-static/css/react-day-picker.css" rel="stylesheet"></link>
+    <link href="inject" rel="stylesheet"></link>
+
+    <link rel="icon" href="/lp-static/img/favicon-v2.png" type="image/png"/>
+    <link rel="shortcut icon" href="/lp-static/img/favicon-v2.ico"/>
+    <link rel="apple-touch-icon" href="/lp-static/img/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="72x72"   href="/lp-static/img/ios/lp-v2-apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon" sizes="76x76"   href="/lp-static/img/ios/lp-v2-apple-touch-icon-76x76-precomposed.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/lp-static/img/ios/lp-v2-apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/lp-static/img/ios/lp-v2-apple-touch-icon-120x120-precomposed.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/lp-static/img/ios/lp-v2-apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/lp-static/img/ios/lp-v2-apple-touch-icon-152x152-precomposed.png">
+
+    <meta name="msapplication-config" content="none"/>
+
+    <title>Lupapiste</title>
+
+  </head>
+
+  <body>
+    <!-- rootVMO -->
+    <div id="app">
+      <div id="modal-dialog" data-bind="component: {name: 'modal-dialog'}"></div>
+      <div id="indicator" data-bind="component: 'indicator'"></div>
+      <div id="indicator-icon" data-bind="component: 'indicator-icon'"></div>
+      <div data-bind="component: 'side-panel'"></div>
+    </div>
+
+    <script src="/lp-static/lib/jquery-3.6.0.min.js"></script>
+    <script src="/lp-static/lib/jquery-migrate-3.4.0.js"></script>
+    <script src="/lp-static/lib/jquery-ui-1.13.2.min.js"></script>
+    <script async src="/lp-static/lib/jquery.dataTables-1.13.1.min.js"></script>
+
+     <script src="inject-common" type="text/javascript"></script>
+     <script src="inject-app" type="text/javascript"></script>
+
+    <nav class="nav-wrapper"></nav>
+    <div class="notification"></div>
+
+    <section></section>
+    <footer></footer>
+    <div class="ko-templates"></div>
+
+    <!--[if lt IE 9]><script src="/lp-static/lib/borderless-iframes.js"></script><![endif]-->
+    <script type="text/x-jquery-tmpl" id="error-template">
+      <span class="error-message" data-bind="validationMessage: field"></span>
+    </script>
+    <script src="inject-cljs" type="text/javascript"></script>
+    <script src="inject-map-component" type="text/javascript"></script>
+    <script src="inject-chatbot"></script>
+  </body>
+</html>

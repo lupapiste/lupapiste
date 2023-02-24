@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="register-company-existing-user-success">
+    <div class="register-company-wizard">
+      <register-company-steps params="step: 88"></register-company-steps>
+      <div class="register-company-container">
+        <h3 data-bind="ltext: 'register-company-success.title'"></h3>
+        <div>
+          <a href="#!/applications" data-bind="ltext: 'navigation.dashboard'"></a>
+        </div>
+        <div data-bind="if: lupapisteApp.models.currentUser">
+          <a href="#" data-bind="ltext: 'company.tab.info', attr: {href: '#!/company/' + lupapisteApp.models.currentUser.company.id() + '/info'}"></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

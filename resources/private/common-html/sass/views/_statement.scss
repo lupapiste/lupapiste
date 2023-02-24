@@ -1,0 +1,48 @@
+#statement {
+
+  .statement-top {
+    background-color: $app-summary-bg;
+    padding-top: $marginL;
+    .container {
+      margin-bottom: 0;
+    }
+  }
+
+  .headerarea {
+    h1 {
+      display: inline;
+      vertical-align: middle;
+    }
+
+    .statement-state-indicator {
+      margin-left: $marginL;
+      display: inline-block;
+      i {
+        color: $red;
+        vertical-align: middle;
+      }
+      span {
+        font-weight: bold;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .statement-info {
+    vertical-align: top;
+    margin-bottom: $baseline;
+  }
+
+  .statement-conversation {
+    width: 49%;
+    display: inline-block;
+  }
+  textarea {
+    resize: vertical;
+    width: 99%;
+  }
+  .statement-control-buttons {
+    margin-bottom: $baseline;
+  }
+
+}

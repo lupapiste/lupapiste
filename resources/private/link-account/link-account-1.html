@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="link-account">
+    <div class="container">
+      <h1 data-bind="ltext: 'register.header1'"></h1>
+      <p data-bind="ltext: 'link-account.info'" class="register-info"></p>
+
+      <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
+      <div data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'link-account-', errorLocPrefix: 'register'}}"></div>
+    </div>
+  </section>
+</body>
+</html>

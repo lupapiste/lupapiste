@@ -1,0 +1,25 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-text-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label,
+                    ltext: label,
+                    css: labelClasses,
+                    attr: {'for': id}"></label>
+  <textarea class="lux"
+            data-bind="textInput: value,
+                       css: inputClasses,
+                       event: events,
+                       disable: disabled,
+                       required: required,
+                       ariaLtext: ariaLabel,
+                       ariaErrorMessage: errorMessageId,
+                       testId: testId,
+                       attr: { 'readonly': readonly,
+                       'maxlength': inputOptions.maxLength,
+                       'max': inputOptions.max,
+                       'min': inputOptions.min,
+                       id: id,
+                       placeholder: inputOptions.placeholder}"></textarea>
+  <ping aria-hidden="true"
+        params="indicator: indicator, mode: 'icon'"></ping>
+</script>

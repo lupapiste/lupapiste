@@ -1,0 +1,48 @@
+<script type="text/x-jquery-tmpl" class="ko-template"
+        id="text-field-template">
+  <div class="field--vertical">
+    <label class="lux field--block"
+           data-bind="text: label,
+                      attr: {'for': id},
+                      css: {'required': required},
+                      visible: label"></label>
+    <!-- ko if: isImmediate -->
+    <input class="lux field--block"
+           type="text"
+           data-bind="textInput: value,
+                      attr: {placeholder: placeholder,
+                      id: id,
+                      name: id,
+                      'aria-errormessage': errorId,
+                      maxlength: maxlength},
+                      required: required,
+                      ariaInvalid: notValid,
+                      hasFocus: isSelected,
+                      disable: disable,
+                      class: extraClass,
+                      testId: id"/>
+    <!-- /ko -->
+    <!-- ko ifnot: isImmediate -->
+    <input class="lux field--block"
+           type="text"
+           data-bind="value: value,
+                      attr: {placeholder: placeholder,
+                      id: id,
+                      name: id,
+                      'aria-errormessage': errorId,
+                      maxlength: maxlength},
+                      required: required,
+                      ariaInvalid: notValid,
+                      disable: disable,
+                      class: extraClass,
+                      testId: id"/>
+    <!-- /ko -->
+    <!-- ko if: notValid -->
+    <div class="error-note field--block"
+         role="alert"
+         data-bind="id: errorId,
+                    validationMessage: value">
+    </div>
+    <!-- /ko -->
+  </div>
+</script>

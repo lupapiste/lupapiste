@@ -1,0 +1,51 @@
+;(function() {
+  "use strict";
+
+  var orgId = lupapisteApp.usagePurpose().orgId;
+
+  // Provide application comments for other services
+  lupapisteApp.services.commentService = new LUPAPISTE.CommentService();
+  lupapisteApp.services.infoService = new LUPAPISTE.InfoService();
+  lupapisteApp.services.organizationsUsersService = new LUPAPISTE.OrganizationsUsersService();
+  lupapisteApp.services.organizationsHandlingTimesService = new LUPAPISTE.OrganizationsHandlingTimesService();
+  lupapisteApp.services.organizationTagsService = new LUPAPISTE.OrganizationTagsService();
+  lupapisteApp.services.sidePanelService = new LUPAPISTE.SidePanelService();
+  lupapisteApp.services.companyTagsService = new LUPAPISTE.CompanyTagsService();
+  lupapisteApp.services.applicationFiltersService = new LUPAPISTE.ApplicationFiltersService();
+  lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.handlerFilterService = new LUPAPISTE.HandlerFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.tagFilterService = new LUPAPISTE.TagFilterService(lupapisteApp.services.organizationTagsService, lupapisteApp.services.applicationFiltersService, "tags");
+  lupapisteApp.services.companyTagFilterService = new LUPAPISTE.TagFilterService(lupapisteApp.services.companyTagsService, lupapisteApp.services.applicationFiltersService, "companyTags");
+  lupapisteApp.services.organizationFilterService = new LUPAPISTE.OrganizationFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.operationFilterService = new LUPAPISTE.OperationFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.textFilterService = new LUPAPISTE.SimpleFilterService(lupapisteApp.services.applicationFiltersService, "text");
+  lupapisteApp.services.roleFilterService = new LUPAPISTE.SimpleFilterService(lupapisteApp.services.applicationFiltersService, "role");
+  lupapisteApp.services.publishBulletinService = new LUPAPISTE.PublishBulletinService();
+  lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService();
+  lupapisteApp.services.accordionService = new LUPAPISTE.AccordionService();
+  lupapisteApp.services.fileUploadService = new LUPAPISTE.FileuploadService();
+  lupapisteApp.services.scrollService = new LUPAPISTE.ScrollService();
+  lupapisteApp.services.ramService = new LUPAPISTE.RamService();
+  lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
+  lupapisteApp.services.attachmentsService = new LUPAPISTE.AttachmentsService();
+  lupapisteApp.services.sutiService = new LUPAPISTE.SutiService();
+  lupapisteApp.services.contextService = new LUPAPISTE.ContextService();
+  lupapisteApp.services.buildingService = new LUPAPISTE.BuildingService();
+  lupapisteApp.services.assignmentService = new LUPAPISTE.AssignmentService(lupapisteApp.models.applicationAuthModel);
+  lupapisteApp.services.assignmentRecipientFilterService = new LUPAPISTE.AssignmentRecipientFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.assignmentTargetFilterService = new LUPAPISTE.AssignmentTargetFilterService();
+  lupapisteApp.services.eventFilterService = new LUPAPISTE.EventFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.inspectionSummaryService = new LUPAPISTE.InspectionSummaryService();
+  lupapisteApp.services.handlerService = new LUPAPISTE.HandlerService();
+  lupapisteApp.services.cardService = new LUPAPISTE.CardService();
+  lupapisteApp.services.campaignService = new LUPAPISTE.CampaignService();
+  lupapisteApp.services.companyRegistrationService = new LUPAPISTE.CompanyRegistrationService();
+  lupapisteApp.services.triggersTargetService = new LUPAPISTE.TriggerTargetService();
+  lupapisteApp.services.suomifiService = new LUPAPISTE.SuomifiService();
+  lupapisteApp.services.naviSidebarService = new LUPAPISTE.NaviSidebarService(orgId);
+  lupapisteApp.services.batchService = new LUPAPISTE.BatchService();
+  lupapisteApp.services.noticeFormsService = new LUPAPISTE.NoticeFormsService();
+  lupapisteApp.services.taskService = new LUPAPISTE.TaskService();
+  lupapisteApp.services.schemaFlagsService = new LUPAPISTE.SchemaFlagsService();
+  lupapisteApp.services.summaryService = new LUPAPISTE.SummaryService();
+})();

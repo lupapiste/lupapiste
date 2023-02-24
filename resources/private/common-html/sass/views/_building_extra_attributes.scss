@@ -1,0 +1,112 @@
+#building-extra-attributes {
+
+  .filter-group {
+      border: none;
+      padding-bottom: 0;
+      margin-bottom: 8px;
+  }
+
+  .checkbox-wrapper {
+      display: block;
+      border: none;
+      margin-left: 0;
+
+      label {
+          padding-left: 0px;
+      }
+  }
+
+  .upper-case {
+      text-transform: uppercase;
+  }
+
+  .missing-value {
+      border: 3px solid $red-dark;
+  }
+
+  .table-checkbox-label:before {
+    margin-right: 0 !important;
+  }
+
+  .table-checkbox-label {
+    text-align: center;
+  }
+
+  .field-error {
+      color: $red-dark;
+  }
+
+  .search-and-filters {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+  }
+
+  .search {
+      align-self: flex-end;
+      margin-bottom: 8px;
+      width: 35%;
+
+      i {
+          top: 0px;
+          right: 0px;
+          padding-right: 5px;
+      }
+
+      .lupicon-search {
+          position: relative;
+      }
+
+      .search-box-container {
+          display: flex;
+          flex-direction: row;
+      }
+      input {
+          width: 100%;
+      }
+  }
+
+  .help-text {
+      margin-bottom: 5px;
+  }
+
+  .report-link {
+      cursor: pointer;
+  }
+
+  .actions {
+      display: flex;
+      justify-content: flex-end;
+
+      .building-attributes-buttons {
+          display: flex;
+
+          .building-action-btn {
+              margin-left: 5px;
+          }
+      }
+  }
+
+  .warning {
+      padding-top: 1em;
+      p {
+          margin-bottom: 0;
+      }
+      ul {
+          color: $negative;
+      }
+      a {
+          color: $negative;
+      }
+  }
+
+  .latest-archival-info {
+      display: flex;
+
+      i {
+          margin-right: 10px;
+          align-self: center;
+      }
+  }
+
+}

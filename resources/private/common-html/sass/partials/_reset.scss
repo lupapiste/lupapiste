@@ -1,0 +1,151 @@
+/*
+    CSS Reset by ajk (http://ajk.im/)
+    Based on http://necolas.github.com/normalize.css/
+*/
+
+html,body,div,
+span,object,iframe,
+h1,h2,h3,h4,h5,h6,
+p,blockquote,pre,img,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,
+abbr,address,cite,code,del,dfn,em,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,
+article,aside,figure,footer,header,hgroup,menu,nav,section,time,mark,audio,video {
+  margin:0;
+  padding:0;
+  vertical-align: baseline;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+table{border-collapse:collapse;border-spacing:0;}
+
+fieldset,img{border:0;}
+
+/* HTML5 */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, dialog {
+  display: block;
+}
+
+html {
+  font-size: 100%;
+  overflow-y:scroll; /* Force scrollbars 100% of the time */
+}
+
+html, body {
+  min-height:100%;
+}
+
+a:focus {
+  outline: thin dotted;
+}
+
+a:hover, a:active {
+  outline: 0;
+  cursor: pointer;
+}
+
+img::-moz-selection {
+    background: transparent;
+}
+
+img::selection {
+  background: transparent;
+}
+
+textarea {
+  overflow: auto;
+  vertical-align: top;
+}
+
+legend {
+  border: 0;
+  *margin-left: -7px;
+}
+
+button, input, select, textarea {
+  vertical-align: baseline;
+  *vertical-align: middle;
+}
+
+button, input {
+  line-height: normal;
+  *overflow: visible;
+}
+
+button, input[type="button"], input[type="reset"], input[type="submit"] {
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+input[type="checkbox"], input[type="radio"] {
+  box-sizing: border-box;
+}
+
+input[type="search"] {
+  -webkit-appearance: textfield;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/* Ensures hidden content is hidden from all presentations, including screenreaders */
+[hidden] {
+  display:none;
+  visibility:hidden;
+}
+
+button::-moz-focus-inner, input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* Reintroduce inner spacing in 'table' to avoid overlap and whitespace issues in IE6/7 */
+table button, table input {
+  *overflow: auto;
+}
+
+ul, ol {
+  padding: 0 0 0 1.4em;
+}
+
+dl dd {
+  margin-left: 1.625em;
+}
+
+abbr[title], dfn[title] {
+  border-bottom: 1px dotted;
+  text-decoration: none;
+  cursor: help;
+}
+
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+strong, b, dt {
+  font-weight: bold;
+}
+
+/* Position 'sub' and 'sup' without affecting line-height: gist.github.com/413930 */
+sub, sup {
+  font-size: 0.625em;
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}

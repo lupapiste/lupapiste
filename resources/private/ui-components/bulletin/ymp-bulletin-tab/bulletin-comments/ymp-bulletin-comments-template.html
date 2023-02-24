@@ -1,0 +1,47 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="ymp-bulletin-comments-template">
+  <div>
+    <button class="secondary back-button" data-bind="click: hideComments">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+    <div>
+      <h1 data-bind="ltext: 'bulletin.comments.title'"></h1>
+    </div>
+    <div class="bulletin-proclamation-header">
+      <span class="bulletin-proclamation-text" data-bind="text: proclaimedHeader"></span>
+      <button class="bulletin-proclamation-sort primary" data-bind="toggleClick: asc, ltext: sortButtonText"></button>
+    </div>
+  </div>
+
+  <!-- ko foreach: comments -->
+  <div class="bulletin-comment">
+    <div class="bulletin-comment__header" data-bind="click: $parent.selectComment">
+      <span class="bulletin-comment__index" data-bind="text: $parent.commentIndex($index())"></span>
+      <span class="bulletin-comment__name"  data-bind="fullName: $data['contact-info']"></span>
+      <span data-bind="dateTimeString: $data.created"></span>
+      <div class="description-bubble" data-bind="slider: $parent.selectedComment() === $data._id">
+        <span class="bulletin-comment__description" data-bind="text: $parent.description($data)"></span>
+      </div>
+    </div>
+    <div class="bulletin-comment__body">
+      <!-- ko if: $data.attachments.length > 0 -->
+      <div class="bulletin-comment__attachments" data-bind="foreach: $data.attachments">
+        <div class="bulletin-comment__attachment">
+          <a class="link-btn bulletin-comment_attachment-link" target="_blank" data-bind="attr: {href: '/api/raw/download-bulletin-comment-attachment?attachmentId=' + $data.fileId}">
+            <span data-bind="text: $data.filename"></span>
+          </a>
+          <span class="bulletin-comment__attachment-type">
+            <span data-bind="ltext: $data.contentType"></span>
+            <span data-bind="size: $data.size"></span>
+          </span>
+        </div>
+      </div>
+      <!-- /ko -->
+      <div>
+        <pre data-bind="text: comment"></pre>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+  <div class="bulletin-comment-spinner" data-bind="component: {name: 'infinite-scroll', params: {load: commentsLeft, loadFn: fetchComments}}"></div>
+</script>

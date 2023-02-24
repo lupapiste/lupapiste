@@ -1,0 +1,43 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-review-buildings-template">
+
+  <div class="h2" data-bind="ltext: 'task-katselmus.rakennukset'"></div>
+
+  <!-- ko ifnot: _.size( buildings ) -->
+  <span data-bind="ltext: 'task-katselmus.no-buildings'"></span>
+  <!-- /ko -->
+  <!-- ko if: _.size( buildings ) -->
+  <table class="review-buildings-table">
+    <thead>
+      <th class="review-buildings--description" data-bind="ltext: 'task-katselmus.selite'"></th>
+      <th data-bind="ltext: 'task-katselmus.tila'"></th>
+      <th data-bind="ltext: 'task-katselmus.rakennus.tila.kayttoonottava'"></th>
+      <th data-bind="ltext: 'task-katselmus.rakennus.valtakunnallinenNumero'"></th>
+      <th data-bind="ltext: 'task-katselmus.rakennus.kiinteistotunnus'"></th>
+    </thead>
+    <tbody data-bind="foreach: buildings">
+      <tr data-bind="attr: {'data-test-index': $index}">
+        <td data-bind="text: description"></td>
+        <td data-bind="component: { name: $data.tila.uicomponent,
+                       params: { schema: $data.tila,
+                       path: $data.tila.path,
+                       i18npath: $data.tila.i18npath,
+                       applicationId: $data.tila.applicationId,
+                       documentId: $data.tila.documentId,
+                       authModel: $parent.authModel,
+                       service: $parent.service }}"></td>
+        <td data-bind="component: { name: $data.kayttoonottava.uicomponent,
+                       params: { schema: $data.kayttoonottava,
+                       path: $data.kayttoonottava.path,
+                       i18npath: $data.kayttoonottava.i18npath,
+                       applicationId: $data.kayttoonottava.applicationId,
+                       documentId: $data.kayttoonottava.documentId,
+                       authModel: $parent.authModel,
+                       service: $parent.service }}"></td>
+        <td data-bind="text: nationalId"></td>
+        <td data-bind="text: propertyId"></td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- /ko -->
+</script>

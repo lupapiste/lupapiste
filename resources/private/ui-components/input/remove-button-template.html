@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="remove-button-template">
+  <div class="remove-button">
+    <button class="secondary" data-test-id="remove-button"
+            data-bind="toggleClick: showRemove,
+                       visible: !showRemove()">
+      <i class="lupicon-remove"></i>
+      <span data-bind="ltext: 'remove'"></span>
+    </button>
+    <div class="remove-button__row" data-bind="transition: showRemove, class: 'remove-button--show', duration: 50">
+      <button class="primary" data-test-id="confirm-remove-button" data-bind="click: removeFn">
+        <i class="lupicon-remove"></i>
+        <span data-bind="ltext: 'remove'"></span>
+      </button>
+      <button class="secondary" data-test-id="cancel-remove-button" data-bind="toggleClick: showRemove">
+        <span data-bind="ltext: 'cancel'"></span>
+      </button>
+    </div>
+  </div>
+</script>

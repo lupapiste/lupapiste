@@ -1,0 +1,32 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-listing-template">
+        <span></span>
+  <!-- ko if: $data.hasFilters() -->
+  <filters params="pageName: $data.pageName,
+                   customDescriptions: true"></filters>
+  <!-- /ko -->
+
+  <!-- ko if: $data.hasFilteredAttachments() -->
+  <help-toggle params="html: legendHtml,
+                       lbutton: 'attachment.legend.help'"></help-toggle>
+
+  <div data-bind="component: { name: 'attachments-accordions',
+                               params: { pageName: pageName,
+                                         upload: upload,
+                                         attachments: attachments,
+                                         options: options} }"></div>
+  <!-- /ko -->
+
+  <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
+  <div data-test-id="no-filtered-attachments-info">
+    <i class="lupicon-circle-attention negative"></i>
+    <span data-bind="ltext: 'attachment.listing.no-filtered-attachments'"></span>
+  </div>
+  <!-- /ko -->
+  <!-- ko if: !$data.hasUnfilteredAttachments() -->
+  <div data-test-id="no-unfiltered-attachments-info">
+    <i class="lupicon-circle-attention negative"></i>
+    <span data-bind="ltext: 'attachment.listing.no-attachments'"></span>
+  </div>
+  <!-- /ko -->
+</script>

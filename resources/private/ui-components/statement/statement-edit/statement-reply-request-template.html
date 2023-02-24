@@ -1,0 +1,38 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="statement-reply-request-template">
+
+    <div class="headerarea" data-test-id="header-statement-edit-reply-request">
+      <div>
+        <h1>
+          <span>
+            <span data-bind="ltext: 'statement.tab.' + tab"></span>:
+          </span>
+          <span>
+            <span data-bind="text: applicationTitle"></span>
+          </span>
+          <span data-bind="with: data">
+            <!-- ko if: $data.person -->
+            (<span data-bind="text: person.text"></span>)
+            <!-- /ko -->
+          </span>
+        </h1>
+      </div>
+    </div>
+
+    <div class="statement-info gap--t1">
+      <div data-bind="ifnot: submitAuthorized">
+        <p data-bind="ltext: 'statement.reply-request.info-text'"></p>
+      </div>
+      <form>
+        <div data-bind="if: submitAuthorized">
+          <label class="form-label" for="statement-reply-covering-note" data-bind="ltext: 'statement.' + tab + '.text'"></label>
+          <textarea class="lux"
+            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
+                       textInput: text,
+                       readonly: !enabled()"
+            id="statement-reply-covering-note"
+            rows="15">
+          </textarea>
+        </div>
+      </form>
+    </div>
+</script>

@@ -1,0 +1,97 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-table-template">
+  <div class="iniline" data-bind="template: componentTemplate"></div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="default-docgen-table-template">
+  <div data-bind="attr: {id: groupId,
+                  'class': schemaCss}">
+
+    <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
+
+    <!-- ko if: groupHelp -->
+    <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+    <!-- /ko -->
+
+    <table data-bind="attr: {'class': _.last(path) + '-table'}">
+      <thead>
+        <tr data-bind="foreach: columnHeaders">
+          <th data-bind="css: $parent.columnCss(name)">
+            <span data-bind="ltext: name"></span>
+            <span data-bind="visible: required">*</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: rows">
+        <!-- ko if: _.size( warnings() ) -->
+        <tr>
+          <td data-bind="attr: {colspan: _.size( $parent.columnHeaders )}">
+            <warnings class="table-warnings"
+                      params="warnings: warnings"></warnings>
+          </td>
+        </tr>
+        <!-- /ko -->
+        <tr data-bind="attr: { 'id': $component.groupId + '-row-' + index , 'data-test-id': $component.schemaName + '-row-' + index}">
+          <!-- ko foreach: $component.subSchemas -->
+          <td data-bind="css: $component.columnCss([name])">
+            <span class="form-entry form-input"
+              data-bind="component: { name: uicomponent,
+                         params: { schema: $data,
+                         path: $parent.path.concat(name),
+                         i18npath: i18npath,
+                         applicationId: applicationId,
+                         documentId: documentId,
+                         authModel: $component.authModel,
+                         ariaLabel: $component.columnName( $data ),
+                         ariaErrorMessage: true}}">
+            </span>
+          </td>
+          <!-- /ko -->
+
+          <td class="action-column">
+            <button class="secondary icon-only no-border"
+               data-bind="click: $component.removeGroup,
+                          ariaLtext: 'remove',
+                          visible: $component.groupsRemovable($data.schema),
+                          attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+      <tfoot data-bind="if: _.some( footerSums )">
+        <td class="footer-sum--total"
+            data-bind="ltext: 'waste.total'"></td>
+        <!-- ko foreach: footerSums -->
+        <td data-bind="if: $data,
+                       attr: {'class': _.get( $data, 'tdStyle')}">
+          <span data-bind="component: {name: 'docgen-footer-sum',
+                           params: { documentId: $parent.documentId,
+                           path: $parent.path,
+                           schema: $data.schema,
+                           footer: $data.footer}}"></span>
+        </td>
+        <!-- /ko -->
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="button-group" data-bind="visible: updatable()">
+    <span data-bind="component: { name: 'docgen-button',
+                                 params: { id: groupId + '-append-button',
+                                           className: 'positive',
+                                           icon: 'lupicon-circle-plus',
+                                           label: appendLabel,
+                                           clickFn: addGroup,
+                                           testId: schemaName + '-append-button' }}">
+    </span>
+    <span data-bind="component: { name: 'docgen-button',
+                                 params: { id: groupId + '-copy-button',
+                                           className: 'secondary',
+                                           icon: 'lupicon-copy',
+                                           label: copyLabel,
+                                           clickFn: duplicateLastGroup,
+                                           testId: schemaName + '-copy-button' }}">
+    </span>
+  </div>
+</script>

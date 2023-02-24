@@ -1,0 +1,32 @@
+ <script type="text/x-jquery-tmpl" class="ko-template" id="application-bulletins-list-template">
+      <!-- ko if: gotResults -->
+      <table id="application-bulletins-list">
+        <thead>
+        <tr data-bind="foreach: columns">
+          <th data-bind="click: $data.click, css: $data.css, attr: $data.attr">
+            <span data-bind="ltext: $data.ltext"></span>
+            <i class="lupicon-chevron-small-up" data-bind="visible: $data.isAscending"></i>
+            <i class="lupicon-chevron-small-down" data-bind="visible: $data.isDescending"></i>
+          </th>
+        </tr>
+        </thead>
+        <tbody data-bind="foreach: bulletins">
+          <tr data-bind="click: $component.openBulletin">
+            <td data-bind="ltext: $data.bulletinStateLoc"></td>
+            <td data-bind="ltext: $data.municipality"></td>
+            <td data-bind="text: $data.address"></td>
+            <td data-bind="text: $data.type"></td>
+            <td data-bind="text: $data.applicant"></td>
+            <td data-bind="dateTimeString: $data.date"></td>
+            <td>
+              <!-- <div data-bind="text: $data.commentingType"></div> waiting for feedback -->
+              <div data-bind="text: $data.commentingEndsAt"></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- /ko -->
+      <!-- ko ifnot: gotResults -->
+      <p data-bind="ltext: 'bulletin.search.no-results'"></p>
+      <!-- /ko -->
+</script>

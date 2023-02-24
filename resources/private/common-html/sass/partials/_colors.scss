@@ -1,0 +1,541 @@
+// From Color usage guidelines in
+// https://cloudpermit.atlassian.net/wiki/spaces/EVOLVE/pages/852328475/Visual+Guidelines+for+product+UI
+$night-sky-10: #e8e7ed;
+$night-sky-20: #d1cfdb;
+$night-sky-30: #bab9c8;
+$night-sky-40: #a3a0b5;
+$night-sky-50: #8c88a3;
+$night-sky-60: #757091;
+$night-sky-70: #5e587f;
+$night-sky-80: #47416c;
+$night-sky-90: #302959;
+$night-sky-100: #191147;
+$night-sky-110: #470883;
+$night-sky-120: #140e39;
+$night-sky-130: #120c32;
+$night-sky-140: #0f0a2b;
+$night-sky-150: #0d0924;
+$night-sky-160: #0a071c;
+$night-sky-170: #070515;
+$night-sky-180: #05030e;
+$night-sky-190: #020207;
+$black: #011627;
+$burgundy: #720b4b;
+$blue-10: #e7ecfb;
+$blue-20: #cfd9f7;
+$blue-30: #b7c5f2;
+$blue-40: #9fb3ed;
+$blue-50: #879fe9;
+$blue-60: #708de4;
+$blue-70: #5879e0;
+$blue-80: #3f65db;
+$blue-90: #2752d7;
+$blue-100: #0f3fd2;
+$blue-110: #0e39bd;
+$blue-120: #0b32a8;
+$blue-130: #0b2c93;
+$blue-140: #09267e;
+$blue-150: #08206a;
+$blue-160: #061954;
+$blue-170: #04133f;
+$blue-180: #030d2a;
+$blue-190: #010615;
+$yellow: #fadf0b;
+// The style guid green does not have enough contrast on white.
+$green: #008000; // #00a832;
+$red: #ec0927;
+$dark-red: #bd071;
+$red-10: #fde6e9;
+$red-20: #fbcfd4;
+$red-30: #f9b5bf;
+$red-40: #f79da9;
+$red-50: #f78493;
+$red-60: #f56b7d;
+$red-70: #f35368;
+$red-80: #f13a53;
+$red-90: #ee223d;
+$red-100: #ec0a28;
+$red-110: #d50924;
+$red-120: #be0720;
+$red-130: #a5061a;
+$red-140: #8e0517;
+$red-150: #760514;
+$red-160: #5e0510;
+$red-170: #47020b;
+$red-180: #2f0208;
+$red-190: #180104;
+$violet-10: #ede6f5;
+$violet-20: #dccee9;
+$violet-30: #cab5de;
+$violet-40: #b99cd3;
+$violet-50: #a784c9;
+$violet-60: #956bbd;
+$violet-70: #8452b2;
+$violet-80: #7239a7;
+$violet-90: #61229c;
+$violet-100: #4f0891;
+$violet-110: #470883;
+$violet-120: #3f0674;
+$violet-130: #370666;
+$violet-140: #2f0557;
+$violet-150: #280449;
+$violet-160: #20023b;
+$violet-170: #18022b;
+$violet-180: #10021d;
+$violet-190: #08010d;
+$white: #ffffff;
+$dark-gray: #b3b9be;
+$gray: #cdd1d4;
+$light-gray: #ecedef;
+$focus-background: #ddcfea;
+
+// Dark and neutral selection color.
+$plain: #140839;
+
+$gray17:  rgb(17, 17, 17);
+$gray34:  rgb(34, 34, 34);
+$gray51:  rgb(51, 51, 51);
+$gray68:  rgb(68, 68, 68);
+$gray85:  rgb(85, 85, 85);
+// The lightest text color against white background that stil has
+// enough contrast
+$gray102: rgb(102, 102, 102);
+$gray119: rgb(119, 119, 119);
+$gray136: rgb(136, 136, 136);
+$gray153: rgb(153, 153, 153);
+$gray170: rgb(170, 170, 170);
+$gray187: rgb(187, 187, 187);
+$gray204: rgb(204, 204, 204);
+$gray221: rgb(221, 221, 221);
+$gray238: rgb(238, 238, 238);
+$gray247: rgb(247, 247, 247);
+
+$panel-background: #f6f7f7;
+
+$blue-background: $blue-10;
+$violet-background: #ede7f4;
+$green-background: $green;
+
+.bg--gray {
+  background-color: $panel-background;
+}
+
+.bg--dark-gray {
+  background-color: $gray;
+}
+
+
+.bg--white {
+  background-color: $white;
+}
+
+.bg--blue {
+  background-color: $blue-background;
+}
+
+.bg--violet {
+  background-color: $violet-background;
+}
+
+.bg--unset {
+  background-color: unset;
+}
+
+
+$gray-tint: ($gray17, $gray34, $gray51, $gray68, $gray85,
+             $gray102, $gray119, $gray136, $gray153, $gray170,
+             $gray187, $gray204, $gray221, $gray238, $gray247 );
+
+// 1 darkest, 15 lightest
+// Note: 6 ($gray102) is the highest with the acceptable text contrast
+// on white background. The same color is also the gray signal color.
+@function get-gray( $index ) {
+  @return nth( $gray-tint, $index );
+}
+
+$night-sky-tint: ($night-sky-190, $night-sky-180, $night-sky-170,
+                  $night-sky-160, $night-sky-150, $night-sky-140,
+                  $night-sky-130, $night-sky-120, $night-sky-110,
+                  $night-sky-100, $night-sky-90, $night-sky-80, $night-sky-70,
+                  $night-sky-60, $night-sky-50, $night-sky-40, $night-sky-30,
+                  $night-sky-20, $night-sky-10 );
+
+// 1 darkest, 19 lightest
+@function get-night-sky( $index ) {
+  @return nth( $night-sky-tint, $index );
+}
+
+$blue-tint: ($blue-190, $blue-180, $blue-170, $blue-160, $blue-150, $blue-140,
+             $blue-130, $blue-120, $blue-110, $blue-100, $blue-90, $blue-80,
+             $blue-70, $blue-60, $blue-50, $blue-40, $blue-30, $blue-20, $blue-10 );
+
+// 1 darkest, 19 lightest
+@function get-blue( $index ) {
+  @return nth( $blue-tint, $index );
+}
+
+$red-tint: ($red-190, $red-180, $red-170, $red-160, $red-150, $red-140,
+            $red-130, $red-120, $red-110, $red-100, $red-90, $red-80, $red-70,
+            $red-60, $red-50, $red-40, $red-30, $red-20, $red-10 );
+
+// 1 darkest, 19 lightest
+@function get-red( $index ) {
+  @return nth( $red-tint, $index );
+}
+
+$violet-tint: ($violet-190, $violet-180, $violet-170, $violet-160,
+               $violet-150, $violet-140, $violet-130, $violet-120,
+               $violet-110, $violet-100, $violet-90, $violet-80,
+               $violet-70, $violet-60, $violet-50, $violet-40, $violet-30,
+               $violet-20, $violet-10 );
+
+// 1 darkest, 19 lightest
+@function get-violet( $index ) {
+  @return nth( $violet-tint, $index );
+}
+
+$text-colors: ("night-sky": $night-sky-100,
+               "black": $black,
+               "burgundy": $burgundy,
+               "blue": $blue-100);
+
+$signal-colors: map-merge( $text-colors,
+                           ("yellow": $yellow,
+                            "green": $green,
+                            "red": $red,
+                            "violet": $violet-100,
+                            "gray": $gray102));
+
+@function get-signal( $color ) {
+  @return map-get( $signal-colors, $color );
+}
+
+$background-colors: ("white": $white,
+                     "dark": $dark-gray,
+                     "gray": $gray,
+                     "light": $light-gray,
+                     "blue": $blue-10);
+
+$indicator-colors: ("active": $violet-100,
+                    "hover": $night-sky-100,
+                    "selected": $violet-100,
+                    "disabled": $dark-gray);
+
+@function state-map( $enabled, $hover, $active, $focus, $disabled ) {
+  @return ("enabled": $enabled,
+           "hover": $hover,
+           "active": $active,
+           "focus": $focus,
+           "disabled": $disabled);
+}
+
+$register-colors: ("text": state-map( $black, $black, $black, $night-sky-100, $black ),
+                  "background": state-map( $gray247, $gray247, $gray247,
+                                           $focus-background, $gray),
+                  "border": ()
+
+);
+
+$primary-colors: ("text": state-map( $white, $white, $white, $night-sky-100, $white ),
+                  "background": state-map( $violet-100, $violet-130, $night-sky-100,
+                                           $focus-background, $gray),
+                  "border": ("focus": $blue-100));
+
+$secondary-colors: ("text": state-map( $violet-100, $white, $white, $night-sky-100, $gray ),
+                    "background": state-map( transparent, $violet-130, $night-sky-100,
+                                             $focus-background, transparent),
+                    "border": ("enabled": $violet-100,
+                               "focus": $blue-100,
+                               "disabled": $gray));
+
+$help-colors: ("text": state-map( $violet-100, $blue-100, $blue-100, $blue-100, $gray ),
+               "background": state-map( transparent, transparent, transparent,
+                                        transparent, transparent),
+               "border": ("focus": $blue-100));
+
+$secondary-with-icon-colors: ("text": state-map( $violet-100, $white, $white,
+                                                 $night-sky-100, $dark-gray ),
+                              "background": state-map( transparent, $violet-130, $night-sky-100,
+                                                       $focus-background, transparent),
+                              "border": ("enabled": $violet-100,
+                                         "focus": $blue-100));
+
+$tertiary-colors: ("text": state-map( $violet-100, $white, $white, $night-sky-100, $gray ),
+                   "background": state-map( transparent, $violet-130, $night-sky-100,
+                                            $focus-background, transparent),
+                   "border": ("focus": $blue-100));
+
+$tertiary-with-icon-colors: ("text": state-map( $violet-100, $white,
+                                                $white, $night-sky-100, $dark-gray ),
+                             "background": state-map( transparent, $violet-130, $night-sky-100,
+                                                      $focus-background, transparent),
+                             "border": ("focus": $blue-100));
+
+$white-button-colors: ("text": state-map( $white, get-gray(1), get-gray(1), $night-sky-100, $gray ),
+                       "background": state-map( transparent, $white, get-gray(10),
+                                                $focus-background, transparent),
+                       "border": ("focus": $blue-100));
+
+
+$danger-colors: ("text": state-map( $white, $white, $white, $night-sky-100, $white ),
+                 "background": state-map( $red, $dark-red, $red, $red-10, $gray ),
+                 "border": ("focus": $blue-100));
+
+$link-colors: ("text": state-map($blue-100, $blue-100, $blue-100, $blue-100, $dark-gray),
+               "background": (),
+               "border": ("focus": $blue-100));
+
+@function box-state-map( $enabled, $hover, $selected, $selected-hover, $disabled, $focus) {
+  @return ("enabled": $enabled,
+           "hover": $hover,
+           "selected": $selected,
+           "selected:hover": $selected-hover,
+           "disabled": $disabled,
+           "focus": $focus);
+}
+
+$primary-tag-colors: ("text": box-state-map( $violet-100, $white, $white, $white,
+                                             $dark-gray, $black ),
+                      "background": box-state-map( transparent, $black, $violet-100, $black,
+                                                   $gray, $focus-background ),
+                      "border": box-state-map( $violet-100, $violet-100, null, null,
+                                               $dark-gray, $blue-100 ));
+
+$status-tag-colors: ("text": box-state-map( $black, $white, $white, $white,
+                                            $dark-gray, $black ),
+                     "background": box-state-map( $panel-background, $violet-100, $violet-100, $night-sky-100,
+                                                  $panel-background, $focus-background ),
+                     "border": ("focus": $blue-100));
+
+
+@function input-state-map( $enabled, $hover, $active, $focus, $disabled,
+                           $required, $error, $read-only ) {
+  @return ("enabled": $enabled,
+           "hover": $hover,
+           "active": $active,
+           "focus": $focus,
+           "disabled": $disabled,
+           "required": $required,
+           "error": $error,
+           "read-only": $read-only);
+}
+
+$input-colors: ("text": map-merge( input-state-map( $black, $black, $black, $black,
+                                                    get-gray( 5 ), $black, $black,
+                                                    $black),
+                                   ("placeholder": get-gray( 6 ))),
+                "border": map-merge( ("textarea": $gray187),
+                                     input-state-map( $black, $black, null, $blue-100, transparent,
+                                                      $violet-100, $red, $black )),
+                "background": ("disabled": get-gray( 15 ),
+                               "read-only": get-gray( 15 ))
+);
+
+$dropdown-colors: ("text": input-state-map( $black, $black, $black, $black, get-gray( 5 ),
+                                            $black, $black, $black ),
+                   "border": input-state-map( $gray187, $gray187, get-violet( 1 ),
+                                              $blue-100, $gray187,
+                                              $violet-100, $red, $gray187),
+                   "background": ("disabled": get-gray( 15 ),
+                                  "autocomplete": $white,
+                                  "autocomplete:select": $violet-100));
+// Autocomplete and comboox selection list
+$listbox-colors: ("default": ("text": $black,
+                              "background": $white,
+                              "border": $blue-100),
+                  "selected": ("text": $white,
+                               "background": $blue-100));
+
+$checkbox-colors: ("icon": box-state-map( $violet-100, $black, $violet-100, $black, $dark-gray, $blue-100),
+                   "text": box-state-map( $black, $black, $black, $black, $dark-gray, $black),
+                   "background": (),
+                   "border": box-state-map( $gray, $gray, $gray, $gray,  $dark-gray, $blue-100 ));
+
+
+$radio-colors: ("text": box-state-map( $violet-100, $violet-100, $violet-100, $black,
+                                       $dark-gray, $black ));
+
+$plain-hover: $gray119;
+$plain-colors: ("text": box-state-map( $plain, $white, $white, $white, $plain, $plain),
+                "background": box-state-map( transparent, $plain-hover, $plain, $plain-hover, $gray,
+                                             $focus-background),
+                "border": ("enabled": $gray,
+                           "focus": $blue-100, ));
+
+$plain-tab-colors: ("text": box-state-map( $plain, $white, $white, $white, $plain, $plain),
+                    "background": box-state-map( $white, $plain-hover, $plain, $plain-hover, $gray,
+                                                 $focus-background),
+                    "border": ("enabled": $gray,
+                               "focus": $blue-100, ));
+
+$plain-filter-colors: ("text": box-state-map( $plain, $plain, $white, $white, $plain, $plain),
+                       "background": box-state-map( $white, get-gray(13), $plain, $plain-hover, $gray,
+                                                    $focus-background),
+                       "border": ("enabled": $gray,
+                                  "focus": $blue-100, ));
+
+$tri-state-false-colors: ("text": box-state-map( $plain, $plain, $white, $white, $plain, $plain),
+                       "background": box-state-map( transparent, get-gray(13), $plain, $plain-hover, $gray,
+                                                    $focus-background),
+                       "border": ("enabled": $gray,
+                                  "focus": $blue-100, ));
+
+$tri-state-true-colors: ("text": box-state-map( $white, $white, $plain, $plain, $white, $white),
+                         "background": box-state-map( $plain, get-gray(13), $white, $plain-hover, $gray,
+                                                      $focus-background),
+                         "border": ("enabled": $gray,
+                                    "focus": $blue-100, ));
+
+$tri-state-nil-colors: ("text": box-state-map( $plain, $plain, $white, $white, $plain, $plain),
+                          "background": box-state-map( $white, get-gray(13), $plain, $plain-hover, $gray,
+                                                       $focus-background),
+                          "border": ("enabled": $gray,
+                                     "focus": $blue-100, ));
+
+
+
+$breadcrumb-colors: ("text": box-state-map( $black, $white, $black, $white, $plain, $black),
+                     "background": box-state-map( transparent, $black, transparent,
+                                                  $black, transparent, $focus-background),
+                     "border": ("focus": $blue-100, ));
+
+$breadcrumb-primary-colors: ("text": box-state-map( $blue-100, $white, $blue-100, $white, $plain, $blue-100),
+                             "background": box-state-map( transparent, $blue-100, transparent,
+                                                          $blue-100, transparent, $focus-background),
+                             "border": ("focus": $blue-100, ));
+
+
+
+$plain-button-colors: ("text": state-map( $white, $white, $white, $plain, $plain ),
+                       "background": state-map( $plain, $plain-hover, $plain,
+                                                $focus-background, $gray),
+                       "border": state-map( $plain, $plain-hover, $plain, $blue-100,  $gray ));
+
+$plain-secondary-colors: ("text": state-map( $plain, $white, $white, $plain, $dark-gray ),
+                          "background": state-map( transparent, $plain-hover, $plain,
+                                                   $focus-background, transparent),
+                          "border": state-map( $plain, $plain-hover, $plain, $blue-100,  $gray ));
+
+
+$action-button-colors: ("text": state-map( $plain, $plain, $plain,
+                                           $plain, $gray),
+                        "background": state-map( $white, $dark-gray, $white, $focus-background,
+                                                 $plain ),
+                        "border": ("focus": $blue-100,
+                                   "hover": $blue-100));
+
+
+$th-button-colors: ("text": state-map( $black, $white, $black, $black, $black),
+                    "background": state-map( transparent, $plain-hover, transparent,
+                                             $focus-background, $black),
+                    "border": ("focus": $blue-100));
+
+$primary-tab-colors: ("text": box-state-map( $white, $white, $white, $white,
+                                             $dark-gray, $black ),
+                      "background": box-state-map( $violet-100, $violet-130, $violet-160, $violet-130,
+                                                   $gray, $focus-background ),
+                      "border": ("enabled": $violet-100,
+                                 "focus": $blue-100));
+
+
+// Top navigation bar
+$navi-background: #130b37;
+$navi-colors: ("text": state-map( $white, $white, $white, $plain, $gray),
+               "background": state-map($navi-background, $plain-hover, $navi-background,
+                                       $focus-background,  $navi-background),
+               "border": ("focus": $blue-100));
+
+$navi-toggle-colors: ("text": box-state-map( $white, $white, $navi-background, $white, $gray, $plain ),
+                      "background": box-state-map($navi-background, $plain-hover, $white,
+                                                   $plain-hover, $navi-background, $focus-background),
+                      "border": ("focus": $blue-100));
+
+
+// state-map( $enabled, $hover, $active, $focus, $disabled )
+// box-state-map( $enabled, $hover, $selected, $selected-hover, $disabled, $focus)
+// input-state-map( $enabled, $hover, $active, $focus, $disabled, $required, $error, $read-only )
+
+$COLOR-MAP: ("primary": $primary-colors,
+             "secondary": $secondary-colors,
+             "help": $help-colors,
+             "tertiary": $tertiary-colors,
+             "danger": $danger-colors,
+             "navi": $navi-colors,
+             "navi-toggle": $navi-toggle-colors,
+             "link": $link-colors,
+             "plain": $plain-colors,
+             "plain-tab": $plain-tab-colors,
+             "plain-filter": $plain-filter-colors,
+             "plain-button": $plain-button-colors,
+             "plain-secondary": $plain-secondary-colors,
+             "primary-tag": $primary-tag-colors,
+             "checkbox": $checkbox-colors,
+             "radio": $radio-colors,
+             "input": $input-colors,
+             "dropdown": $dropdown-colors,
+             "th-button": $th-button-colors,
+             "action-button": $action-button-colors,
+             "primary-tab": $primary-tab-colors,
+             "listbox": $listbox-colors,
+             "breadcrumb": $breadcrumb-colors,
+             "status-tag": $status-tag-colors,
+             "register": $register-colors,
+             "white-button": $white-button-colors,
+             "tri-state-nil": $tri-state-nil-colors,
+             "tri-state-true": $tri-state-true-colors,
+             "tri-state-false": $tri-state-false-colors
+);
+
+@function resolve-color( $type, $property, $state ) {
+  @return map-get( map-get( map-get( $COLOR-MAP, $type), $property), $state);
+}
+
+@function resolve-border( $type, $state ) {
+  $color: resolve-color( $type, "border", $state );
+  $width: 1px;
+  @if $state == "focus" {
+    $width: 2px;
+  }
+  @if $color {
+    @return $width solid $color;
+  }
+  @return null;
+}
+
+@mixin colors-and-border( $type, $state ) {
+  $border: resolve-border( $type, $state);
+
+  color: resolve-color( $type, "text", $state );
+  background-color: resolve-color( $type, "background", $state );
+  @if $state == "focus" {
+    outline: $border;
+    outline-offset: 0;
+  } @else {
+    border: $border;
+  }
+}
+
+@mixin icon-color-and-outline( $type, $state ) {
+  color: resolve-color( $type, "icon", $state );
+  @if $state == "focus" {
+    outline: resolve-border( $type, $state );
+    outline-offset: 0;
+  }
+}
+
+// Convenience color classes
+
+$primary:   resolve-color( "primary", "background", "enabled" );
+$positive:  get-signal( "green" );
+$negative:  get-signal( "red" );
+
+@mixin fg-bg( $name, $color ) {
+  .fg--#{$name} {color: $color};
+  .bg--#{$name} {background-color: $color};
+}
+
+@include fg-bg( negative, $negative );
+@include fg-bg( positive, $positive );
+@include fg-bg( primary, $primary );
+
+.fg--gray {color: get-signal( "gray" );}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="campaigns">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <h2>Kampanjat</h2>
+        <table data-bind="visible: _.size( campaigns() )">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'campaign.code'"></th>
+              <th data-bind="ltext: 'campaign.starts'"></th>
+              <th data-bind="ltext: 'campaign.ends'"></th>
+              <th data-bind="ltext: 'register.company.account5.title'"></th>
+              <th data-bind="ltext: 'register.company.account15.title'"></th>
+              <th data-bind="ltext: 'register.company.account30.title'"></th>
+              <th data-bind="ltext: 'campaign.last-discount-date'"></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: campaigns">
+            <tr>
+              <td data-bind="text: code,
+                             testId: code + '-code'"></td>
+              <td data-bind="text: starts,
+                             testId: code + '-starts'"></td>
+              <td data-bind="text: ends,
+                             testId: code + '-ends'"></td>
+              <td data-bind="text: account5,
+                             testId: code + '-account5'"></td>
+              <td data-bind="text: account15,
+                             testId: code + '-account15'"></td>
+              <td data-bind="text: account30,
+                             testId: code + '-account30'"></td>
+              <td data-bind="text: lastDiscountDate,
+                             testId: code + '-last-discount-date'"></td>
+              <td class="lupicon-remove primary"
+                  data-bind="click: $parent.deleteCampaign,
+                             testId: code + '-delete'"></td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- ko if: showEditor -->
+        <campaign-editor params="showEditor: showEditor"></campaign-editor>
+        <!-- /ko -->
+        <icon-button params="text: 'Uusi kampanja',
+                             icon: 'circle-plus',
+                             testId: 'add-campaign',
+                             click: addCampaign"></icon-button>
+
+      </div>
+    </section>
+  </body>
+</html>

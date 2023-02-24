@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="premises-upload-template">
+  <!-- ko if: allowed -->
+  <form enctype="multipart/form-data" data-bind="submit: submit" class="upload-component premises-upload">
+    <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, disable: disabled" data-test-id="premises-upload-input"/>
+    <button class="btn btn-primary"
+            data-bind="click: chooseFile, disable: pending, css: {waiting: pending}">
+        <i class="lupicon-upload"></i>
+        <i class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: 'huoneistot.premisesUploadButton'"></span>
+    </button>
+  </form>
+  <!-- /ko -->
+</script>

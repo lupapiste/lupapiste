@@ -1,0 +1,47 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="neighbor-status-template">
+  <div class="content">
+
+    <div data-bind="text: loc(['neighbors.status-dialog.message', state])"></div>
+    <div data-bind="text: loc(['neighbors.status-dialog.description', state])"></div>
+
+    <table>
+      <tbody>
+        <tr>
+          <td data-bind="ltext: 'neighbors.status-dialog.user.firstName'"></td>
+          <td data-bind="text: firstName" data-test-id="neighbor-status-firstName"></td>
+        </tr>
+        <tr>
+          <td data-bind="ltext: 'neighbors.status-dialog.user.lastName'"></td>
+          <td data-bind="text: lastName" data-test-id="neighbor-status-lastName"></td>
+        </tr>
+        <tr data-bind="if: userid">
+          <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
+          <td data-bind="text: userid" data-test-id="neighbor-status-userid"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div>
+      <span data-bind="ltext: 'neighbors.status-dialog.user.time'"></span>:
+      <span data-bind="dateTimeString: created"></span>
+    </div>
+
+    <div data-bind="visible: message">
+      <div data-bind="text: loc(['neighbors.status-dialog.message-title', state])"></div>
+      <div data-bind="text: message"
+           data-test-id="neighbor-status-message"
+           class="neighbors-message"></div>
+    </div>
+  </div>
+  <div class="button-group ok">
+    <button data-bind="ltext: 'neighbors.status-dialog.ok',
+                       click: _.wrap( 'close-dialog', hub.send ),
+                       focusNext: '#modal-dialog-button-close:visible'"
+            data-test-id="neighbor-status-ok"
+            class="positive btn-dialog">
+    </button>
+  </div>
+
+
+</script>

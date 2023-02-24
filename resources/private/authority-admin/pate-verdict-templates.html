@@ -1,0 +1,9 @@
+<section class="page" id="pate-verdict-templates">
+  <div class="container container--authority-admin"
+       data-bind="if: organization.organizationId() &&
+                      organization.pateEnabled() &&
+                      lupapisteApp.models.rootVMO.currentPage() === 'pate-verdict-templates',
+                  css: lupapisteApp.services.naviSidebarService.containerCss">
+    <cljs-pate_verdict-templates params="orgId: organization.organizationId()"></cljs-pate_verdict-templates>
+  </div>
+</section>

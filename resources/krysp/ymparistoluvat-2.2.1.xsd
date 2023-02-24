@@ -1,0 +1,1732 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
+<!-- KRYSP projekti-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.2.1">
+	<!--<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/feature.xsd"/>-->
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd"/>
+	<!--Local usage-->
+	<!--<xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\yhteiset\gml_dummy.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset\yhteiset.xsd"/>-->
+	<!-- ================================================= -->
+	<!-- Package: <<XSDschema>> Ympäristöluvat -->
+	<!-- ================================================= -->
+	<!-- Kohdejoukko: Ympäristöluvat -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Class: <<FeatureType>> Ympäristöluvat-->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Ymparistoluvat" type="ymy:YmparistoluvatType" substitutionGroup="gml:_Feature">
+		<xs:annotation>
+			<xs:documentation>Skeeman juurielementti</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="YmparistolupaType">
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="kasittelytietotieto" type="ymy:KasittelyHistoriaType" maxOccurs="unbounded"/>
+					<xs:element name="luvanTunnistetiedot" type="yht:YmparistoLuvanTunnisteTiedotType" minOccurs="0"/>
+					<xs:element name="valvontatapahtumattieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Valvontatapahtuma" type="yht:ValvontatapahtumaType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="paatostieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Paatos" type="yht:YmparistoPaatosType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="lausuntotieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Lausunto" type="yht:LausuntoYmpType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="maksajatieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Maksaja" type="yht:MaksajaType" minOccurs="0"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="hakija" type="yht:YhteystietoType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="toiminta" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>TOIMINTA, JOLLE LUPAA HAETAAN</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="peruste" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>Hakijan käsitys luvan haun perusteista</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="kuvaus" type="xs:string">
+									<xs:annotation>
+										<xs:documentation>Lyhyt kuvaus toiminnasta</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="luvanHakemisenSyy" type="ymy:LuvanHakemisenSyyType" minOccurs="0"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="laitoksentiedot" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Laitoksen/toimipaikantiedot</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Laitos" type="ymy:LaitosType">
+									<xs:annotation>
+										<xs:documentation>Laitos/toimipaikka jolle lupaa haetaan</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="voimassaOlevatLuvat" type="ymy:VoimassaOlevatLuvatType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>VOIMASSA OLEVAT YMPÄRISTÖLUPA-, VESILUPA- TAI MUUT PÄÄTÖKSET JA SOPIMUKSET</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="alueJaYmparisto" type="ymy:AlueJaYmparistoType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>TIEDOT KIINTEISTÖISTÄ JA NIILLÄ SIJAITSEVISTA LAITOKSISTA JA TOIMINNOISTA SEKÄ NÄIDEN HALTIJOISTA
+YHTEYSTIETOINEEN</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="toiminnanSijaintitieto" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>TIEDOT TOIMINNAN SIJAINTIPAIKASTA, YMPÄRISTÖOLOSUHTEISTA, YMPÄRISTÖN LAADUSTA JA ASUTUKSESTA SEKÄ
+SELVITYS ALUEEN KAAVOITUSTILANTEESTA</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="ToiminnanSijainti" type="ymy:ToiminnanSijaintiType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="tuotantotiedot" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Tuotanto" type="ymy:TuotantoType">
+									<xs:annotation>
+										<xs:documentation>(V)</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="raakaAineet" type="ymy:RaakaAineetType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Raaka-aineet, kemikaalit, polttoaineet ja muut tuotantoon käytettävät aineet, niiden varastointi
+ja säilytys sekä kulutus ja veden käyttö (V)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="energiaTehokkuus" type="ymy:EnergiaTehokkuusType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Esitetään tiedot käytettävästä energiasta ja arvio sen käytön tehokkuudesta (V)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="vesihuolto" type="ymy:VesihuoltoType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Vedenhankinta ja viemäröinti (V)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="ymparistoriskit" type="yht:YmparistoLiiteType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Arvio toimintaan liittyvistä ympäristöriskeistä, onnettomuuksien estämiseksi suunnitelluista
+toimista sekä toimista häiriötilanteissa</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="liikennejarjestelyt" type="yht:YmparistoLiiteType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Kuvataan laitoksen toiminnasta aiheutuvan liikenteen määrä</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="ymparistoHallintajarjestelma" type="ymy:YmparistoHallintajarjestelmaType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>kuvaus mahdollisesta ympäristöasioiden hallintajärjestelmästä</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="ymparistokuormitustieto" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>tiedot toiminnan päästöjen laadusta ja määrästä</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Ymparistokuormitus" type="ymy:YmparistokuormitusType">
+									<xs:annotation>
+										<xs:documentation>tiedot toiminnan päästöjen laadusta ja määrästä</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="referenssiPiste" type="gml:PointPropertyType" minOccurs="0"/>
+					<xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+					<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="asianKuvaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="RaakaAineetType">
+		<xs:sequence>
+			<xs:element name="RaakaAineet">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="raakaAinetieto" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="RaakaAine" type="ymy:RaakaAineType"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="polttoainetieto" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Polttoaine" type="ymy:PolttoaineType"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="muualtaTulevattieto" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Tiedot muualta tulevista, toiminnassa raaka- tai polttoaineina käytettävistä
+jätteistä sekä se prosessi, jossa jätettä käytetään.</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="MuualtaTulevat" type="ymy:MuualtaTulevatType" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Tiedot muualta tulevista, toiminnassa raaka- tai polttoaineina käytettävistä
+jätteistä sekä se prosessi, jossa jätettä käytetään.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="kemikaalittieto" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Kemikaalit" type="ymy:KemikaalitType" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="varastoalue" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="varastointipaikkatieto" type="ymy:VarastointipaikkatietoType" minOccurs="0" maxOccurs="unbounded">
+										<xs:annotation>
+											<xs:documentation>varastointipaikat ja ongelmajätteiden varastot merkitään karttapiirrokseen, joka
+liitetään hakemukseen</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="sijaintitieto" type="yht:SijaintitietoType"/>
+									<xs:element name="kuvaus" type="xs:string"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="vedenKaytto" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Tiedot ilmoitetaan
+keskimääräisen toteutuneen toimintavuoden ajalta ja hakemuksen mukaisen toiminnan
+osalta</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="raakavedenMaara" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>raakaveden vuotuinen määrä</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="jaahdytysvesi" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>osuus %</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="prosessivesi" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>osuus %</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="kierratettavaVesi" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>osuus %:na kokonaisvesimääräst</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KemikaalitType">
+		<xs:sequence>
+			<xs:element name="vuosi" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Vuosi jota tiedot koskevat</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kemikaalitieto" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Kemikaali" type="ymy:KemikaaliType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Käyttöpakan sijainti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VarastointipaikkaType">
+		<xs:complexContent>
+			<xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+				<xs:sequence>
+					<xs:element name="sijaintitieto" type="yht:SijaintitietoType"/>
+					<xs:element name="kuvaus" type="xs:string"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="VoimassaOlevatLuvatType">
+		<xs:sequence>
+			<xs:element name="luvat" type="ymy:LuvatType" minOccurs="0"/>
+			<xs:element name="vakuutukset" type="ymy:VakuutuksetType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Mahdollinen ympäristövahinkovakuutus (vakuutusyhtiö ja vakuutuksen numero)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="AlueJaYmparistoType">
+		<xs:sequence>
+			<xs:element name="kiinteistonLaitokset" type="ymy:KiinteistonLaitoksetType" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Laitokset kiinteistöittäin</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ToiminnanSijaintiType">
+		<xs:complexContent>
+			<xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+				<xs:sequence>
+					<xs:element name="sijaintitieto" type="yht:SijaintitietoType" maxOccurs="unbounded"/>
+					<xs:element name="ymparistoolosuhteet" type="yht:YmparistoLiiteType" minOccurs="0"/>
+					<xs:element name="ymparistonLaatu" type="yht:YmparistoLiiteType" minOccurs="0"/>
+					<xs:element name="asutus" type="yht:YmparistoLiiteType" minOccurs="0"/>
+					<xs:element name="kaavoitustilanne" type="yht:YmparistoLiiteType" minOccurs="0"/>
+					<xs:element name="rajanaapurit" type="ymy:RajanaapuritType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>SELVITYS TOIMINNAN SIJAINTIPAIKAN RAJANAAPUREISTA SEKÄ MUISTA MAHDOLLISISTA ASIANOSAISISTA, JOITA
+TOIMINTA JA SEN VAIKUTUKSET ERITYISESTI SAATTAVAT KOSKEA</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="TuotantoType">
+		<xs:sequence>
+			<xs:element name="tuotteet" type="ymy:TuotteetType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="energianTuotanto" type="ymy:EnergianTuotantoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Energian tuotannosta ilmoitetaan seuraavat tiedot keskimääräiseltä toteutuneelta toimintavuodelta,
+hakemuksen mukaisesta sekä suurimman mahdollisen tuotantokapasiteetin mukaisesta toiminnasta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EnergiaTehokkuusType">
+		<xs:sequence>
+			<xs:element name="kaytettyEnergia" type="ymy:KaytettyEnergiaType" minOccurs="0"/>
+			<xs:element name="kaytonTehokkuus" type="ymy:KaytonTehokkuusType">
+				<xs:annotation>
+					<xs:documentation>Energian käytön tehokkuudesta esitetään</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VesihuoltoType">
+		<xs:sequence>
+			<xs:element name="Vedenottopaikka" type="ymy:VedenottopaikkaType" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+									Vedenottopaikka
+								</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Jatevesi" type="ymy:JatevesiType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Jätevesien käsittely </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="YmparistoHallintajarjestelmaType">
+		<xs:sequence>
+			<xs:element name="nimi" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>järjestelmän nimi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kayttoonottoPvm" type="xs:date"/>
+			<xs:element name="viimeisinAuditointiPvm" type="xs:date">
+				<xs:annotation>
+					<xs:documentation>viimeisimmän
+ulkoisen auditoinnin ajankohta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="YmparistokuormitusType">
+		<xs:sequence>
+			<xs:element name="jatevesimaara" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="yksikko">
+							<xs:annotation>
+								<xs:documentation>Ilmoituksessa käytetty yksikkö</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="m3/a"/>
+									<xs:enumeration value="m3/d"/>
+									<xs:enumeration value="ei tiedossa"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="prosessivesi" type="xs:string"/>
+						<xs:element name="saniteettivesi" type="xs:string"/>
+						<xs:element name="jatevesi" type="xs:string"/>
+						<xs:element name="jaahdytysvesi" type="xs:string"/>
+						<xs:element name="hulevesi" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="aine" type="ymy:AineType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään ainekohtaisesti kokonaiskuormitus</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kemikaalittieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Kemikaalit" type="ymy:KemikaalitType" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="paastotIlmaan" type="ymy:PaastotIlmaanType">
+				<xs:annotation>
+					<xs:documentation>Esitetään päästöt ilmaan</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paastotMaaperaan" type="ymy:PaastotMaaperaanType">
+				<xs:annotation>
+					<xs:documentation>Pilaantuneen maa-aineksen käsittely</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="melupaastot" type="ymy:MelupaastotType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>esitetään melu- ja tärinäselvitys, jossa esitetään tarvittaessa tiedot toiminnasta aiheutuvasta
+melusta ja tärinästä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paastojenVahentaminen" type="ymy:PaastojenVahentaminenType">
+				<xs:annotation>
+					<xs:documentation>Päästöjen vähentämistä ja puhdistamista koskevat toimet</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jatteet" type="ymy:JatteetType">
+				<xs:annotation>
+					<xs:documentation>Syntyvät jätteet ja niiden ominaisuudet ja määrät, jätteiden varastointi sekä edelleen
+toimittaminen (V)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jatteidenHyodyntaminen" type="ymy:JatteidenHyodyntaminenType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään selvitys tehdyistä (esim. viimeisten viiden vuoden ajalta) ja suunnitelluista toimista jätteiden
+määrän tai niiden haitallisuuden vähentämiseksi ja jätteiden hyödyntämisestä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="bat" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään arvio parhaan käyttökelpoisen tekniikan (Best Available Techniques, BAT) soveltamisesta.
+Parhaalla käyttökelpoisella tekniikalla tarkoitetaan mahdollisimman tehokkaita ja kehittyneitä, teknisesti
+ja taloudellisesti toteuttamiskelpoisia tuotanto- ja puhdistusmenetelmiä ja suunnittelu-, rakentamis-,
+ylläpito- sekä käyttötapoja, joilla voidaan ehkäistä toiminnan aiheuttama ympäristön pilaantuminen
+tai tehokkaimmin vähentää sitä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ristikkaisvaikutukset" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Lupahakemusta laadittaessa on otettava huomioon toiminnan vaikutus ympäristöön kokonaisuutena,
+pilaantumisen ehkäisemiseksi tarkoitettujen toimien merkitys ympäristön kokonaisuuden kannalta sekä
+tekniset ja taloudelliset mahdollisuudet toteuttaa nämä toimet.Tarkastelussa tulisi arvioida mm. ympäristön kannalta erisuuntaisten vaikutusten eli ns. ristikkäisvaikutusten
+(cross-media effects) keskinäistä merkittävyyttä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="bep" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Ympäristön kannalta parhaalla käytännöllä (Best Environmental Practice, BEP) ymmärretään YSL:n
+mukaan pilaantumisen ehkäisemiseksi tarkoituksenmukaisia kustannustehokkaita eri toimien yhdistelmiä,
+kuten työmenetelmiä sekä raaka-aine- ja polttoainevalintoja</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vaikutuksetYmparistoon" type="ymy:VaikutuksetYmparistoonType">
+				<xs:annotation>
+					<xs:documentation>Esitetään selvitys tai arvio toiminnan tai laitoksen eri vaikutuksista ympäristöön. Ympäristövaikutukset
+esitetään kokonaisvaltaisesti sekä ilmaan, veteen ja maaperään kohdistuvien vaikutusten että melun
+ja tärinän suhteen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tarkkailuJaRaportointi" type="ymy:TarkkailuJaRaportointiType">
+				<xs:annotation>
+					<xs:documentation>Hakemukseen liitetään tarkkailusuunnitelma, jossa esitetään tiedot toiminnan käyttötarkkailusta, ympäristöön
+kohdistuvien päästöjen ja niiden vaikutusten tarkkailusta sekä käytettävistä mittausmenetelmistä
+ja -laitteista, laskentamenetelmistä ja niiden laadunvarmistuksesta. Esitetään, miten, milloin
+ja mille tahoille tuloksista raportoidaan</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vahinkoToimenpiteet" type="ymy:VahinkoToimenpiteetType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Vahinkoarvio ja vahinkoa estävät toimenpiteet sekä korvaukset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LuvatType">
+		<xs:sequence>
+			<xs:element name="lupa" type="ymy:LupaType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LupaType">
+		<xs:sequence>
+			<xs:element name="tunnistetieto" type="xs:string"/>
+			<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+			<xs:element name="liite" type="yht:YmparistoLiiteType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VakuutuksetType">
+		<xs:sequence>
+			<xs:element name="vakuutus" type="ymy:VakuutusType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VakuutusType">
+		<xs:sequence>
+			<xs:element name="vakuutusyhtio" type="xs:string"/>
+			<xs:element name="vakuutusnumero" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KaytonTehokkuusType">
+		<xs:sequence>
+			<xs:element name="saastosopimus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>tieto energiansäästösopimuksesta ja sen allekirjoitusajankohdasta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="energiakatselmustodistus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Motivan tms. energiakatselmuksen tai -analyysin tekeminen (katselmuspäivämäärä, katselmuksen
+lopputulos, johtopäätökset)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tehokkuus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>kuvaus energian käytön tehokkuudesta toiminnassa perusteluineen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kuvaus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>lyhyt kuvaus merkittävimmistä laitoksen energiansäästötoimenpiteistä ja energiatehokkuuden
+parantamiseksi tehdyistä toimenpiteistä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="suunnitelmat" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>suunnitellut energiansäästötoimenpiteet
+sekä energiatehokkuuden parantamistavoitteet</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KaytettyEnergiaType">
+		<xs:sequence>
+			<xs:element name="maara" type="xs:string"/>
+			<xs:element name="laatu" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>sähkö, lämpö tai prosessihöyry</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kayttokohteet" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KiinteistonLaitoksetType">
+		<xs:sequence>
+			<xs:element name="kiinteistorekisteritunnus" type="xs:string"/>
+			<xs:element name="laitos" type="xs:string" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RajanaapuritType">
+		<xs:sequence>
+			<xs:element name="luettelo" type="yht:YmparistoLiiteType">
+				<xs:annotation>
+					<xs:documentation>luettelo rajanaapureista/muista asianosaisista osoitetietoineen on esitetty liitteessä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ProsessitType">
+		<xs:sequence>
+			<xs:element name="laitteisto" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Kuvaillaan toimintaan liittyvät laitteistot</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rakenteet" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Kuvaillaan toimintaan liittyvät rakenteet</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paaperiaatteet" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Kuvaillaan toimintaan liittyvät prosessien pääperiaatteet lyhyesti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="prosessikaavio" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Prosessikaavion avulla esitetään tuotevirtojen kulkeminen kokonaistuotannossa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KapasiteettiType">
+		<xs:sequence>
+			<xs:element name="tuotantomaaraToteutunut" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>toteutuneen toimintavuoden tuotantomäärä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tuotantomaaraHakemus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>hakemuksen mukainen
+vuosittainen tuotantomäärä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tuotantokapasiteetti" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>suurin mahdollinen tuotantokapasiteetti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="keskimaarainenKayntiaika" type="xs:decimal" nillable="true">
+				<xs:annotation>
+					<xs:documentation>h/vrk</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PaivittainenToimintaAika" type="ymy:PaivittainenToimintaAikaType"/>
+			<xs:element name="viikottainenToimintaAika" type="ymy:viikottainenToimintaAikaType"/>
+			<xs:element name="vuodenaikaisvaihtelu" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TuotteetType">
+		<xs:sequence>
+			<xs:element name="Kapasiteetti" type="ymy:KapasiteettiType" minOccurs="0"/>
+			<xs:element name="Prosessit" type="ymy:ProsessitType" minOccurs="0"/>
+			<xs:element name="Varastointipaikka" type="ymy:VarastointipaikkaType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KattilaTaiKaasuturbiiniType">
+		<xs:sequence>
+			<xs:element name="nimi" type="xs:string"/>
+			<xs:element name="polttoaineteho" type="xs:decimal" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Polttoaineteho yksikkö MW</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="nimellisteho" type="xs:decimal" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nimellisteho yksikkö MW</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sahkoTaiLampoteho" type="xs:decimal" nillable="true">
+				<xs:annotation>
+					<xs:documentation>laitoksesta saatava sähkö- tai lämpöteho. Yksikkö MW</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kayttotehoalue" type="xs:decimal" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Käyttötehoalue yksikkö MW</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SahkonNettotuotantoType">
+		<xs:sequence>
+			<xs:element name="yhteistuotanto" type="xs:string"/>
+			<xs:element name="erillistuotanto" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EnergianTuotantoType">
+		<xs:sequence>
+			<xs:element name="kattilaTaiKaasuturbiini" type="ymy:KattilaTaiKaasuturbiiniType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>kattilan/kaasuturbiinin yksilöimiseksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sahkonBruttotuotanto" type="ymy:SahkonBruttotuotantoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>sähkön bruttotuotannosta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sahkonNettotuotanto" type="ymy:SahkonNettotuotantoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Sähkön nettotuotannosta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="voimalaitokset" type="ymy:VoimalaitoksetType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Koskee vain voimalaitoksia</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="teollisuushoyryTaiLampo" type="xs:string" minOccurs="0"/>
+			<xs:element name="kaukolampo" type="ymy:KaukolampoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>kaukolämmön tuotannosta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VoimalaitoksetType">
+		<xs:sequence>
+			<xs:element name="yhteistuotanto" type="xs:string"/>
+			<xs:element name="erillistuotanto" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SahkonBruttotuotantoType">
+		<xs:sequence>
+			<xs:element name="yhteistuotanto" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>lämmöntuotannon yhteydessä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="erillistuotanto" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>lauhdutus, apujäähdytys</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KaukolampoType">
+		<xs:sequence>
+			<xs:element name="yhteistuotanto" type="xs:string"/>
+			<xs:element name="erillistuotanto" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RaakaAineType">
+		<xs:sequence>
+			<xs:element name="laatu" type="xs:string"/>
+			<xs:element name="maara" type="xs:string"/>
+			<xs:element name="prosessi" type="xs:string"/>
+			<xs:element name="toteutunut" type="xs:string"/>
+			<xs:element name="sijaintitieto" type="yht:SijaintitietoType">
+				<xs:annotation>
+					<xs:documentation>Käyttöpaikan sijainti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="varastointipaikkatieto" type="ymy:VarastointipaikkatietoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PitoisuudetType">
+		<xs:sequence>
+			<xs:element name="rikki" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Gj/t</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tuhka" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Gj/t</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kosteus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Gj/t</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PolttoaineType">
+		<xs:sequence>
+			<xs:element name="kauppanimi" type="xs:string"/>
+			<xs:element name="laatu" type="xs:string"/>
+			<xs:element name="ominaisuudet" type="ymy:OminaisuudetType"/>
+			<xs:element name="prosessi" type="xs:string"/>
+			<xs:element name="toteutunut" type="xs:string"/>
+			<xs:element name="sijaintitieto" type="yht:SijaintitietoType">
+				<xs:annotation>
+					<xs:documentation>Käyttöpaikan sijainti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="varastointipaikkatieto" type="ymy:VarastointipaikkatietoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="OminaisuudetType">
+		<xs:sequence>
+			<xs:element name="pitoisuudet" type="ymy:PitoisuudetType"/>
+			<xs:element name="lampoarvo" type="xs:string"/>
+			<xs:element name="kokonaisenergia" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KayttopaikkaType">
+		<xs:choice>
+			<xs:element name="prosessi" type="xs:string"/>
+			<xs:element name="kattila" type="xs:string"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="KemikaaliType">
+		<xs:sequence>
+			<xs:element name="kemikaalinTiedot" type="ymy:KemikaalinTiedotType">
+				<xs:annotation>
+					<xs:documentation>Tieto kemikaalin käytöstä prosessissa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paatyy" type="ymy:PaatyyType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Kemikaalista päätyy</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Kemikaalin käyttöpaikan sijainti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="varastointipaikkatieto" type="ymy:VarastointipaikkatietoType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MuualtaTulevatType">
+		<xs:sequence>
+			<xs:element name="jate" type="xs:string"/>
+			<xs:element name="kayttopaikka" type="ymy:KayttopaikkaType"/>
+			<xs:element name="sijaintitiedot" type="yht:SijaintitietoType">
+				<xs:annotation>
+					<xs:documentation>Käyttöpaikan sijainti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="varastointipaikkatieto" type="ymy:VarastointipaikkatietoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KemikaalinTiedotType">
+		<xs:sequence>
+			<xs:element name="kemikaaliTaiValmiste" type="xs:string"/>
+			<xs:element name="koostumus" type="xs:string"/>
+			<xs:element name="Osuus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>%</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="casnro" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>CAS - numero</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="luokitus" type="xs:string"/>
+			<xs:element name="haihtuvat" type="ymy:HaihtuvatType">
+				<xs:annotation>
+					<xs:documentation>Haihtuvat orgaaniset
+yhdisteet</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="eka" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Enimmäismäärä
+prosessissa
+ja varastossa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="keski" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Keskimääräinen käyttö</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kayttotarkoitus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>käyttötarkoitus- ja kohde</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="HaihtuvatType">
+		<xs:sequence>
+			<xs:element name="hyorystyminen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Höyrynpaine
+20°C:ssa
+(kPa)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kiehumispiste" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Kiehumispiste
+101,3
+kPa:ssa (°C)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaatyyType">
+		<xs:sequence>
+			<xs:element name="tuotteeseen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>%</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vesiin" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>%</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ilmaan" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>%</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jatteeseen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>%</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="reagoi" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>%</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PoistokaasuType">
+		<xs:sequence>
+			<xs:element name="pitoisuudetMuunnettuna" type="ymy:PitoisuudetMuunnettunaType">
+				<xs:annotation>
+					<xs:documentation>Pitoisuudet eri toiminnoista ilmoitetaan muunnettuna seuraaviin happipitoisuuksiin kuivissa kaasuissa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PuhdistinType">
+		<xs:sequence>
+			<xs:element name="erotusaste" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>erotusaste (%)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="takuuarvo" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>suunnittelu- ja takuuarvo (mg/m3)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tunnus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>puhdistimen tunnus</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PitoisuudetMuunnettunaType">
+		<xs:sequence>
+			<xs:element name="kiintea" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>polttolaitokset, kiinteät polttoaineet 6 %</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="neste" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>polttolaitokset, neste- ja kaasumaiset polttoaineet 3 %</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kaasuturbiinit" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>kaasuturbiinit 15 %</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jatteenpolttoasemat" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>jätteenpolttolaitokset 11 %</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="asfalttiasemat" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>asfalttiasemat 17 %.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="laskentamenetelmat" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Laskentamenetelmät esimerkkeineen liitetään hakemukseen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaastotMaaperaanType">
+		<xs:sequence>
+			<xs:element name="PaastotMaaperaan">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="toiminta" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>maaperän pilaantumista aiheuttanut toiminta</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="sijaintitieto" type="yht:SijaintitietoType"/>
+						<xs:element name="aine" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Maaperän pilaantumista aiheuttaneet aineet</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="tutkimustulokset" type="yht:YmparistoLiiteType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>yksityiskohtaiset tutkimustulokset maaperän ja pohjaveden pilaantuneisuuden selvittämisestä</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="puhdistustyo" type="yht:YmparistoLiiteType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>selvitys käytettävästä puhdistusmenetelmästä, jätteiden käsittelystä, selvitys puhdistustyön
+suorittamisesta ja työn valvonnasta</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="asemapiirros" type="yht:YmparistoLiiteType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>kartta ja asemapiirros, joihin on merkitty asian käsittelyn kannalta merkitykselliset kohteet</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaastotIlmaanType">
+		<xs:sequence>
+			<xs:element name="hajapaasto" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>vuosittainen </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pistepaasto" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>vuosittainen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="yksikko" type="ymy:yksikkoType"/>
+			<xs:element name="pitoisuusEnnen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Esitetään päästöt ilmaan ennen puhdistustoimenpiteitä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pitoisuusJalkeen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Esitetään päästöt ilmaan puhdistustoimenpiteiden jälkeen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="puhdistin" type="ymy:PuhdistinType"/>
+			<xs:element name="poistokaasu" type="ymy:PoistokaasuType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MelupaastotType">
+		<xs:sequence>
+			<xs:element name="paastolahteet" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>vaihtelevaa tai erillisistä melutapahtumista
+koostuvaa melua</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="luonne" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>luonteella tarkoitetaan esimerkiksi tasaista melua</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="hetki" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Melun esiintymisen mahdolliset vaihtelut ja kestoaika</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="mittaustietoa" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Jos melupäästöistä on mittaustietoa, mittausraportit liitetään hakemukseen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="suunnitelmat" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>esitetään lisäksi toteutetut melu- ja tärinäpäästöjen vähentämistoimet sekä mahdolliset
+suunnitelmat päästöjen vähentämiseksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KuivaAinepitoisuusType">
+		<xs:sequence>
+			<xs:element name="laskentaperiaate" type="yht:YmparistoLiiteType">
+				<xs:annotation>
+					<xs:documentation>Käytetyt muuntokertoimet ja laskentaperusteet esitetään liitteenä. Ilmoitetaan, onko määrä
+A = punnittu, B = arvioitu vai C = ainetaseesta laskettu</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaastojenVahentaminenType">
+		<xs:sequence>
+			<xs:element name="toimenpiteet" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään selvitys tehdyistä (esim. viimeisten viiden vuoden ajalta) ja suunnitelluista päästöjen vähentämistä
+ja puhdistamista koskevista toimista. Esitetään toimenpiteet vesi- ja ilmapäästöjen muodostumisen
+ehkäisemiseksi tai vähentämiseksi (ns. prosessitekniset toimenpiteet) sekä päästöjen puhdistusmenetelmät
+ja -tehot (ns. piipunpäätekniikka). Esitetään myös teollisten jätevesien esikäsittely johdettaessa jätevedet yleiseen tai toisen viemäriin. Esitetään toimenpiteet, joilla vähennetään melupäästöjä
+ja estetään päästöt maaperään</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kaavio" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään kaavion avulla päästöjen kulkureitti prosessista puhdistuksen kautta päästökohtaan. Puhdistusmenetelmät
+kuvaillaan sekä ilmoitetaan niiden sijoitus ja mitoitus</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TiedotType">
+		<xs:sequence>
+			<xs:element name="jatenimike" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätenimike ilmoitetaan mahdollisimman tarkasti (ks. ympäristöministeriön asetus yleisimpien
+jätteiden ja ongelmajätteiden luettelosta 1129/2001)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jateID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätteen numerotunnuksella tarkoitetaan yllä mainitun ympäristöministeriön asetuksen sisältämän jäteluettelon mukaista tunnusta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kuivapaino" type="xs:string"/>
+			<xs:element name="kuivaAinepitoisuus" type="ymy:KuivaAinepitoisuusType" minOccurs="0"/>
+			<xs:element name="tyyppi">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="ongelmajäte"/>
+						<xs:enumeration value="Tavanomainen"/>
+						<xs:enumeration value="Pysyvä"/>
+						<xs:enumeration value="ei tiedossa"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="toimittaja" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Paikka josta jäte tulee</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kaatopaikkakelpoisuus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Selvitys kaatopaikalle toimitettavien jätteiden kaatopaikkakelpoisuudesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TuotetutJatteetType">
+		<xs:sequence>
+			<xs:element name="kasittelypaikkatieto">
+				<xs:annotation>
+					<xs:documentation>Jätteiden hyödyntämis- ja käsittelypaikan yhteystiedot</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Kasittelypaikka" type="yht:PostiosoiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="prosessivaihe" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätteistä ilmoitetaan myös, missä (esim.
+prosessivaiheessa) jäte syntyy</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tiedot" type="ymy:TiedotType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VarastoituJateType">
+		<xs:sequence>
+			<xs:element name="jatenimike" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätenimike ilmoitetaan mahdollisimman tarkasti (ks. ympäristöministeriön asetus yleisimpien
+jätteiden ja ongelmajätteiden luettelosta 1129/2001)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jateID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätteen numerotunnuksella tarkoitetaan yllä mainitun ympäristöministeriön asetuksen sisältämän jäteluettelon mukaista tunnusta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kuivapaino" type="xs:string"/>
+			<xs:element name="kuivaAinepitoisuus" type="ymy:KuivaAinepitoisuusType" minOccurs="0"/>
+			<xs:element name="tyyppi">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="ongelmajäte"/>
+						<xs:enumeration value="Tavanomainen"/>
+						<xs:enumeration value="Pysyvä"/>
+						<xs:enumeration value="ei tiedossa"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="varastointipaikkatieto" type="yht:SijaintitietoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KierratettyJateType">
+		<xs:sequence>
+			<xs:element name="jatenimike" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätenimike ilmoitetaan mahdollisimman tarkasti (ks. ympäristöministeriön asetus yleisimpien
+jätteiden ja ongelmajätteiden luettelosta 1129/2001)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="jateID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Jätteen numerotunnuksella tarkoitetaan yllä mainitun ympäristöministeriön asetuksen sisältämän jäteluettelon mukaista tunnusta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kuivapaino" type="xs:string"/>
+			<xs:element name="kuivaAinepitoisuus" type="ymy:KuivaAinepitoisuusType" minOccurs="0"/>
+			<xs:element name="tyyppi">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="ongelmajäte"/>
+						<xs:enumeration value="Tavanomainen"/>
+						<xs:enumeration value="Pysyvä"/>
+						<xs:enumeration value="ei tiedossa"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="JatteetType">
+		<xs:sequence>
+			<xs:element name="TuotetutJatteet" type="ymy:TuotetutJatteetType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Omassa toiminnassa syntyvät jätteet, jotka toimitetaan muualle käsiteltäviksi / hyödynnettäviksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="KierratettyJate" type="ymy:KierratettyJateType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Omassa toiminnassa hyödynnetyt ja käsitellyt jätteet</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="VarastoituJate" type="ymy:VarastoituJateType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Varastoidut hyöty- ja ongelmajätteet vuoden lopussa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KasittelyType">
+		<xs:sequence>
+			<xs:element name="laatu" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>hyödyntämisen tai käsittelyn tuottaman jätteen lajista, laadusta ja määrästä sekä siinä syntyvän
+jätteen hyödyntämisestä tai käsittelystä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="maara" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>hyödynnettäväksi tai käsiteltäväksi aiotun jätteen laadusta ja määrästä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="alue" type="yht:SijaintitietoType">
+				<xs:annotation>
+					<xs:documentation>alueesta, jolta jätettä aiotaan ottaa hyödynnettäväksi tai käsiteltäväksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kuljetus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>hakijan järjestämästä jätteen keräyksestä ja kuljetuksesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kaavio" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>jätteen hyödyntämisestä ja käsittelystä sekä kaaviopiirros hyödyntämisen tai käsittelyn kulusta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vakuus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>selvitys vakuudesta tai tarvittaessa vakavaraisuudesta tai muusta vastaavasta järjestelystä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="asiantuntemus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>hakijan käytettävissä olevasta alan asiantuntemuksesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KaatopaikkaType">
+		<xs:sequence>
+			<xs:element name="rakentaminen" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>kaatopaikan rakentamisesta ja rakenteesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kaytto" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>kaatopaikan käytöstä ja hoidosta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="valvonta" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>kaatopaikan valvonnasta ja tarkkailusta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="poistaminen" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>kaatopaikan käytöstä poistamisesta ja jälkihoidosta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vahinkotilanteet" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>vahinkotilanteisiin varautumisesta ja niiden hoidosta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vakuus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Lisäksi edellytetään, että jos kaatopaikan pitäjä ei aseta vakuutta, on lupahakemuksessa esitettävä
+muu vastaava järjestely, jolla varmistetaan kaatopaikkaa koskevien vaatimusten täyttäminen sekä toiminnan
+lopettaminen ja jälkihoidon toteuttaminen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="JatteidenHyodyntaminenType">
+		<xs:sequence>
+			<xs:element name="Kasittely" type="ymy:KasittelyType">
+				<xs:annotation>
+					<xs:documentation>Toiiminnan koskiessa jätteen  hyödyntämistä tai käsittelyä </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Kaatopaikka" type="ymy:KaatopaikkaType">
+				<xs:annotation>
+					<xs:documentation>Kaatopaikkaa koskevassa lupahakemuksessa on lisäksi esitettävä seuraavat tiedot</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VaikutuksetYmparistoonType">
+		<xs:sequence>
+			<xs:element name="vaikutusViihtyvyyteen" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään selvitys tai arvio toiminnan tai laitoksen vaikutuksista yleiseen viihtyisyyteen sekä, miten
+vaikutukset ihmisten terveyteen ehkäistään tai rajoitetaan mahdollisimman vähäisiksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vaikutusLuontoon" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Selvitetään hankkeen vaikutukset luontoon ja luonnonsuojeluarvoihin sekä rakennettuun ympäristöön.
+Selvitetään vaikutukset Natura 2000 -alueisiin. Esitetään hakijan arvio siitä, onko hankkeella todennäköisesti
+merkittäviä vaikutuksia Natura 2000 -alueiden luonnonarvoihin</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vaikutusVesistoon" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>- selvitys toiminnan vaikutuksista vesien laatuun
+- selvitys toiminnan vaikutuksista kalastoon ja muihin vesieliöihin
+- selvitys päästöjen vaikutuksista kalastukseen ja muuhun vesistön käyttöön</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vaikutusIlmaan" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään selvitys ilmaan joutuvien päästöjen vaikutuksista alueen ilman laatuun ja ympäristön tilaan</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vaikutusMaaperaan" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään selvitys laitoksen toiminnan vaikutuksista alueen maaperään ja pohjaveteen ottaen huomioon
+YSL 7 ja 8 §:ien mukaiset pilaamiskiellot</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="melutarinaVaikutus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään laitoksen toiminnasta aiheutuva melutaso ja häiritsevyys lähimmissä melulle alttiissa kohteissa.
+Hakemuksessa tulee selvittää melun tyyppi ja ominaisuudet ja melun vaikutusalueen laskennallinen
+tai mittauksiin perustuva laajuus. Melu- tai tärinäpäästöjen leviämistä arvioidaan tarvittaessa leviämismallilaskelmilla,
+joiden tulokset esitetään karttapiirroksena. Siihen merkitään myös melusta
+häiriytyvät kohteet sekä arvio melulle ja tärinälle altistuvien henkilöiden määristä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ymparistovaikutus" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Jos hakemuksen mukaisesta toiminnasta on tehty ympäristövaikutusten arviointimenettelystä annetussa
+laissa (468/1994) tarkoitettu arviointi, liitetään hakemukseen arviointiselostus ja yhteysviranomaisen
+siitä antama lausunto</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TarkkailuJaRaportointiType">
+		<xs:sequence>
+			<xs:element name="kayttotarkkailu" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään prosessien päivittäiseen tarkkailuun liittyvät olennaiset toimenpiteet, menetelmät ja tiedon
+hallintaan liittyvät laitteet sekä puhdistuslaitteiden toimivuuden tarkkailu</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paastotarkkailu" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään päästötarkkailuun liittyvät päästökohteet, parametrit, tarkkailun tiheys ja tekijä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vaikutustarkkailu" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Vaikutustarkkailusta esitetään ilmanlaadun, vesistövaikutusten, pohjavesien ja melutilanteen tarkkailu
+ja sen alueellinen ulottuvuus ja tiheys sekä tarkkailuun liittyvät menetelmät, mittaukset ja laitteet</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="mittausmenetelmat" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Esitetään päästöjen tarkkailuun liittyvien komponenttien mittaustekniikat ja -menetelmät. Kuvataan
+näytteenottokohta, mittausjärjestelmä, mittauksen kulku ja tiheys (tiedontuotantoketju: näytteenotto
+sekä määrä- että pitoisuusmittauksen osalta, näytteen esikäsittely, käsittely, analysointi ja käytetyt
+standardit tai ohjeet, tietojen käsittely, laskentamenetelmät ja raportointi). Esitetään tiedot mittalaitteiden
+huollosta, kalibroinneista, varajärjestelmistä ja mittausjärjestelmän tarkistuksesta sekä hälytyksistä.
+Esitetään toiminnanharjoittajan arvio tiedontuotantoketjun luotettavuudesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tarkkailuohjelma" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Voimassa oleva tarkkailuohjelma (toimivaltaisen viranomaisen hyväksymä tarkkailusuunnitelma) liitetään
+hakemukseen. Hakemukseen liitetään tarvittaessa YSA 10 §:n 7 kohdan mukainen ehdotus
+tarkkailun järjestämiseksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VahinkoToimenpiteetType">
+		<xs:sequence>
+			<xs:element name="arvioVesistoVahingoista" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Jos laitos tai toiminta aiheuttaa päästöjä vesistöön, on hakemukseen liitettävä alla luetellut lisätiedot.
+Lisätiedot on esitettävä soveltuvin osin myös johdettaessa jätevesiä maahan, tai muuhun uomaan
+(esimerkiksi ojaan) kuin vesistöön. Esitetään YSA 11 § 1 momentin mukainen arvio päästöjen aiheuttamista
+vahingoista (esimerkiksi virkistyskäytön estyminen, kalatalousvahingot)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="vesistoVahinkojenEhkaisy" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Jos laitos tai toiminta aiheuttaa päästöjä vesistöön, on hakemukseen liitettävä alla luetellut lisätiedot.
+Lisätiedot on esitettävä soveltuvin osin myös johdettaessa jätevesiä maahan tai muuhun uomaan (esimerkiksi
+ojaan) kuin vesistöön. YSA 11 § 1 momentin mukaiset lisätiedot:
+· selvitys vahinkojen ehkäisemiseksi tai vähentämiseksi tarvittavista toimenpiteistä
+· arvio mahdollisuuksista estää vesistön pilaantumisesta aiheutuva korvattava vahinko toimenpiteillä</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="korvausesitysVesisto" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Jos laitos tai toiminta aiheuttaa päästöjä vesistöön, on hakemukseen liitettävä alla luetellut lisätiedot.
+Lisätiedot on esitettävä soveltuvin osin myös johdettaessa jätevesiä maahan tai muuhun uomaan (esimerkiksi
+ojaan) kuin vesistöön. YSA 11 § 1 momentin mukaiset lisätiedot:
+· korvauskysymysten ratkaisemiseksi tarpeelliset kiinteistötiedot
+· ehdotus vahinkojen korvaamisesta kiinteistöjen omistajille tai haltijoille tai muille vahingonkärsijöille,
+esimerkiksi ammattikalastajille</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="muutKuinVesistovahingot" type="yht:YmparistoLiiteType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Muiden kuin vesistöpäästöjen osalta selvitetään muut toimenpiteet kuin suojatoimet päästökohteessa,
+kuten esimerkiksi meluntorjuntarakenteet tai suojapuusto</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaivittainenToimintaAikaType">
+		<xs:sequence>
+			<xs:element name="alkuHetki" type="xs:time"/>
+			<xs:element name="loppuHetki" type="xs:time"/>
+			<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ToimintaAikaType">
+		<xs:sequence>
+			<xs:element name="aloitusPvm" type="xs:date"/>
+			<xs:element name="lopetusPvm" type="xs:date"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="viikottainenToimintaAikaType">
+		<xs:sequence>
+			<xs:element name="ma" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ti" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ke" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="to" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="pe" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="la" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="su" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="alkuHetki" type="xs:time"/>
+						<xs:element name="loppuHetki" type="xs:time"/>
+						<xs:element name="vuorokausivaihtelu" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="LuvanHakemisenSyyType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Muu"/>
+			<xs:enumeration value="Toiminnan aloittamislupa"/>
+			<xs:enumeration value="Lupamääräysten tarkistaminen"/>
+			<xs:enumeration value="Toiminnan muutos"/>
+			<xs:enumeration value="Olemassa oleva toiminta"/>
+			<xs:enumeration value="Uusi toiminta"/>
+			<xs:enumeration value="ei tiedossa"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="AineType">
+		<xs:sequence>
+			<xs:element name="vesikuormitus" type="xs:string"/>
+			<xs:element name="viemarikuormitus" type="xs:string"/>
+			<xs:element name="pitoisuusEnnen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Esitetään tiedot jäteveden sisältämien aineiden pitoisuuksista
+luvan hakemisen kannalta tarpeellisilta osin ennen jäteveden puhdistusta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pitoisuusJalkeen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>ja jälkeen puhdistuksen</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="puhdistusteho" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Lisäksi esitetään jäteveden käsittelyn puhdistusteho (reduktio-%) ainekohtaisesti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="lampokuorma" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>esitetään myös jätevesien aiheuttama lämpökuorma (MWh/a)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VedenottopaikkaType">
+		<xs:complexContent>
+			<xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+				<xs:sequence>
+					<xs:element name="nimi" type="xs:string"/>
+					<xs:element name="kuvaus" type="xs:string"/>
+					<xs:element name="sijaintitieto" type="yht:SijaintitietoType"/>
+					<xs:element name="liittymissopimus" type="xs:string"/>
+					<xs:element name="tyyppi">
+						<xs:annotation>
+							<xs:documentation>Vedenhankinnasta ilmoitetaan,
+mistä raakavesi otetaan, ryhmätunnus</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Toisen yrityksen vesilaitos"/>
+								<xs:enumeration value="Kunnan tai vastaavan yhteinen laitos"/>
+								<xs:enumeration value="Meri"/>
+								<xs:enumeration value="Tekoallas"/>
+								<xs:enumeration value="Joki"/>
+								<xs:enumeration value="Järvi tai lampi"/>
+								<xs:enumeration value="Pohjavedenottamo"/>
+								<xs:enumeration value="ei tiedossa"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="LiittymissopimusType">
+		<xs:sequence>
+			<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+			<xs:element name="sopimuksentiedot" type="yht:YmparistoLiiteType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KasittelypaikkaType">
+		<xs:sequence>
+			<xs:element name="kuvaus" type="xs:string"/>
+			<xs:element name="sijaintitieto" type="yht:SijaintitietoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="JatevesiType">
+		<xs:sequence>
+			<xs:element name="omaKasittely" type="ymy:OmaKasittelyType" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Jos jätevesiä ei johdeta yleiseen tai toisen viemäriin, ilmoitetaan, minne jätevedet johdetaan</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="liittymissopimus" type="ymy:LiittymissopimusType" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Tarpeen mukaan vedenottolupa
+ja sopimus yleiseen tai toisen viemäriin liittymisestä liitetään hakemuksen liitteiksi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="OmaKasittelyType">
+		<xs:sequence>
+			<xs:element name="Kasittelypaikka" type="ymy:KasittelypaikkaType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="KasittelynTilaType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="0 Kesken"/>
+			<xs:enumeration value="1 Vireillä"/>
+			<xs:enumeration value="2 Lupa haettu"/>
+			<xs:enumeration value="3 Lupa myönnetty"/>
+			<xs:enumeration value="4 Lupa rauennut"/>
+			<xs:enumeration value="5 Jatkolupa"/>
+			<xs:enumeration value="6 Lupakohteen tarkastus"/>
+			<xs:enumeration value="7 Lupahakemuksesta tiedottaminen"/>
+			<xs:enumeration value="8 Lausunnon pyytäminen"/>
+			<xs:enumeration value="9 Lausunto"/>
+			<xs:enumeration value="10 Muistutus"/>
+			<xs:enumeration value="11 Hakijan kuuleminen ja vastine"/>
+			<xs:enumeration value="12 Päätöksestä valitettu"/>
+			<xs:enumeration value="13 Päätös lainvoimainen"/>
+			<xs:enumeration value="ei tiedossa"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="KasittelyHistoriaType">
+		<xs:sequence>
+			<xs:element name="Kasittelytieto" type="yht:KasittelyTietoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="yksikkoType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="mg/m3"/>
+			<xs:enumeration value="t/a"/>
+			<xs:enumeration value="ei tiedossa"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="LaitosType">
+		<xs:complexContent>
+			<xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+				<xs:sequence>
+					<xs:element name="laitoksenNimi" type="xs:string" minOccurs="0"/>
+					<xs:element name="osoite" type="yht:PostiosoiteType" minOccurs="0"/>
+					<xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="toimialatunnus" type="yht:ToimialaType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>TOLin mukainen</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="toimiala" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Toimialan kuvaus</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="yhteyshenkilo" type="yht:YhteyshenkiloType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="toimintaAika" type="ymy:ToimintaAikaType" minOccurs="0"/>
+					<xs:element name="tyontekijamaara" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Kuinka monta ihmistä laitoksessa työskentelee</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="henkilotyovuodet" type="xs:string" minOccurs="0"/>
+					<xs:element name="kiinttun" type="yht:KiinteistotunnusType" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Kiinteistötunnus</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="rakennustunnustieto" type="yht:RakennuksenTunnusType" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="YmparistoluvatType">
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="toimituksenTiedot" type="yht:AineistotoimituksentiedotType"/>
+					<xs:element name="ymparistolupatieto" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element ref="ymy:Ymparistolupa"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="Ymparistolupa" type="ymy:YmparistolupaType" substitutionGroup="gml:_Feature"/>
+	<xs:complexType name="VarastointipaikkatietoType">
+		<xs:sequence>
+			<xs:element name="Varastointipaikka" type="ymy:VarastointipaikkaType">
+				<xs:annotation>
+					<xs:documentation>Raaka-aineen,kemikaalin tvs. varastointipaikka</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

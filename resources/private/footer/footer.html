@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+  <footer role="contentinfo">
+    <div class="informations">
+      <div class="footer-box">
+        <span class="footer-title" data-bind="ltext: 'footer.conversation.title'"></span>
+        <p>
+            <span data-bind="lhtml: 'footer.conversation.desc'"></span><br />
+          <!-- ko if: _.includes(sidePanelPages, lupapisteApp.models.rootVMO && lupapisteApp.models.rootVMO.currentPage()) -->
+            <a onclick="window.parent.hub.send('side-panel::open');return false;" href="#" data-bind="ltext: 'footer.open.conversation'"></a>
+          <!-- /ko -->
+      </p>
+      </div>
+      <div class="footer-box">
+        <span class="footer-title" data-bind="ltext: 'footer.report-issue.title'"></span>
+        <p>
+          <span data-bind="ltext: 'footer.report-issue.desc'"></span>
+          <span><a target="_blank" data-bind="ltext: 'footer.report-issue.link-text',
+                                              attr: {href: loc('footer.report-issue.link-href')}"></a></span>
+        </p>
+      </div>
+      <div class="footer-box">
+        <ul class="footer-links">
+          <li><a data-bind="ltext: 'footer.register',
+                            attr: {href: loc('a11y.url.registry')}"></a></li>
+          <li><a href="/page/terms/fi"
+                 data-bind="ltext: 'footer.terms'"></a></li>
+          <li><a href="/page/licenses/fi"
+                 data-bind="ltext: 'footer.license'"></a></li>
+        </ul>
+      </div>
+      <div class="footer-box">
+        <p>&nbsp;</p>
+      </div>
+    </div>
+    <span id="buildinfo"></span>
+  </footer>
+
+</body>
+</html>

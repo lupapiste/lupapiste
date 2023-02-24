@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="reports">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <h2>Raportit</h2>
+        <p><b>Huom:</b> Raporttien generointi voi kest&auml;&auml; jokusen tovin.</p>
+        <h3>K&auml;ytt&auml;j&auml;t</h3>
+        <div class="form-grid" id="admin-user-report" data-bind="with: $data.users">
+          <div class="row">
+            <!-- ko foreach: values -->
+            <div class="col-1">
+              <label data-bind="text: $data.label"></label>
+              <select data-bind="options: $parent.options,
+                                 optionsText: 'text',
+                                 optionsValue: 'value',
+                                 value: $data.value"
+                      class="dropdown"></select>
+            </div>
+            <!-- /ko -->
+            <div class="col-1">
+              <br>
+              <a class="btn primary"
+                 data-bind="attr: {href: link}">
+                <i class="lupicon-download"></i>
+                <span>Lataa raportti</span>
+              </a>
+            </div>
+            <div class="row">
+              <div class="col-1">
+                <br>
+                <label>Henkil&ouml;t, joille ei l&auml;hetet&auml; s&auml;hk&ouml;postia</label>
+                <textarea class="grid-style-input"
+                          data-bind="value: emails"></textarea>
+                <button class="positive"
+                        data-bind="click: upsert">Tallenna</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ko with: $data.applications -->
+        <h3>J&auml;tetyt hakemukset</h3>
+        <div class="form-grid">
+          <div class="row">
+            <div class="col-1">
+              <label>Kuukausi</label>
+              <input class="lux" type="text" data-bind="value: $data.monthInput" />
+            </div>
+            <div class="col-1">
+              <label>Vuosi</label>
+              <input type="text" class="lux" data-bind="value: $data.yearInput" />
+            </div>
+            <div class="col-1">&nbsp;</div>
+            <div class="col-1">
+              <br>
+              <a class="btn primary"
+                 data-bind="click: fetch">
+                <i class="lupicon-download"></i>
+                <span>Lataa raportti</span>
+              </a>
+            </div>
+          </div>
+          <!-- ko ifnot: _.isEmpty(results()) -->
+          <div class="row">
+            <div class="col-4">
+              <span class="h3">J&auml;tetyt hakemukset
+                 <span data-bind="text: monthValue"></span> / <span data-bind="text: yearValue"></span></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-2">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Lupatyyppi</th>
+                    <th>Hakemukset lkm</th>
+                    <th>Toimenpiteet lkm</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: results">
+                  <tr>
+                    <td>
+                      <!-- ko if: $data._id === 'R_prev-permit' -->
+                      <span data-bind="ltext: 'operations.aiemmalla-luvalla-hakeminen'"></span>
+                      <!-- /ko -->
+                      <!-- ko ifnot: $data._id === 'R_prev-permit' -->
+                      <span data-bind="ltext: $data.permitType"></span>
+                      <!-- /ko -->
+                      <!-- ko foreach: $data.operations -->
+                      <p>
+                        <i>
+                          - <span data-bind="ltext: 'operations.' + $data._id"></span>: <span data-bind="text: $data.countApp"></span> kpl
+                        </i>
+                      </p>
+                      <!-- /ko -->
+                    </td>
+                    <td style="vertical-align: top"><span data-bind="text: $data.countApp"></span></td>
+                    <td style="vertical-align: top"><span data-bind="text: $data.countOp"></span></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th>Yhteens&auml;</th>
+                    <th><span data-bind="text: totalCountApp"></span></th>
+                    <th><span data-bind="text: totalCountOp"></span></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="col-2">
+              <a class="btn negative"
+                 data-bind="click: reset">
+                <i class="lupicon-remove"></i>
+                <span>Sulje</span>
+              </a>
+            </div>
+          </div>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
+
+        <section>
+          <h3 data-bind="ltext: 'authorityAdmin.storeBillingReports.titleAll'"></h3>
+          <div class="form-grid">
+            <organization-report-form
+                params="action: 'store-billing-report-all-municipalities',
+                        lcaption:   'authorityAdmin.storeBillingReports.captionAll',
+                        lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                        lstartDate: 'authorityAdmin.storeBillingReports.timePeriod.startTs',
+                        lendDate:   'authorityAdmin.storeBillingReports.timePeriod.endTs',
+                        startTs:    startComputed,
+                        endTs:      endComputed,
+                        startDate:  startDate,
+                        endDate:    endDate,
+                        useOrgId:   false">
+            </organization-report-form>
+            <!-- Last month's billing shortcut form -->
+            <organization-report-form
+                params="action: 'store-billing-report-all-municipalities',
+                        lbutton:  'authorityAdmin.storeBillingReports.lastMonthButtonText',
+                        startTs:  lastMonthStart,
+                        endTs:    lastMonthEnd,
+                        useOrgId: false">
+            </organization-report-form>
+          </div>
+        </section>
+
+        <section>
+          <h3 data-bind="ltext: 'authorityAdmin.storeDownloadsReports.titleAll'"></h3>
+          <div class="form-grid">
+            <organization-report-form
+                    params="action: 'store-downloads-report-all-municipalities',
+                        lcaption:   'authorityAdmin.storeDownloadsReports.captionAll',
+                        lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                        lstartDate: 'authorityAdmin.storeDownloadsReports.timePeriod.startTs',
+                        lendDate:   'authorityAdmin.storeDownloadsReports.timePeriod.endTs',
+                        startTs:    startForDownloadsComputed,
+                        endTs:      endForDownloadsComputed,
+                        startDate:  startDateForDownloads,
+                        endDate:    endDateForDownloads,
+                        useOrgId:   false">
+            </organization-report-form>
+            <!-- Last month's downloads shortcut form -->
+            <organization-report-form
+                    params="action: 'store-downloads-report-all-municipalities',
+                        lbutton:  'authorityAdmin.storeBillingReports.lastMonthButtonText',
+                        startTs:  lastMonthStart,
+                        endTs:    lastMonthEnd,
+                        useOrgId: false">
+            </organization-report-form>
+
+          </div>
+        </section>
+
+        <section>
+          <h3 data-bind="ltext: 'authorityAdmin.digitizingReports.titleAll'"></h3>
+          <div class="form-grid">
+            <organization-report-form
+                params="action:     'digitizer-applications-report-all-municipalities',
+                        lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                        lstartDate: 'authorityAdmin.digitizingReports.timePeriod.startTs',
+                        lendDate:   'authorityAdmin.digitizingReports.timePeriod.endTs',
+                        startTs:    startForDigitizingComputed,
+                        endTs:      endForDigitizingComputed,
+                        startDate:  startDateForDigitizing,
+                        endDate:    endDateForDigitizing,
+                        useOrgId:   false">
+            </organization-report-form>
+            <!-- Last month's digitizing shortcut form -->
+            <organization-report-form
+                params="action:   'digitizer-applications-report-all-municipalities',
+                        lbutton:  'authorityAdmin.storeBillingReports.lastMonthButtonText',
+                        startTs:  lastMonthStart,
+                        endTs:    lastMonthEnd,
+                        useOrgId: false">
+            </organization-report-form>
+          </div>
+        </section>
+
+        <section>
+          <h3 data-bind="ltext: 'oauth.report.title'"></h3>
+          <div class="form-grid">
+            <organization-report-form
+                params="action:     'rami-logins-report',
+                        lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                        lstartDate: 'oauth.report.start',
+                        lendDate:   'oauth.report.end',
+                        startDate:  startRamiDate,
+                        endDate:    endRamiDate,
+                        startTs:    startRamiTs,
+                        endTs:      endRamiTs,
+                        useOrgId:   false">
+            </organization-report-form>
+          </div>
+        </section>
+
+        <section>
+          <h3 data-bind="ltext: 'admin-report.verdicts.title'"></h3>
+          <div class="form-grid">
+            <organization-report-form
+                params="action:     'verdicts-contracts-report',
+                        lbutton:    'authorityAdmin.storeBillingReports.buttonText',
+                        lstartDate: 'oauth.report.start',
+                        lendDate:   'oauth.report.end',
+                        startDate:  startVerdictDate,
+                        endDate:    endVerdictDate,
+                        startTs:    startVerdictTs,
+                        endTs:      endVerdictTs,
+                        useOrgId:   false">
+            </organization-report-form>
+          </div>
+        </section>
+      </div>
+    </section>
+  </body>
+</html>

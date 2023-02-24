@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container"
+             role="main"
+             id="mypage">
+      <div id="own-info-form"
+           class="accordion-container">
+        <div id="inner-margins">
+          <button class="secondary"
+                  data-bind="click: function() { history.go(-1); }"
+                  data-test-id="back-button">
+            <i class="lupicon-chevron-start"></i>
+            <span data-bind="ltext: 'back'"></span>
+          </button>
+        </div>
+        <div class="hr"></div>
+        <h1 data-bind="ltext: 'mypage.title'"></h1>
+        <div data-bind="ltext:'mypage.desc'" class="page-info"></div>
+        <!-- ko if: !lupapisteApp.models.currentUser.isFinancialAuthority() -->
+        <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
+
+        <form>
+
+          <div class="form-grid no-padding">
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: firstName,
+                              id: 'firstName',
+                              disable: disable,
+                              lLabel: 'userinfo.firstName'}}">
+              </div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: lastName,
+                              id: 'lastName',
+                              disable: disable,
+                              lLabel: 'userinfo.lastName'}}">
+              </div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: phone,
+                              id: 'phone',
+                              disable: disable,
+                              lLabel: 'userinfo.phone'}}"></div>
+            </div>
+
+            <!-- ko if: showSimpleCompanyInfo -->
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: companyName,
+                              disable: disable,
+                              id: 'architect.company.name',
+                              lLabel: 'userinfo.architect.company.name'}}"></div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: companyId,
+                              disable: disable,
+                              id: 'architect.company.id',
+                              lLabel: 'userinfo.architect.company.id',
+                              placeholder: loc( 'mypage.ytunnus.placeholder')}}"></div>
+            </div>
+            <!-- /ko -->
+
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: street,
+                              disable: disable,
+                              id: 'userinfo.street',
+                              lLabel: 'userinfo.street'}}">
+              </div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: zip,
+                              disable: disable,
+                              id: 'userinfo.zip',
+                              lLabel: 'userinfo.zip'}}">
+              </div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: city,
+                              disable: disable,
+                              id: 'userinfo.city',
+                              lLabel: 'userinfo.city'}}">
+              </div>
+            </div>
+            <div class="row" data-bind="if: personIdEditable">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: personId,
+                              disable: disable,
+                              id: 'userinfo.personId',
+                              lLabel: 'userinfo.personId'}}">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'select-field',
+                              params: {value: language,
+                              options: loc.getSupportedLanguages(),
+                              optionsText: loc,
+                              disable: disable,
+                              id: 'userinfo-language',
+                              lLabel: 'userinfo.language'}}">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-3"
+                   data-bind="component: {name: 'checkbox-field',
+                              params: {value: allowDirectMarketing,
+                              disable: disable,
+                              id: 'allowDirectMarketing',
+                              hasHtmlLabel: true,
+                              lLabel: 'userinfo.allowDirectMarketing'}}"></div>
+            </div>
+            <div class="row">
+              <span data-bind="lhtml:'userinfo.architect.desc'"></span>
+            </div>
+            <div class="row">
+              <div class="col-3"
+                   data-bind="component: {name: 'checkbox-field',
+                              params: {value: architect,
+                              disable: disable,
+                              id: 'architect',
+                              lLabel: 'userinfo.architect'}}"></div>
+            </div>
+          </div>
+
+          <!-- ko if: architect -->
+          <div class="architect-info form-grid no-padding">
+
+            <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'select-field',
+                              params: {value: degree,
+                              disable: disable,
+                              options: availableDegrees,
+                              optionsValue: 'id',
+                              optionsText: 'name',
+                              lOptionsCaption: 'userinfo.architect.degree.choose',
+                              id: 'architect-degree-select',
+                              lLabel: 'userinfo.architect.degree'}}"></div>
+
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: graduatingYear,
+                              disable: disable,
+                              id: 'architect.graduatingYear',
+                              lLabel: 'userinfo.architect.graduatingYear',
+                              maxLength: 4}}"></div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                              params: {value: fise,
+                              disable: disable,
+                              id: 'architect.fise',
+                              lLabel: 'userinfo.architect.fise'}}"></div>
+            </div>
+            <div class="row">
+              <div class="col-3"
+                   data-bind="component: {name: 'select-field',
+                              params: {value: fiseKelpoisuus,
+                              disable: disable,
+                              options: availableFiseKelpoisuusValues,
+                              optionsValue: 'id',
+                              optionsText: 'name',
+                              lOptionsCaption: 'userinfo.architect.fiseKelpoisuus.choose',
+                              id: 'architect-fiseKelpoisuus-select',
+                              lLabel: 'userinfo.architect.fiseKelpoisuus'}}"></div>
+            </div>
+
+            <div class="row">
+              <div class="col-4" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
+                <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
+                <table data-bind="visible: hasAttachments" class="architect-attachments">
+                  <thead>
+                    <tr>
+                      <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                      <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: attachments">
+                    <tr>
+                      <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
+                        <div
+                          data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
+                          data-test-id="attachment-type"></div>
+                        <div data-bind="text:  $data['file-name']"
+                             data-test-id="filename"></div>
+                      </td>
+                      <td>
+                        <!-- ko ifnot: $parent.disable-->
+                        <a class="btn primary gap--r4"
+                           data-bind="ltext: 'userinfo.architect.attachments.load',
+                                      attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
+                           data-test-id="load" href="#"></a>
+                        <button
+                          class="secondary"
+                          data-test-id="remove"
+                          data-bind="ltext: 'userinfo.architect.attachments.remove',
+                                     click: $parent.remove">
+                        </button>
+                        <!-- /ko -->
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <icon-button params="click: add,
+                                     disable: disable,
+                                     testId: 'test-add-architect-attachment',
+                                     icon: 'upload',
+                                     ltext: 'userinfo.architect.attachments.add'">
+                </icon-button>
+              </div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <div class="button-group">
+            <icon-button params="click: save,
+                                 enable: isValid() && !disable(),
+                                 waiting: pending,
+                                 icon: 'save',
+                                 ltext: 'save',
+                                 testId: 'save-my-userinfo'">
+            </icon-button>
+          </div>
+
+        </form>
+        <!-- /ko -->
+
+      </div>
+
+      <!-- TODO: componentize mypage -->
+      <div id="pw-form" class="accordion-container">
+        <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
+        <form>
+          <div class="form-grid no-padding">
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'password-field',
+                              params: {value: oldPassword,
+                              disable: disable,
+                              id: 'oldPassword',
+                              lLabel: 'userinfo.oldPassword'}}"></div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'password-field',
+                              params: {value: newPassword,
+                              disable: disable,
+                              id: 'newPassword',
+                              lLabel: 'userinfo.newPassword',
+                              quality: quality}}"></div>
+
+              <div class="col-1"
+                   data-bind="component: {name: 'password-field',
+                              params: {value: newPassword2,
+                              disable: disable,
+                              id: 'newPassword2',
+                              lLabel: 'userinfo.newPassword2'}}"></div>
+
+              <div class="col-1" style="padding-top:24px">
+                <button data-bind="click: save,
+                                   disable: disable,
+                                   enable: ok,
+                                   css: {waiting: pending}" class="positive"
+                        data-test-id="change-my-password">
+                  <i class="lupicon-refresh"></i>
+                  <i class="wait spin lupicon-refresh"></i>
+                  <span data-bind="ltext: 'userinfo.changePassword'"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="mypage-change-email"  class="accordion-container">
+        <div data-test-id="mypage-change-email-accordion"
+             data-bind="component: {name: 'change-email',
+                        params: {data: $data.userinfo, authorization: $data.authorization}}"></div>
+      </div>
+
+      <div id="mypage-company"
+           class="accordion-container"
+           data-bind="if: companyShow">
+        <rollup params="open: companyAccordionOpen">
+          <rollup-button params="open: $parent.companyAccordionOpen,
+                                 css: {secondary: true,  'txt--upper': true},
+                                 ltext: 'company.title',
+                                 controls: 'mypage-company-details'">
+          </rollup-button>
+          <div class="rollup__open"
+               id="mypage-company-details">
+            <div class="form-grid" data-test-id="my-company">
+              <div class="row">
+                <div class="col-4">
+                  <div data-bind="visible: $parent.companyLoading">
+                    <em class="button-loader"></em>
+                    <span data-bind="ltext: 'userInfo.company.loading'"></span>
+                  </div>
+
+                <div data-bind="visible: $parent.companyLoaded">
+                  <label data-bind="ltext: 'userInfo.company.name'
+                                    " class="form-label"></label>
+                  <span data-bind="text: $parent.company.name"
+                        class="form-input"
+                        data-test-id="my-company-name"></span>
+                  <label data-bind="ltext: 'userInfo.company.y'"
+                         class="form-label"></label>
+                  <span data-bind="text: $parent.company.y"
+                        class="form-input"
+                        data-test-id="my-company-id"></span>
+
+                  <div class="spacerM"
+                       data-bind="if: $parent.company.document">
+                    <label data-bind="ltext: 'userInfo.company.contract'"
+                           class="form-label"></label>
+                    <a data-bind="text: $parent.company.document,
+                                  attr: {href: $parent.company.document}"
+                       target="_blank"></a>
+                  </div>
+                  <icon-button params="click: $parent.editCompany,
+                                       testId: 'company-edit-info',
+                                       icon: 'chevron-right',
+                                       ltext: 'mypage.companyAccount.editInfo'">
+                  </icon-button>
+                  <icon-button params="click: $parent.editUsers,
+                                       icon: 'chevron-right',
+                                       testId: 'company-edit-users',
+                                       ltext: 'mypage.companyAccount.editUsers'">
+                  </icon-button>
+                  <icon-button params="click: $parent.companyReports,
+                                       testId: 'company-reports',
+                                       icon: 'chevron-right',
+                                       ltext: 'mypage.companyAccount.reports'">
+
+                  </icon-button>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </rollup>
+      </div>
+
+      <div id="mypage-register-company" class="accordion-container">
+        <!-- ko if: !authority() && !companyShow() &&  !lupapisteApp.models.currentUser.isFinancialAuthority() -->
+        <rollup params="open: companyAccordionOpen">
+          <rollup-button params="open: $parent.companyAccordionOpen,
+                                 css: {secondary: true,  'txt--upper': true},
+                                 ltext: 'register.company.header',
+                                 controls: 'mypage-register-company-account'">
+          </rollup-button>
+          <div class="rollup__open"
+               id="my-page-register-company-account">
+            <div class="form-grid">
+              <h2 data-bind="ltext: 'register.company.header'"></h2>
+              <div class="row">
+                <div class="col-3">
+                  <p data-bind="lhtml: 'register.company.info'"
+                     class="register-info"></p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-1">
+                  <a href="#!/register-company-account-type"
+                     class="btn positive"
+                     data-bind="visible: lupapisteApp.models.globalAuthModel.ok('init-sign')"
+                     data-test-id="logged-user-register-company-start">
+                    <span data-bind="ltext: 'register.company.register'"></span>
+                    <i aria-hidden="true"
+                       class="lupicon-chevron-right"></i>
+                  </a>
+                </div>
+            </div>
+          </div>
+          </div>
+        </rollup>
+        <!-- /ko -->
+      </div>
+
+      <div id="dialog-userinfo-architect-upload"
+           role="dialog"
+           class="window autosized autosized--wider">
+        <div class="flex--between bd--b-black gap--b05 flex--align-end">
+          <strong class="h3 txt--bold"
+                  data-bind="ltext: 'userinfo.architect.upload.title'">
+          </strong>
+          <icon-button params="buttonClass: 'tertiary close',
+                               icon: 'remove',
+                               id: 'user-info-upload-dialog-close',
+                               iconOnly: true,
+                               ltext: 'close',
+                               focusPrevious: 'button#userinfo-upload-dialog-cancel'">
+          </icon-button>
+        </div>
+        <div class="dialog-content">
+          <form>
+            <label for="userinfo-upload-dialog-select"
+                   data-bind="ltext: 'userinfo.architect.upload.state.init'">
+            </label>
+            <select name="attachmentType"
+                    id="userinfo-upload-dialog-select"
+                    autofocus="true"
+                    class="lux w--100"
+                    data-bind="options: availableAttachmentTypes,
+                               value: attachmentType,
+                               optionsText: 'name',
+                               optionsValue: 'id',
+                               optionsCaption: loc('userinfo.architect.qualification.choose')">
+            </select>
+            <div class="clear"></div>
+            <input type="file" name="files[]" class="file-upload">
+            <input data-bind="attr: {value: csrf}"
+                   type="hidden"
+                   name="__anti-forgery-token">
+          </form>
+
+          <div>
+            <div data-bind="visible: !filename()">
+              <p data-bind="ltext: 'userinfo.architect.upload.no-file'"></p>
+            </div>
+            <div data-bind="visible: filename">
+              <p>
+                <span data-bind="ltext: 'userinfo.architect.upload.filename'"></span>
+                <span data-bind="text: filename"></span>
+                <span data-bind="size: filesize"></span>
+              </p>
+            </div>
+          </div>
+
+          <div data-bind="visible: state() === stateSending,
+                          ltext: 'userinfo.architect.upload.state.sending'">
+          </div>
+          <div data-bind="visible: state() === stateDone,
+                          ltext: 'userinfo.architect.upload.state.ready'">
+          </div>
+          <div class="error-note"
+               data-bind="visible: state() === stateError,
+                          ltext: 'userinfo.architect.upload.state.error'">
+          </div>
+          <div class="error-note"
+               data-bind="visible: errorText(),
+                          ltext: errorText()"
+               data-test-id="userinfo-upload-error">
+          </div>
+
+          <button data-bind="click: upload,
+                             visible: state() < stateSending,
+                             enable: canStart,
+                             ltext: 'userinfo.architect.upload.ok'"
+                  data-test-id="userinfo-upload-ok"
+                  class="positive btn-dialog">
+          </button>
+          <button data-bind="visible: state() == stateDone,
+                             ltext: 'userinfo.architect.upload.ready'"
+                  data-test-id="userinfo-upload-ready"
+                  class="positive btn-dialog close">
+          </button>
+          <button data-bind="enable: state() < stateSending,
+                             visible: state() < stateDone,
+                             ltext: 'userinfo.architect.upload.cancel',
+                             focusNext: 'button#user-info-upload-dialog-close'"
+                  data-test-id="userinfo-upload-cancel"
+                  id="userinfo-upload-dialog-cancel"
+                  class="secondary btn-dialog close">
+          </button>
+
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

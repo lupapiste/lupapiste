@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="signing-dialogs" style="visibility: visible; display: block;">
+
+      <div role="dialog"
+           id="dialog-sign-attachment" class="window autosized">
+        <div data-bind="with: $root.signingModel">
+          <div class="dialog-header dsp--flex flex--between">
+            <p data-bind="ltext: 'attachment.signLatest'"></p>
+            <icon-button class="close"
+                         params="ltext: 'close',
+                                 id: 'sign-attachment-close',
+                                 buttonClass: 'tertiary',
+                                 iconOnly: true,
+                                 icon: 'remove',
+                                 focusPrevious: '#sign-attachment-cancel'">
+            </icon-button>
+          </div>
+          <div class="dialog-content">
+            <p data-bind="lhtml: 'signAttachment.description'"></p>
+          <form data-bind="submit: sign" class=" gap--t1">
+            <label for="signSingleAttachmentPassword"
+                   data-bind="ltext: 'signAttachment.verifyPassword'"
+                   class="form-label"></label>
+            <input id="signSingleAttachmentPassword"
+                   data-test-id="signSingleAttachmentPassword"
+                   type="password"
+                   data-bind="textInput: password"
+                   class="lux w--100">
+
+            <div data-bind="if: errorMessage" >
+              <div role="alert"
+                   data-bind="ltext: errorMessage"
+                   class="gap--t1 context-error"></div>
+            </div>
+
+            <div class="dsp--flex flex--around gap--t2">
+              <icon-button params="click: sign,
+                                   enable: $root.authorization.ok('sign-attachments') && password() && !processing(),
+                                   type: 'submit',
+                                   testId: 'do-sign-attachment',
+                                   icon: 'pen',
+                                   waiting: pending,
+                                   ltext: 'attachment.signLatest'">
+              </icon-button>
+              <button  id="sign-attachment-cancel"
+                       data-bind="ltext: 'cancel',
+                                  focusNext: '#sign-attachment-close'"
+                       class="secondary close"></button>
+            </div>
+          </form>
+
+          </div>
+        </div>
+      </div>
+
+      <div id="dialog-sign-attachments" class="window autosized">
+        <div data-bind="with: $root.signingModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'application.signAttachments'"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+          <div class="dialog-content">
+
+            <p data-bind="lhtml: 'signAttachment.description'"></p>
+
+            <div class="stamp-files">
+              <table class="header-table">
+                <thead>
+                  <tr>
+                    <th class="width-30" data-bind="ltext: 'application.attachmentType'"></th>
+                    <th class="width-30" data-bind="ltext: 'application.attachmentFile'"></th>
+                    <th class="width-10" data-bind="ltext: 'application.attachmentVersion'"></th>
+                    <th class="width-10" data-bind="ltext: 'stamp.size'"></th>
+                    <th class="width-20" data-bind="ltext: 'signAttachment.select'"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5">
+                            <div class="scroll-20em">
+                                <table>
+                                    <tbody data-bind="foreach: attachments">
+                                        <tr>
+                                            <td class="width-30" data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
+                                            <td class="width-30"> <label data-bind="text: filename"></label></td>
+                                            <td class="width-10">
+                                                <span data-bind="version: version"></span>
+                                            </td>
+                                            <td class="width-10" data-bind="size: size"></td>
+                                            <td class="width-20" style="text-align:center;">
+                                                <input type="checkbox" data-bind="checked: selected, attr: {id: 'sign' + id}" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align:right">
+                            <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
+                            <span>/</span>
+                            <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
+                        </td>
+                    </tr>
+                </tfoot>
+              </table>
+            </div>
+          <form data-bind="submit: sign">
+            <label for="signAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
+            <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="textInput: password" class="form-input text ">
+
+            <div data-bind="if: errorMessage" >
+              <div data-bind="ltext: errorMessage" class="context-error"></div>
+            </div>
+
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" type="submit" style="width:20em;"
+                    data-test-id="do-sign-attachments">
+              <span data-bind="ltext: 'signAttachment.sign'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
+          </form>
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

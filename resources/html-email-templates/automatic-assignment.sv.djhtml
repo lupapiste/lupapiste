@@ -1,0 +1,93 @@
+{% subject %}
+Lupapiste: {% app address |safe %}, {% app :municipality |safe %}.
+{% if attachment-type %}Bilaga tillagd.{% endif %}
+{% if notice-form %}Anmälan gjord.{% endif %}
+{% if foreman-role %}Avslutande av arbetsledarens ansvar.{% endif %}
+{% if review-request %}Syn beställd.{% endif %}
+{% endsubject %}
+
+<h2 {% style-attr :h2 %}>{% greet Hej %}</h2>
+<p>
+  Detta är ett meddelande som skickas av en automatiserad uppgift {{filter-name}}.
+</p>
+{% if filter-email.message %}
+  <pre {% style-attr :pre %}>{{filter-email.message}}</pre>
+{% endif %}
+
+{% if attachment-type %}
+  <p>
+    En bilaga {% loc attachment-type %} har lagts till projektet {% app :id %} {% app :operation %} på {% app :address %},
+    {% app :municipality %}
+  </p>
+{% endif %}
+
+{% if notice-form %}
+  <p>
+    En ny anmälan {% loc :notice-forms notice-form.type %} har skapats för projektet {% app :id %} {% app :operation %} på {% app :address %},
+    {% app :municipality %}.
+  </p>
+  <dl>
+    {% if notice-form-buildings|length > 0 %}
+      <dt {% style-attr :dt %}>Byggnader, som anmälan gäller</dt>
+      <dd>
+        <ul {% style-attr :dd.ul %}>
+          {% for building in notice-form-buildings %}
+            <li>{% loc building %}</li>
+          {% endfor %}
+        </ul>
+      </dd>
+    {% endif %}
+    <dt {% style-attr :dt %}>Meddelande</dt>
+    <dd><pre {% style-attr :user-note :dd %}>{{notice-form.text}}</pre></dd>
+    {% if notice-form.customer %}
+      <dt {% style-attr :dt %}>Beställarens information</dt>
+      <dd {% style-attr :dd %}>{{notice-form.customer.name}}, {{notice-form.customer.email}},
+        {{notice-form.customer.phone}}</dd>
+    {% endif %}
+  </dl>
+{% endif %}
+
+{% if foreman-role %}
+  <p>
+    Projektledarens {{foreman-name}} ({% loc :automatic.foreman foreman-role %}) ansvar för projektet {% app :id %} {% app :operation %} på {% app :address %},
+    {% app :municipality %} har ansöka till avsluta.
+  </p>
+  <dl>
+    <dt {% style-attr :dt %}>Motiveringar</dt>
+    <dd><pre {% style-attr :user-note :dd %}>{{reason}}</pre>
+{% endif %}
+
+{% if review-request %}
+  <p>
+    En syn {{review-name}} har beställts för {% app :id %} {% app :operation %} på {% app :address %},
+    {% app :municipality %}
+  </p>
+  <dl>
+    {% if review-request-buildings|length > 0 %}
+      <dt {% style-attr :dt %}>Byggnader, som anmälan gäller</dt>
+      <dd>
+        <ul {% style-attr :dd.ul %}>
+          {% for building in review-request-buildings %}
+            <li>{% loc building %}</li>
+          {% endfor %}
+        </ul>
+      </dd>
+    {% endif %}
+    <dt {% style-attr :dt %}>Meddelande</dt>
+    <dd><pre {% style-attr :user-note :dd %}>{{review-request.message}}</pre></dd>
+    {% if review-request.contact %}
+      <dt {% style-attr :dt %}>Tilaajan tiedot</dt>
+      <dd {% style-attr :dd %}>{{review-request.contact.name}}, {{review-request.contact.email}},
+        {{review-request.contact.phone}}</dd>
+    {% endif %}
+  </dl>
+{% endif %}
+
+<br>
+<p>
+  {% button :primary %}
+  {% app-link tab %}
+  Gå till projektet
+  {% endbutton %}
+</p>
+<br>

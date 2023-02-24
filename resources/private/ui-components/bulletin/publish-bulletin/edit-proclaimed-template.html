@@ -1,0 +1,33 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="edit-proclaimed-template">
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: proclamationStartsAt,
+                                             lLabel: 'bulletin.proclamation.startsAt',
+                                             lPlaceholder: 'choose',
+                                             required: true,
+                                             id: 'proclamationStartsAt'}}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: proclamationEndsAt,
+                                             lLabel: 'bulletin.proclamation.endsAt',
+                                             lPlaceholder: 'choose',
+                                             required: true,
+                                             id: 'proclamationEndsAt'}}"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        <div data-bind="component: {name: 'textarea-field',
+                                    params: {value: proclamationText,
+                                             lPlaceholder: 'bulletin.proclamation.text.placeholder',
+                                             lLabel: 'application.tabInstructions.proclaimed',
+                                             required: true,
+                                             id: 'proclamationText',
+                                             maxlength: 5000}}"></div>
+      </div>
+    </div>
+  </div>
+</script>

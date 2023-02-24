@@ -1,0 +1,15 @@
+---
+version: '2.4'
+services:
+  lupis-mongo:
+    image: lupis-mongo:5.0
+    build: lupis-mongo
+    container_name: lupis-mongo
+    ports:
+      - 127.0.0.1:27017:27017
+    mem_limit: 512m
+    restart: on-failure
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: lupapiste

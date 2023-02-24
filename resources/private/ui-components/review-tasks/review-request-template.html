@@ -1,0 +1,75 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="review-request-template">
+  <div class="review-request-container">
+    <h3 data-bind="ltext: 'automatic.reviews.title'"></h3>
+    <div class="form-grid form-grid--no-border">
+      <!-- ko if: _.size( buildings() ) -->
+      <div class="row">
+        <div class="col-3 col--vertical">
+          <label data-bind="ltext: 'review-request.buildings'"
+                 data-test-id="review-request-buildings"></label>
+          <!-- ko foreach: buildings -->
+          <toggle params="text: text,
+                          prefix: 'blockbox',
+                          disable: $parent.waiting,
+                          testId: 'review-request-building-' + $index(),
+                          value: $data.selected"></toggle>
+          <div class="building-separator"></div>
+          <!-- /ko -->
+        </div>
+      </div>
+      <!-- /ko -->
+      <div class="row">
+        <div class="col-3">
+          <form-cell params="value: message,
+                             label: 'notice-form.message',
+                             required: true,
+                             immediate: true,
+                             testId: 'review-request-message',
+                             cell: 'textarea'"></form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="value: clientName,
+                             label: 'notice-form.customer.name',
+                             required: true,
+                             immediate: true,
+                             testId: 'review-request-customer-name',
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: clientEmail,
+                             label: 'email',
+                             warning: emailWarning,
+                             required: true,
+                             immediate: true,
+                             testId: 'review-request-customer-email',
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: clientPhone,
+                             label: 'puhelin',
+                             warning: phoneWarning,
+                             required: true,
+                             immediate: true,
+                             testId: 'review-request-customer-phone',
+                             cell: 'text'"></form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <icon-button params="ltext: 'review-request.request',
+                               icon: 'circle-arrow-right',
+                               enable: canSend,
+                               click: request"></icon-button>
+          &nbsp; &nbsp;
+          <button class="secondary"
+                  data-bind="ltext: 'cancel',
+                             disable: waiting,
+                             click: cancel"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

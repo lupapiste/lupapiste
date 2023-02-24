@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+  <head>
+    <style type="text/css">{{css|safe}}</style>
+    <body>
+      <table align="center" class="body" cellpadding="0" cellspacing="0"
+             role="presentation"
+             {% style-attr :table.body %}>
+        <tbody>
+          <tr height="35">
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td align="center" valign="top">
+              <table cellpadding="0" cellspacing="0" class="header"
+              {% style-attr :table.header %}>
+                <tbody>
+                  <tr height="20">
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td align="center" colspan="3" height="35">
+                      <a href="{{lupapiste}}" target="_blank" class="header"
+                      {% style-attr :a.header %}>
+                        <img src="{{lupapiste}}/lp-static/email/lupapiste-logo.png"
+                             alt="Lupapiste">
+                      </a>
+                    </td>
+                  </tr>
+                  <tr height="20">
+                    <td colspan="3"></td>
+                  </tr>
+                </tbody>
+              </table>
+              <table cellpadding="0" cellspacing="0" class="message"
+                     role="presentation"
+                     {% style-attr :table.message %}>
+                <tbody>
+                  {% if fi %}
+                    <tr height="50">
+                      <td width="100"></td>
+                      <td valign="middle" width="500" class="do-not-reply"
+                      {% style-attr :do-not-reply %}>
+                        Tämä on automaattinen sähköposti - älä vastaa tähän viestiin.
+                      </td>
+                      <td width="100"></td>
+                    </tr>
+                    <tr>
+                      <td width="100"></td>
+                      <td width="500">
+                        {{fi.body|safe}}
+                      </td>
+                    </tr>
+                  {% endif %}
+                  {% if sv %}
+                    {% if fi %}
+                      <tr><td colspan="3" {% style-attr :divider %}>&nbsp;</td></tr>
+                    {% endif %}
+                    <tr height="50">
+                      <td width="100"></td>
+                      <td valign="middle" width="500" class="do-not-reply"
+                          {% style-attr :do-not-reply %}>
+                        Detta är ett automatiskt meddelande – svara inte på detta meddelande.
+                      </td>
+                      <td width="100"></td>
+                    </tr>
+                    <tr>
+                      <td width="100"></td>
+                      <td width="500">
+                        {{sv.body|safe}}
+                      </td>
+                    </tr>
+                  {% endif %}
+                  {% if en %}
+                    {% if any fi sv %}
+                      <tr><td colspan="3" {% style-attr :divider %}>&nbsp;</td></tr>
+                    {% endif %}
+                    <tr height="50">
+                      <td width="100"></td>
+                      <td valign="middle" width="500" class="do-not-reply"
+                          {% style-attr :do-not-reply %}>
+                        This is an automated e-mail - please don't reply to this message.
+                      </td>
+                      <td width="100"></td>
+                    </tr>
+                    <tr>
+                      <td width="100"></td>
+                      <td width="500">
+                        {{en.body|safe}}
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+
+              <table class="footer" cellpadding="0" cellspacing="0"
+                     role="presentation"
+                     {% style-attr :table.footer %}>
+                <tbody>
+                  <tr height="35">
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td align="center" colspan="3" height="35">
+                      <a class="cloudpermit" href="https://www.cloudpermit.com"
+                      target="_blank" {% style-attr :a.cloudpermit %}>
+                        <img src="{{lupapiste}}/lp-static/email/cloudpermit-logo-white.png"
+                             alt="Cloudpermit"></td>
+                      </a>
+                  </tr>
+                  <tr height="35">
+                    <td colspan="3">
+                      <table cellpadding="0" cellspacing="0"
+                             role="presentation"
+                             {% style-attr :table.footer %}>
+                        <tbody>
+                          <tr>
+                            <td width="225"></td>
+                            <td align="center" width="50" valign="middle">
+                              <a class="social"
+                                 {% style-attr :a.social %}
+                                 href="https://www.linkedin.com/company/cloudpermit/"
+                                 target="_blank">
+                                <img src="{{lupapiste}}/lp-static/email/linkedin.png"
+                                     alt="Linkedin" kv_aslink="0" kv_asnoscale="0"></a>
+                            </td>
+                            <td align="center" width="50" valign="middle">
+                              <a class="social"
+                                 href="https://www.twitter.com/cloudpermit"
+                                 {% style-attr :a.social %}
+                                 target="_blank">
+                                <img src="{{lupapiste}}/lp-static/email/twitter.png"
+                                     alt="Twitter" kv_aslink="0" kv_asnoscale="0"></a>
+                            </td>
+                            <td align="center" width="50" valign="middle">
+                              <a class="social"
+                                 href="https://www.facebook.com/cloudpermit"
+                                 {% style-attr :a.social %}
+                                 target="_blank">
+                                <img src="{{lupapiste}}/lp-static/email/facebook.png"
+                                     alt="Facebook" kv_aslink="0" kv_asnoscale="0"></a></td>
+                            <td width="225"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr height="35">
+                    <td colspan="3"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr height="35">
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+    </body>
+</html>

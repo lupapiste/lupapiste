@@ -1,0 +1,1 @@
+tests/01_init/01_open_browser.robot

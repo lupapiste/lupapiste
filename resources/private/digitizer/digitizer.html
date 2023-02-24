@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container" id="create-archiving-project">
+  <h1 data-bind="ltext: 'digitizer.tools'"></h1>
+  <div class="archiving-top">
+      <div class="button-group">
+        <icon-button params="click: createArchivingReport,
+                             testId: 'applications-create-archiving-report',
+                             icon: 'document-list',
+                             ltext: 'digitizer.report.title'">
+        </icon-button>
+      </div>
+  </div>
+  <div class="form-grid form-grid--no-border">
+    <form data-bind="submit: findPermit">
+      <div class="row">
+        <label>
+          <span data-bind="ltext: 'prev-permit-label-kuntalupatunnus'"></span>
+          <input data-bind="textInput: kuntalupatunnusFromPrevPermit"
+                 class="lux"
+                 data-test-id="test-archiving-project-kuntalupatunnus"
+                 type="text" autofocus="autofocus" name="kuntalupatunnus" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label for="digitizer-prev-permit-organization-select">
+          <span data-bind="ltext: 'prev-permit-label-organization'"></span>
+          <select id="digitizer-prev-permit-organization-select"
+                  data-test-id="test-digitizer-prev-permit-organization-select"
+                  class="lux"
+                  data-bind="options: organizationOptions,
+                               optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
+                               optionsValue: 'id',
+                               value: selectedPrevPermitOrganization,
+                               optionsCaption: loc('choose')">
+          </select>
+        </label>
+      </div>
+
+      <div>
+        <icon-button params="type: 'submit',
+                             enable: creatingAppWithPrevPermitOk,
+                             testId: 'test-prev-permit-create-button',
+                             icon: 'search',
+                             waiting: pending,
+                             ltext: 'newRequest.newApplicationWithPrevPermit'">
+        </icon-button>
+      </div>
+    </form>
+
+    <div data-bind="visible: (permitNotFound() || needMorePrevPermitInfo()) && selectedPrevPermitOrganization()"
+         class="row">
+      <div class="txt--bold gap--b2">
+        <span data-bind="ltext: 'digitizer.prevPermitNotFound', visible: permitNotFound"></span>
+        <span data-bind="ltext: 'more-prev-app-info-needed-desc', visible: needMorePrevPermitInfo"></span>
+      </div>
+      <div>
+        <div class="create-application-search-box">
+          <label for="archiving-address-search"
+               data-bind="ltext: 'newRequest.locationInfo'"></label>
+          <input data-bind="textInput: search,
+                            lplaceholder: 'create.placeholder',
+                            css: {'ui-autocomplete-loading':searching}"
+                 id="archiving-address-search"
+                 type="text"
+                 class="lux gap--v1"
+                 autofocus="autofocus" />
+          <icon-button params="click: searchNow,
+                               disable: _.isBlank( search() ),
+                               testId: 'create-search-button',
+                               icon: 'search',
+                               ltext: 'search'">
+          </icon-button>
+          <icon-button params="click: createWithoutLocation,
+                               buttonClass: 'secondary',
+                               ltext: 'create.without.location',
+                               icon: 'chevron-right'"
+                       class="right">
+          </icon-button>
+        </div>
+        <div id="archiving-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="page container" id="create-archiving-report">
+  <div class="operation-button-row">
+    <button class="secondary"
+            data-bind="click: _.wrap( 'create-archiving-project', pageutil.openPage )"
+            data-test-id="back-button">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+  </div>
+  <div>
+    <h1 data-bind="ltext: 'digitizer.report.title'"></h1>
+      <table class="company-report-table">
+        <thead>
+          <th><span data-bind="ltext: 'digitizer.report.startDate'"></span></th>
+          <th><span data-bind="ltext: 'digitizer.report.endDate'"></span></th>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" data-bind="datepicker: reportStartDate" class="lux dateinput"></td>
+            <td><input type="text" data-bind="datepicker: reportEndDate" class="lux dateinput"></td>
+          </tr>
+        </tbody>
+      </table>
+    <div class="downlaod">
+      <button class="positive"
+              data-bind="click: downloadReport"
+              data-test-id="download-digitizer-report-btn">
+        <i class="lupicon-download btn-small"></i>
+        <span data-bind="ltext: 'digitizer.report.download'"></span>
+      </button>
+
+    </div>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="eidas" style="width: 30em; padding: 70px 0;">
+    <div class="eidas-info">
+      <i class="lupicon-warning primary" style="float: left;"></i>
+      <p class="info" data-bind="lhtml: 'eidas.login-info'" style="margin-left: 50px;"></p>
+      <p><span data-bind="ltext: 'register.was-canceled'"></span></p>
+      <p data-bind="ltext: 'ident.logout.info-text'"></p>
+    </div>
+    <div class="button-group" style="margin-top: 50px">
+      <icon-button class="cancel-button"
+                   params="buttonClass: 'secondary',
+                           icon: 'undo',
+                           ltext: 'ident.logout.action',
+                           click: util.identLogoutRedirect,
+                           testId: 'eidas-back-button'">
+      </icon-button>
+    </div>
+  </section>
+</body>
+</html>

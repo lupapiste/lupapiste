@@ -1,0 +1,68 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="matti-admin-reviews-template">
+  <div class="matti-admin">
+    <h2 data-bind="ltext: 'matti.review-batchrun'"></h2>
+    <div class="pate-note-frame pate-note"
+         data-bind="ltext: 'matti.review-note'">
+    </div>
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="value: batchrunStart,
+                             label: 'matti.batchrun.start-date',
+                             cell: 'date'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: batchrunEnd,
+                             label: 'matti.batchrun.end-date',
+                             cell: 'date'"></form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-1">
+          <icon-button params="enable: batchrunCanFetch,
+                               icon: 'calendar',
+                               waiting: fetchWait,
+                               ltext: 'matti.review-fetch',
+                               click: batchrunFetchTargets"></icon-button>
+        </div>
+      </div>
+      <!-- ko if: _.size( batchrunTargets() ) -->
+      <div class="row">
+        <div class="col-2">
+          <label data-bind="text: batchrunTargetsLabel"></label>
+          <select multiple="multiple"
+                  class="matti-listbox"
+                  data-bind="options: batchrunTargets,
+                             selectedOptions: batchrunIds,
+                             disable: batchrunWait"></select>
+        </div>
+      </div>
+      <!-- /ko -->
+      <div class="row">
+        <div class="col-1">
+          <icon-button params="enable: _.size( batchrunIds() ),
+                               icon: 'hammer',
+                               waiting: batchrunWait,
+                               ltext: 'matti.review-run',
+                               click: batchrunRun"></icon-button>
+        </div>
+      </div>
+      <div class="row"
+           data-bind="if: _.size( batchrunResults() )">
+        <div class="col-4 batchrun-results">
+          <form-cell params="attr: {disabled: true},
+                             label: 'matti.batchrun.results',
+                             value: batchrunLog,
+                             cell: 'textarea'">
+          </form-cell>
+          <button class="ghost primary"
+                  data-bind="ltext: 'pate.clear',
+                             disable: batchrunWait,
+                             visible: _.size( batchrunResults() ),
+                             click: clearLog"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

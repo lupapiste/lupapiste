@@ -1,0 +1,209 @@
+%% This a comment. Only full-line comments are supported.
+%% # H1 title
+%% ## H2 (numbered) title
+%% ### H3 title
+%% #-- Single line
+%% #---- Indented single line
+
+%% ${xxx} text placeholder that is replaced during the processing.
+
+%% Superfluous empty lines are ignored.
+%% ------------------------------------
+
+# Lupapisteen Yritystili-palvelua koskeva sopimus
+
+## SOPIMUSOSAPUOLET
+
+### Asiakas
+
+#---- ${company.name} (y-tunnus ${company.y})
+#---- ${company.address1}
+#---- ${company.zip} ${company.po}
+#----
+#---- Yhteyshenkilö:
+#---- ${contact.firstName} ${contact.lastName}
+
+### Toimittaja
+
+#---- Cloudpermit Oy (y-tunnus 2795153-5)
+#---- Hämeenkatu 13a
+#---- 33100 Tampere
+
+Sopimuksen osapuolista käytetään jatkossa myös nimitystä Sopijapuolet.
+
+Asiakkaan on ilmoitettava yhteyshenkilönsä vaihtamisesta Toimittajalle
+kirjallisesti ilman aiheetonta viivytystä.
+
+## SOPIMUKSEN KOHDE
+
+Lupapiste on Toimittajan tuottama ja asiakkailleen tarjoama
+verkkopalvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa-
+ja ilmoitusasiansa sekä niiden hallinnoinnin vuorovaikutuksessa
+viranomaisten ja muiden osapuolten kanssa. Toimittaja tuottaa
+Lupapistettä vakiomuotoisena palveluna (”Lupapiste”) palvelun
+Käyttöehdoissa ${tos-link} (”Käyttöehdot”) kuvatulla
+tavalla. Toimittaja ilmoittaa oleellisista käyttöehtojen muutoksista
+kirjallisesti Asiakkaalle kolmekymmentä (30) vuorokautta ennen
+muutosta. Muutos tulee voimaan Toimittajan ilmoittamana
+voimaantulopäivänä.
+
+Lupapisteen Yritystili (“Yritystili”) on Käyttöehdoissa (kohta 7)
+määritelty maksullinen Lisäarvopalvelu. Yritystilin avulla Asiakas
+pystyy hallinnoimaan Asiakkaan organisaatioon kuuluvien
+Lupapiste-käyttäjien (“Käyttäjät) hankkeita yhdessä
+työtilassa. Yritystilin sisältökuvaus on saatavilla osoitteessa:
+${pro-link}.
+
+Yritystilille määritellään yksi tai useampi ylläpitäjä, (”Ylläpitäjä”)
+joiden velvollisuuksista säädetään tarkemmin jäljempänä tässä
+sopimuksessa.
+
+Asiakas ja Toimittaja ovat tehneet tässä sopimuksessa sovituin ehdoin
+sopimuksen Yritystilin toimittamisesta Asiakkaalle palveluna tämän
+sopimuksen voimassaolon ajaksi.
+
+## HINNAT JA MAKSUEHDOT
+
+Palvelun hinta määräytyy Asiakkaan valitseman Yritystilityypin
+mukaisesti. Veloitus on Käyttäjien enimmäislukumäärään pohjautuva
+kiinteä kuukausi- tai vuosimaksu, joka määritellään palvelun
+Hintataulukossa ${prices-link} (”Hintataulukko”).
+
+Yli kolmenkymmenen (30) käyttäjän Yritystilistä Toimittaja tekee
+Asiakkaalle erillisen tarjouksen.
+
+Hintoihin lisätään voimassa oleva arvonlisävero.
+
+Asiakas tilaa käyttöönsä vaihtoehdon: ${account.type}, jossa
+laskutuskausi on ${account.months} kk. Veloitettava maksu on
+${account.price} €.
+
+Asiakas on velvollinen suorittamaan maksut tilaamistaan Lupapisteen
+osioista. Maksuehto on neljätoista (14) päivää netto, ja
+viivästyskorko määräytyy korkolain mukaan. Maksuehto määräytyy laskun
+päiväyksestä lukien.
+
+Asiakkaan valitsemasta laskutuskaudesta riippuen Toimittaja laskuttaa
+valitut palvelut etukäteen joko 12 kertaa vuodessa tai kerran
+vuodessa. Jos Asiakas valitsee kuukausilaskutuksen, laskutuskausi on
+yksi kalenterikuukausi ja ensimmäinen laskutuskausi alkaa sopimuksen
+tilauspäivämäärää seuraavan kuukauden alusta. Jos Asiakas valitsee
+vuosilaskutuksen, ensimmäinen laskutuskausi on sopimuksen
+tilauspäivämäärää seuraavan kuukauden alusta saman kalenterivuoden
+loppuun asti ja tästä eteenpäin 12 kuukautta kerrallaan.
+
+Asiakas voi korottaa Yritystilin tyyppiä sopimuskauden aikana
+valitsemalla uuden tilityypin useammalle Käyttäjälle Yritystilin
+ylläpitonäkymän kautta. Toistuvaismaksun määrä korotetaan vastaamaan
+valittua Yritystilin tyyppiä kuukausilaskutuksessa heti muutosta
+seuraavaan laskuun. Vuosilaskutuksessa Asiakkaalta veloitetaan
+muutosta seuraavan kuukauden alussa Yritystilin hinnan muutos koko
+loppuvuodelta kerralla. Mikäli Asiakas haluaa pienentää Yritystilin
+tyyppiä, tulee hänen ilmoittaa tästä kirjallisesti
+Toimittajalle. Toistuvaismaksun määrää pienennetään vastaamaan
+valittua tilityyppiä vasta seuraavan laskutuskauden yhteydessä.
+
+Toimittaja voi korottaa palvelumaksuja, työstä veloitettavia maksuja
+ja muita maksuja ilmoittamalla Asiakkaalle kirjallisesti kolmekymmentä
+(30) vuorokautta ennen korotusta. Korotus tulee voimaan Toimittajan
+ilmoittamana voimaantulopäivänä, jos se on laskutuskauden ensimmäinen
+päivä. Muussa tapauksessa korotus tulee voimaan ilmoitettua
+voimaantulopäivää lähinnä seuraavana laskutuskauden ensimmäisenä
+päivänä.
+
+Toimittajalla on oikeus estää Asiakkaan pääsy Yritystiliin,
+jos Asiakas laiminlyö sopimuksen mukaiset maksusuorituksensa tai osan
+niistä ja viivästys on kestänyt yli neljätoista (14)
+vuorokautta. Toimittajan on ilman aiheetonta viivytystä ilmoitettava
+Asiakkaalle käytön peruuttamisesta ja sen syistä.
+
+## PALVELUN KÄYTTÖ JA OSAPUOLTEN VELVOLLISUUDET
+
+Yritystili on Asiakkaan käytettävissä osoitteessa ${lupapiste-link}.
+
+Asiakas saa ylläpitäjätunnukset Yritystiliin sopimuksen
+allekirjoittamisen jälkeen. Ylläpitäjä voi lisätä Yritystiliin useita
+Ylläpitäjiä, jotka saavat yhtäläiset oikeudet muokata Asiakkaan
+tietoja sekä lisätä tai poistaa Yritystilin Käyttäjiä. Nimetessään
+Yritystiliin uuden Ylläpitäjän, Ylläpitäjä on velvollinen tiedottamaan
+uutta Ylläpitäjää tässä sopimuksessa mainituista Ylläpitäjän
+velvollisuuksista.
+
+Kun Ylläpitäjä lisää Yritystiliin tavanomaiset käyttöoikeudet omaavan
+Käyttäjän, Ylläpitäjä valtuuttaa lisätyn Käyttäjän asioimaan Asiakkaan
+puolesta Lupapisteessä ilman erillistä valtakirjaa. Yritystiliin
+lisätty Käyttäjä hyväksyy kyseisen oikeuden hyväksymällä
+vastaanottamansa kutsun Yritystilin Käyttäjäksi.
+
+Ylläpitäjä vastaa siitä, että asiointitunnukset luovutetaan ainoastaan
+tunnistetuille tarkoituksenmukaisille henkilölle. Ylläpitäjä vastaa,
+että hän poistaa Yritystilin käyttäjälistasta ne käyttäjät, jolla ei
+ole enää oikeutta käsitellä tai nähdä Asiakkaalle kuuluvia
+asioita. Asiakas vastaa siitä, että käyttäjätunnuksia ei käytetä
+väärin.
+
+Toimittajalla on oikeus vapaasti jatkokehittää ja muuttaa Yritystiliä
+tämän sopimuksen sitä mitenkään rajoittamatta. Toimittaja voi kehittää
+Yritystiliä ja julkistaa siitä päivityksiä ja uusia versioita, mutta
+ei ole siihen millään tavalla velvollinen. Uusien osioiden tai
+ominaisuuksien käyttöönotosta ja hinnoista sovitaan erikseen.
+
+Asiakkaan Toimittajalle Yritystilin käytön myötä toimittamia
+henkilötietoja käsitellään Toimittajan kulloinkin voimassa olevan
+Rekisteri-ja tietosuojaselosteen ${registry-link} mukaisesti.
+
+## SOPIMUKSEN VOIMASSAOLO JA IRTISANOMINEN
+
+Sopimus tulee voimaan, kun Asiakas on allekirjoittanut sopimuksen
+sähköisesti Visma Sign -palvelussa. Allekirjoituksen yhteydessä
+Asiakas hyväksyy Visma Sign -palvelun Käyttöehdot. Toimittaja ei
+vastaa Visma Sign -palvelun Käyttöehtojen sisällöstä eikä palvelun
+mahdollisista käyttökatkoista. Asiakkaan tulee suorittaa vahva
+sähköinen tunnistautuminen nimenomaisessa palvelussa tämän sopimuksen
+allekirjoittamiseksi.
+
+Sopimus on voimassa seuraavasti:
+
+Sopimuksen allekirjoituksesta lukien toistaiseksi voimassa
+olevana. Sopimuksen irtisanomisaika on irtisanomispäivästä kuluvan
+laskutuskauden eli joko kalenterikuukauden tai -vuoden loppuun ja
+Asiakkaan tulee ilmoittaa sopimuksen irtisanomisesta kirjallisesti
+Toimittajalle. Palveluista veloitetaan sopimuksen mukainen maksu koko
+irtisanomisajalta.
+
+## SOPIMUKSEN LIITTEET JA PÄTEMISJÄRJESTYS
+
+Sopimukseen kuuluu sen erottamattomana osana seuraavat liitteet:
+
+#-- Liite 1: Lupapiste-palvelun Käyttöehdot ${tos-link}
+#-- Liite 2: Yritystilin sisältökuvaus ${pro-link}
+#-- Liite 3: Hintataulukko ${prices-link}
+
+Asiakas on tietoinen, että Lupapistettä on tarkoitus kehittää
+edelleen. Uusien maksullisten osioiden tai palveluiden käyttöönotosta
+sovitaan erikseen. Toimittajalla on oikeus muuttaa Käyttöehtoja
+ilmoittamalla siitä Asiakkaalle, edellyttäen ettei muutoksesta aiheudu
+olennaista haittaa Asiakkaalle.
+
+Sopimusasiakirjojen pätemisjärjestys on seuraava:
+
+#-- 1. Tämä sopimus
+#-- 2. Liite 1: Lupapiste-palvelun Käyttöehdot
+#-- 3. Liite 2: Yritystilin sisältökuvaus
+#-- 4. Liite 3: Hintataulukko
+
+## SOPIMUSKAPPALEET JA ALLEKIRJOITUKSET
+
+Allekirjoittamalla henkilökohtaisesti tämän sopimuksen Asiakkaan
+edustaja vastaa siitä, että hänellä on oikeus tehdä Asiakasta sitova
+sopimus joko edustusoikeuden tai valtuutukseen kautta. Toimittaja ei
+ole velvollinen tarkastamaan erikseen Asiakkaan edustajan
+edustusoikeutta. Asiakas vahvistaa tutustuneensa tässä sopimuksessa
+yksilöityihin Käyttöehtoihin ja hyväksyy ne osaksi tätä
+sopimusta. Asiakas hyväksyy tämän sopimuksen ehdot allekirjoittamalla
+sopimuksen sähköisesti.
+
+Tämä sopimus on allekirjoitettu sähköisesti Visma Sign
+-palvelussa. Asiakkaan allekirjoitettu sopimuskappale on ladattavissa
+käyttäjän rekisteröitymisen jälkeen Lupapiste-palvelussa ”Omat tiedot”
+-kohdassa.

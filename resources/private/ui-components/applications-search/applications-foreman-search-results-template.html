@@ -1,0 +1,96 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="applications-foreman-search-results-template">
+      <div class="tabs-content">
+        <!-- ko if: dataProvider.pending -->
+        <div class="btn search-results-waiting">
+          <i class="lupicon-refresh spin primary"></i>
+          <span data-bind="ltext: 'applications.loading'"></span>
+        </div>
+        <!-- /ko -->
+        <!-- ko ifnot: dataProvider.pending -->
+        <table id="applications-list" class="application-foreman-search-result__table" data-bind="if: gotResults()">
+          <thead>
+            <tr data-bind="foreach: columns">
+              <th data-bind="click: $data.clickFn, css: $data.css, attr: $data.attr">
+                <span data-bind="ltext: $data.ltext"></span>
+                <i class="lupicon-chevron-small-up" data-bind="visible: $data.isAscending"></i>
+                <i class="lupicon-chevron-small-down" data-bind="visible: $data.isDescending"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: {data: data, afterRender: scrollPop}">
+            <tr class="application-row"
+                tabindex="0"
+                data-bind="click: $parent.openApplication,
+                           event: {keypress: $parent.keyOpenApplication},
+                           attr: {'data-id': $data.id, 'data-test-address': $data.address}">
+              <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'"
+                  data-test-col-name="urgent">
+                <div class="application-search-results__urgency"
+                     data-bind="click: _.partialRight($parent.openApplication, 'notice'), clickBubble: false,
+                                css: $data.urgency">
+                  <i class="bubble-hover" data-bind="css: $data.urgencyClass">
+                    <span class="bubble-hover-text" data-bind="text: _.trim($data.authorityNotice) ? _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])"></span>
+                  </i>
+                </div>
+              </td>
+              <!-- /ko -->
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.indicators > 0"
+                  data-test-col-name="indicators">
+                <div>
+                  <i class="bubble-hover lupicon-star">
+                    <span class="bubble-hover-text" data-bind="ltext:'info.title'"></span>
+                  </i>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.attachmentsRequiringAction > 0,
+                             click: _.partialRight($parent.openApplication, 'attachments'), clickBubble: false"
+                  data-test-col-name="newAttachments">
+                <div>
+                  <i class=" bubble-hover lupicon-paperclip">
+                      <span class="bubble-hover-text" data-bind="ltext:'attachments.title'"></span>
+                  </i>
+                  <span data-bind="text: $data.attachmentsRequiringAction"></span>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.unseenComments > 0,
+                             click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
+                  data-test-col-name="unseenComments">
+                <div data-test-id="unseen-comments">
+                  <i class="bubble-hover lupicon-conversation">
+                    <span class="bubble-hover-text" data-bind="ltext:'conversation.messages'"></span>
+                  </i>
+                  <span data-bind="text: $data.unseenComments"></span>
+                </div>
+              </td>
+
+              <td data-test-col-name="id">
+                <span data-bind="text: $data.id"></span>
+                </br>
+                <span data-bind="text: $data.kuntalupatunnus"></span>
+              </td>
+              <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
+              <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
+              <td data-bind="text: $data.foreman" data-test-col-name="foreman"></td>
+              <td data-bind="ltext: $data.foremanRoleI18nkey" data-test-col-name="foremanRole"></td>
+              <td data-bind="dateTimeString: _.includes( ['verdict', 'construction'], $data.searchType ) ? $data.verdictDate : $data.submitted" data-test-col-name="submitted"></td>
+              <td data-bind="ltext: $data.state, attr: {'data-test-row-state': $data.state}" data-test-col-name="status"></td>
+              <td data-bind="foreach: $data.handlers" data-test-col-name="authority">
+                <span class="handlers" data-bind="fullName: $data"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- ko ifnot: gotResults -->
+        <p data-bind="ltext: 'applications.search.no-results'"></p>
+        <!-- /ko -->
+        <!-- /ko -->
+      </div>
+</script>

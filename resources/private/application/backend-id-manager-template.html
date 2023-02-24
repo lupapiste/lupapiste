@@ -1,0 +1,58 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="backend-id-manager-template">
+
+  <div>
+      <form autocomplete="off">
+      <table class="table">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'info.backendIds'"></th>
+              <th data-bind="ltext: 'info.verdictDate'"></th>
+              <th data-bind="text: ''"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: backendIds">
+             <tr>
+               <td>
+                 <input type="text"
+                        class="form-input inline textinput textinput--big"
+                        name="backendId[]"
+                        autocomplete="off"
+                        data-bind="value: kuntalupatunnus,
+                                   attr: { placeholder: loc('verdict.id') },
+                                   disable: $component.allInputsDisabled,
+                                   css: {tip: kuntalupatunnus().length === 0,
+                                         warn: kuntalupatunnus().length > 0 && _.trim(kuntalupatunnus()).length === 0}">
+               </td>
+               <td>
+                <input type="text"
+                       name="verdictDate[]"
+                       class="form-input inline textinput textinput--big"
+                       autocomplete="off"
+                       data-bind="datepicker: verdictDate,
+                                  attr: { placeholder: loc('info.verdictDate') },
+                                  css: { warn: invalidDate },
+                                  disable: $parent.allInputsDisabled">
+               </td>
+               <td>
+                   <span data-bind="if: $index() > 0 && !$component.allInputsDisabled()">
+                     <i class="lupicon-circle-remove negative"
+                        style="cursor: pointer"
+                        data-bind="click: function() { $parent.deleteBackendId($index()); },
+                                     attr: { title: loc('remove') }"></i>
+                   </span>
+               </td>
+             <tr>
+           </tbody>
+       </table>
+       </form>
+      <!-- ko if: auth.ok("store-archival-project-backend-ids") -->
+      <button class="primary"
+              data-bind="click: addBackendId, disable: addButtonDisabled, css: { waiting: loading },">
+        <i class="lupicon-circle-plus" data-bind="visible: !loading()"></i>
+        <i class="spin lupicon-refresh wait"></i>
+        <span data-bind="ltext: 'info.addBackendId'"></span>
+      </button>
+      <!-- /ko -->
+  </div>
+
+</script>

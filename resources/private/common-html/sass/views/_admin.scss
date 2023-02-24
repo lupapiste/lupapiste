@@ -1,0 +1,131 @@
+#user-municipality, #user-edit-municipality {
+  height: auto;
+  width: 95%;
+}
+
+#DataTables_Table_0_info {
+  bottom: 40px;
+
+}
+
+#DataTables_Table_0_wrapper {
+  margin-bottom: $marginS;
+}
+
+.permanent-archive-setting {
+  position: relative;
+  margin: $marginM 0;
+  input {
+    vertical-align: middle;
+  }
+  .form-indicator {
+    top: -5px;
+    right:auto;
+    left: 250px;
+  }
+  .earliest-archiving-date {
+    vertical-align: middle;
+    input {
+      margin: 0;
+    }
+  }
+}
+
+#notifications {
+  p {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+  }
+
+  input[type=checkbox] + label {
+    display: inline-block;
+  }
+
+  input[type=text] {
+    width: 480px;
+    box-sizing: border-box;
+  }
+  textarea {
+    width: 480px;
+    box-sizing: border-box;
+  }
+}
+
+.admin {
+  section#admin, nav.nav-wrapper {
+    .container {
+      max-width: 1400px;
+    }
+  }
+  .users-table {
+    .filters {
+      margin-bottom: $marginM;
+      .filter {
+        margin-right: $marginM;
+      }
+    }
+  }
+
+  #modal-dialog-content-component {
+    select, input[type=text] {
+      display: block;
+      margin: $marginS 0;
+    }
+    input[type=text] {
+      width: $cols4;
+    }
+  }
+}
+
+div.organizations-search, form.xml-download {
+  input.textinput {
+    display: inline-block;
+    width: 20em;
+    vertical-align: middle;
+  }
+}
+
+div.organization-title {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  h1 {display: inline-block;
+      margin-bottom: 0;
+      vertical-align: middle;
+     }
+  .organization--closed {
+    margin-left: 2em;
+    color: $negative;
+    text-transform: uppercase;
+  }
+}
+
+div.matti-admin {
+  margin-top: $marginL;
+  margin-bottom: $marginL;
+  .pate-note {
+    margin-top: $marginL;
+    margin-bottom: $marginL;
+  }
+  button.matti-button {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .batchrun-results textarea {
+    font-family: monospace;
+    white-space: pre-wrap;
+    min-height: 40em;
+  }
+  select.matti-listbox {
+    min-height: 20em;
+  }
+}
+
+#addAuthAdmin {
+  margin-top: 1em;
+  button {
+    margin-top: 0.2em;
+  }
+}

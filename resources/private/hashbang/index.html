@@ -1,0 +1,22 @@
+<html>
+<head></head>
+<body>
+<section id="hashbang" class="page container" style="visiblity:visible;display:block;">
+
+  <div class="container">
+    <h2 data-bind="ltext: 'welcome.login'"></h2>
+
+    <p data-bind="ltext: 'login.existing-account.title'"></p>
+    <p>
+      <!-- Support opening to new tab by providing href. Href might be wrong if hash changes. -->
+      <a data-bind="attr: {href: continueUrl}, click: continueHandler" class="btn btn-primary" data-test-id="login"><i class="lupicon-log-in"></i><span data-bind="ltext: 'continue'"></span></a>
+    </p>
+
+   <h2 data-bind="ltext: 'login.no-account.title'"></h2>
+    <p data-bind="ltext: 'login.no-account.help'"></p>
+    <p><a data-bind="ltext: 'register.header', attr: {href: registerUrl}" class="btn secondary" data-test-id="register"></a></p>
+  </div>
+
+</section>
+</body>
+</html>

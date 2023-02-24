@@ -1,0 +1,396 @@
+@mixin center-dialog() {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+#modal-dialog-content-component:focus {
+  outline: none;
+}
+
+// TODO knockout dialog to share same styles with legacy dialog
+#modal-dialog {
+  .small {
+    width: 360px;
+    min-height: 300px;
+  }
+  .medium {
+    width: 480px;
+    min-height: 400px;
+  }
+  .large {
+    width: 980px;
+    min-height: 700px;
+  }
+
+  .dialog {
+    @include center-dialog;
+    display: none;
+    z-index: 9999;
+    padding: $marginM;
+    background-color: #fff;
+
+    .component {
+      overflow: auto;
+      margin: $marginM $marginM 75px $marginM;
+      min-height: 50px;
+      .button-group {
+        position: absolute;
+        bottom: $marginM;
+        right: $marginM;
+        left: $marginM;
+        .cancel {
+          float: right;
+          margin-right: $marginM;
+        }
+      }
+      .button-group.ok {
+        text-align: center;
+        .btn-dialog {
+          margin-right: auto;
+          margin-left: auto;
+          position: relative;
+        }
+      }
+      .autocomplete-component {
+        width: 430px;
+        position: static;
+      }
+    }
+    &.autosized > .component {
+      overflow: initial;
+      margin: $marginM $marginM;
+    }
+    .header {
+      padding-top: 4px;
+      padding-bottom: 4px;
+      padding-left: 24px;
+      border-bottom: 1px solid;
+      font-size: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      .title {
+        line-height: 24px;
+      }
+      .close {
+        position: absolute;
+        right: $marginM;
+        top: 4px;
+        /* cursor: pointer; */
+        /* &:after { */
+        /*   content: "X"; */
+        /* } */
+      }
+    }
+  }
+  .mask {
+    position: fixed;
+    display: block;
+    z-index: 9000;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #000;
+    opacity: 0.5;
+    filter: alpha(opacity=50)\9;
+  }
+}
+
+.mask {
+  position:fixed;
+  z-index:9000;
+  display:none;
+  top: 0;
+  left: 0;
+  righ: 0;
+  bottom: 0;
+  &.black {
+    background-color:#000;
+  }
+  &.white {
+    background-color:#fff;
+  }
+}
+
+.window {
+  @include center-dialog;
+  display:none;
+  z-index:9999;
+  padding: $marginL;
+  background: white;
+  overflow-x:hidden;
+  &.rounded {
+    border-radius: 6px;
+  }
+}
+
+.autosized {
+  min-width:$cols4;
+  min-height:$baseline * 6;
+  height: auto;
+  width: auto;
+}
+
+.neighbor-status {
+  max-height: 1000px;
+  overflow: scroll;
+}
+
+.autosized.autosized--wider {
+  min-width: 25em;
+}
+
+.autosized-yes-no {
+  min-height:$baseline * 6;
+  height: auto;
+  width:$cols6;
+}
+.autosized-ok {
+  min-height:$baseline * 5;
+  height: auto;
+  width:$cols4;
+}
+/* Customize your modal window here, you can add background image too */
+
+.dialog-header {
+  padding: 2px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid;
+  font-weight: bold;
+
+  p {
+    margin: 0;
+    font-size: 20px;
+    display: inline-block;
+  }
+  .dialog-close {
+    position: absolute;
+    right: $marginL;
+    top: $marginL;
+    cursor: pointer;
+    font-size: 28px;
+    color: $gray187;
+    font-weight: normal;
+  }
+  button {
+    position: absolute;
+    right: $marginL;
+    top: $marginM;
+  }
+}
+
+.dialog-content {
+  /* somewhat less than .autosized - .dialog-header */
+  min-height: $baseline * 4;
+  position: relative;
+  margin: $marginM  0;
+  padding-bottom: 64px;
+
+  .dialog-desc {
+    width: 300px;
+  }
+
+  .dialog-desc-wide {
+    width: 450px;
+  }
+
+  .dialog-desc-wider {
+    width: 600px;
+  }
+
+  /* [type=submit], .btn, button { */
+  /*   //padding: 4px $marginL; */
+  /*   min-width: $cols2; */
+  /*   max-width: $cols3; */
+
+  /* } */
+
+  .file-upload {
+    margin: $marginM 0;
+  }
+
+  .dialog-user-content {
+    padding: $marginM 0;
+  }
+}
+
+.dialog-content {
+  p {
+    margin-bottom: 0;
+  }
+
+  div.finished {
+    background: #fff;
+    display: block;
+    text-align: left;
+    z-index: 5000;
+  }
+
+  div.pending {
+    background: #fff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    z-index: 5000;
+    div.ajax {
+      background: url(/lp-static/img/ajax-loader.gif) no-repeat center center;
+      margin: auto;
+      height: 160px;
+    }
+  }
+}
+
+.dialog-content__footer {
+  margin-top: $marginL;
+}
+
+.dialog-content.dialog-content--no-padding {
+  padding-bottom: 0;
+}
+
+.scrolling-content {
+  overflow-y: scroll;
+  max-height: 288px;
+}
+
+.dialog-content-low {
+  min-height: $baseline * 3;
+  padding-bottom:0;
+}
+
+.change-location-help {
+  margin-bottom: .5em;
+}
+
+// This seems to be used only in change-location.html
+.with-map {
+  //min-width: 680px !important;
+  //display: table-row;
+  //display: inline-block;
+
+  /* .map-container { */
+  /*   //padding: 0; */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 480px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+
+  /* form { */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 200px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* .btn-primary { */
+  /*   left: auto; right: 260px; */
+  /*   bottom: 5px; */
+  /* } */
+  /* a.btn-dialog { */
+  /*   right:-70px; */
+  /*   bottom: 10px; */
+  /*   width: 100px; */
+  /* } */
+}
+
+/* .with-map > div { */
+/*   display: table-cell; */
+/*   vertical-align: top; */
+/*   padding-left: $marginM; */
+/* } */
+
+.neighbors-message {
+  margin: $marginM;
+  white-space: pre-wrap;
+}
+
+#dialog-add-link-permit {
+  .combobox{
+    margin-bottom: 8px;
+  }
+}
+
+#upload-dialog {
+  .dialog-content {
+    padding-bottom: 0;
+  }
+}
+
+#dialog-cancel-application {
+  div.application-cancel-text-content p {
+    margin-bottom: 0;
+  }
+}
+
+.authority-select-dialog {
+  select {
+    width: 100%;
+  }
+}
+
+.company-invite-dialog {
+  select {
+    width: 100%;
+  }
+}
+
+
+.with-map-top {
+  margin: {
+    top: $marginS;
+    bottom: 0;
+    left: $marginS;
+    right: $marginS;
+  }
+
+  .checkbox-wrapper {
+    border: none;
+    margin-left: -9px;
+  }
+}
+
+.neighbor-error {
+  color: $negative;
+  margin: {
+    top: $marginS;
+    bottom: $marginS
+  }
+}
+
+.authorize-person-content {
+  max-width: 40em;
+  label, input, textarea, button {
+    display: block
+  }
+
+  .radioGroup {
+    label, input {
+      display: inline-block;
+    }
+  }
+
+  label, button {
+    margin-top: 1em;
+  }
+  input, textarea {
+    width: 100%;
+  }
+}
+
+#modal-dialog .custom-notification-dialog {
+  padding: 0;
+
+  & > .header:first-child {
+    display: none;
+  }
+
+  .component {
+    margin: 0;
+  }
+}

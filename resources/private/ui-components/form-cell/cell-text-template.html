@@ -1,0 +1,18 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="cell-text-template">
+  <!-- ko if: immediate -->
+  <input class="lux"
+         data-bind="attr: attributes,
+                    required: isRequired,
+                    ariaInvalid: isInvalid,
+                    textInput: value,
+                    testId: testId">
+  <!-- /ko -->
+  <!-- ko ifnot: immediate -->
+  <input class="lux"
+         data-bind="attr: attributes,
+                    required: isRequired,
+                    ariaInvalid: isInvalid,
+                    value: value,
+                    testId: testId">
+  <!-- /ko -->
+</script>

@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-handlers-template">
+  <div>
+    <label class="lux lux--inline gap--r1"
+           data-bind="attr: {for: uniqId},
+                      ltext: 'application.handlers'"></label>
+    <!-- ko if: editing -->
+  <icon-button params="icon: 'pen',
+                       buttonClass: 'btn-small secondary',
+                       iconOnly: true,
+                       ltext: 'a11y.edit-handlers',
+                       click: editHandlers"></icon-button>
+  <!-- /ko -->
+  </div>
+  <ul class="boxlist"
+      data-bind="attr: {id: uniqId},
+                 foreach: handlers">
+    <li data-bind="text: $parent.itemText( $data ),
+                   testId: 'handler-' + $index()"></li>
+  </ul>
+</script>

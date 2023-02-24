@@ -1,0 +1,47 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="location-editor-template">
+  <div class="location-editor-container content">
+    <div data-bind="ltext: 'location.editor.help1'"
+         class="location-help-top"></div>
+    <div id="location-editor-map"></div>
+    <div data-bind="ltext: 'location.editor.help2'"
+         class="location-help-bottom"></div>
+    <div class="tabby pad--h05">
+      <div class="tabby__row">
+        <div class="tabby__cell tabby--50">
+          <input class="lux"
+                 type="text"
+                 data-test-id="edit-location-x"
+                 data-bind="value: x,
+                            lplaceholder: 'location.x',
+                            ariaLtext: 'location.x',
+                            ariaInvalid: warningX,
+                            valueRequired: x">
+        </div>
+        <div class="tabby__cell tabby--50">
+          <input class="lux"
+                 type="text"
+
+                 data-test-id="edit-location-y"
+                 data-bind="value: y,
+                            lplaceholder: 'location.y',
+                            ariaLtext: 'location.y',
+                            ariaInvalid: warningY,
+                            valueRequired: y">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="button-group">
+    <button class="positive btn-dialog"
+            data-test-id="edit-location-save"
+            data-bind="ltext: 'save',
+                       click: saveFn,
+                       enable: validX() && validY()"></button>
+    <button class="secondary btn-dialog close"
+            data-test-id="edit-location-cancel"
+            data-bind="ltext: 'cancel',
+                       click: cancelFn,
+                       focusNext: '#modal-dialog-button-close:visible'"></button>
+  </div>
+</script>

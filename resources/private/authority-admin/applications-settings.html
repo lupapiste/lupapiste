@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="applications">
+    <div class="container container--authority-admin"
+         data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.required-fields-obligatory.title'"></h2>
+        <toggle params="value: organization.appRequiredFieldsFillingObligatory,
+                                ltext: 'auth-admin.required-fields-obligatory.enabled',
+                                prefix: 'blockbox',
+                                enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory'),
+                                testId: 'required-fields-obligatory-enabled'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.title'"></h2>
+        <div class="blockbox-wrapper" data-test-id="automatic-ok-wrapper">
+          <input type="checkbox" id="automatic-ok-for-attachments-enabled" data-test-id="automatic-ok-for-attachments-enabled"
+                 data-bind="checked: organization.automaticOkForAttachments, enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-ok-for-attachments')"/>
+          <label for="automatic-ok-for-attachments-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.enabled'"></label>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.extended-construction-waste-report.title'"></h2>
+        <toggle params="value: organization.extendedConstructionWasteReportEnabled,
+                        ltext: 'auth-admin.extended-construction-waste-report.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report'),
+                        testId: 'extended-construction-waste-report-enabled'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.plan-info-disabled.title'"></h2>
+        <toggle params="value: organization.planInfoDisabled,
+                        ltext: 'auth-admin.plan-info-disabled.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-plan-info-disabled'),
+                        testId: 'plan-info-disabled-enabled'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.multiple-operations-support.title'"></h2>
+        <toggle params="value: organization.multipleOperationsSupported,
+                        ltext: 'auth-admin.multiple-operations-support.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-multiple-operations-support'),
+                        testId: 'multiple-operations-support-enabled'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.handling-time.title'"></h2>
+        <div class="blockbox-wrapper" data-test-id="automatic-ok-wrapper">
+          <!-- Checkbox empties the field or sets it to default value -->
+          <input type="checkbox"
+                 id="organization-handling-time-enabled"
+                 data-bind="ltext: 'auth-admin.handling-time.enabled',
+                            checked: organization.handlingTimeEnabled,
+                            enable: lupapisteApp.models.globalAuthModel.ok('set-organization-handling-time')"/>
+          <label for="organization-handling-time-enabled"
+                 data-test-id="organization-handling-time-enabled"
+                 class="blockbox-label"
+                 data-bind="ltext: 'auth-admin.handling-time.enabled'"></label>
+          <!-- Actual field -->
+          <div class="container-padding"
+               data-bind="visible: organization.handlingTimeEnabled">
+            <label for="organization-handling-time-field"
+                   data-bind="ltext: 'auth-admin.handling-time.unit'"></label>
+            <input type="number"
+                   id="organization-handling-time-field"
+                   data-test-id="organization-handling-time-field"
+                   data-bind="ltext: 'auth-admin.handling-time.unit',
+                              value: organization.handlingTime,
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-organization-handling-time')"/>
+            </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.no-comment-neighbor-attachment.title'"></h2>
+        <toggle params="value: organization.noCommentNeighborAttachmentEnabled,
+                        ltext: 'auth-admin.no-comment-neighbor-attachment.enabled',
+                        prefix: 'blockbox',
+                        testId: 'no-comment-neighbor-attachment-enabled'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.clear-handlers.title'"></h2>
+        <toggle params="value: organization.removeHandlersFromRevertedDraft,
+                        ltext: 'auth-admin.remove-handlers-from-reverted-draft',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-remove-handlers-from-reverted-draft'),
+                        testId: 'remove-handlers-from-reverted-draft'"></toggle>
+        <div class="spacerM"></div>
+        <toggle params="value: organization.removeHandlersFromConvertedApplication,
+                        ltext: 'auth-admin.remove-handlers-from-converted-application',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-remove-handlers-from-converted-application'),
+                        testId: 'remove-handlers-from-converted-application'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.foreman-termination-request.title'"></h2>
+        <toggle params="value: organization.foremanTerminationRequestEnabled,
+                        ltext: 'auth-admin.foreman-termination-request.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-foreman-termination-request-enabled'),
+                        testId: 'foreman-termination-enabled'"></toggle>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.ram.title'"></h2>
+        <div class="blockbox-wrapper">
+          <input type="checkbox" id="organization-ram-disabled" data-test-id="organization-ram-disabled"
+                 data-bind="ltext: 'auth-admin.ram',
+                            checked: organization.ramDisabled,
+                            enable: lupapisteApp.models.globalAuthModel.ok('toggle-organization-ram')"/>
+          <label for="organization-ram-disabled" class="blockbox-label"
+                 data-test-id="disable-ram-label"
+                 data-bind="ltext: 'auth-admin.ram'"></label>
+          <div class="ram-disabled container-padding">
+            <table class="admin-settings">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'userinfo.language'"></th>
+                  <th data-bind="ltext: 'auth-admin.ram.description'"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-bind="ltext: 'lang.fi'"></td>
+                  <td class="value">
+                    <input data-test-id="ramDisabledFi" type="text" data-bind="value: organization.ramMessage.fi" />
+                  </td>
+                </tr>
+                <tr>
+                  <td data-bind="ltext: 'lang.sv'"></td>
+                  <td class="value">
+                    <input data-test-id="ramDisabledSv" type="text" data-bind="value: organization.ramMessage.sv" />
+                  </td>
+                </tr>
+                <tr>
+                  <td data-bind="ltext: 'lang.en'"></td>
+                  <td class="value">
+                    <input data-test-id="ramDisabledEn" type="text" data-bind="value: organization.ramMessage.en" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
+        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <div data-bind="component: 'organization-name-editor'"></div>
+        <!-- /ko -->
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.tags'"></h2>
+        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <div data-bind="component: {name: 'tags-editor',
+                                    params: {organizationId: lupapisteApp.usagePurpose().orgId}}"></div>
+        <!-- /ko -->
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.inspection-summaries'"></h2>
+        <div class="blockbox-wrapper">
+          <input type="checkbox" id="inspection-summaries-enabled" data-test-id="inspection-summaries-enabled"
+               data-bind="checked: organization.inspectionSummariesEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-inspection-summaries')" />
+          <label for="inspection-summaries-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.inspection-summaries.enabled'"></label>
+        </div>
+          <!-- ko if: organization.inspectionSummariesEnabled -->
+          <h3 data-bind="ltext: 'auth-admin.inspection-summaries.subtitle'" class="top-marginM"></h3>
+          <div data-bind="component: 'inspection-summary-templates-list'"></div>
+          <!-- /ko -->
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.email-notifications'"></h2>
+        <p data-bind="lhtml: 'auth-admin.email-notifications.info'"></p>
+
+        <table class="admin-settings">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.email-notifications.param-name'"></th>
+              <th data-bind="ltext: 'auth-admin.email-notifications.param-value'"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.email-notifications.neighbor'"></td>
+              <td class="value">
+                <input data-test-id="neighborOrderEmails" type="text" data-bind="value: organization.neighborOrderEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-neighbor-order-email')" />
+              </td>
+            </tr>
+            <tr data-test-id="onSubmitEmails-row">
+              <td data-bind="ltext: 'auth-admin.email-notifications.submit'"></td>
+              <td class="value">
+                <input data-test-id="onSubmitEmails" type="text" data-bind="value: organization.submitNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-submit-notification-email')" />
+              </td>
+            </tr>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.email-notifications.inforequest'"></td>
+              <td class="value">
+                <input type="text" data-bind="value: organization.infoRequestNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-inforequest-notification-email')" />
+              </td>
+            </tr>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.email-notifications.funding'"></td>
+              <td class="value">
+                <input data-test-id="fundingEmails" type="text" data-bind="value: organization.fundingNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-funding-enabled-notification-email')" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div> <!-- container -->
+  </section>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      Schema for transferring sales orders over HTTP to invoicing systems.
+    </xsd:documentation>
+  </xsd:annotation>
+  <xsd:element name="InvoiceTransfer">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="From">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="System">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Id" type="xsd:string" />
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="Invoices">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="Invoice" maxOccurs="unbounded">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Type">
+                      <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                          <xsd:enumeration value="INTERNAL" />
+                          <xsd:enumeration value="EXTERNAL" />
+                        </xsd:restriction>
+                      </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="ApplicationContext">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="Id" type="xsd:string" />
+                          <xsd:element name="StreetAddress" type="xsd:string" />
+                          <xsd:element name="PermitType" type="xsd:string" />
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="Reference" type="xsd:string" />
+                    <xsd:element name="BackendId" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="Payee">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="Organization">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="Id" type="xsd:string" minOccurs="0" />
+                                <xsd:element name="Group" type="xsd:string" minOccurs="0" />
+                                <xsd:element name="Sector" type="xsd:string" minOccurs="0" />
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="Payer">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="Type">
+                            <xsd:simpleType>
+                              <xsd:restriction base="xsd:string">
+                                <xsd:enumeration value="ORGANIZATION" />
+                                <xsd:enumeration value="PERSON" />
+                              </xsd:restriction>
+                            </xsd:simpleType>
+                          </xsd:element>
+                          <xsd:element name="CustomerId" type="xsd:string" />
+                          <xsd:choice>
+                            <xsd:element name="Organization">
+                              <xsd:complexType>
+                                <xsd:sequence>
+                                  <xsd:element name="Id" type="xsd:string" />
+                                  <xsd:element name="PartnerCode" type="xsd:string" minOccurs="0" />
+                                  <xsd:element name="Name" type="xsd:string" />
+                                  <xsd:element name="Contact">
+                                    <xsd:complexType>
+                                      <xsd:group ref="PersonElements" />
+                                    </xsd:complexType>
+                                  </xsd:element>
+                                  <xsd:element name="Address" type="Address" />
+                                  <xsd:element name="EInvoiceAddress" type="xsd:string" />
+                                  <xsd:element name="EDI" type="xsd:string" />
+                                  <xsd:element name="Operator" type="xsd:string" />
+                                </xsd:sequence>
+                              </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="Person">
+                              <xsd:complexType>
+                                <xsd:sequence>
+                                  <xsd:element name="Id" type="xsd:string" />
+                                  <xsd:element name="PartnerCode" type="xsd:string" minOccurs="0" />
+                                  <xsd:group ref="PersonElements" />
+                                  <xsd:element name="Address" type="Address" />
+                                </xsd:sequence>
+                              </xsd:complexType>
+                            </xsd:element>
+                          </xsd:choice>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="Rows">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="Row" maxOccurs="unbounded">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="Product">
+                                  <xsd:complexType>
+                                    <xsd:sequence>
+                                      <xsd:element name="Name" type="xsd:string" />
+                                      <xsd:element name="Unit">
+                                        <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                            <xsd:enumeration value="PIECE" />
+                                            <xsd:enumeration value="HOUR" />
+                                            <xsd:enumeration value="DAY" />
+                                            <xsd:enumeration value="WEEK" />
+                                            <xsd:enumeration value="M2" />
+                                            <xsd:enumeration value="M3" />
+                                          </xsd:restriction>
+                                        </xsd:simpleType>
+                                      </xsd:element>
+                                      <xsd:element name="Quantity" type="DecimalType" />
+                                      <xsd:element name="DiscountPercent" type="P1DecimalType" />
+                                      <xsd:element name="UnitPrice" type="DecimalType" />
+                                      <xsd:element name="ProductConstants" minOccurs="0" maxOccurs="1">
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="CostCentre" type="xsd:string" minOccurs="0" />
+                                            <xsd:element name="VAT" type="xsd:string" minOccurs="0" />
+                                            <xsd:element name="CalculationTag" type="xsd:string" minOccurs="0" />
+                                            <xsd:element name="Project" type="xsd:string" minOccurs="0" />
+                                            <xsd:element name="Target" type="xsd:string" minOccurs="0" />
+                                            <xsd:element name="Function" type="xsd:string" minOccurs="0" />
+                                            <xsd:element name="OtherTag" type="xsd:string" minOccurs="0" />
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                    </xsd:sequence>
+                                  </xsd:complexType>
+                                </xsd:element>
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="created" type="xsd:dateTime" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:simpleType name="P1DecimalType">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="\d{1,9}(\.\d{1,2})" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="DecimalType">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="\-?\d{1,9}(\.\d{1,2})" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:group name="PersonElements">
+    <xsd:sequence>
+      <xsd:element name="FirstName" type="xsd:string"></xsd:element>
+      <xsd:element name="LastName" type="xsd:string"></xsd:element>
+      <xsd:element name="Turvakielto" type="xsd:boolean"></xsd:element>
+    </xsd:sequence>
+  </xsd:group>
+
+  <xsd:complexType name="Address">
+    <xsd:sequence>
+      <xsd:element name="StreetAddress" type="xsd:string"></xsd:element>
+      <xsd:element name="PostalCode" type="xsd:string"></xsd:element>
+      <xsd:element name="City" type="xsd:string"></xsd:element>
+      <xsd:element name="Country" type="xsd:string"></xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

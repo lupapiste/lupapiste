@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <nav style="visibility: hidden;">
+      <div class="julkipano-brand">
+        <div class="nav-top">
+          <div class="nav-box">
+            <div class="brand" >
+              <a href="#"
+                 data-bind="click: $data.openStartPage"
+                 aria-label="Lupapiste"
+                 class="logo julkipano-logo narrow-hide"></a>
+              <a href="#"
+                 data-bind="click: $data.openStartPage"
+                 aria-label="Lupapiste"
+                 class="logo lupapiste-logo-no-text narrow-show"></a>
+            </div>
+            <div id="language-select" class="header-dropdown"
+                 data-bind="css: {active: $root.languageMenuVisible}">
+              <button class="navi" href="#" data-test-id="language-link"
+                      aria-haspopup="true"
+                      data-bind="click: $root.toggleLanguageMenu,
+                                 clickBubble: false,
+                                 ariaText: $root.currentLanguage">
+                <span data-bind="text: $root.currentLanguage"
+                      aria-hidden="true"
+                      style="text-transform: uppercase"></span>
+                <i aria-hidden="true"
+                   data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
+                              'lupicon-chevron-small-up': $root.languageMenuVisible}"></i>
+              </button>
+              <ul class="language-menu"
+                  role="menu"
+                  data-bind="ariaExpanded: $root.languageMenuVisible,
+                             foreach: $root.languages">
+                <li>
+                  <button role="menuitem"
+                          class="navi"
+                          data-bind="click: $root.changeLanguage,
+                                     text: $data.toUpperCase() + ' - ' + loc( $data )"></button>
+                </li>
+              </ul>
+            </div>
+            <div id="header-user-menu" data-bind="visible: authenticated" data-test-id="user-nav-menu">
+
+              <div class="header-box julkipano-user">
+                <span class="lupicon-user"></span>
+
+                <span class="narrow-hide" id="user-name"
+                      data-bind="text: userName"></span>
+              </div>
+              <div class="header-box">
+                <a href="#"
+                   data-bind="click: vetumaLogout"
+                   data-test-id="vetuma-logout">
+                  <span class="lupicon-log-out"></span>
+                  <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
+                </a>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </nav>
+  </body>
+</html>

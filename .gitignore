@@ -1,0 +1,87 @@
+# Java:
+*.class
+
+# Eclipse:
+.classpath
+.settings
+.project
+.pydevproject
+.externalToolBuilders
+bin
+
+# CCW:
+.nrepl-port
+
+# Idea
+*.iml
+*.ipr
+*.iws
+.idea
+
+# Maven:
+target
+
+# Lein:
+.lein-*
+checkouts
+
+# CLJS repl:
+.cljs_rhino_repl
+.cljs_nashorn_repl
+nashorn_code_cache
+
+# For SCSS/SASS generation
+.sass-cache
+
+# Python
+*.pyc
+
+# Backups
+~$*
+
+# Temp
+temp
+.cache
+*.tmp
+
+# VCS
+*.orig
+
+# OSX
+.DS_Store
+
+
+# Test files
+robot/local-ie8-test.bat
+robot/pabot*
+robot/output.xml
+*-leima.pdf
+
+# Misc
+*.swp
+.metadata
+*.log
+sessionkey
+keystore
+.tern-port
+user.properties
+/GPATH
+/GRTAGS
+/GTAGS
+/TAGS
+*.pandoc
+/docs/developerguide.html
+node_modules
+.shadow-cljs
+/.ctags
+src/lupapalvelu/conversion/test-data
+.rebel_readline_history
+
+resources/public/lp-static/css/*.css.map
+resources/public/lp-static/js/*
+/resources/public/lp-static/css/main.css
+/resources/public/lp-static/css/main-blessed1.css
+/.dir-locals.el
+/resources/i18n/shared_translations.txt
+/.sass-lint.yml
+

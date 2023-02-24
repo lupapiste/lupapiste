@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:WFS_Capabilities version="1.1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wfs"
+  xmlns:wfs="http://www.opengis.net/wfs" xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  updateSequence="3589">
+  <ows:ServiceIdentification>
+    <ows:Title>Lupapiste internal test service</ows:Title>
+    <ows:ServiceType>WFS</ows:ServiceType>
+    <ows:ServiceTypeVersion>1.1.0</ows:ServiceTypeVersion>
+  </ows:ServiceIdentification>
+  <wfs:FeatureTypeList>
+    <wfs:FeatureType>
+      <wfs:Name>mkos:Osoite</wfs:Name>
+      <wfs:Title>mkos:Osoite</wfs:Title>
+      <wfs:DefaultSRS>EPSG:3877</wfs:DefaultSRS>
+    </wfs:FeatureType>
+  </wfs:FeatureTypeList>
+  <ogc:Filter_Capabilities>
+    <ogc:Spatial_Capabilities>
+      <ogc:GeometryOperands><ogc:GeometryOperand>gml:Envelope</ogc:GeometryOperand></ogc:GeometryOperands>
+      <ogc:SpatialOperators><ogc:SpatialOperator name="BBOX" /></ogc:SpatialOperators>
+    </ogc:Spatial_Capabilities>
+    <ogc:Scalar_Capabilities></ogc:Scalar_Capabilities>
+    <ogc:Id_Capabilities><ogc:EID /></ogc:Id_Capabilities>
+  </ogc:Filter_Capabilities>
+</wfs:WFS_Capabilities>

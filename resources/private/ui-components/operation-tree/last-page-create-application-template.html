@@ -1,0 +1,38 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="last-page-create-application-template">
+  <div>
+    <div class="gap--t1 gap--b1"
+         data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
+    <div class="operation-description"
+         data-bind="html: loc(['operations', operation(), 'desc'])"></div>
+
+    <organization-links params="organization: organization"></organization-links>
+
+    <div class="organization-attachments gap--t1"
+         data-bind="visible: attachmentsForOp() && attachmentsForOp().length">
+      <div data-bind="ltext: 'organization.attachments'"></div>
+      <ul class="attachments-list"
+          data-bind="foreach: attachmentsForOp">
+        <li data-bind="text: loc(['attachmentType', group, id])"
+            class="mandatory-attachments"></li>
+      </ul>
+    </div>
+
+    <div class="last-page--create-buttons">
+      <icon-button params="click: goPhase3,
+                           enable: createOK,
+                           testId: 'create-proceed-to-inforequest',
+                           icon: 'circle-plus',
+                           ltext: 'newRequest.newInforequest'">
+      </icon-button>
+      <icon-button class="gap--l1"
+                   params="click: createApplication,
+                           enable: createOK,
+                           icon: 'circle-plus',
+                           waiting: pending,
+                           testId: 'create-application',
+                           ltext: 'newRequest.newApplication'">
+      </icon-button>
+    </div>
+  </div>
+</script>

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset
+                      http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.5/yhteiset.xsd
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.8/rakennusvalvonta.xsd
+                      http://www.opengis.net/wfs
+                      http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>Sample</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Järvenpää</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2013-09-02</yht:toimitusPvm>
+    <yht:kuntakoodi>186</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-09-01</yht:pvm>
+          <yht:tila>ei tiedossa</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>2013-01</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-186-2013-00002</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet></yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:uusi>
+          </rakval:uusi>
+          <rakval:rakennustieto>
+            <rakval:Rakennus>
+              <yht:yksilointitieto></yht:yksilointitieto>
+              <yht:alkuHetki>2013-09-01T00:00:00</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:tyhja></yht:tyhja>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:valtakunnallinenNumero>123456001M</rakval:valtakunnallinenNumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>18601234567890</rakval:kiinttun>
+                  <rakval:rakennusnro>101</rakval:rakennusnro>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>039 muut asuinkerrostalot</rakval:kayttotarkoitus>
+                <rakval:kokonaisala>2000</rakval:kokonaisala>
+                <rakval:liitettyJatevesijarjestelmaanKytkin>true</rakval:liitettyJatevesijarjestelmaanKytkin>
+              </rakval:rakennuksenTiedot>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:uusi>
+          </rakval:uusi>
+          <rakval:rakennustieto>
+            <rakval:Rakennus>
+              <yht:yksilointitieto></yht:yksilointitieto>
+              <yht:alkuHetki>2013-09-01T00:00:00</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:tyhja></yht:tyhja>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:valtakunnallinenNumero>123456002N</rakval:valtakunnallinenNumero>
+                  <rakval:jarjestysnumero>2</rakval:jarjestysnumero>
+                  <rakval:kiinttun>18601234567891</rakval:kiinttun>
+                  <rakval:rakennusnro>102</rakval:rakennusnro>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>719 muut varastorakennukset</rakval:kayttotarkoitus>
+                <rakval:kokonaisala>20</rakval:kokonaisala>
+              </rakval:rakennuksenTiedot>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:uusi></rakval:uusi>
+          <rakval:rakennelmatieto>
+            <rakval:Rakennelma>
+              <yht:yksilointitieto></yht:yksilointitieto>
+              <yht:alkuHetki>2013-09-01T00:00:00</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:tyhja></yht:tyhja>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:kuvaus>
+                <rakval:kuvaus></rakval:kuvaus>
+              </rakval:kuvaus>
+              <rakval:tunnus>
+                <rakval:jarjestysnumero>3</rakval:jarjestysnumero>
+                <rakval:kiinttun>18601234567892</rakval:kiinttun>
+                <rakval:rakennusnro>103</rakval:rakennusnro>
+              </rakval:tunnus>
+              <rakval:kokonaisala>22</rakval:kokonaisala>
+            </rakval:Rakennelma>
+          </rakval:rakennelmatieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:paivamaarat>
+            <yht:antoPvm>2013-09-05</yht:antoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Päätös on nyt tämä.</yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>elmo viranomainen</yht:paatoksentekija>
+            <yht:paatospvm>2013-09-01</yht:paatospvm>
+            <yht:pykala>1</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.6594">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>1001-01-01Z</yht:pvm>
+          <yht:tila>ei tiedossa</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0185-R</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-186-2013-00002</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>18600013-0185</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-06-14Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:naapuritieto>
+            <yht:Naapuri>
+              <yht:henkilo> </yht:henkilo>
+            </yht:Naapuri>
+          </yht:naapuritieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:autopaikkojaEnintaan>10</yht:autopaikkojaEnintaan>
+            <yht:autopaikkojaVahintaan>1</yht:autopaikkojaVahintaan>
+            <yht:autopaikkojaRakennettava>2</yht:autopaikkojaRakennettava>
+            <yht:autopaikkojaRakennettu>0</yht:autopaikkojaRakennettu>
+            <yht:autopaikkojaKiinteistolla>7</yht:autopaikkojaKiinteistolla>
+            <yht:autopaikkojaUlkopuolella>3</yht:autopaikkojaUlkopuolella>
+            <yht:kerrosala>100</yht:kerrosala>
+            <yht:kokonaisala>110</yht:kokonaisala>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>aloituskokous</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Aloituskokous</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu tarkastus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Käyttöönottotarkastus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaadittuErityissuunnitelma>ES 1</yht:vaadittuErityissuunnitelma>
+            <yht:vaadittuErityissuunnitelma>ES 22</yht:vaadittuErityissuunnitelma>
+            <yht:vaadittuErityissuunnitelma>ES 333</yht:vaadittuErityissuunnitelma>
+            <yht:maarays>
+              <yht:sisalto>Radontekninen suunnitelma</yht:sisalto>
+              <yht:maaraysPvm>2013-08-28</yht:maaraysPvm>
+              <yht:toteutusHetki>2013-08-29</yht:toteutusHetki>
+            </yht:maarays>
+            <yht:maarays>
+              <yht:sisalto>Ilmanvaihtosuunnitelma</yht:sisalto>
+              <yht:maaraysPvm>2013-08-30</yht:maaraysPvm>
+              <yht:toteutusHetki>2013-08-31</yht:toteutusHetki>
+            </yht:maarays>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>Iv-työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>Kvv-työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>Vastaava työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2013-09-01Z</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2013-09-02</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2013-09-03</yht:voimassaHetkiPvm>
+            <yht:raukeamisPvm>2013-09-04</yht:raukeamisPvm>
+            <yht:antoPvm>2013-09-05</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-09-06</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-09-07</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Päätös 1</yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>viranomainen</yht:paatoksentekija>
+            <yht:paatospvm>2013-08-01</yht:paatospvm>
+            <yht:pykala>1</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>kuvaus 1</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-09-01T12:00:00</yht:muokkausHetki>
+              <yht:versionumero>1</yht:versionumero>
+              <yht:tekija>
+                <yht:henkilo>
+                  <yht:nimi>
+                    <yht:sukunimi>Tarkkanen</yht:sukunimi>
+                  </yht:nimi>
+                </yht:henkilo>
+              </yht:tekija>
+              <yht:tyyppi>tyyppi 1</yht:tyyppi>
+              <yht:metatietotieto>
+                <yht:metatieto>
+                  <yht:metatietoArvo>arvo</yht:metatietoArvo>
+                  <yht:metatietoNimi>nimi</yht:metatietoNimi>
+                </yht:metatieto>
+              </yht:metatietotieto>
+            </yht:liite>
+          </yht:poytakirja>
+          <yht:poytakirja>
+            <yht:paatos>Mieleni minun tekevi, aivoni ajattelevi lähteäni laulamahan, saa'ani sanelemahan, sukuvirttä suoltamahan, lajivirttä laulamahan. Sanat suussani sulavat, puhe'et putoelevat, kielelleni kerkiävät, hampahilleni hajoovat.
+
+Veli kulta, veikkoseni, kaunis kasvinkumppalini! Lähe nyt kanssa laulamahan, saa kera sanelemahan yhtehen yhyttyämme, kahta'alta käytyämme! Harvoin yhtehen yhymme, saamme toinen toisihimme näillä raukoilla rajoilla, poloisilla Pohjan mailla.
+
+Lyökämme käsi kätehen, sormet sormien lomahan, lauloaksemme hyviä, parahia pannaksemme, kuulla noien kultaisien, tietä mielitehtoisien, nuorisossa nousevassa, kansassa kasuavassa: noita saamia sanoja, virsiä virittämiä vyöltä vanhan Väinämöisen, alta ahjon Ilmarisen, päästä kalvan Kaukomielen, Joukahaisen jousen tiestä, Pohjan peltojen periltä, Kalevalan kankahilta.</yht:paatos>
+            <yht:paatoskoodi>ehdollinen</yht:paatoskoodi>
+            <yht:paatoksentekija>Mölli Keinonen</yht:paatoksentekija>
+            <yht:paatospvm>2013-08-02</yht:paatospvm>
+            <yht:pykala>2</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>kuvaus 2</yht:kuvaus>
+              <yht:linkkiliitteeseen></yht:linkkiliitteeseen>
+              <yht:metatietotieto>
+                <yht:metatieto>
+                  <yht:metatietoArvo></yht:metatietoArvo>
+                  <yht:metatietoNimi></yht:metatietoNimi>
+                </yht:metatieto>
+              </yht:metatietotieto>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maarays>
+              <yht:sisalto>Valaistussuunnitelma</yht:sisalto>
+            </yht:maarays>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:antoPvm>2013-09-05</yht:antoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Päätös 2</yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>johtava viranomainen</yht:paatoksentekija>
+            <yht:paatospvm>2013-09-01</yht:paatospvm>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>true</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen>Ei poikkeamisia.</rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

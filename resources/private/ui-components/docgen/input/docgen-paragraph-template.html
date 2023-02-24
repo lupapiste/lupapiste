@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-paragraph-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
+  <div data-bind="text: value,
+                   css: inputClasses,
+                   event: events,
+                   attr: { 'data-test-id': path.join('.') }">
+  </div>
+  <ping aria-hidden="true"
+        params="indicator: indicator, mode: 'icon'"></ping>
+</script>
+!

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="companies">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2>Yritykset</h2>
+
+        <table data-test-id="corporations-table">
+          <thead>
+            <tr>
+              <th>Yritys</th>
+              <th>Y-tunnus</th>
+              <th>Osoite</th>
+              <th>Yll&auml;pit&auml;j&auml;t</th>
+              <th>Tilityyppi</th>
+              <th>K&auml;ytt&auml;j&auml;raja</th>
+              <th>Verkkolaskuosoite</th>
+              <th>V&auml;litt&auml;j&auml;tunnus</th>
+              <th>OVT</th>
+              <th>Viite</th>
+              <th>Sopimus</th>
+              <th>Luotu</th>
+              <th>Sulkeminen</th>
+              <th>Toiminnot</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: { data: companiesModel.companies, as: 'company' }">
+            <tr data-bind="attr: {'data-test-id': 'company-row-' + company.id}">
+              <td data-bind="text: company.name"></td>
+              <td data-bind="text: company.y"></td>
+              <td>
+              <span data-bind="text: company.address1"></span><br/>
+              <span data-bind="text: company.zip"></span> <span data-bind="text: company.po"></span>
+              </td>
+              <td data-bind="foreach: company.admins">
+                <div>
+                  <span data-bind="fullName: $data"></span> / <span data-bind="text: $data.username"></span>
+                </div>
+              </td>
+              <td data-bind="text: loc('register.company.' + company.accountType + '.title') + ' (' + loc('register.company.billing.' + company.billingType + '.title') + ')'"></td>
+              <td data-bind="text: company.userLimit"></td>
+              <td data-bind="text: company.netbill"></td>
+              <td data-bind="text: company.pop"></td>
+              <td data-bind="text: company.ovt"></td>
+              <td data-bind="text: company.reference"></td>
+              <td>
+              <!-- ko if: company.document -->
+              <a data-bind="attr: {href:company.document} ">Visma Sign</a>
+              <!-- /ko -->
+              </td>
+              <td data-bind="dateTimeString: company.created"></td>
+              <td>
+                <!-- ko if: company.locked -->
+                <span data-bind="dateString: company.locked,
+                                 testId: 'lock-date-' + company.id"></span><br>
+                <a class="link-btn"
+                   data-bind="click: $root.companiesModel.unlock,
+                              testId: 'unlock-company-' + company.id">
+                  <i class="lupicon-lock-open-fully"></i>
+                  <span data-bind="ltext: 'company.user.op.enabled.false'"></span>
+                </a>
+                <!-- /ko -->
+                <!-- ko ifnot: company.locked -->
+                <a class="link-btn"
+                   data-bind="click: $root.companiesModel.lock,
+                              testId: 'lock-company-' + company.id">
+                  <i class="lupicon-lock"></i>
+                  <span data-bind="ltext: 'company.user.op.enabled.true'"></span>
+                </a>
+                <!-- /ko -->
+
+              </td>
+              <td><a data-bind="click: company.openDialog" data-test-id="company-edit">Muokkaa</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button class="positive" data-bind="visible: false, click: companiesModel.create">Luo uusi yritys</button>
+
+      </div>
+
+    </section>
+  </body>
+</html>

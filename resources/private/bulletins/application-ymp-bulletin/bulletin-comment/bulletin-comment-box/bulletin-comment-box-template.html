@@ -1,0 +1,174 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="bulletin-comment-box-template">
+      <form id="bulletin-comment-form"
+            data-bind="submit: sendComment"
+            data-test-id="bulletin-comment-box-form"
+            class="form-grid form-grid--no-border">
+
+        <!-- personal details -->
+        <!-- ko ifnot: userInfo.eidasId() -->
+        <div class="row" data-bind="slider: !otherReceiver()">
+          <div class="col-4">
+            <div class="form-grid form-grid--no-border">
+              <div class="row row--no-margin">
+                <div class="col-4">
+                  <label data-bind="ltext: 'bulletin.comment.delivery'"></label>
+                </div>
+                <div class="col-4 user-info" data-bind="with: userInfo">
+                  <div>
+                    <span data-bind="text: firstName"></span>
+                    <span data-bind="text: lastName"></span>
+                  </div>
+                  <div>
+                    <span data-bind="text: street"></span>
+                  </div>
+                  <div>
+                    <span data-bind="text: zip"></span>
+                    <span data-bind="text: city"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row row--no-bottom-margin" data-bind="ifnot: otherReceiver">
+                <div class="col-4" data-bind="slider: !otherReceiver()">
+                  <div class="col-1">
+                    <div data-bind="component: {name: 'text-field',
+                                                params: {value: basicCommentFields.email,
+                                                         id: 'email',
+                                                         lLabel: 'userinfo.email'}}"></div>
+                  </div>
+                  <div class="col-1">
+                    <br/>
+                    <div data-bind="component: {name: 'checkbox-field',
+                                                params: {value: basicCommentFields.emailPreferred,
+                                                         id: 'emailPreferred',
+                                                         lLabel: 'bulletin.comment.emailPreferred',
+                                                         disable: emailIsBlank}}"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /ko -->
+
+        <div class="row">
+          <div class="col-4">
+            <div data-bind="component: {name: 'checkbox-field',
+                                        params: {value: otherReceiver,
+                                                 id: 'otherReceiver',
+                                                 'data-test-id': 'otherReceiver',
+                                                 lLabel: 'bulletin.comment.otherReceiver'}}"></div>
+          </div>
+        </div>
+
+        <!-- ko with: otherReceiverInfo -->
+        <div class="row" data-bind="slider: $component.otherReceiver" data-test-id="other-receiver-row">
+          <div class="col-4">
+            <div class="form-grid form-grid--no-border">
+              <div class="row row--no-margin">
+                <div class="col-1">
+                  <div data-bind="component: {name: 'text-field',
+                                              params: {value: firstName,
+                                                       id: 'firstName',
+                                                       lLabel: 'userinfo.firstName',
+                                                       required: true}}"></div>
+                </div>
+                <div class="col-1">
+                  <div data-bind="component: {name: 'text-field',
+                                              params: {value: lastName,
+                                                       id: 'lastName',
+                                                       lLabel: 'userinfo.lastName',
+                                                       required: true}}"></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-1">
+                  <div data-bind="component: {name: 'text-field',
+                                              params: {value: street,
+                                                       id: 'street',
+                                                       lLabel: 'userinfo.street',
+                                                       required: true}}"></div>
+                </div>
+                <div class="col-1">
+                  <div data-bind="component: {name: 'text-field',
+                                              params: {value: zip,
+                                                       id: 'zip',
+                                                       lLabel: 'userinfo.zip',
+                                                       required: true}}"></div>
+                </div>
+                <div class="col-1">
+                  <div data-bind="component: {name: 'text-field',
+                                              params: {value: city,
+                                                       id: 'city',
+                                                       lLabel: 'userinfo.city',
+                                                       required: true}}"></div>
+                </div>
+              </div>
+              <div class="row" data-bind="if: $component.otherReceiver">
+                <div class="col-1">
+                  <div data-bind="component: {name: 'text-field',
+                                              params: {value: $component.basicCommentFields.email,
+                                                       id: 'email',
+                                                       lLabel: 'userinfo.email'}}"></div>
+                </div>
+                <div class="col-1">
+                  <br/>
+                  <div data-bind="component: {name: 'checkbox-field',
+                                              params: {value: $component.basicCommentFields.emailPreferred,
+                                                       id: 'emailPreferred',
+                                                       lLabel: 'bulletin.comment.emailPreferred',
+                                                       disable: $component.emailIsBlank}}"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /ko -->
+
+        <div class="row">
+           <div class="col-4"
+               data-bind="component: {name: 'textarea-field',
+                                      params: {value: basicCommentFields.comment,
+                                               id: 'bulletin-comment-field',
+                                               lLabel: 'bulletin.comment',
+                                               lPlaceholder: 'bulletin.comment.placeholder'}}"></div>
+        </div>
+        <div class="row">
+          <label data-bind="ltext: 'bulletin.comment.selectedAttachments'"></label>
+          <input class="hidden" type="text" name="bulletin-id" data-bind="value: bulletinId"/>
+          <input class="hidden" type="text" name="bulletin-version-id" data-bind="value: versionId"/>
+          <!-- ko if: attachments().length > 0 -->
+          <ul class="bulletin-comment__attachment-list" data-bind="foreach: attachments">
+            <li>
+              <span data-bind="text: $data.filename"></span>
+              <span data-bind="size: $data.size"></span>
+              <span>
+                <a href="#" data-bind="click: $component.removeAttachment">
+                  <span data-bind="ltext: 'remove'"></span>
+                </a>
+              </span>
+            </li>
+          </ul>
+          <!-- /ko -->
+          <!-- ko if: attachments().length === 0 -->
+          <p data-bind="ltext: 'bulletin.comment.noAttachments'"></p>
+          <!-- /ko -->
+        </div>
+        <div class="row">
+          <!-- TODO get for attr value from service -->
+          <label class="btn bulletin" data-bind="css: {waiting: filePending},
+                                                 attr: {for: fileInputId}">
+            <i class="lupicon-paperclip"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: 'bulletin.comment.addAttachment'"></span>
+          </label>
+        </div>
+        <div class="row">
+          <button type="submit" class="positive" data-test-id="send-comment"
+                  data-bind="disable: isSubmitDisabled, css: {waiting: pending}">
+            <i class="lupicon-comment"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: 'bulletin.comment.send'"></span>
+          </button>
+        </div>
+      </form>
+</script>

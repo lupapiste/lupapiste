@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Nosto Consulting Oy, Pasi Lappalainen, tel. +358 400 858101, http://www.nostoconsulting.fi  -->
+<!--  edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy)  -->
+<!--  KRYSP projekti -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ymi="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.2.4">
+    <xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+    <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd"/>
+    <!-- Local usage -->
+    <!-- <xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\gml_dummy.xsd"/>
+        <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset.xsd"/> -->
+    <!--  =================================================  -->
+    <!--  Package: <<XSDschema>> Ilmoitukset  -->
+    <!--  =================================================  -->
+    <!--  Kohdejoukko: Ilmoitukset  -->
+    <!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+    <!--  Class: <<FeatureType>> Ilmoitukset -->
+    <!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+    <xs:element name="Ilmoitukset" type="ymi:IlmoituksetType">
+        <xs:annotation>
+            <xs:documentation>Skeeman juurielementti</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="MelutarinaType">
+        <xs:complexContent>
+            <xs:extension base="ymi:AbstractIlmoitusKohde">
+                <xs:sequence>
+                    <xs:element name="toimintatieto" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>TOIMINTA</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Toiminta" type="ymi:ToimintaType" minOccurs="0">
+                                    <xs:annotation>
+                                        <xs:documentation>TOIMINTA</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="toiminnanKesto" type="ymi:JaksoType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>TOIMINNAN KESTO</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="melutiedot" type="ymi:MelutiedotType" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>MELUPÄÄSTÖT</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="melunJaTarinanLeviaminen" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>MELUN JA TÄRINÄN LEVIÄMINEN</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="MelunJaTarinanLeviaminen" type="ymi:MelunJaTarinanLeviaminenType" minOccurs="0">
+                                    <xs:annotation>
+                                        <xs:documentation>MELUN JA TÄRINÄN LEVIÄMINEN</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="melunJaTarinanTorjuntaJaSeuranta" type="ymi:MelunJaTarinanTorjuntaJaSeurantaType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>MELUN JA TÄRINÄN TORJUNTA JA SEURANTA</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="lisatiedottieto" type="ymi:LisatiedotType" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>Aineisto ja arviointimenetelmät, joihin tiedot perustuvat</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+                    <xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="KoeluontoinentoimintaType">
+        <xs:complexContent>
+            <xs:extension base="ymi:AbstractIlmoitusKohde">
+                <xs:sequence>
+                    <xs:element name="kuvausKoeluonteisestaToiminnasta" type="ymi:KuvausKoeluonteisestaToiminnastaType">
+                        <xs:annotation>
+                            <xs:documentation>KUVAUS KOELUONTEISESTA TOIMINNASTA</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="koeluonteisenToiminnanKesto" type="ymi:JaksoType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>KOELUONTEISEN TOIMINNAN KESTO</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0"/>
+                    <xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+                    <xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="PoikkeusType">
+        <xs:complexContent>
+            <xs:extension base="ymi:AbstractIlmoitusKohde">
+                <xs:sequence>
+                    <xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+                    <xs:element name="jakso" type="ymi:JaksoType" minOccurs="0"/>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0"/>
+                    <xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+                    <xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="PiMaPuhdistusType">
+        <xs:complexContent>
+            <xs:extension base="ymi:AbstractIlmoitusKohde">
+                <xs:sequence>
+                    <xs:element name="toiminnanKesto" type="ymi:JaksoType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>TOIMINNAN KESTO</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="pilaTiedot" type="ymi:PilaTiedotType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>PILAANTUMISTA KOSKEVAT TIEDOT</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="puhdistusAsiat" type="ymi:PuhdistusAsiatType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>PUHDISTAMISTA KOSKEVAT ASIAT</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="hakemuksenLisaksi" type="ymi:HakemuksenLisaksiType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>HAKEMUKSEEN ON LISÄKSI LIITETTÄVÄ:</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="lisaliitteet" type="ymi:LisaliitteetType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>TARVITTAESSA HAKEMUKSEEN LIITETÄÄN:</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+                    <xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ToiminnanSijaintiType">
+        <xs:sequence>
+            <xs:element name="Osoite" type="yht:PostiosoiteType"/>
+            <xs:element name="Kunta" type="xs:string" minOccurs="0"/>
+            <xs:element name="Sijainti" type="yht:SijaintiType"/>
+            <xs:element name="Liite" type="yht:YmparistoLiiteType" minOccurs="0"/>
+            <xs:element name="Kiinteistorekisterinumero" type="yht:KiinteistotunnusType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="JaksoType">
+        <xs:sequence>
+            <xs:element name="alkuPvm" type="xs:date"/>
+            <xs:element name="loppuPvm" type="xs:date" minOccurs="0"/>
+            <xs:element name="arkiAlkuAika" type="xs:time" minOccurs="0"/>
+            <xs:element name="arkiLoppuAika" type="xs:time" minOccurs="0"/>
+            <xs:element name="lauantaiAlkuAika" type="xs:time" minOccurs="0"/>
+            <xs:element name="lauantaiLoppuAika" type="xs:time" minOccurs="0"/>
+            <xs:element name="sunnuntaiAlkuAika" type="xs:time" minOccurs="0"/>
+            <xs:element name="sunnuntaiLoppuAika" type="xs:time" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="AbstractIlmoitusKohde">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractYmparistotoimiKohde">
+                <xs:sequence>
+                    <xs:element name="kasittelytietotieto" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Kasittelytieto" type="yht:KasittelyTietoType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="luvanTunnistetiedot" type="yht:YmparistoLuvanTunnisteTiedotType" minOccurs="0"/>
+                    <xs:element name="lausuntotieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Lausunto" type="yht:LausuntoYmpType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="toiminnanSijaintitieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="ToiminnanSijainti" type="ymi:ToiminnanSijaintiType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="ilmoittaja" type="yht:YhteystietoType" minOccurs="0"/>
+                    <xs:element name="jatkoIlmoitusKytkin" type="xs:boolean" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Onko kyseessä olemassaolevaanilmoitukseen liittyvä jatkoilmoitus</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="asianKuvaus" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="PuhdistusAsiatType">
+        <xs:sequence>
+            <xs:element name="puhdistusTavoite" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys puhdistustavoitteesta</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="puhdistusmenetelmat" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys käytettävästä puhdistusmenetelmästä ja jätteiden käsittelystä</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="puhdistustyonSuoritus" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys puhdistustyön suorittamisesta, työn valvonnasta (ml. laadunvalvonta) ja aikataulusta</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ymparistovaikutukset" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys puhdistamisen ympäristövaikutuksista ja ympäristöhaittojen ehkäisystä</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PilaTiedotType">
+        <xs:sequence>
+            <xs:element name="tapahtumatAjankohdat" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys pilaantumista aiheuttaneista tapahtumista ja ajankohdista</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="aiheuttanutAine" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys pilaantumisen aiheuttaneesta aineesta (ominaisuudet, pitoisuudet, määrät).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="maaperatiedot" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Maaperätiedot</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="pintaJaPohjavesi" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Pinta- ja pohjavesitiedot (sijainti, laatu, käyttö)</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="HakemuksenLisaksiType">
+        <xs:sequence>
+            <xs:element name="karttaJaAsema" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Kartta ja asemapiirros, joihin on merkitty puhdistettavien kiinteistöjen sijainti ja asian käsittelyn kannalta merkitykselliset kohteet</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="kaavakartat" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Kartat alueen nykyisestä ja suunnitellusta käyttötarkoituksesta (kaavakartat)</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="rajanaapurit" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Puhdistettavien kiinteistöjen rajanaapurien yhteystiedot</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tutkimustulokset" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Yksityiskohtaiset tutkimustulokset maaperän ja pohjaveden pilaantuneisuuden selvittämisestä</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LisaliitteetType">
+        <xs:sequence>
+            <xs:element name="yleissuunnitelma" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Puhdistuksen yleissuunnitelma</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tarkkailusuunnitelma" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Puhdistustyön aikainen tai sen jälkeen tehtävä ympäristön tarkkailusuunnitelma</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tyosuojelusuunnitelma" type="yht:YmparistoLiiteType" minOccurs="0"/>
+            <xs:element name="lausunnot" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Toimintaa koskevat luvat sekä viranomaisen antamat lausunnot</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="TapahtumaType">
+        <xs:sequence>
+            <xs:element name="ulkoilmakonsertti" type="xs:string" minOccurs="0"/>
+            <xs:element name="muu" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="RakentaminenType">
+        <xs:sequence>
+            <xs:element name="louhinta" type="xs:string" minOccurs="0"/>
+            <xs:element name="murskaus" type="xs:string" minOccurs="0"/>
+            <xs:element name="paalutus" type="xs:string" minOccurs="0"/>
+            <xs:element name="muu" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ToimintaType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:element name="rakentaminen" type="ymi:RakentaminenType" minOccurs="0"/>
+                    <xs:element name="tapahtuma" type="ymi:TapahtumaType" minOccurs="0"/>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="KuvausKoeluonteisestaToiminnastaType">
+        <xs:sequence>
+            <xs:element name="kuvaus" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Kuvaus koeluonteisesta toiminnasta/tuotannosta</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="raaka_aineet" type="yht:YmparistoLiiteType" minOccurs="0"/>
+            <xs:element name="paastot" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Toiminnasta aiheutuvat päästöt ja arvio niiden vaikutuksista</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="selvitys" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Selvitys suunnitelluista ympäristönsuojelutoimista</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MelutiedotType">
+        <xs:sequence>
+            <xs:element name="koneidenLkm" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Koneet, laitteet tai toiminnot sekä niiden lukumäärä</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="melutaso">
+                <xs:annotation>
+                    <xs:documentation>Melutaso</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="db" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Melunmäärä desibeleissä</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="paiva" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>päiväaika</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="yo" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>yöaika</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="mittaaja" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Äänen mittaaja</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MelunJaTarinanTorjuntaJaSeurantaType">
+        <xs:sequence>
+            <xs:element name="torjuntatoimenpiteet" type="yht:YmparistoLiiteType" minOccurs="0"/>
+            <xs:element name="melutilanteenSeuranta" type="yht:YmparistoLiiteType" minOccurs="0"/>
+            <xs:element name="tiedottaminen" type="yht:YmparistoLiiteType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Tiedotteen jakelualueen laajuus ja katuosoitteet</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MelunJaTarinanLeviaminenType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:element name="HairiintyvatKohteetYmparistossa" type="yht:YmparistoLiiteType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Häiriintyvät kohteet ympäristössä ja niiden etäisyys toimipaikalta</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="toiminnanVaikutusKohteidenMelutasoon" type="yht:YmparistoLiiteType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Toiminnan vaikutus häiriintyvien kohteiden melutasoon</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="LisatiedotType">
+        <xs:sequence>
+            <xs:element name="Lisatiedot" type="yht:YmparistoLiiteType"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IlmoituksetType">
+        <xs:sequence>
+            <xs:annotation>
+                <xs:documentation>http://www.ymparisto.fi/default.asp?contentid=45108</xs:documentation>
+            </xs:annotation>
+            <xs:element name="toimituksenTiedot" type="yht:AineistotoimituksentiedotType"/>
+            <xs:element name="melutarina" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element ref="ymi:Melutarina"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="koeluontoinentoiminta" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element ref="ymi:Koeluontoinentoiminta"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="poikkeus" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element ref="ymi:Poikkeus"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="pimapuhdistus" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element ref="ymi:Pimapuhdistus"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Melutarina" type="ymi:MelutarinaType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- http://www.ymparisto.fi/default.asp?node=1437&lan=fi -->
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Koeluontoinentoiminta" type="ymi:KoeluontoinentoimintaType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- http://www.ymparisto.fi/default.asp?node=1438&lan=fi -->
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Poikkeus" type="ymi:PoikkeusType" substitutionGroup="gml:_Feature"/>
+    <xs:element name="Pimapuhdistus" type="ymi:PiMaPuhdistusType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- http://www.ymparisto.fi/default.asp?node=1440&lan=fi -->
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+</xs:schema>

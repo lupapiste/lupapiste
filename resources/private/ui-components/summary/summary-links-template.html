@@ -1,0 +1,15 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-links-template">
+  <label class="lux"
+         data-bind="attr: {for: uniqId},
+                    ltext: 'application.appsLinkingToUs'"></label>
+  <ul class="boxlist"
+      data-bind="attr: {id: uniqId},
+                 foreach: links">
+    <li>
+      <a data-bind="attr: $data.attr,
+                    text: $data.text"
+         data-test-id="test-application-app-linking-to-us"></a>
+    </li>
+  </ul>
+</script>

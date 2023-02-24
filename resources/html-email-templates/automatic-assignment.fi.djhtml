@@ -1,0 +1,94 @@
+{% subject %}
+Lupapiste: {% app address |safe %}, {% app :municipality |safe %}.
+{% if attachment-type %}Liite lisätty.{% endif %}
+{% if notice-form %}Ilmoitus tehty.{% endif %}
+{% if foreman-role %}Työnjohtajan vastuiden päättäminen.{% endif %}
+{% if review-request %}Katselmus tilattu.{% endif %}
+{% endsubject %}
+
+<h2 {% style-attr :h2 %}>{% greet Hei %}</h2>
+<p>
+  Tämä on automaattitehtävän {{filter-name}} lähettämä viesti.
+</p>
+{% if filter-email.message %}
+  <pre {% style-attr :pre %}>{{filter-email.message}}</pre>
+{% endif %}
+
+{% if attachment-type %}
+  <p>
+    Hankkeelle {% app :id %} {% app :operation %} osoitteessa {% app :address %},
+    {% app :municipality %} on lisätty liite {% loc attachment-type %}.
+  </p>
+{% endif %}
+
+{% if notice-form %}
+  <p>
+    Hankkeelle {% app :id %} {% app :operation %} osoitteessa {% app :address %},
+    {% app :municipality %} on luotu uusi ilmoitus: {% loc :notice-forms notice-form.type %}.
+  </p>
+  <dl>
+    {% if notice-form-buildings|length > 0 %}
+      <dt {% style-attr :dt %}>Rakennukset, joita ilmoitus koskee</dt>
+      <dd>
+        <ul {% style-attr :dd.ul %}>
+          {% for building in notice-form-buildings %}
+            <li>{% loc building %}</li>
+          {% endfor %}
+        </ul>
+      </dd>
+    {% endif %}
+    <dt {% style-attr :dt %}>Viesti</dt>
+    <dd><pre {% style-attr :user-note :dd %}>{{notice-form.text}}</pre></dd>
+    {% if notice-form.customer %}
+      <dt {% style-attr :dt %}>Tilaajan tiedot</dt>
+      <dd {% style-attr :dd %}>{{notice-form.customer.name}}, {{notice-form.customer.email}},
+        {{notice-form.customer.phone}}</dd>
+    {% endif %}
+  </dl>
+{% endif %}
+
+{% if foreman-role %}
+  <p>
+    Hankkeen {% app :id %} {% app :operation %} osoitteessa {% app :address %},
+    {% app :municipality %} työnjohtajalle {{foreman-name}}
+    ({% loc :automatic.foreman foreman-role %}) on haettu vastuiden päättymistä.
+  </p>
+  <dl>
+    <dt {% style-attr :dt %}>Perustelut</dt>
+    <dd><pre {% style-attr :user-note :dd %}>{{reason}}</pre>
+{% endif %}
+
+{% if review-request %}
+  <p>
+    Hankkeelle {% app :id %} {% app :operation %} osoitteessa {% app :address %},
+    {% app :municipality %} on tilattu katselmus {{review-name}}.
+  </p>
+  <dl>
+    {% if review-request-buildings|length > 0 %}
+      <dt {% style-attr :dt %}>Rakennukset, joita katselmus koskee</dt>
+      <dd>
+        <ul {% style-attr :dd.ul %}>
+          {% for building in review-request-buildings %}
+            <li>{% loc building %}</li>
+          {% endfor %}
+        </ul>
+      </dd>
+    {% endif %}
+    <dt {% style-attr :dt %}>Viesti</dt>
+    <dd><pre {% style-attr :user-note :dd %}>{{review-request.message}}</pre></dd>
+    {% if review-request.contact %}
+      <dt {% style-attr :dt %}>Tilaajan tiedot</dt>
+      <dd {% style-attr :dd %}>{{review-request.contact.name}}, {{review-request.contact.email}},
+        {{review-request.contact.phone}}</dd>
+    {% endif %}
+  </dl>
+{% endif %}
+
+<br>
+<p>
+  {% button :primary %}
+  {% app-link tab %}
+  Siirry hankkeelle
+  {% endbutton %}
+</p>
+<br>

@@ -1,0 +1,18 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="address-template">
+  <div>
+    <!-- ko if: prefix -->
+    <span data-bind="ltext: prefix"></span>
+    <!-- /ko -->
+    <span data-bind="text: address"
+          class="address"
+          data-test-id="application-title"></span>
+    <icon-button params="click: changeAddress,
+                         visible: canEdit,
+                         testId: 'change-location-link',
+                         buttonClass: 'gap--l05 secondary btn-small',
+                         iconOnly: true,
+                         icon: 'pen',
+                         ltext: 'location.edit'">
+    </icon-button>
+  </div>
+</script>

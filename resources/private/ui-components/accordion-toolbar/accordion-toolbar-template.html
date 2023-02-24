@@ -1,0 +1,196 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="accordion-toolbar-template">
+  <div class="accordion-toggle">
+    <button data-bind="css: {positive: isApproved,
+                       plain: !ko.unwrap( isApproved ),
+                       rejected: isSummaryRejected,
+                       disabled: disabledStatus,
+                       toggled: isOpen},
+                       click: toggleAccordion">
+      <i class="lupicon-chevron-down"></i>
+      <i class="lupicon-chevron-up toggle"></i>
+      <span class="bar-text">
+        <span class="title"
+              data-bind="attr: {title: toolbarTitle,
+                                'data-app-id': docModel.appId,
+                                'data-doc-id': docModel.docId,
+                                'data-test-id': docModel.schemaName + '-accordion-title-text'},
+                         text: toolbarTitle">
+        </span>
+        <span class="description"
+              data-bind="text: headerDescription,
+                         css: {shortenedDescription: shouldShortenDescription},
+                         testId: docModel.schemaName + '-accordion-description-text',
+                         attr: {title: headerDescription}"></span>
+
+        <!-- ko if: isSecretBuilding -->
+        <span data-bind="text: secretBuildingText,
+                         attr: {title: secretBuildingText}"></span>
+        <!-- /ko -->
+
+        <span>
+          <!-- ko if: isPrimaryOperation -->
+          <i class="lupicon-star" data-bind="attr: {title: loc('operations.primary')}"></i>
+          <!-- /ko -->
+        </span>
+      </span>
+      <span class="icons">
+        <i class="lupicon-circle-attention rejected"></i>
+        <i class="lupicon-circle-check approved"></i>
+      </span>
+    </button>
+
+    <!-- ko if: showToolbar -->
+    <div class="group-buttons" >
+      <span class="form-approval-status is-status no-border-bottom"
+            data-bind="css: {approved: isApproved,
+                             rejected: isRejected,
+                             'own-line': hasOperation},
+                       visible: showStatus">
+        <div class="like-btn">
+          <i class="lupicon-circle-attention rejected"></i>
+          <i class="lupicon-circle-check approved"></i>
+          <span class="is-details"
+                data-bind="text: details,
+                           css: {'is-details--rejected': isRejected}">
+          </span>
+        </div>
+        <div data-bind="component: {name: 'reject-note',
+                        params: {docModel: docModel, disabled: disabledStatus,
+                        noteCss: {'accordion-reject-note': !hasOperation(),
+                        'toolbar-reject-note': hasOperation()},
+                        editorCss: {'accordion-reject-note-editor': !hasOperation(),
+'toolbar-reject-note-editor': hasOperation()}}}"></div>
+      </span>
+
+      <span class="form-approval-status is-status no-border-bottom"
+            data-bind="css: {approved: true,
+                       'own-line': hasOperation},
+                       visible: showEditNote">
+        <div class="like-btn">
+          <i class="lupicon-circle-check approved"></i>
+          <span class="is-details"
+                data-bind="text: editNote"></span>
+        </div>
+      </span>
+
+      <span class="form-approval-status is-status no-border-bottom"
+            data-bind="css: {approved: true,
+                       'own-line': hasOperation},
+                       visible: showSentNote">
+        <div class="like-btn">
+          <i class="lupicon-circle-check approved"></i>
+          <span class="is-details"
+                data-bind="text: sentNote"></span>
+        </div>
+      </span>
+
+      <button class="secondary is-left"
+              data-bind="visible: hasOperation,
+                         toggleClick: showIdentifierEditors,
+                         testId: testId('toggle-identifiers')">
+        <i class="lupicon-pen"></i>
+        <span data-bind="ltext: 'document.operation-identifiers'"></span>
+      </button>
+      <button class="secondary is-right"
+          data-bind="visible: showRemove,
+                     attr: {'data-test-class': remove.testClass},
+                     click: remove.fun">
+        <i class="lupicon-remove"></i>
+        <span data-bind="ltext: 'remove'"></span>
+      </button>
+      <!-- ko if: showReplaceOperation -->
+      <button class="secondary is-right"
+              data-bind="click: replaceOperation"
+              data-test-id="replace-operation">
+        <i class="lupicon-pen"></i>
+        <span data-bind="ltext: 'operations.replace'"></span>
+      </button>
+      <!-- /ko -->
+      <!-- ko if: canBeDisabled -->
+      <button class="secondary is-right"
+              data-test-id="toggle-document-status"
+              data-bind="click: changeDocStatus">
+        <i data-bind="css: {'lupicon-remove': !disabledStatus(), 'lupicon-check': disabledStatus}"></i>
+        <span data-bind="ltext: disabledStatus() ? 'document.status.toggle.enable' : 'document.status.toggle.disable'"></span>
+      </button>
+      <!-- /ko -->
+      <button class="secondary is-right"
+              data-bind="testId: rejectTestId,
+                         visible: showReject,
+                         ltext: 'document.reject',
+                         click: reject">
+      </button>
+      <button class="positive is-right"
+              data-bind="testId: approveTestId,
+                         visible: showApprove,
+                         click: approve">
+        <i class="lupicon-check"></i>
+        <span data-bind="ltext: 'document.approve'"></span>
+      </button>
+
+      <!-- ko if: showToggleEdit() -->
+        <!-- ko if: !editMode() -->
+        <button class="positive is-right"
+                data-bind="click: toggleEdit">
+          <i class="lupicon-pen"></i>
+          <span data-bind="ltext: 'document.edit'"></span>
+        </button>
+        <!-- /ko -->
+        <!-- ko if: editMode() -->
+         <button class="secondary is-right"
+                data-bind="click: closeEdit">
+          <i class="lupicon-remove"></i>
+          <span data-bind="ltext: 'document.edit.close'"></span>
+         </button>
+        <!-- /ko -->
+       <!-- ko if: editMode() && auth.ok( "send-doc-updates" ) -->
+        <button class="function is-right"
+                data-bind="click: sendEdit">
+          <i class="lupicon-arrow-right"></i>
+          <span data-bind="ltext: 'document.edit.send'"></span>
+        </button>
+       <!-- /ko -->
+      <!-- /ko -->
+
+      <!-- ko if: showIdentifierEditors -->
+        <div class="container-bubble"
+             data-test-id="identifier-editors" data-bind="event: {keydown: closeEditors}">
+       <!-- ko if: isArchiveProject() -->
+       <div class="identifier-component gap--t1"
+        data-bind="component: {name: 'building-identifier',
+                               params: {docModel: docModel,
+                                        authModel: auth,
+                                        operation: operation,
+                                        isPrimary: isPrimaryOperation,
+                                        options: docModelOptions}}"></div>
+        <!-- /ko -->
+        <!-- ko if: identifierField -->
+        <div class="identifier-component gap--t05 gap--r1 dsp--inline-block"
+             data-bind="component: {name: 'document-identifier',
+                        params: {docId: docModel.docId,
+                        authModel: auth,
+                        options: docModelOptions}}"></div>
+        <!-- /ko -->
+        <div class="identifier-component gap--t05 dsp--inline-block"
+             data-bind="component: {name: 'operation-editor',
+                        params: {docModel: docModel,
+                        operation: operation,
+                        isPrimary: isPrimaryOperation,
+                        auth: auth}}"></div>
+
+        <!-- ko if: identifierField -->
+       <div class="accordion-help gap--t1"
+          data-bind="lhtml: 'document.operation-identifier.notice'"></div>
+        <!-- /ko -->
+      </div>
+      <!-- /ko -->
+    </div>
+    <!-- /ko -->
+    <!-- ko if: auth.ok("assignments-for-application") && documentAssignments().length > 0 -->
+    <accordion-assignments params="documentAssignments: documentAssignments,
+                                   schemaName: info.name,
+                                   applicationId: docModel.appId,
+                                   authorities: accordionService.authorities"></accordion-assignments>
+    <!-- /ko -->
+  </div>
+</script>

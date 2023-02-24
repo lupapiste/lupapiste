@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-property-template">
+  <div class="dsp--inline-block">
+    <div>
+      <label class="lux lux--inline gap--r1"
+             data-bind="attr: {for: uniqId},
+                        ltext: 'application.property'">
+      </label>
+    </div>
+    <span data-bind="attr: {id: uniqId}">
+      <span data-test-id="application-property-id"
+            data-bind="propertyId: application.propertyId,
+                       css: {'gap--r1 align--middle': warning || editing}"></span>
+    </span>
+  </div>
+  <!-- ko if: warning -->
+  <div class="like-btn fg--negative">
+    <i class="lupicon-circle-attention" aria-hidden="true"></i>
+    <span data-bind="ltext: 'application.property-id.entered-manually'"></span>
+  </div>
+  <!-- /ko -->
+</script>

@@ -1,0 +1,12 @@
+
+<!-- Template is to be used with AttachmentPageStampingModel or standalone -->
+<script type="text/x-jquery-tmpl" id="attachment-page-stamping-template" class="ko-template">
+        <span class="form-approval-status is-status"
+              data-bind="css: {stamped: isStamped},
+                              visible: showStatus">
+          <span class="like-btn">
+            <i aria-hidden="true" class="lupicon-circle-stamp"></i>
+            <span data-bind="text: details"></span>
+          </span>
+        </span>
+</script>

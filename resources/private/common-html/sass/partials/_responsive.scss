@@ -1,0 +1,35 @@
+// Various utilities for rudimentary responsiveness support.
+
+// No need to support narrower displays.
+$minimum-breakpoint: 768px;
+$narrow-breakpoint:  991px;
+$semi-wide-breakpoint: 1170px;
+$wide-breakpoint: 1500px;
+
+@mixin hide-classes( $cls, $breakpoint) {
+  .#{$cls}-hide {
+    @media (max-width: $breakpoint) {
+      display: none !important;
+    }
+  }
+  .#{$cls}-show {
+    @media (min-width: $breakpoint + 1) {
+      display: none !important;
+    }
+  }
+
+  .btn.#{$cls}-icon-only,
+  button.#{$cls}-icon-only {
+    @media (max-width: $breakpoint) {
+      span {
+        display: none;
+      }
+      i {
+        padding: 0;
+      }
+    }
+  }
+}
+
+@include hide-classes( narrow, $narrow-breakpoint );
+@include hide-classes( wide, $wide-breakpoint );

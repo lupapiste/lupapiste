@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="operations" >
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <section>
+          <h2 data-bind="ltext: 'auth-admin.selected-operations'"></h2>
+          <table data-test-id="organization-selected-operations"
+                 class="selected-operations-table">
+            <!-- ko foreach: organization.selectedOperations -->
+            <thead>
+              <tr>
+                <th data-bind="ltext: permitType"
+                    class="sot--full-width"></th>
+                <!-- ko if: $root.organization.pateEnabled() -->
+                <th data-bind="if: $parent.organization.pateSupported( permitType )">
+                  <span data-bind="ltext: 'pate-verdict-template',
+                                   testId: 'pate-support-' + permitType"></span>
+                </th>
+                <!-- /ko -->
+                <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
+                <th><span data-bind="ltext: 'auth-admin.inspection-summary-template', if: permitType === 'R'"></span></th>
+                <!-- /ko -->
+                <!-- ko if: $root.organization.verdictSectionEnabled -->
+                <th data-bind="ltext: 'section.column'"></th>
+                <!-- /ko -->
+                <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
+                <th data-bind="ltext: 'suti.column'"></th>
+                <!-- /ko -->
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: operations">
+              <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">
+                <td data-bind="text: text"></td>
+                <!-- ko if: $root.organization.pateEnabled() -->
+                <td>
+                  <default-verdict-template params="organization: $root.organization,
+                                                    operation: $data"></default-verdict-template>
+                </td>
+                <!-- /ko -->
+                <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
+                <td class="sot--center">
+                  <!-- ko if: $parent.permitType === "R" -->
+                  <div data-bind="component: {name: 'select-inspection-summary-template-for-operation',
+                                              params: {operation: $data,
+                                                       templates: $root.organization.inspectionSummaryTemplates,
+                                                       operationsMapping: $root.organization.operationsInspectionSummaryTemplates}}"></div>
+                  <!-- /ko -->
+                </td>
+                <!-- /ko -->
+                <!-- ko if: $root.organization.verdictSectionEnabled -->
+                <td class="sot--center">
+                  <div class="sectionbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="attr: {id: 'section-' + id},
+                                      checked: $root.organization.isSectionOperation( $data )">
+                    <label class="sectionbox-label"
+                           data-bind="attr: {'for': 'section-' + id},
+                                      click: $root.organization.toggleSectionOperation"></label>
+                  </div>
+                </td>
+                <!-- /ko -->
+                <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
+                <td class="sot--center">
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="attr: {id: 'suti-' + id},
+                                      checked: lupapisteApp.services.sutiService.isSutiOperation( $data )">
+                    <label class="checkbox-label"
+                           data-bind="attr: {'for': 'suti-' + id},
+                                      click: lupapisteApp.services.sutiService.toggleSutiOperation"></label>
+                  </div>
+                </td>
+                <!-- /ko-->
+              </tr>
+            </tbody>
+          <!-- /ko -->
+          </table>
+          <div data-bind="with: organization">
+            <button data-bind="click: $root.editSelectedOperationsModel.open, ltext: 'edit', enable: lupapisteApp.models.globalAuthModel.ok('set-organization-selected-operations')"
+                    class="btn-primary" data-test-id="authadmin-edit-selected-operations"></button>
+          </div>
+        </section>
+      </div>
+
+      <div id="dialog-edit-selected-operations" class="window autosized selectm-dialog">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'auth-admin.selected-operations'"></p>
+          <p class="dialog-close close lupicon-remove"></p>
+        </div>
+        <div class="dialog-content">
+          <div class="selected-operation-templates"></div>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

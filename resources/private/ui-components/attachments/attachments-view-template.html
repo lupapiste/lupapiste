@@ -1,0 +1,33 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-view-template">
+  <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
+  <span data-bind="component: {
+                   name: 'help-toggle',
+                   params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
+                   }"></span>
+  <!-- ko if: authModel.ok("assignments-for-application") && lupapisteApp.services.assignmentService.automaticAssignments().length > 0  && batchEmpty() -->
+  <automatic-assignments data-test-id="automatic-assignments-component"
+                         params="authModel : authModel,
+                                 assignments: lupapisteApp.services.assignmentService.automaticAssignments,
+                                 applicationId: applicationId,
+                                 pageName: 'attachments-listing',
+                                 getFilters: lupapisteApp.services.attachmentsService.getFilters">
+  </automatic-assignments>
+  <!-- /ko -->
+  <!-- ko if: authModel.ok("create-assignment") && batchEmpty() -->
+  <create-assignment data-test-id="create-assignment-component"
+                     params="authorities: $root.authorities,
+                             applicationId: applicationId,
+                             initialTarget: 'attachments',
+                             targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+  <!-- /ko -->
+  <div class="clear"></div>
+  <attachments-operation-buttons params="upload: upload"></attachments-operation-buttons>
+  <attachment-batch params="upload: upload"></attachment-batch>
+
+  <!-- ko if: batchEmpty -->
+    <suti-display></suti-display>
+    <cljs-attachment_attachments-view params="upload: upload"></cljs-attachment_attachments-view>
+  <!-- /ko -->
+
+</script>

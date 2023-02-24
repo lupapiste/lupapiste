@@ -1,0 +1,36 @@
+// General styles for all links without
+// any additional styling
+
+@mixin link ( $link-style: "link") {
+  $link: resolve-color( $link-style, "text", "enabled");
+  $hover: resolve-color( $link-style, "text", "hover");
+  $active: resolve-color( $link-style, "text", "active");
+
+  color: $link;
+  text-decoration: none;
+  // Reminder: ordering is link, visited, hover, active.
+  &:link, &:visited {
+    color: $link;
+    border: resolve-border( $link-style, "enabled");
+  }
+  &:hover {
+    color: $hover;
+    text-decoration: underline;
+    border: resolve-border( $link-style, "hover");
+  }
+  &:active {
+    color: $active;
+    text-decoration: underline;
+    border: resolve-border( $link-style, "active");
+  }
+}
+
+a {
+  @include link;
+}
+
+@mixin link-text( $max-width) {
+  max-width: $max-width;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,6 @@
+"bulletin-report.bulletins" "en" "Bulletins"
+"bulletin-report.bulletins" "fi" "Julkipanot"
+"bulletin-report.bulletins" "sv" "Anslagen"
+"bulletin-report.report" "en" "Bulletin information"
+"bulletin-report.report" "fi" "Julkipanon tiedot"
+"bulletin-report.report" "sv" "Anslag information"

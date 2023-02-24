@@ -1,0 +1,45 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="change-email-template">
+  <h2 data-bind="ltext: 'userinfo.change-email'"></h2>
+  <form>
+    <div class="form-grid no-padding">
+      <div class="row">
+        <div class="col-1"
+             data-bind="component: {name: 'text-field',
+                        params: {value: email,
+                        id: 'oldEmail',
+                        disable: true,
+                        lLabel: 'userinfo.current-email'}}"></div>
+        <!-- ko if: authorized() -->
+        <div class="col-1"
+             data-bind="component: {name: 'text-field',
+                        params: {value: newEmail,
+                        immediate: false,
+                        id: 'newEmail',
+                        lLabel: 'userinfo.new-email'}}"></div>
+
+        <div class="col-1" style="padding-top: 24px">
+          <button data-bind="click: save,
+                             disable: processing,
+                             enable: ok,
+                             css: {waiting: pending}" class="positive"
+                  data-test-id="change-email">
+            <i class="lupicon-refresh"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: 'userinfo.change-email-submit'"></span>
+          </button>
+        </div>
+        <!-- /ko -->
+      </div>
+      <div data-bind="if: proceed" class="row">
+        <p data-bind="ltext: 'userinfo.change-email-proceed'" class="success-message"></p>
+      </div>
+      <div data-bind="if: authorized()" class="row">
+        <p data-bind="lhtml: 'userinfo.change-email-info'"></p>
+      </div>
+    </div>
+  </form>
+  <div data-bind="ifnot: authorized()" class="row">
+    <p data-bind="ltext: 'userinfo.change-email-not-possible'"></p>
+  </div>
+</script>

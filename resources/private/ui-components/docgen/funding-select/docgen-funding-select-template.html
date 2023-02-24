@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-funding-select-template">
+<section data-bind="if: lupapisteApp.models.globalAuthModel.ok('invite-financial-handler')">
+  <span class="form-group">
+    <div class="property-group-header">
+      <label class="form-label form-label-property-group" data-bind="ltext: 'hankkeen-kuvaus.rahoitus._group_label'"></label>
+    </div>
+    <p>
+      <toggle params="ltext: label,
+                      disable: disabled,
+                      prefix: 'buttonbox',
+                      value: selectValue"></toggle>
+      <span data-bind="saveIndicator: indicator, label: true"></span>
+    </p>
+  </span>
+</section>
+</script>

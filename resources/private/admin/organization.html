@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization">
+      <div class="container">
+        <a class="btn secondary" href="#!/organizations">
+          <i class="lupicon-chevron-start"></i><span>Organisaatiolistaus</span></a>
+
+        <div data-bind="with: organizationModel">
+          <div class="organization-title">
+            <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>
+            <div class="like-btn organization--closed"
+                 data-bind="visible: deactivated">
+              <i class="lupicon-lock"></i>
+              <span data-bind="ltext: 'admin.deactivated'"></span>
+            </div>
+          </div>
+
+          <h2>Organisaation nimi</h2>
+          <table data-test-id="organization-name-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'userinfo.language'"></th>
+                <th data-bind="ltext: 'organization.name'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: names">
+              <tr data-bind="css: {'warning': !util.isSupportedLang($data.lang)},
+                             attr: {title: !util.isSupportedLang($data.lang) ? 'Kieli ei käytössä' : ''}">
+                <td data-bind="ltext: 'lang.'+$data.lang"></td>
+                <td><input type="text" data-bind="value: $data.name" class="form-input"></td>
+              </tr>
+            </tbody>
+          </table>
+          <button data-bind="ltext: 'save',
+                             click: updateOrganizationName" class="btn positive"></button>
+
+          <h2 data-bind="ltext: 'admin.deactivated.title'"></h2>
+
+          <div data-bind="ltext: 'admin.deactivated.info'"></div>
+          <!-- ko if: deactivated -->
+          <button class="positive"
+                  data-bind="ltext: 'admin.deactivated.activate',
+                             click: _.wrap( false, toggleDeactivation )"></button>
+          <!-- /ko -->
+          <!-- ko ifnot: deactivated -->
+          <button class="negative"
+                  data-bind="ltext: 'admin.deactivated.deactivate',
+                             click: _.wrap( true, toggleDeactivation )"></button>
+          <!-- /ko -->
+
+          <h2>Aineistokauppa</h2>
+          <div class="docstore-setting">
+            <div>
+              <label data-bind="ltext: 'organization.docstore.enabled'" for="docstore-enabled"></label>
+              <input data-bind="checked: flags.docstore" id="docstore-enabled" type="checkbox"/>
+            </div>
+            <div>
+              <label data-bind="ltext: 'organization.docterminal.enabled'" for="docterminal-enabled"></label>
+              <input data-bind="checked: flags.docterminal" id="docterminal-enabled" type="checkbox"/>
+            </div>
+            <div>
+              <label data-bind="ltext: 'organization.docdepartmental.enabled'" for="docdepartmental-enabled"></label>
+              <input data-bind="checked: flags.docdepartmental" id="docdepartmental-enabled" type="checkbox"/>
+            </div>
+            <!-- ko if: flags.docstore -->
+            <div data-test-id="docstore-enabled-settings">
+              <label data-bind="ltext: 'organization.docstore.price'"
+                     for="docstore-price"></label>
+              <input data-bind="value: docstorePrice,
+                                valueUpdate: 'keyup',
+                                css: { warning: !validDocstorePriceAndFee() }"
+                     class="grid-style-input"
+                     id="docstore-price" name="docstore-price"
+                     type="text"/>
+              &nbsp;
+              <label data-bind="ltext: 'organization.docstore.fee'"
+                     for="docstore-fee"></label>
+              <input data-bind="value: docstoreFee,
+                                valueUpdate: 'keyup',
+                                css: { warning: !validDocstorePriceAndFee() }"
+                     class="grid-style-input"
+                     id="docstore-fee" name="docstore-fee"
+                     type="text"/>
+              <div class="pate-note"
+                   data-bind="ltext: 'organization.docstore.fee-info'"></div>
+            </div>
+            <!-- /ko -->
+            <!-- ko if: flags.docstore() || flags.docterminal() || flags.docdepartmental() -->
+            <table data-test-id="docstore-description-table"
+                   class="table table-striped admin-settings">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'userinfo.language'"></th>
+                  <th data-bind="ltext: 'organization.docstore.description'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: docstoreDescs">
+                <tr>
+                  <td data-bind="ltext: 'lang.'+$data.lang"></td>
+                  <td class="value">
+                    <input type="text"
+                           data-bind="value: $data.description,
+                                      attr: {'data-test-id': 'docstore-desc-' + $data.lang }"
+                           class="form-input">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- /ko -->
+            <button data-bind="ltext: 'save',
+                               click: updateDocstoreInfo,
+                               enable: docstoreInfoOk" class="btn positive"
+                    data-test-id="save-docstore-info"></button>
+          </div>
+
+          <h2>Asetukset</h2>
+          <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+            <label data-bind="ltext: 'organization.archive.enabled'" for="permanentArchiveEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.permanentArchive" class="form-input" id="permanentArchiveEnabled"><br>
+            <label for="earliest-archiving-date-input" data-bind="ltext: 'admin.earliestArchivingDate'"></label>
+            <div class="earliest-archiving-date">
+              <input type="text" class="form-input inline textinput textinput--big"
+                     data-bind="datepicker: earliestArchivingDate"
+                     placeholder="Ei rajoitettu"
+                     id="earliest-archiving-date-input">
+              <button class="inline" style="vertical-align: middle;"
+                      data-bind="click: resetEarliestArchivingDate, ltext: 'admin.removeLimitation'"></button>
+            </div>
+          </div>
+
+          <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+            <label data-bind="ltext: 'organization.digitizer.enabled'" for="digitizerToolsEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.digitizerTools" class="form-input" id="digitizerToolsEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.automatic-emails.enabled'" for="automaticEmailsEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.automaticEmails" class="form-input" id="automaticEmailsEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.filebank.enabled'" for="filebankEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.filebank" class="form-input" id="filebankEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.reporting.enabled'" for="reportingEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.reporting" class="form-input" id="reportingEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.extra-meta.enabled'" for="extraMetaEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.extraMeta" class="form-input" id="extraMetaEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.foreman-krysp.enabled'" for="foremanKryspEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.foremanKrysp" class="form-input" id="foremanKryspEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.buildings-extinct.enabled'" for="buildingsExtinctEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.buildingsExtinct" class="form-input" id="buildingsExtinctEnabled" />
+          </div>
+
+          <div data-bind="if: organization">
+            <div>
+              <label data-bind="ltext: 'admin.state-change.enabled.title' " for="state-change-msg-enabled"></label>
+              <input data-bind="checked: flags.stateChangeMsg" id="state-change-msg-enabled" type="checkbox"/>
+            </div>
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'organization.rakennusluokat.enabled'" for="rakennusluokatEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.rakennusluokatEnabled" class="form-input" id="rakennusluokatEnabled">
+          </div>
+
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'admin.ely-uspa.enabled'" for="elyUspaEnabled"></label>
+            <input data-bind="checked: flags.elyUspa" id="elyUspaEnabled" type="checkbox" />
+          </div>
+
+          <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">
+            <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
+            <input type="checkbox" data-bind="checked: flags.calendars" class="form-input" id="calendarsEnabled">
+            <span data-bind="saveIndicator: indicator"></span>
+          </div>
+          <hr>
+          <div>
+            <h2>Integraatiot</h2>
+            <p>Samat asetukset ovat kunnan pääkäyttäjän asetettavissa</p>
+            <div>
+              <label data-bind="ltext: 'authorityAdmin.attachmentLinks.label'" for="kuntagml-attachment-links"></label>
+              <input type="checkbox" data-bind="checked: flags.attachmentLinks" class="form-input" id="kuntagml-attachment-links">
+            </div>
+          </div>
+          <hr>
+          <div class="3d-map-setting">
+            <h2>3D</h2>
+            <label data-bind="ltext: 'organization.3d-map.enabled'" for="3d-map-enabled"></label>
+            <input type="checkbox" data-bind="checked: flags.threeDMap" id="3d-map-enabled">
+            <div data-bind="component: {name: 'server-settings',
+                            params: threeDMapServerParams}"></div>
+          </div>
+
+          <h2>Hakemustyypit</h2>
+          <div data-bind="with: organization">
+            <div data-bind="foreach: $data.scope">
+              <h3><span data-bind="text: loc(['municipality', $data.municipality()])"></span>: <span data-bind="ltext: $data.permitType"></span></h3>
+              <table data-test-id="organization-table">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
+                    <th data-bind="ltext: 'organization.application.enabled'"></th>
+                    <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
+                    <th data-bind="text: 'Pate'"></th>
+                    <th data-bind="text: 'Pate SFTP'"></th>
+                    <th data-bind="text: 'Pate-robotti'"></th>
+                    <th data-bind="ltext: 'application.tabInvoice'"></th>
+                    <th data-bind="ltext: 'organization.openinforequest.email'"></th>
+                    <th>Palvelu avataan</th>
+                    <th>Tallenna rivi</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="if: $data">
+                  <tr >
+                    <td data-bind="attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality() + '-' + $data.permitType()}">
+                      <input type="checkbox"
+                             data-bind="checked: $data['inforequest-enabled'],
+                                        disable: $root.organizationModel.deactivated"
+                             class="form-input" >
+                    </td>
+                    <td data-bind="attr: {'data-test-id': 'application-enabled-' + $data.municipality() + '-' + $data.permitType()}">
+                      <input type="checkbox"
+                             data-bind="checked: $data['new-application-enabled'],
+                                        disable: $root.organizationModel.deactivated"
+                             class="form-input" >
+                    </td>
+                    <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
+                      <input type="checkbox"
+                             data-bind="checked: $data['open-inforequest'],
+                                        disable: $root.organizationModel.deactivated"
+                             class="form-input" >
+                    </td>
+                    <td>
+                      <input type="checkbox" data-bind="checked: _.get($data, 'pate.enabled')" class="form-input" >
+                    </td>
+                    <td>
+                      <input type="checkbox" data-bind="checked:  _.get($data, 'pate.sftp')" class="form-input" >
+                    </td>
+                    <td>
+                      <input type="checkbox" data-bind="checked:  _.get($data, 'pate.robot')" class="form-input" >
+                    </td>
+                     <td>
+                      <input type="checkbox" data-bind="checked: $data['invoicing-enabled']" class="form-input" >
+                    </td>
+                    <td data-bind="">
+                      <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" >
+                    </td>
+                    <td data-bind="attr: {'data-test-id': 'opening-' + $data.municipality() + '-' + $data.permitType()}">
+                      <input type="text" data-bind="datepicker: $data['opening']" class="form-input">
+                    </td>
+                    <td><button class="btn btn-primary btn-narrow" data-bind="click: $root.organizationModel.saveRow, attr: {'data-test-id': 'save-' + $data.municipality() + '-' + $data.permitType()}">Tallenna</button></td>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+
+          <div class="spacerL">
+          <button data-bind="click: newScope" class="btn positive">Lis&auml;&auml; lupatyyppi</button>
+
+          <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
+          </div>
+
+          <div class="spacerL" data-bind="with: organization">
+            <h2 data-bind="ltext: 'bulletin'"></h2>
+            <div class="spacerM" data-bind="ifnot: $data['local-bulletins-page-settings']">
+              <button data-bind="click: $root.organizationModel.resetBulletinSettings"
+                      title="Asettaa tyhjän local-bulletins-page-settings property organisaatiolle, sama joka
+                      sheriffi ohjeissa ohjeistettiin laittamaan suoraan kantaan ennen."
+                      class="btn btn-primary btn-narrow">
+                Aseta 'local-bulletins-page-settings' skeleton organisaatiolle
+              </button>
+            </div>
+            <p>* Sähköposti ja toimenpideteksti taustajärjestelmästä ovat myös kunnan pääkäyttäjän näkymässä asetettavissa</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Lupatyyppi</th>
+                  <th>Päällä</th>
+                  <th>URL</th>
+                  <th>Sähköposti*</th>
+                  <th>Toimenpideteksti taustajärjestelmästä*</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.scope">
+                <tr>
+                  <td data-bind="text: $data.permitType"></td>
+                  <td>
+                    <input type="checkbox" data-bind="checked: _.get($data, 'bulletins.enabled')" class="form-input">
+                  </td>
+                  <td>
+                    <input type="text" placeholder="https://julkipano.lupapiste.fi/KUNTA" data-bind="value: _.get($data, 'bulletins.url')" class="form-input">
+                  </td>
+                  <td>
+                    <input type="text" data-bind="value: _.get($data, ['bulletins', 'notification-email'])" class="form-input">
+                  </td>
+                  <td>
+                    <input type="checkbox" data-bind="checked: _.get($data, ['bulletins', 'descriptions-from-backend-system'])" class="form-input">
+                  </td>
+                  <td>
+                    <button data-bind="ltext: 'save', click: $root.organizationModel.saveBulletinRow"
+                            class="btn btn-primary btn-narrow"></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="spacerL">
+          <h2 data-bind="ltext: 'admin.organization.backend-system'"></h2>
+          <table data-test-id="organization-backend-system-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'application.type'"></th>
+                <th data-bind="ltext: 'admin.organization.backend-system'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: backendSystems">
+              <tr>
+                <td data-bind="text: $data.permitType"></td>
+                <td><select data-bind="options: $parent.availableBackendSystems,
+                                       optionsText: $parent.availableBackendSystemsOptionsText,
+                                       optionsCaption: '-',
+                                       value: $data.backendSystem,
+                                       valueAllowUnset: true" class="form-input"></td>
+              </tr>
+            </tbody>
+          </table>
+          <button data-bind="ltext: 'save',
+                             enable: _.size( backendSystems() ),
+                             click: updateBackendSystems" class="btn positive"></button>
+          </div>
+
+          <div>
+            <h2>Valitse organisaatiolle luotetut autologin IP-osoitteet</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Valitse</th>
+                  <th>IP</th>
+                  <th>Kommentti</th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.ssoKeys">
+                <tr>
+                  <td><input type="checkbox" data-bind="checked: $data.selected, attr: {'data-test-id': 'org-sso-selected-' + $data.id}" class="form-input"></td>
+                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id}" class="form-input"></span></td>
+                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id}" class="form-input"></span></td>
+                </tr>
+                <button data-bind="click: saveAutologinIps" class="btn positive">Tallenna</button>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="spacerL">
+            <h2 data-bind="ltext: 'organization.adlogin.header'"></h2>
+            <table data-test-id="ad-table">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'organization.adlogin.enabled'"></th>
+                  <th data-bind="ltext: 'organization.adlogin.trustedDomains'"></th>
+                  <th data-bind="ltext: 'organization.adlogin.idpUri'"></th>
+                  <th data-bind="ltext: 'organization.adlogin.idpCert'"></th>
+                </tr>
+
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <input data-bind="checked: flags.adLogin" id="adlogin-enabled" type="checkbox"/>
+                  </td>
+                  <td>
+                    <input type="text" data-bind="value: adLoginDomains" class="form-input">
+                  </td>
+                  <td>
+                    <input type="text" data-bind="value: adLoginIdPUri" class="form-input">
+                  </td>
+                  <td>
+                    <input type="textarea" data-bind="value: adLoginIdPCert" class="form-input">
+                  </td>
+                </tr>
+                <button data-bind="click: saveAdLoginSettings" class="btn positive">Tallenna</button>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ko if: dmcityBackend -->
+          <matti-admin params="organizationId: organization().id()"></matti-admin>
+          <matti-admin-reviews params="organizationId: organization().id()"></matti-admin-reviews>
+          <!-- /ko -->
+
+          <h2>Suomi.fi-viestit -palvelun tunnukset</h2>
+          <table data-test-id="ad-table">
+            <thead>
+              <tr>
+                <th>ViranomaisTunnus</th>
+                <th>PalveluTunnus</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input type="text" data-bind="value: suomifiViranomaisTunnus" class="form-input">
+                </td>
+                <td>
+                  <input type="text" data-bind="value: suomifiPalveluTunnus" class="form-input">
+                </td>
+              </tr>
+              <button data-bind="click: saveSuomifiSettings" class="btn positive">Tallenna</button>
+            </tbody>
+          </table>
+
+          <!-- ko if: organization -->
+          <bulk-change-handlers params="organization: organization"></bulk-change-handlers>
+          <!-- /ko -->
+
+          <h2>Laskutusintegraatio</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Asetus</th>
+                <th>Arvo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Käytä Lupapisteen SFTP-palvelinta</td>
+                <td><input type="checkbox"
+                           data-bind="checked: invoicingConfig['local-sftp?']">
+                </td>
+              </tr>
+              <!-- ko ifnot: invoicingConfig['local-sftp?'] -->
+              <tr>
+                <td colspan="2">
+                  <div class="pate-note">
+                    <i class="lupicon-circle-info"></i>
+                    <span data-bind="ltext: 'organization.invoicing-integration.connection-config.info'">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>URL</td>
+                <td><input type="text" data-bind="value: invoicingConfig['integration-url']" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Käyttäjätunnus</td>
+                <td><input type="text" data-bind="value: invoicingConfig['credentials']['username']" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Salasana</td>
+                <td><input type="text" data-bind="value: invoicingConfig['credentials']['password']" class="form-input"></td>
+              </tr>
+              <!-- /ko -->
+              <tr>
+                <td>
+                  Lähtevän laskun tiedostonimen etuliite.<br>
+                  (Koskee SFTP-integraatioita.)
+                </td>
+                <td>
+                  <input type="text" data-bind="value: invoicingConfig['invoice-file-prefix']" class="form-input">
+                  Jos tämä tieto on asettu, se korvaa korvaa vakioetuliitteen.<br>
+                  Tampereen SAP IDOC SFTP vakioetuliite: <i>ID334_Lupapiste_</i><br>
+                  Yleinen SFTP vakioetuliite: <i>Lupapiste_</i><br>
+                  Mahdollisia välilyöntejä ei huomioida.
+                </td>
+              </tr>
+              <tr>
+                <td>Asiakasnumero pakollinen</td>
+                <td><input type="checkbox" data-bind="checked: invoicingConfig['integration-requires-customer-number?']" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Lataa XML -painike</td>
+                <td><input type="checkbox" data-bind="checked: invoicingConfig['download?']" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Laskunumero käytössä</td>
+                <td><input type="checkbox" data-bind="checked: invoicingConfig['backend-id?']" class="form-input"></td>
+              </tr>
+
+            </tbody>
+
+            <h3>Laskujen vakioarvot</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Kenttä</th>
+                  <th>Arvo</th>
+                </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Tilauslaji</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.tilauslaji" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Myyntiorg</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.myyntiorg" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Jakelutie</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.jakelutie" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Sektori</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.sektori" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Laskuttaja</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.laskuttaja" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Nimike</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.nimike" class="form-input"></td>
+              </tr>
+              <tr>
+                <td>Tulosyksikkö</td>
+                <td><input type="text" data-bind="value: invoicingConfig.constants.tulosyksikko" class="form-input"></td>
+              </tr>
+              </tbody>
+            </table>
+            <button data-bind="click: updateInvoicingConfig" class="positive">Tallenna</button>
+          </table>
+
+          <!-- ko if: !_.isEmpty(attachmentExportFiles()) -->
+          <div class="spacerL"></div>
+          <h2>Liite-exportit</h2>
+          <table>
+            <tbody data-bind="foreach: attachmentExportFiles">
+              <tr>
+                <td><a data-bind="text: $data.filename,
+                                  attr: {href: $data.url}"></a></td>
+                <td data-bind="text: $data.size"></td>
+                <td data-bind="text: $data.created"></td>
+                <td><button data-bind="click: $parent.deleteAttachmentExportFile">Poista</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- /ko -->
+          <!-- ko if: organization -->
+          <cljs-sftp_configuration params="orgId: organization().id()"></cljs-sftp_configuration>
+          <!-- /ko -->
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

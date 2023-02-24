@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FeatureCollection xmlns="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta/2.2.2/rakennusvalvonta.xsd http://www.kuntatietopalvelu.fi/gml/yhteiset http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.8/yhteiset.xsd">
+    <featureMember xmlns="http://www.opengis.net/gml">
+        <RakennusvalvontaAsia p4:id="rakennusvalvontaasia.1" xmlns="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta" xmlns:p4="http://www.opengis.net/gml">
+            <kasittelynTilatieto>
+                <Tilamuutos xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <pvm>2018-07-19</pvm>
+                    <tila>lupa hyväksytty</tila>
+                    <kasittelija>
+                        <henkilo>
+                            <nimi>
+                                <sukunimi>Testi Viranomainen</sukunimi>
+                            </nimi>
+                            <puhelin>123123</puhelin>
+                        </henkilo>
+                    </kasittelija>
+                </Tilamuutos>
+            </kasittelynTilatieto>
+            <luvanTunnisteTiedot>
+                <LupaTunnus xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <kuntalupatunnus>729-2018-0100</kuntalupatunnus>
+                    <muuTunnustieto>
+                        <MuuTunnus>
+                            <tunnus>LP-999-2018-12345</tunnus>
+                        </MuuTunnus>
+                    </muuTunnustieto>
+                    <muuTunnustieto>
+                        <MuuTunnus>
+                            <tunnus>LP-999-2019-11111</tunnus>
+                        </MuuTunnus>
+                    </muuTunnustieto>
+                    <VRKLupatunnus>72900018-0100</VRKLupatunnus>
+                    <saapumisPvm>2018-07-10</saapumisPvm>
+                </LupaTunnus>
+            </luvanTunnisteTiedot>
+            <osapuolettieto>
+                <Osapuolet xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <osapuolitieto>
+                        <Osapuoli>
+                            <kuntaRooliKoodi>Rakennusvalvonta-asian hakija</kuntaRooliKoodi>
+                            <VRKrooliKoodi>hakija</VRKrooliKoodi>
+                            <henkilo>
+                                <nimi>
+                                    <etunimi>Testaaja Terttu</etunimi>
+                                    <sukunimi>Mägelä</sukunimi>
+                                </nimi>
+                                <osoite>
+                                    <kunta>SaarijÃ¤rvi</kunta>
+                                    <osoitenimi>
+                                        <teksti>Testitie</teksti>
+                                    </osoitenimi>
+                                    <osoitenumero>1</osoitenumero>
+                                    <postinumero>00100</postinumero>
+                                    <postitoimipaikannimi>SAARIJÄRVI</postitoimipaikannimi>
+                                </osoite>
+                                <sahkopostiosoite>asd@asd.com</sahkopostiosoite>
+                            </henkilo>
+                        </Osapuoli>
+                    </osapuolitieto>
+                    <osapuolitieto>
+                        <Osapuoli>
+                            <kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</kuntaRooliKoodi>
+                            <VRKrooliKoodi>maksaja</VRKrooliKoodi>
+                            <henkilo>
+                                <nimi>
+                                    <etunimi>Jooseppi</etunimi>
+                                    <sukunimi>Mägelä</sukunimi>
+                                </nimi>
+                                <osoite>
+                                    <kunta>SaarijÃ¤rvi</kunta>
+                                    <osoitenimi>
+                                        <teksti>Testitie</teksti>
+                                    </osoitenimi>
+                                    <osoitenumero>6</osoitenumero>
+                                    <postinumero>00100</postinumero>
+                                    <postitoimipaikannimi>SAARIJÄRVI</postitoimipaikannimi>
+                                </osoite>
+                                <sahkopostiosoite>test@example.com</sahkopostiosoite>
+                            </henkilo>
+                        </Osapuoli>
+                    </osapuolitieto>
+                </Osapuolet>
+            </osapuolettieto>
+            <rakennuspaikkatieto>
+                <Rakennuspaikka>
+                    <metatieto xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset"/>
+                    <yksilointitieto xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">11405</yksilointitieto>
+                    <alkuHetki xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">2018-07-10T00:00:00</alkuHetki>
+                    <rakennuspaikanKiinteistotieto xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                        <RakennuspaikanKiinteisto>
+                            <kiinteistotieto>
+                                <Kiinteisto>
+                                    <kiinteistotunnus>72940800580007</kiinteistotunnus>
+                                </Kiinteisto>
+                            </kiinteistotieto>
+                            <kokotilaKytkin>true</kokotilaKytkin>
+                            <hallintaperuste>oma</hallintaperuste>
+                        </RakennuspaikanKiinteisto>
+                    </rakennuspaikanKiinteistotieto>
+                    <kaavanaste xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">asema</kaavanaste>
+                    <kaavatilanne xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">asemakaava</kaavatilanne>
+                </Rakennuspaikka>
+            </rakennuspaikkatieto>
+            <toimenpidetieto>
+                <Toimenpide>
+                    <uusi/>
+                    <rakennustieto>
+                        <Rakennus>
+                            <yksilointitieto xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">12502</yksilointitieto>
+                            <alkuHetki xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">1001-01-01T00:00:00</alkuHetki>
+                            <sijaintitieto>
+                                <Sijainti>
+                                    <piste xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                                        <Point axisLabels="x y" srsDimension="2" srsName="EPSG:3067" xmlns="http://www.opengis.net/gml">
+                                            <pos>417598.56961165 6951134.66711149</pos>
+                                        </Point>
+                                    </piste>
+                                </Sijainti>
+                            </sijaintitieto>
+                            <rakennuksenTiedot>
+                                <rakennustunnus>
+                                    <valtakunnallinenNumero>1231231230</valtakunnallinenNumero>
+                                    <jarjestysnumero>1</jarjestysnumero>
+                                    <kiinttun>72940800580007</kiinttun>
+                                    <rakennuksenSelite>1 941 talousrakennukset</rakennuksenSelite>
+                                </rakennustunnus>
+                                <kayttotarkoitus>941 talousrakennukset</kayttotarkoitus>
+                                <tilavuus>270</tilavuus>
+                                <kokonaisala>80</kokonaisala>
+                                <osoite>
+                                    <kunta xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">Saarijärvi</kunta>
+                                    <osoitenimi xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                                        <teksti>Testitie</teksti>
+                                    </osoitenimi>
+                                    <osoitenumero xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">166</osoitenumero>
+                                    <postinumero xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">101010</postinumero>
+                                    <postitoimipaikannimi xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">TESTI</postitoimipaikannimi>
+                                </osoite>
+                                <kerrosluku>1</kerrosluku>
+                                <kerrosala>80</kerrosala>
+                                <rakentamistapa>paikalla</rakentamistapa>
+                                <kantavaRakennusaine>
+                                    <rakennusaine>puu</rakennusaine>
+                                </kantavaRakennusaine>
+                                <julkisivu>
+                                    <julkisivumateriaali>puu</julkisivumateriaali>
+                                </julkisivu>
+                                <verkostoliittymat>
+                                    <viemariKytkin>true</viemariKytkin>
+                                    <vesijohtoKytkin>true</vesijohtoKytkin>
+                                    <sahkoKytkin>true</sahkoKytkin>
+                                    <maakaasuKytkin>false</maakaasuKytkin>
+                                    <kaapeliKytkin>false</kaapeliKytkin>
+                                </verkostoliittymat>
+                                <paloluokka>P3</paloluokka>
+                                <lammitystapa>vesikeskus</lammitystapa>
+                                <lammonlahde>
+                                    <muu>muu</muu>
+                                </lammonlahde>
+                                <varusteet>
+                                    <sahkoKytkin>true</sahkoKytkin>
+                                    <kaasuKytkin>false</kaasuKytkin>
+                                    <viemariKytkin>true</viemariKytkin>
+                                    <vesijohtoKytkin>true</vesijohtoKytkin>
+                                    <lamminvesiKytkin>false</lamminvesiKytkin>
+                                    <aurinkopaneeliKytkin>false</aurinkopaneeliKytkin>
+                                    <hissiKytkin>false</hissiKytkin>
+                                    <koneellinenilmastointiKytkin>false</koneellinenilmastointiKytkin>
+                                    <saunoja>0</saunoja>
+                                    <uima-altaita>0</uima-altaita>
+                                    <vaestonsuoja>0</vaestonsuoja>
+                                </varusteet>
+                            </rakennuksenTiedot>
+                            <rakentajatyyppi>muu</rakentajatyyppi>
+                            <omistajatieto>
+                                <Omistaja>
+                                    <henkilo xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                                        <nimi>
+                                            <etunimi>Testaaja Terttu</etunimi>
+                                            <sukunimi>Mägelä</sukunimi>
+                                        </nimi>
+                                        <osoite>
+                                            <kunta>SaarijÃ¤rvi</kunta>
+                                            <osoitenimi>
+                                                <teksti>Testitie</teksti>
+                                            </osoitenimi>
+                                            <osoitenumero>6</osoitenumero>
+                                            <postinumero>00100</postinumero>
+                                            <postitoimipaikannimi>SAARIJÄRVI</postitoimipaikannimi>
+                                        </osoite>
+                                    </henkilo>
+                                    <omistajalaji>
+                                        <omistajalaji>muu yksityinen henkilö tai perikunta</omistajalaji>
+                                    </omistajalaji>
+                                </Omistaja>
+                            </omistajatieto>
+                            <tilapainenRakennusKytkin>false</tilapainenRakennusKytkin>
+                        </Rakennus>
+                    </rakennustieto>
+                </Toimenpide>
+            </toimenpidetieto>
+            <katselmustieto>
+                <Katselmus>
+                    <katselmuksenRakennustieto>
+                        <KatselmuksenRakennus>
+                            <valtakunnallinenNumero>1037173908</valtakunnallinenNumero>
+                            <kunnanSisainenPysyvaRakennusnumero>12502</kunnanSisainenPysyvaRakennusnumero>
+                            <jarjestysnumero>1</jarjestysnumero>
+                            <kiinttun>72940800580007</kiinttun>
+                            <rakennusnro>002</rakennusnro>
+                            <katselmusOsittainen>lopullinen</katselmusOsittainen>
+                            <rakennuksenSelite>1 941 talousrakennukset</rakennuksenSelite>
+                        </KatselmuksenRakennus>
+                    </katselmuksenRakennustieto>
+                    <muuTunnustieto>
+                        <MuuTunnus>
+                            <tunnus xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">28158</tunnus>
+                            <sovellus xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">Louhi</sovellus>
+                        </MuuTunnus>
+                    </muuTunnustieto>
+                    <tilanneKoodi>Hyväksytty</tilanneKoodi>
+                    <pitoPvm>2019-12-20</pitoPvm>
+                    <osittainen>lopullinen</osittainen>
+                    <pitaja>Piia Pitäjä</pitaja>
+                    <katselmuksenLaji>osittainen loppukatselmus</katselmuksenLaji>
+                    <vaadittuLupaehtonaKytkin>true</vaadittuLupaehtonaKytkin>
+                    <!--<liitetieto>
+                        <Liite>
+                            <kuvaus xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">Katselmuspöytäkirja</kuvaus>
+                            <linkkiliitteeseen xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">http://localhost:8000/</linkkiliitteeseen>
+                        </Liite>
+                    </liitetieto>-->
+                    <tarkastuksenTaiKatselmuksenNimi>Käyttöönottokatselmus</tarkastuksenTaiKatselmuksenNimi>
+                    <lasnaolijat>-  Mägelä Testaaja Terttu</lasnaolijat>
+                </Katselmus>
+            </katselmustieto>
+            <katselmustieto>
+                <Katselmus>
+                    <katselmuksenRakennustieto>
+                        <KatselmuksenRakennus>
+                            <valtakunnallinenNumero>1037173908</valtakunnallinenNumero>
+                            <kunnanSisainenPysyvaRakennusnumero>12502</kunnanSisainenPysyvaRakennusnumero>
+                            <jarjestysnumero>1</jarjestysnumero>
+                            <kiinttun>72940800580007</kiinttun>
+                            <rakennusnro>002</rakennusnro>
+                            <katselmusOsittainen>lopullinen</katselmusOsittainen>
+                            <rakennuksenSelite>1 941 talousrakennukset</rakennuksenSelite>
+                        </KatselmuksenRakennus>
+                    </katselmuksenRakennustieto>
+                    <muuTunnustieto>
+                        <MuuTunnus>
+                            <tunnus xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">28157</tunnus>
+                            <sovellus xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">Louhi</sovellus>
+                        </MuuTunnus>
+                    </muuTunnustieto>
+                    <tilanneKoodi>Hyväksytty</tilanneKoodi>
+                    <pitoPvm>2018-06-28</pitoPvm>
+                    <osittainen>lopullinen</osittainen>
+                    <pitaja>Pito Pertti</pitaja>
+                    <katselmuksenLaji>rakennuksen paikan merkitseminen</katselmuksenLaji>
+                    <vaadittuLupaehtonaKytkin>true</vaadittuLupaehtonaKytkin>
+                    <tarkastuksenTaiKatselmuksenNimi>Sijainnin merkitseminen</tarkastuksenTaiKatselmuksenNimi>
+                    <lasnaolijat>-  Mägelä</lasnaolijat>
+                </Katselmus>
+            </katselmustieto>
+            <paatostieto>
+                <Paatos xmlns="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <lupamaaraykset>
+                        <vaaditutKatselmukset>
+                            <Katselmus>
+                                <katselmuksenLaji>rakennuksen paikan merkitseminen</katselmuksenLaji>
+                                <tarkastuksenTaiKatselmuksenNimi>Sijainnin merkitseminen</tarkastuksenTaiKatselmuksenNimi>
+                                <muuTunnustieto>
+                                    <MuuTunnus>
+                                        <tunnus>28157</tunnus>
+                                        <sovellus>Louhi</sovellus>
+                                    </MuuTunnus>
+                                </muuTunnustieto>
+                            </Katselmus>
+                        </vaaditutKatselmukset>
+                        <vaaditutKatselmukset>
+                            <Katselmus>
+                                <katselmuksenLaji>osittainen loppukatselmus</katselmuksenLaji>
+                                <tarkastuksenTaiKatselmuksenNimi>Käyttöönottokatselmus</tarkastuksenTaiKatselmuksenNimi>
+                                <muuTunnustieto>
+                                    <MuuTunnus>
+                                        <tunnus>28158</tunnus>
+                                        <sovellus>Louhi</sovellus>
+                                    </MuuTunnus>
+                                </muuTunnustieto>
+                            </Katselmus>
+                        </vaaditutKatselmukset>
+                        <vaaditutKatselmukset>
+                            <Katselmus>
+                                <katselmuksenLaji>loppukatselmus</katselmuksenLaji>
+                                <tarkastuksenTaiKatselmuksenNimi>Loppukatselmus</tarkastuksenTaiKatselmuksenNimi>
+                                <muuTunnustieto>
+                                    <MuuTunnus>
+                                        <tunnus>28159</tunnus>
+                                        <sovellus>Louhi</sovellus>
+                                    </MuuTunnus>
+                                </muuTunnustieto>
+                            </Katselmus>
+                        </vaaditutKatselmukset>
+                        <vaadittuErityissuunnitelmatieto>
+                            <VaadittuErityissuunnitelma>
+                                <vaadittuErityissuunnitelma>Rakennepiirustukset</vaadittuErityissuunnitelma>
+                            </VaadittuErityissuunnitelma>
+                        </vaadittuErityissuunnitelmatieto>
+                        <vaadittuTyonjohtajatieto>
+                            <VaadittuTyonjohtaja>
+                                <tyonjohtajaRooliKoodi>vastaava työnjohtaja</tyonjohtajaRooliKoodi>
+                            </VaadittuTyonjohtaja>
+                        </vaadittuTyonjohtajatieto>
+                    </lupamaaraykset>
+                    <paivamaarat>
+                        <aloitettavaPvm>2021-08-07</aloitettavaPvm>
+                        <lainvoimainenPvm>2018-08-07</lainvoimainenPvm>
+                        <voimassaHetkiPvm>2023-08-07</voimassaHetkiPvm>
+                        <antoPvm>2018-07-23</antoPvm>
+                        <julkipanoPvm>2018-07-20</julkipanoPvm>
+                    </paivamaarat>
+                    <poytakirja>
+                        <paatoskoodi>myönnetty</paatoskoodi>
+                        <paatoksentekija>Jouni Vesala</paatoksentekija>
+                        <paatospvm>2018-07-19</paatospvm>
+                        <pykala>158</pykala>
+                        <!--<liite>
+                            <linkkiliitteeseen>http://localhost:8000</linkkiliitteeseen>
+                        </liite>-->
+                    </poytakirja>
+                </Paatos>
+            </paatostieto>
+            <lisatiedot>
+                <Lisatiedot>
+                    <asioimiskieli>suomi</asioimiskieli>
+                </Lisatiedot>
+            </lisatiedot>
+        </RakennusvalvontaAsia>
+    </featureMember>
+</FeatureCollection>

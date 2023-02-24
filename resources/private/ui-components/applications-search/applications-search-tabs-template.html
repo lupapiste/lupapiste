@@ -1,0 +1,19 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="applications-search-tabs-template">
+  <div class="applications-search-tabs">
+    <!-- ko if: selectedStates -->
+    <div class="pad--2">
+      <h4 data-bind="ltext: 'a11y.filter.by-state.tab-text'"></h4>
+      <ul class="gap--h4" data-bind="foreach: selectedStates">
+        <li data-bind="text: $data"></li>
+      </ul>
+    </div>
+    <!-- /ko -->
+    <!-- ko ifnot: selectedStates -->
+    <tag-toggles params="selected: selectedTab,
+                         toggles: toggles,
+                         prefix: 'plain-bold-narrow-tag'">
+    </tag-toggles>
+    <!-- /ko -->
+  </div>
+</script>

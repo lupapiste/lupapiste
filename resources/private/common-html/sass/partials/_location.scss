@@ -1,0 +1,25 @@
+#application-structures-tab,
+.location-editor-container {
+  #location-editor-map {
+    width: 100%;
+    height: 360px;
+  }
+  input.warning {
+    background-color: transparentize( $negative, 0.95 );
+  }
+  .location-help-top {
+    margin-bottom: .5em;
+  }
+  .location-help-bottom {
+    margin-top: .5em;
+  }
+}
+
+#application-structures-tab,
+table.location-operations-table {
+  @include no-row-hover;
+  span.location-missing {
+    font-weight: bold;
+    color: $red-120;
+  }
+}

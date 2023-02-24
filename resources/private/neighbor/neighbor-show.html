@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <section id="neighbor-init" class="page">
+      <div class="container">
+        <div class="waiting" style="display: inline">
+          <h1 style="display: inline-block; margin-right: 1em;" data-bind="ltext: 'loading'">Ladataan</h1>
+          <i class="wait spin lupicon-refresh"></i>
+        </div>
+      </div>
+    </section>
+    <section id="neighbor" class="page">
+      <div data-bind="if: inError">
+        <div class="container">
+          <h1 data-bind="ltext: errorText"></h1>
+          <p data-bind="ltext: 'neighbor.invite.failed.long'"></p>
+        </div>
+      </div>
+      <div data-bind="ifnot: inError">
+        <div class="application_summary">
+          <div class="container">
+            <div data-bind="visible: application" class="application-map-container neighbor">
+              <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+            </div>
+            <div data-bind="with: application" class="application_summary_info neighbor">
+              <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
+
+              <h2 data-bind="if: $root.primaryOperation">
+                <span data-test-id="test-application-primary-operation"
+                      data-bind="ltext: $root.primaryOperationName, attr: {'data-test-primary-operation-id': $root.primaryOperation().name}"></span>
+              </h2>
+
+              <!-- Property ID: -->
+              <div>
+                <p data-bind="ltext: 'application.property'"></p>
+                <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+              </div>
+
+              <!-- State: -->
+              <div>
+                <p data-bind="ltext: 'application.state'">Tila:</p>
+                <span
+                  data-bind="ltext: state, attr: {'data-test-state': state}"
+                  data-test-id="application-state"
+                  class="application_summary_text">
+                </span>
+              </div>
+              <!-- Submitted: -->
+
+              <!-- ID: -->
+              <div>
+                <p data-bind="ltext: 'application.id'"></p>
+                <span
+                  data-bind="text: id, attr: {'data-test-value': id}"
+                  data-test-id="application-id"
+                  class="application_summary_text">
+                </span>
+              </div>
+
+              <!-- Operations: -->
+              <div>
+                <p data-bind="ltext: 'application.operations.secondary'"></p>
+                <!-- ko if: $root.operationsCount() && $root.operationsCount().length > 0 -->
+                <ul data-bind="foreach: $root.operationsCount">
+                  <li>
+                    <span data-bind="visible: count > 1">
+                      <span data-bind="text: count"></span>
+                      <span>&#x00D7;</span>
+                    </span>
+                    <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
+                  </li>
+                </ul>
+                <!-- /ko -->
+                <!-- ko if: $root.operationsCount() && $root.operationsCount().length === 0 -->
+                <p data-bind="ltext: 'application.operations.secondary.none'"></p>
+                <!-- /ko -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container">
+
+            <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
+            <div class="tab-info">
+                <p data-bind="ltext: 'neighbor.show.welcome.desc1'"></p>
+                <p data-bind="ltext: 'neighbor.show.welcome.desc2'"></p>
+                <p data-bind="ltext: 'neighbor.show.welcome.desc3'"></p>
+            </div>
+          <h1 data-bind="ltext: 'application.tabInfo'"></h1>
+
+          <!-- docgen generated content: -->
+          <div class="application_section docgen-content">
+            <div id="neighborDocgen"></div>
+            <div id="neighborPartiesDocgen"></div>
+          </div>
+
+          <!-- attachments: -->
+          <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
+            <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
+            <table class="table" data-bind="foreach: attachmentsByGroup">
+              <thead>
+                <tr class="attachment-group-header">
+                  <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
+                </tr>
+                <tr>
+                  <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                  <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                  <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: attachments">
+                <tr style="cursor: pointer;">
+                  <td>
+                    <span data-bind="if: type">
+                      <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                    </span>
+                    <span data-bind="if: !type">
+                      <i data-bind="ltext: 'attachment.noName'"></i>
+                    </span>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion">
+                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: $root.fileDownloadLink($data)}"></a><br/>
+                      <i data-bind="ltext: latestVersion.contentType"></i>
+                      <i data-bind="size: latestVersion.size"></i>
+                    </span>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion">
+                    <span data-bind="dateTimeString: modified"></span>
+                      <span data-bind="fullName: latestVersion.user"></span>
+                    </span>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div data-bind="visible: pending" class="pending"></div>
+          <h1 data-bind="ltext: 'neighbor.show.form'" id="responseHeading"></h1>
+          <p data-bind="ltext: 'neighbor.show.responce.desc'" class="tab-info"></p>
+          <div class="neighbor-reply-form">
+
+            <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
+            <div data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'link-account-', errorLocPrefix: 'neighbor-vetuma'}}"></div>
+
+            <div data-bind="if: tupasUser">
+              <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
+              <form data-bind="submit: send, visible: !done()">
+                <h3 data-bind="ltext: 'choose'"></h3>
+
+                <input type="radio" id="responseOk" data-bind="checked: response, enable: !done()" value="ok" data-test-id="neighbor-response-ok" />
+                <label data-bind="ltext: 'neighbor.show.responce.ok'" for="responseOk"></label>
+
+                <br>
+
+                <input type="radio" id="responseNo" data-bind="checked: response, enable: !done()" value="comments" data-test-id="neighbor-response-comments" />
+                <label data-bind="ltext: 'neighbor.show.responce.comments'" for="responseNo"></label>
+
+                <textarea
+                  data-bind="
+                    textInput: message,
+                    enable: response() === 'comments' && !done(),
+                    visible: response() === 'comments',
+                    attr: {placeholder: loc('neighbor.show.message.placeholder')}"
+                  data-test-id="neighbor-response-message"
+                  class="form-input textarea really-long high"
+                  rows=10>
+                </textarea>
+
+                <div class="spacerM"></div>
+
+                <button class="btn-primary"
+                        type="submit"
+                        data-test-id="neighbor-response-send"
+                        data-bind="
+                          enable: response() && !saving() && !done(),
+                          visible: !done(),
+                          ltext: 'neighbor.show.ok'">
+                </button>
+                <span data-bind="visible: saving">
+                  <img src="/lp-static/img/ajax-loader-12.gif" alt="loader"/>
+                  <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
+                </span>
+              </form>
+              <div data-bind="visible: done">
+                <h1 data-bind="ltext: 'neighbor.show.response.done'" data-test-id="neighbor-response-done"></h1>
+                <p data-bind="ltext: 'neighbor.show.response.done.desc'"> </p>
+
+                <!-- ko if: util.identLogoutUrl() -->
+                <p data-bind="ltext: 'ident.logout.info-text'"></p>
+                <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect"></button>
+                <!-- /ko -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

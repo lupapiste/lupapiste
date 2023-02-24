@@ -1,0 +1,384 @@
+@use "sass:math";
+
+#register3 {
+  .container {
+    width: 600px;
+    margin: 24px 0;
+  }
+}
+
+.register-form {
+  .error-message {
+    font-style: italic;
+    color: get-signal( "red" );
+  }
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  .form-entry {
+    &.register-checkbox {
+      width: 100%;
+      height: auto;
+      min-height: 32px;
+      label.checkbox-required::after {
+        color: $lp-orange;
+        content: "*";
+        display: inline;
+      }
+    }
+  }
+
+  .register-error {
+    position: relative;
+    margin: $marginS 0;
+  }
+
+  .architect-toggle {
+    min-height: 36px;
+  }
+
+  .info-indicator {
+    cursor: pointer;
+  }
+
+}
+
+#dialogRakentajafi .dialog-content {
+  width: 400px;
+  p {
+   margin-bottom: math.div($baseline, 2);
+  }
+}
+
+.account-select-help {
+  margin-top: $marginL;
+  margin-left: $marginL;
+}
+
+#onnistuu-start-form {
+  display: inline-block;
+}
+
+div.register-company-wizard {
+  h1, h2 {
+    text-transform: none;
+    text-align: center;
+    margin-top: 1em;
+  }
+  h1 {
+      font: {
+        size: 60px;
+        weight: bold;
+      }
+  }
+  h2 {
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+    font-size: 1.5em;
+    font-weight: normal;
+    .required {
+      color: $label-required-star-color;
+    }
+  }
+
+  div.company-steps {
+    $disabled: get-gray( 8 );
+    h2 {
+      margin-bottom: 1.5em;
+    }
+    h2.register-company-subtitle {
+      max-width: 44em;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 0;
+    }
+
+    .tabby {
+      width: 80%;
+      margin: 0 auto;
+      padding-top: 1.5em;
+      // margin-bottom: $marginL;
+      text-align: center;
+      vertical-align: middle;
+      .tabby__cell {
+        padding-left: 0;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .circle-title {
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      .circle-row {
+        display: table-row;
+      }
+      .circle-number {
+        $radius: 40px;
+        min-width: 2 * $radius;
+        min-height: 2 * $radius;
+        line-height: 2 * $radius;
+        border-radius: $radius;
+        font-size: 2em;
+        font-weight: bold;
+        color: $white;
+        background-color: $disabled;
+        display: table-cell;
+      }
+      .circle-number.current {
+        background-color: $primary;
+      }
+      .circle-number.past {
+        background-color: $positive;
+      }
+      .edge {
+        box-sizing: content-box;
+        width: 100%;
+        background-color: $disabled;
+        height: 4px;
+        z-index: -1;
+        &.past {
+          background-color: $positive;
+        }
+        &.current {
+          background-color: $primary;
+        }
+      }
+      .circle-pad {
+        display: table-cell;
+        width: 50%;
+        vertical-align: middle;
+      }
+    }
+  }
+  div.account-type-boxes {
+    $hover: resolve-color( "primary", "background", "hover");
+    margin-top: 1em;
+    .account-type-box {
+      display: block;
+      position: relative;
+      text-align: center;
+      padding: {
+        top: 3em;
+        left: 2em;
+        right: 2em;
+        bottom: 3em;
+      }
+      &[aria-pressed="false"] {
+        opacity: .7;
+        background-color: get-gray( 15 );
+      }
+      > h3 {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      > .account-type-price {
+        margin-top: .5em;
+        margin-bottom: .5em;
+        font-size: 4em;
+        font-weight: bold;
+        color: $primary;
+        white-space: nowrap;
+        &.campaign {
+          margin-bottom: 0;
+        }
+      }
+      > .account-billing-type-description {
+        margin-top: .5em;
+        margin-bottom: .5em;
+        span {
+          font-weight: bold;
+          font-size: $baseline;
+          color: get-gray( 5 );
+        }
+      }
+      > .account-type-description {
+        border-top: 3px dotted  $gray221;
+        padding-top: 1em;
+        font-weight: bold;
+        padding-bottom: 1em;
+      }
+      > .small-print {
+        border-top: 3px dotted  $gray221;
+        padding-top: 1em;
+      }
+      > .last-discount-date {
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+      > .overstrike-price {
+        font-size: 2em;
+        font-weight: bold;
+        text-decoration: line-through;
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+      > .ribbon span {
+        color: $white;
+        background-color: $primary;
+        font-size: $font-size * 1.2;
+        line-height: 32px;
+        border-top: 1px solid $primary;
+        border-bottom: 1px solid $primary;
+      }
+    }
+  }
+  .account-billing-type-select {
+    div.button-container {
+      button {
+        display: block;
+        margin: $marginM auto;
+        padding: $marginL;
+        //background-color: $gray247;
+        line-height: 0; // btn-base has 40px default, which wasn't appropriate here
+        //border: 4px solid transparent;
+        span {
+          display: block;
+          text-align: center;
+        }
+      }
+      &.yearly {
+        button {
+          margin-bottom: 0;
+          &:not([aria-pressed="true"]) {
+            padding-top: $marginL + 3px;
+            padding-bottom: $marginL;
+            padding-left: $marginL + 3px;
+            padding-right: $marginL + 3px;
+          }
+        }
+      }
+      div.discount {
+        $color: get-gray( 13 );
+        display: block;
+        color: $positive;
+        border-right: 1px dashed $color;
+        border-bottom: 1px dashed $color;
+        border-left: 1px dashed $color;
+        padding: $baseline * .75;
+        line-height: 0;
+        span {
+          font-size: $font-size * 1.2;
+          text-align: center;
+          display: block;
+        }
+      }
+    }
+  }
+
+  register-company-buttons {
+    display: block;
+    text-align: center;
+    .register-company-buttons-group {
+      margin-top: 2em;
+      display: inline-block;
+      icon-button {
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+    }
+  }
+  div.form-grid {
+    margin-top: 2em;
+    border: 1px solid $gray221;
+    h3 {
+      font-weight: bold;
+      font-size: 1.5em;
+      margin-bottom: 0;
+    }
+    &.form-grid--no-border {
+      margin-top: 0;
+      border: none;
+    }
+  }
+  .form-grid + .form-grid {
+    margin-top: 0;
+  }
+  .existing-user-sign-in {
+    padding-top: $marginS;
+    padding-bottom: $marginS;
+
+  }
+  div.register-company-container {
+    margin-top: 0;
+    border: 1px solid $gray221;
+    padding: {
+      left: 20px;
+      right: 20px;
+      top: 20px;
+      bottom: 20px;
+    }
+    p {
+      margin-bottom: $marginS;
+    }
+    h3 {
+      font-weight: bold;
+      font-size: 1.5em;
+      margin-bottom: .5em;
+    }
+    a.btn {
+      margin-top: $marginL;
+      margin-bottom: $marginL;
+    }
+    form {
+      margin-top: 2em;
+      margin-top: 1em;
+      icon-button {
+        margin-right: 2em;
+      }
+    }
+    img.logo {
+      width: 200px;
+      height: auto;
+    }
+  }
+  div.register-company-summary {
+    .tabby__row {
+      .tabby__cell {
+        &:last-child {
+          text-align: right;
+        }
+      }
+      &:last-child {
+        .tabby__cell {
+          border-top: 2px dotted $gray221;
+          padding-top: $marginM;
+        }
+      }
+      &:nth-last-child(2) {
+        .tabby__cell {
+          padding-bottom: 20px;
+        }
+      }
+    }
+    span.discount {
+      color: get-signal( "green" );
+    }
+  }
+  div.register-company-confirmation {
+    display: block;
+    margin: $marginL 0;
+    padding: 0;
+    border: 1px solid get-signal( "blue" );
+    i, span {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    i {
+      color: $white;
+      background-color: get-signal( "blue" );
+      margin-bottom: 0;
+      padding: $marginM;
+    }
+    span {
+      padding-left: $marginS;
+    }
+  }
+}
+
+.login--error {
+  color: $negative;
+}

@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-autocomplete-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
+  <simple-autocomplete
+    data-bind="attr: {class: schemaCss}"
+    params="items: items,
+            value: value,
+            lCaption: schema.caption,
+            lPlaceholder: schema.placeholder,
+            disable: disabled() || readonly(),
+            testId: path.join('.'),
+            maxHeight: schema['max-height']">
+  </simple-autocomplete>
+  <span data-bind="saveIndicator: indicator, label: false"></span>
+</script>

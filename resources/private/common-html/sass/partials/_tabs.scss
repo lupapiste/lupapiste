@@ -1,0 +1,193 @@
+/*Tab styles*/
+
+
+// Old school
+
+
+$tab-size: 2px;
+
+
+@mixin tab-style {
+  display: inline-block;
+  text-decoration: none;
+  background: white;
+  color: $gray51;
+  padding: {
+    left: $marginM;
+    right: $marginM;
+  }
+  @include btn-height;
+  border: {
+    style: solid;
+    width: 1px;
+    color: $gray221;
+    bottom: none;
+  }
+}
+
+@mixin active-tab-style {
+  box-sizing: content-box;
+  border: {
+    style: solid;
+    width: $tab-size;
+    color: $gray187;
+    bottom: none;
+}
+  &:before {
+    content: " ";
+    border-bottom: $tab-size solid white;
+    position: absolute;
+    bottom: -$tab-size;
+    left: 0%;
+    width: 100%;
+  }
+}
+
+.tab-wrapper {
+  padding: 30px;
+}
+
+.tabs-container {
+  width: 100%;
+  display: block;
+  clear: both;
+  box-sizing: border-box;
+  padding-top: 40px;
+
+  @media print {
+      visibility: hidden; //Otherwise causes application data to float over content
+  }
+}
+
+$indicator-size: 24px;
+
+.tabs {
+  list-style: none;
+  margin: 0;
+  li {
+    display: inline-block;
+    margin-right: 2px;
+    a {
+      @include tab-style;
+      position: relative;
+      outline: 0;
+    }
+
+    &.active a {
+      @include active-tab-style;
+    }
+  }
+}
+
+.tabs span.indicator {
+  display: table-cell;
+  float: right;
+  line-height: $indicator-size - 2px;
+  font-size: 12px;
+  border: 2px solid $orange-dark;
+  min-height: $indicator-size;
+  max-height: $indicator-size;
+  text-align: center;
+  box-sizing: border-box;
+  padding-bottom: 2px;
+  vertical-align: middle;
+  padding: {
+    left: 2px;
+    right: 2px;
+  }
+}
+
+// Override the padding reset in _buttons.
+.tabs a.link-btn {
+  :first-child {
+    padding-right: 2px !important;
+  }
+}
+
+.tabs li.active >  a.link-btn,
+.tabs li.active >  a.link-btn-julkipano {
+  cursor: default;
+  color: $gray51;
+  pointer-events: none;
+  background-color: unset;
+  border: 1px solid $primary;
+}
+
+.tabs li.active >  a.link-btn-inverse {
+  cursor: default;
+  color: $gray51;
+  pointer-events: none;
+  background-color: $orange;
+}
+
+.tabs-content-container {
+  border: 1px solid #ccc;
+  border-top: none;
+  padding: 10px;
+  width: 400px;
+}
+
+.tab-content {
+  padding:  0;
+  h1 {
+    line-height: normal;
+    display: inline-block;
+  }
+}
+
+.radio-tabs {
+  display: inline;
+  input {
+    &[type=radio] {
+      display: none;
+      width: 0px;
+      height: 0px;
+      margin: 0px;
+      padding: 0px;
+      -moz-appearance: none;
+      position: absolute;
+      z-index: -1;
+    }
+    &[type="radio"] + label {
+      display: inline-block;
+      padding: 8px 10px;
+      text-decoration: none;
+      background: $lp-light-grey;
+      color: $color-text;
+      outline: none;
+      /* Note: IE filters and border-radius don't mix */
+      filter: none;
+      &:hover {
+      cursor: pointer;
+      }
+    }
+    &[type="radio"]:checked + label {
+        background: darken($lp-light-grey, 10%);
+    }
+  }
+  [type="radio"] + label.checked {
+        background: darken($lp-light-grey, 10%);
+   }
+  .form-input {
+    margin-bottom: 7px;
+  }
+  button.application-create {
+    display: inline;
+    margin-bottom: 0;
+    width: 330px;
+    @media all and (max-width: 1000px) {
+      position: absolute;
+      left: 8px;
+      top: 54px;
+    }
+  }
+  button.application-from-previous {
+    @extend .application-create;
+    margin: 0 5px;
+  }
+}
+
+.missing-info-title {
+  margin-bottom: $marginS;
+  margin-top: $marginL;
+}

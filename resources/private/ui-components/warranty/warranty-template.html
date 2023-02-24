@@ -1,0 +1,48 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="warranty-template">
+
+  <!-- ko if: showWarrantyStart -->
+  <tr>
+    <td><span data-bind="ltext: 'application.warranty.start'"></span></td>
+    <td>
+      <!-- ko ifnot: canEditStart -->
+      <span data-bind="dateString: warrantyStart"
+            data-test-id="warranty-start-date-text"></span>
+      <!-- /ko -->
+      <!-- ko if: canEditStart -->
+      <input type="text"
+             data-bind="datepicker: warrantyStart,
+                        dateInvalidClass: {isInvalid: badStart, cls: 'err', allowBlank: true},
+                        ariaInvalid: badStart"
+             class="lux dateinput"
+             data-test-id="warranty-start-date-edit">
+      <!-- /ko -->
+    </td>
+    <td></td>
+    <td></td>
+  </tr>
+  <!-- /ko -->
+
+  <!-- ko if: showWarrantyEnd -->
+  <tr>
+    <td><span data-bind="ltext: 'application.warranty.end'"></span></td>
+    <td>
+      <!-- ko ifnot: canEditEnd -->
+      <span data-bind="dateString: warrantyEnd"
+            data-test-id="warranty-end-date-text"></span>
+      <!-- /ko -->
+      <!-- ko if: canEditEnd -->
+      <input type="text"
+             data-bind="datepicker: warrantyEnd,
+                                    dateInvalidClass: {isInvalid: badEnd, cls: 'err', allowBlank: true},
+                                    ariaInvalid: badEnd"
+             class="lux dateinput"
+             data-test-id="warranty-end-date-edit">
+      <!-- /ko -->
+    </td>
+    <td></td>
+    <td></td>
+  </tr>
+  <!-- /ko -->
+
+</script>

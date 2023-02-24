@@ -1,0 +1,122 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="multi-attachment-edit-dialog-template">
+
+  <div class="uploadDialog" data-bind="if: dialogState().show === 'upload'"
+       data-test-id="multi-upload-dialog">
+    <div class="content">
+      <i class="lupicon-circle-info primary fileIcon"></i>
+      <p data-bind="lhtml: dialogState().message" class="dialog-desc"></p>
+    </div>
+    <!-- ko if: _.size( badFiles() ) -->
+    <i class="filesUnableToBeUpdatedTitle"
+       data-bind="lhtml: 'attachment.bad-files'"></i>
+    <ul data-bind="foreach: badFiles">
+      <li>
+        <i class="lupicon-warning negative fileIcon"
+           data-test-id="warning-icon"></i>
+        <p class="filename" data-bind="text: filename"></p>
+      </li>
+    </ul>
+    <!-- /ko -->
+
+    <div class="button-group">
+      <upload-button data-test-id="multi-upload-upload-button"
+                     params="upload: upload,
+                             buttonText: 'update-attachments.choose-files'">
+      </upload-button>
+      <icon-button class="cancel-button"
+                   params="buttonClass: 'secondary',
+                           icon: 'undo',
+                           ltext: 'update-attachments.cancel',
+                           click: no,
+                           testId: 'multi-upload-no-button'">
+      </icon-button>
+    </div>
+  </div>
+
+  <div class="confirmDialog"
+       data-bind="if: dialogState().show === 'confirm'"
+       data-test-id="multi-confirm-dialog">
+    <div class="content">
+      <!-- ko if: _.size(goodFiles()) -->
+      <i class="filesToUpdateTitle"
+         data-bind="lhtml: 'update-attachments.files-to-be-updated'"></i>
+      <ul data-bind="foreach: goodFiles">
+        <li>
+          <i class="lupicon-circle-check positive fileIcon" data-test-id="success-icon"></i>
+          <p class="filename" data-bind="text: filename"></p>
+        </li>
+      </ul>
+      <!-- /ko -->
+      <!-- ko if: _.size( ignoredFiles() ) -->
+      <i class="filesUnableToBeUpdatedTitle"
+         data-bind="lhtml: 'update-attachments.ignored-files'"></i>
+      <ul data-bind="foreach: ignoredFiles">
+        <li>
+          <i class="lupicon-file fileIcon" data-test-id="no-match-icon"></i>
+          <p class="filename" data-bind="text: filename"></p>
+        </li>
+      </ul>
+      <!-- /ko -->
+      <!-- ko if: _.size( badFiles() ) -->
+      <i class="filesUnableToBeUpdatedTitle"
+         data-bind="lhtml: 'attachment.bad-files'"></i>
+      <ul data-bind="foreach: badFiles">
+        <li>
+          <i class="lupicon-warning negative fileIcon"
+             data-test-id="warning-icon"></i>
+          <p class="filename" data-bind="text: filename"></p>
+        </li>
+      </ul>
+      <!-- /ko -->
+    </div>
+    <div class="button-group">
+      <icon-button params="buttonClass: 'positive',
+                           icon: 'check',
+                           ltext: 'update-attachments.title',
+                           click: updateAttachments,
+                           testId: 'multi-update-attachments-button',
+                           waiting: waiting"
+                   data-bind="visible: updateButton">
+      </icon-button>
+      <icon-button class="cancel-button"
+                   params="buttonClass: 'secondary',
+                           icon: 'undo',
+                           ltext: 'update-attachments.cancel',
+                           click: no,
+                           testId: 'multi-update-no-button'">
+      </icon-button>
+    </div>
+  </div>
+
+  <div class="successDialog" data-bind="if: dialogState().show === 'success'"
+       data-test-id="multi-success-dialog">
+    <div class="content">
+      <!-- ko ifnot: _.size( unboundFiles() ) -->
+      <i class="lupicon-check positive fileIcon"></i>
+      <p data-bind="lhtml: 'update-attachments.file-update-success'"
+         class="dialog-desc"></p>
+      <!-- /ko -->
+      <!-- ko if: _.size( unboundFiles() ) -->
+      <i class="filesUnableToBeUpdatedTitle"
+         data-bind="lhtml: 'attachment.unbound-files'"></i>
+      <ul data-bind="foreach: unboundFiles">
+        <li>
+          <i class="lupicon-circle-attention negative fileIcon"
+             data-test-id="attention-icon"></i>
+          <p class="filename" data-bind="text: filename"></p>
+        </li>
+      </ul>
+      <!-- /ko -->
+    </div>
+    <div class="button-group">
+      <icon-button class="cancel-button"
+                   params="buttonClass: 'secondary',
+                           icon: 'check',
+                           ltext: 'update-attachments.exit',
+                           click: no,
+                           testId: 'multi-success-no-button'">
+      </icon-button>
+    </div>
+</div>
+</script>

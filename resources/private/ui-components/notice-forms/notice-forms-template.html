@@ -1,0 +1,45 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="notice-forms-template">
+
+  <!-- ko if: isVisible -->
+  <div class="notice-forms-container">
+    <h2 data-bind="ltext: 'notice-forms.config.title'"></h2>
+    <!-- ko foreach: ["construction", "terrain", "location"] -->
+    <!-- ko foreach: $parent.formAssignments( $data ) -->
+    <div class="notice-form-assignment">
+      <i aria-hidden="true"
+         class="lupicon-circle-info primary"></i>
+      <strong data-bind="text: $data.description"></strong>
+      <span data-bind="text:  $data.text,
+                       testId: $parentContext.$data + '-form-assignment'"></span>
+    </div>
+    <!-- /ko -->
+    <!-- ko foreach: $parent.noticeForms()[$data] -->
+    <div class="notice-form-wrapper">
+      <notice-form params="form: $data,
+                           prefix: $parentContext.$data + '-' + $index()">
+      </notice-form>
+    </div>
+    <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: view() === "form" -->
+    <new-notice-form params="ok: formOk,
+                             cancel: formReset,
+                             type: formType()"></new-notice-form>
+    <!-- /ko -->
+    <!-- ko ifnot: view() === "form" -->
+    <div class="new-form-buttons"
+         data-bind="foreach: formTypes">
+      <!-- ko if: $parent.newFormAuth( $data ) -->
+      <icon-button params="ltext: 'notice-forms.' + $data,
+                           icon: $parent.formIcon( $data ),
+                           disable: $parent.waiting,
+                           buttonClass: 'ghost',
+                           testId: 'new-' + $data + '-notice-form',
+                           click: _.wrap( $data, $parent.newForm )"></icon-button>
+      <!-- /ko -->
+    </div>
+    <!-- /ko -->
+  </div>
+  <!-- /ko -->
+</script>

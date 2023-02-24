@@ -1,0 +1,30 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-date-template">
+  <div class="inline" data-bind="template: componentTemplate"></div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="default-docgen-date-template">
+
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label,
+                    ltext: label,
+                    css: labelClasses"></label>
+  <span>
+    <input type="text"
+           class="lux"
+           data-bind="datepicker: datepickerValue,
+                      value: value,
+                      lplaceholder: placeholder,
+                      required: required,
+                      ariaLtext: ariaLabel,
+                      ariaErrorMessage: errorMessageId,
+                      datepickerOptions: datepickerOptions,
+                      css: inputClasses,
+                      event: events,
+                      disable: disabled() || readonly(),
+                      testId: testId">
+
+  </span>
+  <ping aria-hidden="true"
+        params="indicator: indicator, mode: 'icon'"></ping>
+</script>

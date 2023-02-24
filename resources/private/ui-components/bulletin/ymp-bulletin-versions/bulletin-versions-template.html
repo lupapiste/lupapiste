@@ -1,0 +1,77 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="ymp-bulletin-versions-template">
+  <rollup data-test-id="bulletin-versions-accordion"
+          params="open: open">
+    <rollup-button params="open: $parent.open,
+                           css: {secondary: true},
+                           ltext: 'bulletin.versions.history'"></rollup-button>
+    <div class="rollup__open"
+         data-bind="template: {name: 'bulletin-versions-accordion-content', data: $parent}">
+    </div>
+  </rollup>
+
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-versions-accordion-content">
+  <table class="table" data-test-id="bulletin-versions-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'bulletin.versions.published'"></th>
+        <th data-bind="ltext: 'bulletin.versions.state'"></th>
+        <th data-bind="ltext: 'bulletin.versions.comments'"></th>
+        <th data-bind="ltext: 'bulletin.versions.actions'"></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: versions">
+      <!-- ko ifnot: edit -->
+      <tr data-bind="template: 'proclaimed-row'"></tr>
+      <!-- /ko -->
+      <!-- ko if: edit -->
+      <tr data-bind="template: 'editable-proclaimed-row'"></tr>
+      <!-- /ko -->
+    </tbody>
+  </table>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="proclaimed-row">
+  <td data-bind="dateString: modified"></td>
+  <td data-bind="ltext: 'bulletin.state.' + bulletinState"></td>
+  <td>
+    <!-- ko if: $data.comments -->
+    <span data-bind="text: $data.comments"></span>
+    <span data-bind="ltext: 'unit.kpl'"></span>
+    <!-- /ko -->
+  </td>
+  <td class="actions">
+    <!-- ko if: $data.editable -->
+    <a href="#" class="link-btn" data-bind="click: $parent.editPublishedApplication, ltext: 'edit'"></a>
+    <!-- /ko -->
+    <!-- ko if: $data.comments -->
+    <a href="#" class="link-btn" data-bind="click: $parent.handleVersionClick, ltext: 'bulletin.versions.comments.show'"></a>
+    <!-- /ko -->
+    <a href="#" class="link-btn" target="_blank" data-bind="attr: {href: $parent.bulletinUrl}, ltext: 'bulletin.versions.version.show'"></a>
+  </td>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="editable-proclaimed-row">
+  <td colspan=4>
+    <!-- ko if: $data.bulletinState === 'proclaimed'-->
+    <div data-bind="template: 'edit-proclaimed-template'"></div>
+    <!-- /ko -->
+    <!-- ko if: $data.bulletinState === 'verdictGiven'-->
+    <div data-bind="template: 'edit-verdict-given-template'"></div>
+    <!-- /ko -->
+    <button data-bind="click:  save,
+                       enable: isValid(),
+                       css:    {waiting: pending}"
+            data-test-id="save-bulletin"
+            class="positive">
+      <i class="lupicon-save"></i>
+      <i class="wait spin lupicon-refresh"></i>
+      <span data-bind="ltext: 'save'"></span>
+    </button>
+    <button class="secondary action" data-bind="click: $parent.editPublishedApplication">
+      <i class="lupicon-remove"></i>
+      <span data-bind="ltext: 'cancel'"></span>
+    </button>
+  </td>
+</script>

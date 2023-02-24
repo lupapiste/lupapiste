@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="email">
+    <div class="container" data-test-id="init-email-change">
+      <h1 data-bind="ltext: 'change-email.init-header'"></h1>
+      <p data-bind="ltext: 'change-email.init-info'" class="register-info"></p>
+
+      <div data-bind="if: error">
+        <p class="error-message register-error" data-bind="ltext: error"></p>
+        <a href="#login" class="btn secondary"><i class="lupicon-log-in"></i><span data-bind="ltext: 'continue'"></span></a>
+      </div>
+
+      <div data-bind="ifnot: error">
+        <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
+        <div data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'change-email-', errorLocPrefix: 'register'}}"></div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

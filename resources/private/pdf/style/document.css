@@ -1,0 +1,29 @@
+.document>.group>h3 {
+  margin-top: 40px;
+}
+
+.document span {
+  display: inline-block;
+  margin-top: 0px;
+  margin-bottom: 20px;
+}
+
+.document .group .group h3 {
+  font-weight: normal;
+}
+
+.document .layout-full-width {
+  width: 100% !important;
+}
+
+.document .layout-vertical > span {
+  display: block;
+}
+
+.document .leaf-text {
+  width: 50%;
+}
+
+.document .leaf-string {
+  width: 50%;
+}

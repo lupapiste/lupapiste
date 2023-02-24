@@ -1,0 +1,12 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-operations-template">
+  <label class="lux"
+         data-bind="attr: {for: uniqId},
+                    ltext: 'application.operations.secondary'"></label>
+  <ul class="boxlist"
+      data-test-id="application-secondary-operations"
+      data-bind="attr: {id: uniqId},
+                 foreach: operations">
+    <li data-bind="text: $data"></li>
+  </ul>
+</script>

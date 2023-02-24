@@ -1,0 +1,65 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-account-type-template">
+    <h2 data-bind="ltext: 'register.company.billing.select-type'"></h2>
+    <div class="account-billing-type-select pate-grid-4">
+      <div class="row">
+        <div class="col-1"></div>
+        <div
+          class="button-container col-1 col--center monthly">
+          <button class="register h2"
+                  data-bind="click: _.partial(toggleBilling, 'monthly'),
+                             ariaPressed: billingType() === 'monthly',
+                             testId: 'monthly-billing'">
+            <span data-bind="ltext: 'register.company.billing.monthly.title'"></span>
+          </button>
+        </div>
+        <div class="button-container col-1 col--center yearly">
+          <div>
+            <button
+              class="register h2"
+              data-bind="click: _.partial(toggleBilling, 'yearly'),
+                         ariaPressed: billingType() === 'yearly',
+                         testId: 'yearly-billing'">
+              <span data-bind="ltext: 'register.company.billing.yearly.title'"></span>
+            </button>
+            <div class="like-btn discount">
+              <span data-bind="ltext: 'register.company.save5'"></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-1"></div>
+      </div>
+    </div>
+    <h2 data-bind="ltext: 'register.company.select'"></h2>
+    <div class="tabby account-type-boxes">
+      <div class="tabby__row"
+           data-bind="foreach: accountTypes">
+        <div class="tabby__cell tabby--33">
+          <button class="register account-type-box"
+                  data-bind="click: _.wrap( id, $component.selected ),
+                             attr: {'aria-pressed': $component.selectedStatus( id )},
+                          testId: 'account-type-' + id">
+            <!-- ko if: $data.isYearly -->
+            <div class="ribbon ribbon--right">
+              <span data-test-id="save-5-ribbon" data-bind="ltext: 'register.company.save5'"></span>
+            </div>
+            <!-- /ko -->
+            <h3 data-bind="text: title"></h3>
+            <div class="account-type-price"
+                 data-bind="text: $component.price( $data ),
+                            testId: id + '-price'"></div>
+            <div class="account-billing-type-description">
+              <span data-bind="ltext: 'register.company.billing.' + $component.billingType() + '.description'">
+            </div>
+            <!-- ko if: $data.isYearly -->
+            <div class="overstrike-price"
+                 data-bind="text: normalYearPrice + ' \u20AC',
+                            testId: 'normal-yearly-price'"></div>
+            <!-- /ko -->
+            <div class="account-type-description"
+                 data-bind="text: description"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+</script>

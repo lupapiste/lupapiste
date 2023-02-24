@@ -1,0 +1,85 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="neighborhood-template">
+  <div data-bind="ifnot: hasNeighbors">
+    <p data-bind="ltext: missing"
+       data-test-id="application-no-neigbors"></p>
+  </div>
+
+  <!-- ko if: municipalityHearsNeighborsVisible -->
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <div data-bind="component: {name: 'checkbox-field',
+                      params: {value: application.optionMunicipalityHearsNeighbors,
+                      lLabel: 'application.municipality-hears-neighbors',
+                      disable: application.optionMunicipalityHearsNeighborsDisabled}}"
+           data-test-id="municipality-hears-neighbours" ></div>
+    </div>
+  </div>
+  <!-- /ko -->
+
+  <div data-bind="if: hasNeighbors">
+    <table>
+      <thead>
+        <tr>
+          <th data-bind="ltext: 'neighbors.propertyId'"></th>
+          <th data-bind="ltext: 'neighbors.owner'"></th>
+          <th data-bind="ltext: 'neighbors.status'"></th>
+          <th data-bind="ltext: 'neighbors.actions'"></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: neighbors">
+        <tr data-bind="testId: 'neighbors-row-email-' + owner.email()">
+          <td data-bind="propertyId: propertyId"></td>
+          <td data-bind="with: owner">
+            <span data-bind="text: name" class="owner-name"></span>
+            <span data-bind="text: address.street" class="owner-street"></span>
+            <span data-bind="text: address.zip" class="owner-zip"></span>
+            <span data-bind="text: address.city" class="owner-city"></span>
+            <span data-bind="text: email" class="owner-email"></span>
+          </td>
+          <td>
+            <a data-bind="visible: $parent.statusCompleted($data),
+                          click: $parent.showStatus,
+                          testId: 'neighbors-row-status-' + state"
+               href="#">
+              <span data-bind="text: loc(['neighbor.state', state])"
+                    class="status-state"></span>
+            </a>
+            <span data-bind="visible: !$parent.statusCompleted($data),
+                             text: loc(['neighbor.state', state ]),
+                             testId: 'neighbors-row-status-' + state"
+                  class="status-state">
+            </span>
+            <!-- ko if: email -->
+            <span data-bind="text: email,
+                             testId: 'email-address-' + email"
+                  class="owner-email"></span>
+            <!-- /ko -->
+            <span data-bind="dateTimeString: created"
+                  class="status-time"></span>
+          </td>
+          <td>
+            <span data-bind="visible: !$parent.statusCompleted($data)">
+              <a data-bind="click: $parent.sendEmail,
+                            visible: $parent.authOk('neighbor-send-invite'),
+                            ltext: 'neighbors.actions.sendEmail'"
+                 data-test-id="neighbor-row-invite"
+                 class="command"
+                 href="#">
+              </a>
+              <a data-bind="click: $parent.markDone,
+                            visible: _.last(status()).state() != 'mark-done'
+                            && $parent.authOk('neighbor-mark-done'),
+                            ltext: 'neighbors.actions.markDone',
+                            clickBubble: false"
+                 data-test-id="neighbor-row-mark-done"
+                 class="command"
+                 href="#">
+              </a>
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</script>

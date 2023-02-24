@@ -1,0 +1,50 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="tags-editor-template">
+  <div class="tags-editor-component">
+    <p data-bind="visible: _.isEmpty(tags()), ltext: 'tags.no-tags'"></p>
+    <ul class="tags" data-bind="ifnot: _.isEmpty(tags())">
+      <!-- ko foreach: tags -->
+      <li class="tag"
+          data-bind="css: {'tag--disabled': !$parent.canEdit}">
+        <!-- ko if: $parent.canEdit -->
+        <button class="primary"
+                data-bind="click: $parent.removeTag,
+                           ariaLtext: 'remove',
+                           attr: {'data-test-id': 'remove-tag-button-' + $index()}">
+          <i aria-hidden="true" class="lupicon-remove"></i>
+        </button>
+        <!-- /ko -->
+        <!-- ko ifnot: edit -->
+        <span class="tag-label"
+              data-bind="text: $data.label,
+                         testId: 'tag-label-' + $index()"></span>
+        <!-- /ko -->
+        <!-- ko if: edit -->
+        <input class="lux tag-editor"
+               data-bind="hasFocus: edit,
+                          ariaLtext: 'a11y.tag',
+                          lplaceholder: 'a11y.tag',
+                          value: $data.label,
+                          event: {keypress: $parent.onKeypress},
+                          documentEvent: {keypress: _.partial( cancel, $data), key: 27},
+                          testId: 'edit-tag-input-' + $index()"/>
+        <!-- /ko -->
+        <!-- ko if: $parent.canEdit -->
+        <button class="primary"
+                data-bind="visible: !edit(),
+                           ariaLtext: 'edit',
+                           click: $parent.editTag">
+          <i aria-hidden="true" class="lupicon-pen"></i>
+        </button>
+        <!-- /ko -->
+      </li>
+      <!-- /ko -->
+    </ul>
+    <button class="secondary"
+            data-test-id="add-tag-button"
+            data-bind="click: addTag,
+                       enable: canEdit">
+      <i aria-hidden="true" class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'auth-admin.tags.add'"></span>
+    </button>
+  </div>
+</script>

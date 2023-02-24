@@ -1,0 +1,37 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="extension-applications-template">
+  <!-- ko ifnot: _.isEmpty( extensions() ) -->
+  <h2 data-bind="ltext: 'application.extension'"></h2>
+  <table data-test-id="extensions-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'application.extension.start'"></th>
+        <th data-bind="ltext: 'application.extension.end'"></th>
+        <th data-bind="ltext: 'tila'"></th>
+        <!-- ko if: showReason -->
+        <th class="full-width-column"
+            data-bind="ltext: 'application.extension.reason'"></th>
+        <!-- /ko -->
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: extensions">
+      <tr>
+        <td data-bind="dateString: startDate,
+                       testId: 'start-date-' + $index()"></td>
+        <td data-bind="dateString: endDate,
+                       testId: 'end-date-' + $index()"></td>
+        <td data-bind="if: state">
+          <a class="no-wrap-whitespace"
+             data-bind="ltext: state,
+                        attr: {href: url},
+                        testId: 'state-link-' + $index()"></a>
+        </td>
+        <!-- ko if: $parent.showReason -->
+        <td data-bind="text: reason,
+                       testId: 'reason-' + $index()"></td>
+        <!-- /ko -->
+      </tr>
+    </tbody>
+  </table>
+  <!-- /ko -->
+</script>

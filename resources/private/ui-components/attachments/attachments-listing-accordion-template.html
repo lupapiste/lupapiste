@@ -1,0 +1,59 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-listing-accordion-template"><span></span>
+  <!-- ko if: $data.hasContent -->
+    <rollup params="open: $data.open"
+            data-bind="attr: {'data-test-level': 'accordion-level-' + $data.level,
+                              'data-test-type': $data.accordionName}">
+      <rollup-status-button
+        data-bind="attr: {'data-test-name': $parent.accordionName}"
+        params="open: $parent.open,
+                style: {'secondary': $parent.level === 0,
+                        'tertiary': $parent.level > 0,
+                        'attachments-accordion': true},
+                status: $parent.status,
+                showIndicators: $parent.accordionIndicators,
+                text: $parent.accordionName">
+    </rollup-status-button>
+      <div class="rollup__open attachments-accordion-content">
+        <!-- ko ifnot: util.isEmpty( $parent, "groups" ) -->
+        <div data-bind="foreach: $parent.groups() ">
+          <div class="attachments-accordion-content-part"
+               data-bind="component: { name: 'attachments-listing-accordion',
+                                       params: { pageName: $parents[1].pageName,
+                                                 path: $data.path,
+                                                 attachments: $parents[1].attachments,
+                                                 upload: $parents[1].upload,
+                                                 options: $parents[1].options,
+                                                 level: $parents[1].level + 1 } }">
+          </div>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: util.isEmpty( $parent, "groups" ) -->
+        <div class="rollup-accordion-content-part">
+          <div data-bind="component: { name: 'attachments-table',
+                                       params: { attachments: $parent.filteredAttachments,
+                                                 upload: $parent.upload,
+                                                 options: $parent.options}}"></div>
+        </div>
+        <!-- /ko -->
+        <!-- Shown only if the amount of files does not equal the amount in the category containing this one -->
+        <button data-bind="click: $parent.downloadAll,
+                           visible: $parent.isDownloadAllVisible($parent.getFileCount(),
+                                                                 _.get($parents[3], 'getFileCount', _.constant(0))()),
+                           attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($data.name)}"
+                class="secondary">
+          <i class="lupicon-download"></i>
+          <span data-bind="text: $parent.downloadAllText"></span>
+        </button>
+        <a data-bind="visible: $parent.isSelectAllVisible($parent.getFileCount(),
+                                                          _.get($parents[3], 'getFileCount', _.constant(0))()),
+                      ltext: $parent.areAllSelected() ? 'attachments.group.deselect' : 'attachments.group.select',
+                      attr: {'data-test-type': $parent.areAllSelected() ? 'deselect-all-group' : 'select-all-group'},
+                      click: $parent.toggleSelectAll">
+        </a>
+      </div>
+    </rollup>
+  <!-- /ko -->
+
+
+</script>

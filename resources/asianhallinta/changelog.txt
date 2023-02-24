@@ -1,0 +1,65 @@
+Version 1.3 (7.7.2017)
+- Lisätty messageId attribuutti juurielementteihin
+- AsiaType:lle pakolliseksi version-attribuutti, joka kuvaa mitä skeeman versiota vasten sanoma on validoitu
+- Lausuntotuki:
+  - Skeema mahdollistaa lausunnon pyyntö ja anto toiminnallisuuden
+  - AsianTyyppiTpe: lisätty "Lausuntopyyntö"
+  - Lausuntopyyntö-elementti
+  - LausuntoVastaus-elementti, joka sisältää varsinaisen lausunnon
+  - AsiaType: lisätty TyypinTarkenne vapaaehtoinen elementti, jolla voi ilmoittaa ELY-keskuksen asiointityypin
+  - AsiaType: Vaihtoehtoisina elementteinä Lausuntopyynto tai Lausunnot
+
+Versio 1.2 (15.10.2015)
+- LiiteType
+   - Uudet vapaavalintaiset elementit KuvausFi ja KuvausSv, joiden mukana UusiAsia sanomassa lähetetään lokalisoitu liitetyypin selite
+   - Tarkennettu PisteTypen kommenttia: käytössä ETRS-TM35FIN koordinaatisto
+
+Versio 1.1 (13.2.2015)
+- Tuki kiinteistötunnukselle ja sijaintitiedolle
+- Toimenpide-elementti muutettu esitettäväksi merkkijonon sijaan kahdella lapsielementillä:
+    1. ToimenpideTunnus on Lupapisteen tunnus toimenpiteille (merkkijono). Listaus toimenpiteiden tunnuksista toimitetaan erikseen.
+    2. ToimenpideTeksti on asiointikielen mukaan lokalisoitu selkokielinen teksti asiaan liittyvästä toimenpiteestä.
+- Lisäksi UusiAsia-sanoman muodostukseen lisätty liitteen metatiedoksi toimenpidetunnus (Avain: operation), johon liite on kohdistuu. Kaikilla liitteillä tätä ei ole saatavilla, jolloin kyseinen metatieto puuttuu.
+- Tarkempi muutosloki:
+    - XML namespace URI vaihdettu http://www.solita.fi/asianhallinta -> http://www.lupapiste.fi/asianhallinta
+    - Poistettu tyyppi String255, AsiaType/Kuvaus muutettu tyypiksi string
+    - Uusia tyyppejä
+      - ToimenpideType
+        - elementit: ToimenpideTunnus ja ToimenpideTeksti
+      - LaskuviiteType
+      - KiinteistotunnusType
+      - SijaintiType
+        - PisteType
+    - Toimenpide elementti muutettu string:stä uudeksi ToimenpideType:ksi
+    - MaksajaType/Laskuviite elementin tyypiksi LaskuviiteType
+    - AsiaTypelle kaksi uutta elementtiä:
+      - Sijainti (SijaintiType)
+      - Kiinteistotunnus (KiinteistotunnusType)
+    - AsianTaydennysType ja AsianPaatosTypelle muutettu Liite-elementti Liitteet-elementiksi (LiitteetType). Liitteillä nyt yhtenäinen rakenne skeemassa.
+
+Versio 1.0 (16.1.2015)
+- Lisätty juurielementeille "version" attribuutti
+- Korjattu elementin kirjoitusvirhe LinkkiLiiteeseen -> LinkkiLiitteeseen
+- LiitteetType/Liite: muutettu minOccurs 0 -> 1
+- Lisätty MetatiedotType: Metatiedot elementin alla useita Metatieto elementtejä.
+
+Versio 0.9 (5.1.2015)
+- version attribuutti skeemaan (version="0.9")
+- KuvausType -> String255
+- Hakijat elementin HakijaType nyt HakijatType (elementin alla voi olla useita Hakija elementtejä)
+- Liitteet elementin LiiteType vaihdettu LiitteetTypeksi (elementin alla useita Liite elementtejä)
+- Toimenpide elementin tyypiksi vaihdettu ToimenpiteetTypeksi (elementin alla useita Toimenpide elementtejä)
+- Lisätty MaksajaType:lle Laskuviite ja Verkkolaskutustieto
+- Luotu YhteyshenkiloType
+- Muokattu HenkiloType laajentamaan YhteyshenkiloType henkilötunnuksella
+- Luotu LiitteetType, jonka alla voi olla useita Liite elementtejä
+- AsianTaydennysType elementtiin lisätty HakemusTunnus
+- AsianPaatosType lisätty AsianTunnus
+- AsianTyyppiType enumeraatioiksi KasiteltavaHakemus ja Tiedoksianto
+- Lisätty Viitelupa mekanismi
+  - Viiteluvat-elementti, jonka alla 0..N Viitepula-elementtiä
+  - Viiteluvan choicena AsianTunnus tai MuuTunnus
+  - Lisätty MuuTunnusType, jossa elementit Tunnus ja Sovellus
+- Lisätty AsianTunnusVastaus elementti, jonka typena AsianTunnusResponse
+- HakemusTunnus, AsianTunnus ja VastaanotettuPvm
+- Osaan elementeistä lisätty selventävää dokumentaatiota

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container" id="register2">
+      <div class="content">
+        <form class="register-form">
+          <h1 data-bind="ltext: 'register.header2'"></h1>
+          <p>
+            <span data-bind="ltext: 'register.personal-info'"></span>
+            <span data-bind="lhtml: 'required.field.desc'"></span>
+          </p>
+          <div class="form-group label--top">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-firstName"
+                     data-bind="ltext: 'userinfo.firstName'"></label>
+              <input class="lux"
+                     id="register-firstName"
+                     data-test-id="register-firstName"
+                     data-bind="value: firstName"
+                     type="text"
+                     disabled="disabled">
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-lastName"
+                     data-bind="ltext: 'userinfo.lastName'"></label>
+              <input class="lux"
+                     id="register-lastName"
+                     data-test-id="register-lastName"
+                     data-bind="value: lastName"
+                     type="text"
+                     disabled="disabled">
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-personid"
+                     data-bind="ltext: 'userinfo.personId'"></label>
+              <input class="lux"
+                     id="register-personid"
+                     data-test-id="register-personid"
+                     data-bind="value: personId"
+                     type="text"
+                     disabled="disabled">
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group label--top">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-street"
+                     data-bind="ltext: 'userinfo.street'"></label>
+              <input class="lux"
+                     id="register-street"
+                     aria-errormessage="register-street-error"
+                     data-test-id="register-street"
+                     data-bind="value: street,
+                                required: isRequired( street ),
+                                ariaInvalid: isNotValid( street )"
+                     type="text" autofocus="autofocus"/>
+              <!-- ko if: isNotValid( street ) -->
+              <div class="error-note"
+                   role="alert"
+                   id="register-street-error"
+                   data-bind="validationMessage: street"></div>
+              <!-- /ko -->
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-zip"
+                     data-bind="ltext: 'userinfo.zip'"></label>
+              <input class="lux"
+                     id="register-zip"
+                     aria-errormessage="register-zip-error"
+                     data-test-id="register-zip"
+                     data-bind="value: zip,
+                                required: isRequired( zip ),
+                                ariaInvalid: isNotValid( zip )"
+                     type="text">
+              <!-- ko if: isNotValid( zip ) -->
+              <div class="error-note"
+                   id="register-zip-error"
+                   role="alert"
+                   data-bind="validationMessage: zip"></div>
+              <!-- /ko -->
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-city"
+                     data-bind="ltext: 'userinfo.city'"></label>
+              <input class="lux"
+                     id="register-city"
+                     aria-errormessage="register-city-error"
+                     data-test-id="register-city"
+                     data-bind="value: city,
+                                required: isRequired( city ),
+                                ariaInvalid: isNotValid( city )"
+                     type="text">
+              <!-- ko if: isNotValid( city ) -->
+              <div class="error-note"
+                   id="register-city-error"
+                   role="alert"
+                   data-bind="validationMessage: city"></div>
+              <!-- /ko -->
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-phone"
+                     data-bind="ltext: 'userinfo.phone'"></label>
+              <input class="lux"
+                     id="register-phone"
+                     aria-errormessage="register-phone-error"
+                     data-test-id="register-phone"
+                     data-bind="value: phone,
+                                required: isRequired( phone ),
+                                ariaInvalid: isNotValid( phone )"
+                     type="text">
+              <!-- ko if: isNotValid( phone ) -->
+              <div class="error-note"
+                   role="alert"
+                   id="register-phone-error"
+                   data-bind="validationMessage: phone"></div>
+              <!-- /ko -->
+
+            </div>
+            <div class="form-entry">
+              <label class="lux"
+                     for="register-language"
+                     data-bind="ltext: 'userinfo.language'"></label>
+              <select class="lux"
+                      id="register-language"
+                      data-test-id="register-language"
+                      data-bind="value: language,
+                                 options: loc.getSupportedLanguages(),
+                                 optionsText: loc"></select>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group label--top  border--bottom">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-email"
+                     data-bind="ltext: 'register.email'"></label>
+              <input class="lux"
+                     id="register-email"
+                     aria-errormessage="register-email-error"
+                     data-test-id="register-email"
+                     data-bind="value: email,
+                                required: isRequired( email ),
+                                ariaInvalid: isNotValid( email )"
+                     type="email">
+              <!-- ko if: isNotValid( email ) -->
+              <div class="error-note"
+                   role="alert"
+                   id="register-email-error"
+                   data-bind="validationMessage: email"></div>
+              <!-- /ko -->
+
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-confirm-email"
+                     data-bind="ltext: 'register.email2'"></label>
+              <input class="lux"
+                     id="register-confirm-email"
+                     aria-errormessage="register-confirm-email-error"
+                     data-test-id="register-confirmEmail"
+                     data-bind="value: confirmEmail,
+                                required: isRequired( confirmEmail ),
+                                ariaInvalid: isNotValid( confirmEmail )"
+                     type="email">
+              <!-- ko if: isNotValid( confirmEmail ) -->
+              <div class="error-note"
+                   role="alert"
+                   id="register-confirm-email-error"
+                   data-bind="validationMessage: confirmEmail"></div>
+              <!-- /ko -->
+
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group label--top border--bottom">
+            <div class="form-entry">
+              <toggle params="value: architect,
+                              ltext: 'userinfo.architect',
+                              prefix: 'blockbox'"></toggle>
+            </div>
+            <div data-bind="visible: architect">
+              <div class="architect-info form-group label--top">
+                <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+
+                <div class="form-entry">
+                  <label data-bind="ltext: 'userinfo.architect.degree'"
+                         for="architect-degree"
+                         class="lux"></label>
+                  <select class="lux"
+                          id="architect-degree"
+                          data-test-id="architect-degree-select"
+                          data-bind="options: availableDegrees,
+                                     value: degree,
+                                     optionsValue: 'id',
+                                     optionsText: 'name',
+                                     optionsCaption: loc('userinfo.architect.degree.choose'),
+                                     attr: {'title': loc('userinfo.architect.degree.choose.help')}"></select>
+                </div>
+
+                <div class="form-entry">
+                  <label data-bind="ltext: 'userinfo.architect.graduatingYear'"
+                         for="architect.graduatingYear" class="lux"></label>
+                  <input data-bind="value: graduatingYear,
+                                    ariaInvalid: isNotValid( graduatingYear )"
+                         aria-errormessage="graduatingyear-error"
+                         id="architect.graduatingYear"
+                         type="text"
+                         class="lux"
+                         maxlength="4">
+                  <!-- ko if: isNotValid( graduatingYear ) -->
+                  <div class="error-note"
+                       role="alert"
+                       id="graduatingyear-error"
+                       data-bind="validationMessage: graduatingYear"></div>
+                  <!-- /ko -->
+
+                </div>
+
+                <div class="form-entry">
+                  <label data-bind="ltext: 'userinfo.architect.fise'"
+                         for="architect.fise" class="lux"></label>
+                  <input data-bind="value: fise"
+                         id="architect.fise"
+                         type="text" class="lux" maxlength="255"/>
+                </div>
+
+                <div class="form-entry">
+                  <label data-bind="ltext: 'userinfo.architect.fiseKelpoisuus'"
+                         for="architect.fiseKelpoisuus" class="lux"></label>
+                  <select class="lux"
+                          id="architect.fiseKelpoisuus"
+                          data-test-id="architect-fiseKelpoisuus-select"
+                          data-bind="options: availableFiseKelpoisuusValues,
+                                     value: fiseKelpoisuus,
+                                     optionsValue: 'id',
+                                     optionsText: 'name',
+                                     optionsCaption: loc('userinfo.architect.fiseKelpoisuus.choose')"></select>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="form-group label--top">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-password"
+                     data-bind="ltext: 'userinfo.password'"></label>
+              <input class="lux"
+                     id="register-password"
+                     aria-errormessage="register-password-error"
+                     data-test-id="register-password"
+                     data-bind="value: password,
+                                ariaInvalid: isNotValid( password ),
+                                required: isRequired( password )"
+                     type="password">
+              <!-- ko if: isNotValid( password ) -->
+              <div class="error-note"
+                   id="register-password-error"
+                   role="alert"
+                   data-bind="validationMessage: password"></div>
+              <!-- /ko -->
+
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="register-confirm-password"
+                     data-bind="ltext: 'userinfo.newPassword2'"></label>
+              <input class="lux"
+                     id="register-confirm-password"
+                     aria-errormessage="register-confirm-password-error"
+                     data-test-id="register-confirmPassword"
+                     data-bind="value: confirmPassword,
+                                ariaInvalid: isNotValid( confirmPassword ),
+                                required: isRequired( confirmPassword )"
+                     type="password">
+              <!-- ko if: isNotValid( confirmPassword ) -->
+              <div class="error-note"
+                   id="register-confirm-password-error"
+                   role="alert"
+                   data-bind="validationMessage: confirmPassword"></div>
+              <!-- /ko -->
+
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-wrapper gap--v1">
+              <input type="checkbox" id="registerAcceptTerms"
+                     required="required"
+                     data-bind="checked: acceptTerms" value="true">
+              <label class="checkbox-label" for="registerAcceptTerms">
+                <span data-bind="ltext: 'register.accept-terms.label'"></span>
+                <a href="/page/terms/fi" target="_blank"
+                   data-bind="ltext: 'register.accept-terms.link'"></a>
+              </label>
+            </div>
+            <div class="checkbox-wrapper gap--v1">
+              <input type="checkbox"
+                     id="registerAllowDirectMarketing"
+                     data-bind="checked: allowDirectMarketing" value="true">
+              <label class="checkbox-label" for="registerAllowDirectMarketing"
+                     data-bind="lhtml: 'userinfo.allowDirectMarketing'">
+              </label>
+            </div>
+            <div class="checkbox-wrapper gap--v1">
+              <input type="checkbox" id="rakentajafi"
+                     data-bind="checked: rakentajafi" value="true">
+              <label class="checkbox-label" for="rakentajafi">
+                <span data-bind="lhtml: 'register.rakentajafi'"></span>
+                <button class="help btn-small btn-icon-only gap--b1"
+                        data-bind="ariaLtext: 'verdict.muutoksenhaku.extra',
+                                   click: showRakentajafiInfo">
+                  <i aria-hidden="true"
+                     class="lupicon-circle-info"></i>
+                </button>
+              </label>
+            </div>
+
+            <div class="clear"></div>
+          </div>
+          <!-- ko if: error -->
+          <div class="gap--b2">
+            <div role="alert"
+                 class="error-note"
+                 data-bind="ltext: error">
+            </div>
+          </div>
+          <!-- /ko -->
+          <div>
+            <icon-button params="ltext: 'register.register-action',
+                                 testId: 'register-submit',
+                                 disable: disabled,
+                                 click: submit,
+                                 icon: 'user-plus',
+                                 waiting: pending,
+                                 type: 'submit'">
+            </icon-button>
+            <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="secondary"></button>
+          </div>
+        </form>
+      </div>
+
+      <div id="dialogRakentajafi" class="window autosized">
+        <div class="dialog-header flex--between">
+          <p>Rakentaja.fi</p>
+          <icon-button params="ltext: 'close',
+                               id: 'rakentaja-close',
+                               buttonClass: 'tertiary close',
+                               iconOnly: true,
+                               icon: 'remove',
+                               focusPrevious: '#rakentaja-ok'">
+          </icon-button>
+        </div>
+        <div class="dialog-content">
+          <p>
+            <img alt="R & R" src="/lp-static/img/rr_tietopaketti_kansi_201405.jpg" align="right" width="175" height="248">
+            <span data-bind="ltext: 'register.rakentajafi-popup.1'"></span></p>
+          <p><strong data-bind="ltext: 'register.rakentajafi-popup.2'"></strong></p>
+          <p data-bind="ltext: 'register.rakentajafi-popup.3'"></p>
+          <p data-bind="ltext: 'register.rakentajafi-popup.4'"></p>
+          <button class="primary btn-dialog  close"
+                  autofocus="true"
+                  id="rakentaja-ok"
+                  data-bind="ltext: 'ok',
+                             focusNext: '#rakentaja-close'">
+
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

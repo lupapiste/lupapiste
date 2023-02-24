@@ -1,0 +1,40 @@
+{:global       {:admin              #{:organization/convert-inforequests
+                                      :organization/update-name
+                                      :organization/authorities
+                                      :organization/invoicing-config}}
+ :organization {:authority          #{:organization/check-filebank-enabled
+                                      :organization/edit-filebank
+                                      :organization/check-permanent-archive-enabled
+                                      :organization/suomifi
+                                      :organization/tags
+                                      :organization/invoicing-config
+                                      :organization/departmental
+                                      :organization/areas}
+                :reader             #{:organization/check-permanent-archive-enabled
+                                      :organization/tags
+                                      :organization/invoicing-config
+                                      :organization/departmental
+                                      :organization/areas}
+                :commenter          #{:organization/check-permanent-archive-enabled
+                                      :organization/tags
+                                      :organization/invoicing-config
+                                      :organization/departmental
+                                      :organization/areas}
+                :authorityAdmin     #{:organization/admin
+                                      :organization/update-name
+                                      :organization/invoicing-config
+                                      :organization/tags
+                                      :organization/areas
+                                      :organization/check-permanent-archive-enabled}
+                :tos-editor         #{:organization/check-permanent-archive-enabled}
+                :tos-publisher      #{:organization/check-permanent-archive-enabled}
+                :archivist          #{:organization/check-permanent-archive-enabled
+                                      :organization/get-archiving-status}
+                :departmental       #{:organization/departmental}
+                :biller             #{:organization/invoicing-config}}
+ :application  {:writer             #{:organization/check-permanent-archive-enabled}
+                :reader             #{:organization/check-permanent-archive-enabled}
+                :foreman            #{:organization/check-permanent-archive-enabled}
+                :guest              #{:organization/check-permanent-archive-enabled}
+                :guestAuthority     #{:organization/check-permanent-archive-enabled}
+                :financialAuthority #{:organization/check-permanent-archive-enabled}}}

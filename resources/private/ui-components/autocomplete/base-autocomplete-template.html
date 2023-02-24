@@ -1,0 +1,83 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="base-autocomplete-template">
+      <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
+        <div class="autocomplete-selection-wrapper"
+             role="combobox"
+             aria-haspopup="listbox"
+             data-bind="ariaLtext: ariaLtext,
+                        ariaExpanded: dropdownVisible,
+                        event: {focus: selectInput},
+                        css: {active: inputSelected(), disabled: disable},
+                        attr: {tabindex: function(){ return inputSelected() ? -1 : 0; }(),
+                        'aria-owns': dropdownId}">
+          <span class="autocomplete-selection" data-bind="css: {toggled: inputSelected()}">
+            <!-- ko if: showSingleSelection -->
+            <span class="caption" data-bind="visible: selectionText, text: selectionText"></span>
+            <!-- /ko -->
+            <span class="selection-text" data-bind="visible: showCaption, text: optionsCaption"></span>
+
+        <!-- ko if: showTags() && _.size( selectedOptions() ) -->
+        <ul class="tags"
+            data-bind="foreach: selectedOptions()">
+          <li>
+            <button class="primary"
+                    data-bind="disable: $component.disable,
+                               click: _.wrap( $data, $component.removeTag ),
+                               clickBubble: false">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+              <span data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data"></span>
+            </button>
+          </li>
+        </ul>
+        <!-- /ko -->
+        <i class="tag-chevron lupicon-chevron-small-down"></i>
+        <i class="tag-chevron lupicon-chevron-small-up toggle"></i>
+      </span>
+    </div>
+        <div class="autocomplete-dropdown"
+             data-bind="visible: false,
+                        fader: dropdownVisible,
+                        duration: 100,
+                        attr: {id: dropdownId}">
+      <div class="search" data-bind="css: {toggled: query && query(), active: inputSelected}">
+        <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
+               data-bind="textInput: query,
+                          hasFocus: inputSelected,
+                          event: {keyup: navigate,
+                          blur: blur},
+                          attr: {placeholder: placeholder}"/>
+        <i class="search-icon lupicon-search"></i>
+        <i class="search-icon lupicon-remove toggle"
+           data-bind="click: clearQuery,
+                      clickBubble: false,
+                      attr: {title: loc('applications.filter.search.clear')}"></i>
+      </div>
+
+      <!-- ko if: dropdownVisible() && util.getIn(data, ["length"]) > 0 -->
+      <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}, style: {'max-height': maxHeight}">
+        <!-- ko foreach: data -->
+        <!-- ko if: $data.groupHeader -->
+        <li class="autocomplete-group-header" data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
+                                                         titleWhenOverflow: $component.optionsText ? $data[$component.optionsText] : $data"></li>
+        <!-- /ko -->
+        <!-- ko ifnot: $data.groupHeader -->
+        <li class="autocomplete-result-item"
+            data-bind="event: {mouseover: $component.changeIndex.bind($data, $index()),
+                       mousedown: $component.selectItem.bind($data)},
+                       mousedownBubble: false,
+                       css: {active: $index() === $component.index()},
+                       titleWhenOverflow: $data === null ? $component.optionsCaption : $component.optionsText ? $data[$component.optionsText] : $data">
+          <span data-bind="text: $data === null ? $component.optionsCaption : $component.optionsText ? $data[$component.optionsText] : $data"></span>
+        </li>
+        <!-- /ko -->
+        <!-- /ko -->
+      </ul>
+      <!-- /ko -->
+      <!-- ko if: util.getIn(data, ["length"]) === 0 -->
+      <ul class="autocomplete-result">
+        <li class="autocomplete-result-empty" data-bind="ltext: 'autocomplete.no-results'"></li>
+      </ul>
+      <!-- /ko -->
+    </div>
+
+      </div>
+</script>

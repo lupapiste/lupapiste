@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="features">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2>Featuret</h2>
+
+        <ul data-bind="foreach: _.keys(features())">
+          <li>
+            <span data-bind="text: $data,
+                             attr: {'style': 'color: green'}">
+            </span>
+          </li>
+        </ul>
+
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,124 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="notice-form-template">
+  <rollup class="notice-form-rollup"
+          params="open: open">
+    <rollup-status-button params="status: $parent.rollupStatus,
+                                  open: $parent.open,
+                                  showIndicators: true,
+                                  rejectedClass: 'secondary',
+                                  ltext: $parent.rollupText,
+                                  extraText: $parent.rollupExtraText,
+                                  style: {ghost: true}"
+                          data-bind="testId: $parent.testId( 'status-button' )">
+    </rollup-status-button>
+    <div class="rollup__open notice-form-details">
+      <div class="tabby">
+        <div class="tabby__row">
+          <div class="tabby__cell tabby--100">
+            <!-- ko if: _.size( $parent.form.buildings ) -->
+            <strong data-bind="ltext: 'notice-form.buildings',
+                               testId: $parent.testId( 'buildings' )"></strong>
+            <ul data-bind="foreach: $parent.form.buildings">
+              <li data-bind="text: $data,
+                             testId: $parents[1].testId( 'building', $index() )"></li>
+            </ul>
+            <!-- /ko -->
+            <strong data-bind="ltext: 'notice-form.message'"></strong>
+            <blockquote data-bind="text: $parent.form.text,
+                                   testId: $parent.testId( 'message' )"></blockquote>
+
+          </div>
+          <div class="tabby__cell notice-form-state-buttons">
+            <!-- ko if: $parent.note -->
+            <span class="notice-form-note"
+                  data-bind="text: $parent.note,
+                             testId: $parent.testId( 'reject-note' )"></span>
+            <!-- /ko -->
+            <!-- ko if: $parent.showEditor -->
+            <div class="notice-form-editor"
+                 data-bind="event: {keydown: $parent.closeEditor}">
+              <input type="text"
+                     class="grid-style-input"
+                     data-bind="textInput: $parent.editor,
+                                hasFocus: true,
+                                testId: $parent.testId( 'reject-input' ),
+                                lplaceholder: 'notice-form.reject-placeholder'"><button class="primary"
+                                                                                        data-bind="click: $parent.rejectForm,
+                                                                                                   testId: $parent.testId( 'reject-button' ),">
+                <!-- Opening button tag must be attached to input tag due to layout -->
+                <i class="lupicon-save"></i>
+              </button>
+                <a class="link-btn"
+                   data-bind="ltext: 'cancel',
+                              testId: $parent.testId( 'reject-cancel' ),
+                              toggleClick: $parent.showEditor"></a>
+            </div>
+            <!-- /ko -->
+
+            <!-- ko if: $parent.showOther -->
+            <button class="btn-icon-only positive"
+                    data-bind="click: $parent.approveForm,
+                               ariaLtext: 'approve',
+                               testId: $parent.testId( 'approve' ),
+                               disable: $parent.formApproved,
+                               css: {approve: !$parent.formApproved()}">
+              <i aria-hidden="true" class="lupicon-check"></i>
+            </button>
+            <!-- /ko -->
+            <!-- ko if: $parent.showOther -->
+            <button class="btn-icon-only negative"
+                    data-bind="toggleClick: $parent.showEditor,
+                               ariaLtext: 'button.decline',
+                               testId: $parent.testId( 'reject' ),
+                               css: {reject: !$parent.formRejected()}">
+              <i aria-hidden="true" class="lupicon-circle-attention do-not-colorize"></i>
+            </button>
+            <!-- /ko -->
+            <!-- ko if: $parent.showRemove -->
+            <button class="btn-icon-only secondary"
+                    data-bind="click: $parent.deleteForm,
+                               ariaLtext: 'remove',
+                               testId: $parent.testId( 'delete' )">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+            </button>
+            <!-- /ko -->
+          </div>
+        </div>
+        <!-- ko if: $parent.customerInfo -->
+        <div class="tabby__row">
+          <div class="tabby__cell tabby--100">
+            <strong data-bind="ltext: 'notice-form.customer'"></strong>
+            <blockquote data-bind="text: $parent.customerInfo,
+                                   testId: $parent.testId( 'customer' )"></blockquote>
+          </div>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: $parent.payerInfo -->
+        <div class="tabby__row">
+          <div class="tabby__cell tabby--100">
+            <strong data-bind="ltext: 'notice-form.payer'"></strong>
+            <blockquote data-bind="text: $parent.payerInfo,
+                                   testId: $parent.testId( 'payer' )"></blockquote>
+          </div>
+        </div>
+        <!-- /ko -->
+
+      </div>
+
+      <!-- ko if: _.size( $parent.form.attachments ) -->
+      <table class="notice-form-attachments">
+        <tbody data-bind="foreach: $parent.form.attachments">
+          <tr data-bind="testId: $parents[1].testId( 'attachment', $index() )">
+            <td><a data-bind="fileLink: $data"></a></td>
+            <td data-bind="size: $data.size"></td>
+            <td data-bind="ltext: $data.contentType"></td>
+            <td data-bind="version: $data.version"></td>
+            <td data-bind="fullName: $data.user"></td>
+            <td data-bind="dateTimeString: $data.created"></td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- /ko -->
+    </div>
+  </rollup>
+</script>

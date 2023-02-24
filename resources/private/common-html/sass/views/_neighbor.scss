@@ -1,0 +1,32 @@
+#neighbor {
+  .pending {
+    width: 100%;
+    height: 100px;
+    background-image: url(/lp-static/img/ajax-loader.gif);
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
+}
+
+.dialog.neighbors-edit {
+  width: 415px !important;
+  max-height: 590px !important;
+}
+
+.application_summary_info.neighbor {
+  float: left;
+  width: 50%;
+}
+
+.application-map-container.neighbor {
+    width: $map-width; // from _application.scss
+    float: left;
+}
+
+div.edit-neighbor-info {
+  padding-left: 1em;
+  padding-right: 1em;
+  input.lux {
+    width: 100%;
+  }
+}

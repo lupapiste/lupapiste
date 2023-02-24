@@ -1,0 +1,17 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="submit-button-template">
+      <form class="submit-button" data-bind="submit: submitFn, attr:{'id': id + '-form'}">
+        <div class="submit-button__item"
+             data-bind="component: {name: 'text-field', params: {value: value,
+                                                                 id: id,
+                                                                 lLabel: lLabel}},
+                        css: {submittable: !disableButton()}"></div>
+        <div class="submit-button_item">
+          <br/>
+          <button class="positive" data-bind="click: submitFn, disable: disableButton">
+            <i class="lupicon-save"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: lSubmitTitle"></span>
+          </button>
+        </div>
+      </form>
+</script>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container" id="link-account-2">
+      <div class="content">
+        <form class="register-form">
+          <h1 data-bind="ltext: 'register.header2'"></h1>
+          <p>
+            <span data-bind="ltext: 'register.personal-info'"></span>
+            <span data-bind="lhtml: 'required.field.desc'"></span>
+          </p>
+          <div class="form-group label--top">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-firstName"
+                     data-bind="ltext: 'userinfo.firstName'"></label>
+              <input class="lux"
+                     id="link-account-firstName"
+                     data-bind="value: firstName"
+                     type="text"
+                     disabled="disabled">
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-lastName"
+                     data-bind="ltext: 'userinfo.lastName'"></label>
+              <input class="lux"
+                     id="link-account-lastName"
+                     data-test-id="link-account-lastName"
+                     data-bind="value: lastName"
+                     type="text"
+                     disabled="disabled">
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-personid"
+                     data-bind="ltext: 'userinfo.personId'"></label>
+              <input class="lux"
+                     id="link-account-personid"
+                     data-test-id="link-account-personid"
+                     data-bind="value: personId"
+                     type="text"
+                     disabled="disabled">
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group label--top">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-street"
+                     data-bind="ltext: 'userinfo.street'"></label>
+              <input class="lux"
+                     id="link-account-street"
+                     aria-errormessage="link-account-street-error"
+                     data-test-id="link-account-street"
+                     data-bind="value: street,
+                                required: isRequired( street ),
+                                ariaInvalid: isNotValid( street )"
+                     type="text"
+                     autofocus="autofocus">
+              <!-- ko if: isNotValid( street ) -->
+              <div class="error-note"
+                   role="alert"
+                   id="link-account-street-error"
+                   data-bind="validationMessage: street"></div>
+              <!-- /ko -->
+
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-zip"
+                     data-bind="ltext: 'userinfo.zip'"></label>
+              <input class="lux"
+                     id="link-account-zip"
+                     aria-errormessage="link-account-zip-error"
+                     data-test-id="link-account-zip"
+                     data-bind="value: zip,
+                                required: isRequired( zip ),
+                                ariaInvalid: isNotValid( zip )"
+                     type="text">
+              <!-- ko if: isNotValid( zip ) -->
+              <div class="error-note"
+                   id="link-account-zip-error"
+                   role="alert"
+                   data-bind="validationMessage: zip"></div>
+              <!-- /ko -->
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-city"
+                     data-bind="ltext: 'userinfo.city'"></label>
+              <input class="lux"
+                     id="link-account-city"
+                     aria-errormessage="link-account-city-error"
+                     data-test-id="link-account-city"
+                     data-bind="value: city,
+                                required: isRequired( city ),
+                                ariaInvalid: isNotValid( city )"
+                     type="text">
+              <!-- ko if: isNotValid( city ) -->
+              <div class="error-note"
+                   id="link-account-city-error"
+                   role="alert"
+                   data-bind="validationMessage: city"></div>
+              <!-- /ko -->
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-phone"
+                     data-bind="ltext: 'userinfo.phone'"></label>
+              <input class="lux"
+                     id="link-account-phone"
+                     type="text"
+                     aria-errormessage="link-account-phone-error"
+                     data-test-id="link-account-phone"
+                     data-bind="value: phone,
+                                required: isRequired( phone ),
+                                ariaInvalid: isNotValid( phone )">
+              <!-- ko if: isNotValid( phone ) -->
+              <div class="error-note"
+                   role="alert"
+                   id="link-account-phone-error"
+                   data-bind="validationMessage: phone"></div>
+              <!-- /ko -->
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group label--top">
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-emial"
+                     data-bind="ltext: 'register.email'"></label>
+              <input class="lux"
+                     id="link-account-email"
+                     data-test-id="link-account-email"
+                     data-bind="value: email"
+                     type="email"
+                     disabled="disabled">
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-password"
+                     data-bind="ltext: 'userinfo.password'"></label>
+              <input class="lux"
+                     id="link-account-password"
+                     aria-errormessage="link-account-password-error"
+                     data-test-id="link-account-password"
+                     data-bind="value: password,
+                                ariaInvalid: isNotValid( password ),
+                                required: isRequired( password )"
+                     type="password">
+              <!-- ko if: isNotValid( password ) -->
+              <div class="error-note"
+                   id="link-account-password-error"
+                   role="alert"
+                   data-bind="validationMessage: password"></div>
+              <!-- /ko -->
+            </div>
+            <div class="form-entry">
+              <label class="lux tip"
+                     for="link-account-confirm-password"
+                     data-bind="ltext: 'userinfo.newPassword2'"></label>
+              <input class="lux"
+                     id="link-account-confirm-password"
+                     aria-errormessage="link-account-confirm-password-error"
+                     data-test-id="link-account-confirmPassword"
+                     data-bind="value: confirmPassword,
+                                ariaInvalid: isNotValid( confirmPassword ),
+                                required: isRequired( confirmPassword )"
+                     type="password"/>
+              <!-- ko if: isNotValid( confirmPassword ) -->
+              <div class="error-note"
+                   id="link-account-confirm-password-error"
+                   role="alert"
+                   data-bind="validationMessage: confirmPassword"></div>
+              <!-- /ko -->
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-wrapper gap--v1">
+              <input type="checkbox" id="linkAccountAcceptTerms"
+                     required="required"
+                     data-bind="checked: acceptTerms" value="true">
+              <label class="checkbox-label" for="linkAccountAcceptTerms">
+                <span data-bind="ltext: 'register.accept-terms.label'"></span>
+                <a href="/page/terms/fi" target="_blank"
+                   data-bind="ltext: 'register.accept-terms.link'"></a>
+              </label>
+            </div>
+            <div class="checkbox-wrapper gap--v1">
+              <input type="checkbox"
+                     id="linkAccountAllowDirectMarketing"
+                     data-bind="checked: allowDirectMarketing" value="true">
+              <label class="checkbox-label" for="linkAccountAllowDirectMarketing"
+                     data-bind="lhtml: 'userinfo.allowDirectMarketing'">
+              </label>
+            </div>
+            <div class="clear"></div>
+          </div>
+
+          <!-- ko if: error -->
+          <div class="gap--b2">
+            <div role="alert"
+                 class="error-note"
+                 data-bind="ltext: error">
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <div>
+            <icon-button params="ltext: 'register.register-action',
+                                 testId: 'register-submit',
+                                 disable: disabled,
+                                 click: submit,
+                                 icon: 'user-plus',
+                                 waiting: pending,
+                                 type: 'submit'">
+            </icon-button>
+            <button data-bind="click: cancel, ltext: 'cancel'"
+                    type="button"
+                    class="secondary"></button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </body>
+</html>

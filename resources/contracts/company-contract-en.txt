@@ -1,0 +1,222 @@
+%% This a comment. Only full-line comments are supported.
+%% # H1 title
+%% ## H2 (numbered) title
+%% ### H3 title
+%% #-- Single line
+%% #---- Indented single line
+
+%% ${xxx} text placeholder that is replaced during the processing.
+
+%% Superfluous empty lines are ignored.
+%% ------------------------------------
+
+# Agreement on Lupapiste’s Business Account Service
+
+## PARTIES TO THE AGREEMENT
+
+### Client
+
+#---- ${company.name} (business ID ${company.y})
+#---- ${company.address1}
+#---- ${company.zip} ${company.po}
+#----
+#---- Contact person:
+#---- ${contact.firstName} ${contact.lastName}
+
+### Supplier
+
+#---- Cloudpermit Oy (business ID 2795153-5)
+#---- Hämeenkatu 13a
+#---- 33100 Tampere, Finland
+
+The parties to the agreement are hereinafter referred to as the
+‘Parties’.
+
+The Client must notify the Supplier of changing its contact person in
+writing without undue delay.
+
+## SUBJECT OF THE AGREEMENT
+
+Lupapiste is an online service produced and provided to its clients by
+the Supplier. The service enables citizens, businesses and communities
+to take care of their permit and notification matters and the
+administration thereof in interaction with the authorities and other
+parties. The Supplier produces Lupapiste as a standard service
+(‘Lupapiste’) in accordance with the description given in the terms of
+use ${tos-link} of the service (‘Terms of Use’). The Supplier shall
+notify the Client of any essential changes to the Terms of Use in
+writing thirty (30) days before the changes are implemented. The
+changes shall enter into force on the effective date stated by the
+Supplier.
+
+Lupapiste’s Business Account (‘Business Account’) is a an added value
+service subject to a fee as defined in the Terms of Use (Section
+7). Business Account enables the Client to administrate the projects
+of Lupapiste users (‘Users’) within the Client’s organisation in one
+workspace. A description of the contents of Business Account is
+available online at: ${pro-link}.
+
+One or more administrators (‘Administrator’) shall be appointed for
+Business Account. The Administrators’ obligations are prescribed in
+greater detail below in this agreement.
+
+In accordance with the Terms of Use agreed upon in this agreement, the
+Client and the Supplier have made an agreement concerning the delivery
+of Business Account to the Client as a service for the validity period
+of this agreement.
+
+## PRICES AND PAYMENT TERMS
+
+The price of the service shall be determined in accordance with the
+Business Account type chosen by the Client. The charge shall be a
+fixed monthly or annual fee based on the maximum number of Users. The
+fees are defined in the Pricing Table for the service
+${prices-link} (‘Pricing Table’).
+
+For a Business Account with more than thirty (30) Users, the Supplier
+shall provide the Client with a separate price quote.
+
+A valid value-added tax shall be added to the prices.
+
+The Client orders the service with the following configuration:
+${account.type} with an invoicing period of ${account.months}
+months. The fee charged is €${account.price}.
+
+The Client shall be obligated to pay the fees for the Lupapiste items
+ordered. The payment term shall be fourteen (14) days net from the
+date of the invoice, and the interest on overdue payments shall be
+determined in accordance with the Interest Act.
+
+Depending on the invoicing period selected by the Client, the Supplier
+shall charge for the selected services in advance either 12 times a
+year or once a year. If the Client selects the monthly invoicing
+option, the invoicing period shall be one calendar month, and the
+first invoicing period shall begin from the start of the month
+following the order date of the agreement. If the Client selects the
+annual invoicing option, the first invoicing period shall be from the
+start of the month following the order date of the agreement to the
+end of the same calendar year. From there on, the invoicing period
+shall be 12 months at a time.
+
+The Client may upgrade the Business Account type during the agreement
+period by selecting a new account type for several Users through the
+administrator view of Business Account. The amount of the recurring
+fee shall be increased to correspond with the selected Business
+Account type in the monthly invoicing, beginning from the first
+invoice following the change. In the annual invoicing, the Client
+shall be charged for the change in the Business Account price for the
+rest of the year at once at the start of the month following the
+change. If the Client wishes to downgrade the Business Account type,
+the Client must notify the Supplier of this in writing. The amount of
+the recurring fee shall not be reduced to correspond with the selected
+account type until the next invoicing period.
+
+The Supplier may increase service fees, fees charged for work and
+other fees by notifying the Client in writing thirty (30) days before
+the increase. The increase shall enter into force on the effective
+date stated by the Supplier if it is the first day of the invoicing
+period. In other cases, the increase shall enter into force on the
+first day of the invoicing period following the stated effective date.
+
+The Supplier shall have the right to prevent the Client from accessing
+Business Account if the Client fails to make the payments prescribed
+in the agreement or part thereof and the delay has lasted longer than
+fourteen (14) days. The Supplier must notify the Client of revoking
+the Client’s access and the reasons for it without undue delay.
+
+## USE OF THE SERVICE AND THE PARTIES’ OBLIGATIONS
+
+Business Account is available to the Client at ${lupapiste-link}.
+
+The Client shall receive an administrator user ID and password for
+Business Account after signing the agreement. The Administrator may
+add several Administrators to Business Account. The Administrators are
+given equal rights to modify the Client’s information and add or
+remove Business Account Users. When appointing a new Business Account
+Administrator, the Administrator shall be obligated to inform the new
+Administrator of the Administrator’s obligations prescribed in this
+agreement.
+
+When the Administrator adds a User with standard user rights to
+Business Account, the Administrator authorises the added User to
+conduct business on Lupapiste on behalf of the Client without a
+separate mandate. The User added to Business Account accepts the right
+in question by accepting the invitation to become an Business Account
+User.
+
+The Administrator shall ensure that a user ID and password are only
+given to identified, appropriate persons. The Administrator shall be
+responsible for removing Users that no longer have the right to
+process or see matters belonging to the Client from the Business
+Account user list. The Client shall ensure that the user IDs and
+passwords are not misused.
+
+The Supplier shall have the right to freely further develop and alter
+the Business Account service without any restrictions being set by
+this agreement. The Supplier may develop Business Account and release
+updates for and new versions of it, but shall not be in any way
+obligated to do so. The commissioning and pricing of new items or
+features shall be agreed upon separately.
+
+The personal data delivered to the Supplier by the Client by using
+Business Account will be processed in accordance with the Supplier’s
+currently valid privacy policy ${registry-link}.
+
+## VALIDITY AND TERMINATION OF THE AGREEMENT
+
+The agreement shall enter into force when the Client signs it
+electronically in the Visma Sign service. When signing the agreement,
+the Client shall accept the terms of use of the Visma Sign
+service. The Supplier shall not be responsible for the contents of the
+terms of use of the Visma Sign service or any disruptions in the
+service. In order to sign this agreement, the Client must perform a
+strong electronic authentication in the service in question.
+
+The agreement shall be in force as follows:
+
+Starting from the date of signing and remaining valid until further
+notice. The period of notice for terminating the agreement shall be
+until the end of the invoicing period, i.e. the calendar year or
+month, of the date of termination, and the Client shall notify the
+Supplier of terminating the agreement in writing. The service fee
+shall be charged for the entire period of notice in accordance with
+the agreement.
+
+## ATTACHMENTS TO THE AGREEMENT AND ORDER OF VALIDITY
+
+The following attachments are an inseparable part of the agreement:
+
+#-- Attachment 1: Terms of Use of the Lupapiste service ${tos-link}
+#-- Attachment 2: Description of the contents of Business Account ${pro-link}
+#-- Attachment 3: Pricing Table ${prices-link}
+
+The Client acknowledges that the Supplier plans to develop Lupapiste
+further. The commissioning of new items or services subject to a fee
+shall be agreed upon separately. The Supplier shall have the right to
+make changes to the Terms of Use by notifying the Client of it,
+provided that change does not cause a substantial detriment to the
+Client.
+
+The order of validity of the agreement documents shall be as follows:
+
+#-- 1. This agreement
+#-- 2. Attachment 1: Terms of Use of the Lupapiste service
+#-- 3. Attachment 2: Description of the contents of Business Account
+#-- 4. Attachment 3: Pricing Table
+
+## COPIES OF THE AGREEMENT AND SIGNATURES
+
+By signing this agreement personally, the Client’s representative
+shall be responsible for having the right to make an agreement binding
+the Client through either the right of representation or a
+mandate. The Supplier shall not be obligated to separately verify the
+right of representation of the Client’s representative. The Client
+confirms having read the Terms of Use specified in this agreement and
+approves them as part of this agreement. The Client approves the terms
+and conditions of this agreement by signing the agreement
+electronically.
+
+This agreement has been signed electronically in the Visma Sign
+service. The Client’s signed copy of the agreement can be downloaded
+after user registration in the Lupapiste service in the “My
+Information” section.

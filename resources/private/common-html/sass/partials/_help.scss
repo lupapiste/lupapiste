@@ -1,0 +1,112 @@
+
+@include bubble-arrow( help-arrow, get-signal( "blue"), $gray247);
+
+.help-toggle {
+  margin: {
+    left: $marginM;
+  }
+  display: inline-block;
+  color: get-signal( "violet");
+  text-align: center;
+  button.help.expanded {
+    color: get-signal( "blue");
+  }
+}
+
+.help-toggle.tight {
+  margin-left: 0;
+  button.help {
+    border: none;
+    padding: 0 0 0 0;
+    &:active, &:hover {
+      span {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.stacked.help-toggle,
+.stacked.help-toggle div {
+  overflow-y: visible;
+}
+
+.help-text {
+  display: none;
+  position: relative;
+  background: $gray247;
+  color: $gray51;
+  padding: $marginM;
+  margin-bottom: $marginL;
+  border: 1px solid get-signal( "blue");
+  p {
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  ul.help-items {
+    padding: 0;
+    list-style-type: none;
+  }
+}
+
+.help-text.help-text--show {
+  display: inherit;
+}
+
+.tab-info {
+  width: 80%;
+}
+
+// Reset is needed to make sure that the text flow is reset.
+// Without this the first element after (collapsed) help
+// could start with wrong alignment.
+.help-reset {
+  clear: both;
+  max-height: $marginS;
+}
+
+.panel-info {
+  width: 100%;
+  text-align: justify;
+}
+
+.expanded-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 400ms;
+  &.expand {
+    max-height: 1000px;
+  }
+}
+
+.page-info {
+  margin: $marginM 0;
+}
+
+.help-adjacent-title {
+  margin-top: 0 !important;
+  line-height: normal;
+  display: inline-block;
+}
+
+.help-box {
+  padding: 12px;
+  background-color: $gray238;
+  border-left: 10px solid get-signal( "violet");
+  p {
+    padding-bottom: 0;
+  }
+}
+
+.light {
+  background: $white;
+}
+
+.codeblock {
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: .9em;
+  padding: $marginS;
+  margin: $marginS;
+}

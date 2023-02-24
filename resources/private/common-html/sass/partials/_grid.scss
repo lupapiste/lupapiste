@@ -1,0 +1,324 @@
+// Collapsing tablelike grid using flexboxes.
+
+@use "sass:math";
+
+$SPACING-UNIT: 8px;
+
+@function w( $n ) {
+  @return $n * $SPACING-UNIT;
+}
+
+// Spaces: paddings and margins
+// (gap|pad)--[hvltrb](05|0-15)
+@mixin pad-gap( $n, $cls ) {
+  $space: w($n);
+  .pad--#{$cls} {
+    padding: $space;
+  }
+  .pad--h#{$cls} {
+    padding-left: $space;
+    padding-right: $space;
+  }
+  .pad--v#{$cls} {
+    padding-top: $space;
+    padding-bottom: $space;
+  }
+  .pad--l#{$cls} {
+    padding-left: $space;
+  }
+  .pad--t#{$cls} {
+    padding-top: $space;
+  }
+  .pad--r#{$cls} {
+    padding-right: $space;
+  }
+  .pad--b#{$cls} {
+    padding-bottom: $space;
+  }
+  .gap--l#{$cls} {
+    margin-left: $space;
+  }
+  .gap--t#{$cls} {
+    margin-top: $space;
+  }
+  .gap--r#{$cls} {
+    margin-right: $space;
+  }
+  .gap--b#{$cls} {
+    margin-bottom: $space;
+  }
+  .gap--#{$cls} {
+    margin: $space;
+  }
+  .gap--h#{$cls} {
+    margin-left: $space;
+    margin-right: $space;
+  }
+  .gap--v#{$cls} {
+    margin-top: $space;
+    margin-bottom: $space;
+  }
+  .flex--gap#{$cls} {
+    gap: $space;
+  }
+  .flex--row-gap#{$cls} {
+    row-gap: $space;
+  }
+  .flex--column-gap#{$cls} {
+    column-gap: $space;
+  }
+}
+
+@for $i from 0 to 16 {
+  @include pad-gap( $i, $i );
+}
+
+@include pad-gap( .5, "05" );
+
+$collapse-xl: $semi-wide-breakpoint;
+$collapse-l: $narrow-breakpoint;
+$collapse-m: $minimum-breakpoint;
+$collapse-s: 680px;
+$collapse-xs: 480px;
+
+// Mechanism for responsive widths, for example
+// :div.w--25.w--m-50.w--xs-100
+// which means that the default width is 25%, but changed to 50% and
+// 100% in m and xs breakpoints (see above) respectively.
+@mixin collapse-width( $code, $breakpoint ) {
+  @media( max-width: $breakpoint ) {
+    @each $i in $widths {
+      &.w--#{$code}-#{$i} {
+        width: $i * 1%;
+      }
+    }
+  }
+}
+
+// Percentage widths
+$widths: 10, 20, 25, 30, 40, 49, 50, 60, 70, 75, 80, 90, 100;
+@each $i in $widths {
+  .w--#{$i} {
+    width: $i * 1%;
+    @include collapse-width( xl, $collapse-xl );
+    @include collapse-width( l, $collapse-l );
+    @include collapse-width( m, $collapse-m );
+    @include collapse-width( s, $collapse-s );
+    @include collapse-width( xs, $collapse-xs );
+  }
+}
+
+// Em widths
+$ems: 4, 5, 6, 8, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80;
+@each $i in $ems {
+  $w: $i * 1em;
+  .w--#{$i}em {width: $w;}
+  .w--min-#{$i}em {min-width: $w;}
+  .w--max-#{$i}em {max-width: $w;}
+}
+
+@mixin bd( $name, $border ) {
+  .bd--#{$name} {
+    border: $border;
+  }
+  .bd--h-#{$name} {
+    border-left: $border;
+    border-right: $border;
+  }
+  .bd--v-#{$name} {
+    border-top: $border;
+    border-bottom: $border;
+  }
+  .bd--l-#{$name} {
+    border-left: $border;
+  }
+  .bd--t-#{$name} {
+    border-top: $border;
+  }
+  .bd--r-#{$name} {
+    border-right: $border;
+  }
+  .bd--b-#{$name} {
+    border-bottom: $border;
+  }
+}
+
+$colors: "night-sky", "black", "burgundy", "blue", "yellow", "green", "red", "violet";
+@each $c in $colors {
+  @include bd( $c, 1px solid get-signal( $c ));
+}
+@include bd( "gray", 1px solid get-gray( 11 ));
+@include bd( none, 0);
+
+$box-width: 20%;
+
+.boxgrid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+$radius_size: 1, 2, 3, 4, 5, 6, 7, 8, 10;
+@each $r in $radius_size {
+  $rpx: $r * 4px;
+  .rounded--#{$r} {
+    border-radius: $rpx;
+  }
+}
+
+.boxitem {
+  width: $box-width;
+  &.boxitem--bold-labels {
+    label {
+      font-weight: bold;
+    }
+  }
+  &.box--2 {
+    width: 2 * $box-width;
+  }
+  &.box--3 {
+    width: 3 * $box-width;
+  }
+  &.box--4 {
+    width: 4 * $box-width;
+  }
+  &.box--5 {
+    width: 5 * $box-width;
+  }
+
+  @media (max-width: $minimum-breakpoint) {
+    width: 50%;
+    &.box--2,
+    &.box--3,
+    &.box--4,
+    &.box--5 {
+      width: 100%;
+    }
+  }
+  @media (max-width: math.div($minimum-breakpoint, 2)) {
+    width: 100%;
+  }
+}
+
+// List without bullets or any margins. Useful especially within
+// boxgrid but not limited to that use case.
+ul.boxlist {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+table.collapse {
+  td,
+  th {
+    min-height: auto;
+    height: auto;
+  }
+  td {
+    hyphens: auto;
+  }
+  th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .coll--show {
+    display: none;
+  }
+  @media( max-width: $collapse-s ) {
+    display: block;
+    width: 100%;
+    thead,
+    tfoot {
+      display: none;
+    }
+    tbody {
+      display: block;
+    }
+    tr {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 4px;
+    }
+    td {
+      display: block;
+      width: 50%;
+      padding: 2px;
+    }
+    td.coll--100 {
+      width: 100%;
+    }
+    td.coll--last {
+      order: 100;
+    }
+    .coll--hide {
+      display: none;
+    }
+    .coll--show {
+      display: block;
+    }
+    @media( max-width: $collapse-xs ) {
+      td {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media( max-width: $collapse-xl ) {
+  .flex--wrap-xl {
+    flex-wrap: wrap;
+  }
+  .hide--xl {
+    display: none;
+  }
+  .show--xl {
+    display: block;
+  }
+}
+
+@media( max-width: $collapse-l ) {
+  .flex--wrap-l {
+    flex-wrap: wrap;
+  }
+  .hide--l {
+    display: none;
+  }
+  .show--l {
+    display: block;
+  }
+}
+
+@media( max-width: $collapse-m ) {
+  .flex--wrap-m {
+    flex-wrap: wrap;
+  }
+  .hide--m {
+    display: none;
+  }
+  .show--m {
+    display: block;
+  }
+}
+
+@media( max-width: $collapse-s ) {
+  .flex--wrap-s {
+    flex-wrap: wrap;
+  }
+  .hide--s {
+    display: none;
+  }
+  .show--s {
+    display: block;
+  }
+}
+
+@media( max-width: $collapse-xs ) {
+  .flex--wrap-xs {
+    flex-wrap: wrap;
+  }
+  .hide--xs {
+    display: none;
+  }
+  .show--xs {
+    display: block;
+  }
+}

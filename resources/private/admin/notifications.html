@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="notifications">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <h2>K&auml;ytt&auml;j&auml;ilmoitukset</h2>
+
+        <div>
+          <p>Keille viesti n&auml;kyy</p>
+          <div>
+            <input type="checkbox" id="applicant-notices" data-bind="checked: applicants"/>
+            <label for="applicant-notices">Hakijat</label>
+          </div>
+
+          <div>
+            <input type="checkbox" id="authority-notices" data-bind="checked: authorities"/>
+            <label for="authority-notices">Viranomaiset</label>
+          </div>
+        </div>
+
+        <div>
+          <label>Otsikko</label>
+          <input type="text" data-bind="textInput: title"/>
+        </div>
+
+        <div>
+          <label>Viesti</label>
+          <textarea rows="10" data-bind="value: message"></textarea>
+        </div>
+
+        <button class="btn positive" data-bind="click: updateNotifications">Tallenna ilmoitus k&auml;ytt&auml;jille</button>
+      </div>
+    </section>
+  </body>
+</html>

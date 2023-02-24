@@ -1,0 +1,16 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="load-more-application-bulletins-template">
+      <div class="search-button-wrapper">
+        <button class="bulletin"
+                data-test-id="load-more-bulletins"
+                data-bind="click: pageChanged,
+                           visible: visible,
+                           disable: pending,
+                           css: {waiting: pending}">
+          <i class="lupicon-circle-plus"></i>
+          <i class="wait spin lupicon-refresh"></i>
+          <span data-bind="ltext: 'bulletin.search.button'"></span>
+          <span data-test-id="bulletins-left"
+                data-bind="text: localizedBulletinsLeft"></span>
+        </button>
+      </div>
+</script>

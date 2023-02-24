@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="attachments" >
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <!-- ko if: organization.organizationId -->
+        <cljs-attachment_admin_attachment-settings-view params="{orgId: organization.organizationId}">
+        </cljs-attachment_admin_attachment-settings-view>
+        <!-- /ko -->
+      </div>
+    </section>
+  </body>
+</html>

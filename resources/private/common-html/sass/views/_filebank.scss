@@ -1,0 +1,55 @@
+$keyword-height: 46px;
+
+
+.keyword-box {
+  background-color: $primary;
+  padding: 4px;
+  display: inline-block;
+  color: $white;
+  height: $keyword-height;
+  margin-right: 3px;
+  position: relative;
+  margin-top: 3px;
+  vertical-align: middle;
+
+  input[type=text] {
+    display: inline-block;
+    padding: -2px;
+    line-height: 50%;
+    position: relative;
+    top: -1px;
+    box-sizing: border-box;
+  }
+
+  label {
+    position: relative;
+    top: 0.2em;
+  }
+
+  i {
+    color: white;
+    cursor: pointer;
+    position: relative;
+    top: 0.3em;
+  }
+  i:first-child {
+    margin-right: 9px;
+    margin-left: 2px;
+  }
+
+  i:last-child {
+    margin-right: 2px;
+    margin-left: 9px;
+  }
+
+}
+
+.add-keyword {
+  max-height: $keyword-height;
+  height: $keyword-height;
+  margin-top: 3px;
+}
+
+#filter-label-for-keywords{
+  width: auto;
+}

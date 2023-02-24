@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="integration-error-dialog-template">
+  <div class="content pad--1">
+    <div data-bind="html: text" class="error-note"></div>
+    <div data-bind="if: technicalDetails"
+         class="w--100">
+      <label for="technical-integration-error-message"
+             class="lux dsb--block"
+             data-bind="ltext: 'error.technical-error-message'"></label>
+      <textarea id="technical-integration-error-message"
+                readonly="readonly"
+                class="lux dsp--block w--100"
+                rows="5"
+                data-bind="value: technicalDetails"></textarea>
+    </div>
+  </div>
+  <div class="button-group ok">
+    <div data-bind="component: {name:'ok-button-group',
+                                params: {okFn: ok, okTitle: okTitle}}"></div>
+  </div>
+</script>

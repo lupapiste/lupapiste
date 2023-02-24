@@ -1,0 +1,44 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="preamble-map-template">
+  <div class="application-map-container">
+    <div class="map-boundary"
+         data-bind="if: $root.mapCanRender">
+      <div data-bind="react: {component: window.MapLibrary.ApplicationMap,
+                      props: {
+                      locFn: window.loc,
+                      center: $root.application['location-wgs84'](),
+                      mapRefresher: $root.isMapExtended() ? 'extended' : 'normal',
+                      pageLocation: window.pageutil.getPage(),
+                      applicationID: window.pageutil.subPage(),
+                      drawingAllowed: $root.application.canDraw(),
+                      hiddenTools: ($root.application.planInfoDisabled() ? ['PLAN_INFO', 'SELECT_PROPERTIES'] : ['SELECT_PROPERTIES']),
+                      requestHeaders: {'x-anti-forgery-token': $.cookie('anti-csrf-token')}
+                      }},
+                      attr: {'class': 'react-map-component' + ($root.isMapExtended() ? ' extended' : '')}">
+      </div>
+      <div class="map-expand-collapse">
+        <button data-bind="toggleClick: $root.isMapExtended,
+                           attr: {title: $root.isMapExtended() ? loc('map.shrink') : loc('map.expand')}"
+                class="map-expand-button"
+                type="button">
+          <span data-bind="css: {'lupicon-collapse': $root.isMapExtended,
+                           'lupicon-expand': !$root.isMapExtended()}">
+          </span>
+        </button>
+      </div>
+    </div>
+
+
+    <div class="application-map-actions" data-bind="with: application">
+      <!-- ko if: location() -->
+      <open-3d-map></open-3d-map>
+      <!-- /ko -->
+      <!-- ko if: $root.mapCanRender -->
+        <button class="primary"
+              data-bind="ltext: $root.isMapExtended() ? 'map.shrink' : 'map.expand',
+                         toggleClick: $root.isMapExtended"></button>
+      <!-- /ko -->
+    </div>
+  </div>
+
+</script>

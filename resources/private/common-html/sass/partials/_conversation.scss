@@ -1,0 +1,84 @@
+.conversation-form {
+  textarea {
+    height: 6em;
+  }
+}
+
+
+// New comments
+
+@mixin conversation-bubble ($text: $black, $bg: $white, $border: $gray187,
+                            $left: 5%, $nubbin: 10px ) {
+  @include bubble( $bg, $border, "down", $nubbin, $left: $left);
+  color: $text;
+  width: 100%;
+  border-radius: 2px;
+  padding: {
+    left: 10px;
+    right: 10px;
+    bottom: 5px;
+    top: 5px;
+  }
+  .header {
+    border-bottom: 2px solid $gray187;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+    overflow-y: hidden;
+    vertical-align: top;
+    .sender {
+      font-weight: bold;
+      .role {
+        text-transform: lowercase;
+        &:before {
+          content: "(";
+        }
+        &:after {
+          content: ")";
+        }
+      }
+      .to {
+        &:before {
+          margin-left: 12px;
+          margin-right: 12px;
+          content: "\2192"
+            }
+      }
+    }
+    .timestamp {
+      float: right;
+    }
+  }
+  .content {
+    .target {
+      margin-right: $marginS;
+    }
+  }
+  a {
+    @include link;
+  }
+  .deleted {
+    text-decoration: line-through;
+  }
+}
+
+.comment-bubble {
+  @include conversation-bubble;
+}
+
+
+.comment-bubble-authority {
+  @include conversation-bubble( $left: 95% );
+}
+
+.comment-bubble > .content > span,
+.comment-bubble-authority > .content > span {
+  white-space: pre-wrap;
+  hyphens: auto;
+}
+
+.comment-bubble.attachment > .content > span.target,
+.comment-bubble-authority.attachment > .content > span.target {
+  white-space: normal;
+  hyphens: auto;
+}

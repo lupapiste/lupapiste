@@ -1,0 +1,5 @@
+{:global              {:admin      #{:global/get-actions
+                                     :global/get-billing-reports
+                                     :global/map-config}
+                       :authority #{:global/map-config}
+                       :applicant #{:global/map-config}}}

@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+       id="ping-template">
+  <div class="ping-wrapper"
+       aria-hidden="true"
+       data-bind="css: wrapperCss,
+                  visible: show">
+    <div class=" like-btn">
+      <!-- ko if: text -->
+      <span data-bind="text: text"></span>
+      <!-- /ko -->
+      <!-- ko if: iconClass -->
+      <i data-bind="attr: {'class': iconClass}"></i>
+      <!-- /ko -->
+    </div>
+</div>
+</script>

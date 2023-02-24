@@ -1,0 +1,90 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="statement-edit-template">
+
+    <div class="headerarea" data-test-id="header-statement-edit">
+      <div class="bottom-marginM">
+        <!-- ko if: showDueDate -->
+        <!-- ko ifnot: authModel.ok("save-statement-due-date") -->
+        <p data-bind="text: dueDateText( false )"></p>
+        <!-- /ko -->
+        <!-- ko if: authModel.ok("save-statement-due-date") -->
+        <div class="gap--b2">
+          <label for="due-date-input"
+                 class="form-label"
+                 data-bind="text: dueDateText( true )"></label>
+          <date-input params="value: data().dueDate,
+                              css: 'form-input',
+                              callback: dueDateFn,
+                              validator: isAfterToday,
+                              id: 'due-date-input'"></date-input>
+        </div>
+        <!-- /ko -->
+        <!-- /ko -->
+        <h1>
+          <span>
+            <span data-bind="ltext: 'statement.tab.' + tab"></span>:
+          </span>
+          <span>
+            <span data-bind="text: applicationTitle"></span>
+          </span>
+          <span data-bind="with: data">
+            <!-- ko if: $data.person -->
+            (<span data-bind="text: person.text || person.name"></span>)
+            <!-- /ko -->
+          </span>
+        </h1>
+        <span data-bind="visible: isDraft" class="statement-state-indicator">
+          <i aria-hidden="true" class="lupicon-circle-attention"></i>
+          <span data-bind="ltext: 'luonnos'"></span>
+        </span>
+      </div>
+      <p class="wrapped_text" id="statement-cover-note" data-bind="text: coverNote"></p>
+    </div>
+
+    <div class="statement-info">
+      <div data-bind="ifnot: showStatement">
+        <p data-bind="ltext: 'statement.draft-is-not-visible'"></p>
+      </div>
+      <form data-bind="if: showStatement">
+        <div class="form-entry">
+          <label for="statement-type-select" class="form-label">
+            <span data-bind="ltext: 'statement.title'"></span>
+          </label>
+          <select id="statement-type-select"
+                  class="form-input dropdown"
+                  data-bind="options: statuses,
+                             optionsValue: 'id',
+                             optionsText: 'name',
+                             value: selectedStatus,
+                             valueAllowUnset: true,
+                             optionsCaption: loc('choose'),
+                             disable: !enabled()"></select>
+        </div>
+        <div>
+          <label class="form-label" for="statement-text"
+                 data-bind="ltext: 'statement.' + tab + '.text'"></label>
+          <textarea
+             data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
+                        textInput: text,
+                        readonly: !enabled() || inAttachment()"
+             id="statement-text"
+             rows="15"
+             class="lux really-high">
+          </textarea>
+        </div>
+        <div>
+          <div class="checkbox-wrapper spacerM">
+            <input type="checkbox"
+                    id="statement-provided-as-attachment"
+                    data-bind="checked: inAttachment, disable: !enabled()">
+            <label for="statement-provided-as-attachment"
+                   class="checkbox-label"
+                   data-test-id="statement-provided-as-attachment-label"
+                   data-bind="ltext: 'statement.statement-in-attachment'"></label>
+          </div>
+          <div data-bind="if: showAttachmentGuide">
+            <i data-bind="ltext: 'statement.statement-attachment-guide'"></i>
+          </div>
+        </div>
+      </form>
+    </div>
+</script>

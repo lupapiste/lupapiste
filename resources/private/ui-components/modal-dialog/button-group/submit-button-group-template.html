@@ -1,0 +1,12 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="submit-button-group-template">
+      <div class="button-group">
+        <button data-test-id="modal-dialog-submit-button"
+                data-bind="visible: isSubmitVisible, enable: isSubmitEnabled,
+                           css: submitCssClasses, click: submit, text: submitTitle">
+        </button>
+        <button class="secondary cancel" data-test-id="modal-dialog-cancel-button"
+                data-bind="click: _.partial(hub.send, 'close-dialog'),
+                           ltext: 'cancel',
+                           focusNext: '#modal-dialog-button-close:visible'"></button>
+      </div>
+</script>

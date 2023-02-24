@@ -1,0 +1,193 @@
+.accordion {
+  width: 100%;
+  position: relative;
+  z-index: 5;
+  height: auto;
+  margin-bottom: $marginM;
+  box-sizing: border-box;
+
+  &[data-doc-type="promootio-time"] { z-index: 6; } // HACK: forces timepicker to go over the next accordion
+
+  div.sticky {
+    width: 100%;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
+    }
+    span.shortenedDescription {
+      max-width: 30em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    span.description {
+      padding-right: $icon-pad;
+      text-transform: none;
+    }
+    span.icons {
+      min-width: $lupicon-size;
+      .approved, .rejected {
+        display: none;
+      }
+      .rejected {
+        // Buttons are not used to having complex
+        // contents.
+        padding-right: 0;
+      }
+    }
+    .identifier-component {
+      .form-indicator {
+        right: -100px;
+      }
+    }
+  }
+
+  .accordion-toggle > button, button.accordion-toggle {
+    width: 100%;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
+    }
+    margin-bottom: 0 !important;
+  }
+
+
+  div.sticky button.positive > span.icons > .approved {
+    display: table-cell;
+  }
+
+  div.sticky button.rejected > span.icons >  .rejected {
+    display: table-cell;
+  }
+
+
+
+  .accordion_content {
+    display: none;
+    padding: {
+      top: $marginS;
+      //bottom: $marginS;
+    }
+    position: relative;
+    border: 1px solid $gray221;
+    border-top: none;
+    .accordion-content-part {
+      margin-left: $marginM;
+      margin-right: $marginM;
+      margin-bottom: $marginM;
+    }
+    .accordion-fields {
+      width: 100%;
+
+      h2 {
+        color: black;
+      }
+      .authority-accept-fields {
+        h2 {
+          background: $lp-light-grey;
+        }
+      }
+      h3 {
+        margin-top: $marginM;
+      }
+      .form-group {
+        margin-top: $marginS;
+      }
+    }
+  }
+
+  .accordion_content.expanded {
+    display: block;
+  }
+}
+
+div.accordion-assignments {
+  color: white;
+  margin: 0 auto;
+  min-height: $grid-min-height;
+  .assignment-container {
+    margin-top: 1px;
+    padding: $marginS $marginS;
+    &:first-child {
+      margin-top: 0;
+    }
+    background-color: $primary;
+  }
+  .assignment {
+    width: 100%;
+    display: block;
+    > * {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 $marginS;
+    }
+    > .assignment-text {
+      width: 100%; // let text take all the space it can have as it's dynamic
+    }
+    > .assignment-header {
+      white-space: nowrap;
+      .creator {
+        &:before {
+         content: " (";
+        }
+      }
+      .receiver {
+        &:before {
+          content: "\2192"
+        }
+        &:after {
+          content: "):";
+        }
+      }
+    }
+    div.no-wrap-whitespace button:first-child {
+      margin-right: $marginS;
+    }
+    .editor {
+      display: table-row;
+    }
+  }
+}
+
+
+.accordion-fields > .button-group:last-child {
+  border-bottom: none;
+}
+
+.accordion-indicator {
+  z-index: 12000;
+  width: 112px;
+  min-height: 18px;
+  display: none;
+  padding: 0 $marginL 0 0;
+  margin-left: $marginM;
+
+  .icon {
+    display: none;
+    @include spite-bg;
+  }
+  &.accordion-input-saved {
+    .icon {
+      display: inline-block;
+      background-position: 4px -2499px;
+      border-right: none;
+    }
+  }
+  &.accordion-input-warn {
+    .icon {
+      display: inline-block;
+      background-position: 4px -3199px;
+      border-right: none;
+    }
+  }
+  &.accordion-input-err {
+    .icon {
+      display: inline-block;
+      background-position: 4px -2399px;
+      border-right: none;
+    }
+  }
+}
+
+.accordion-help {
+
+}

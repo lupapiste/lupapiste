@@ -1,0 +1,39 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="applications-map-marker-popup-template">
+  <div class="applications-map-marker-info">
+    <!-- ko if: titleText() -->
+    <h4 data-bind="text: titleText()"></h4>
+    <!-- /ko -->
+    <!-- ko foreach: markerInfos -->
+    <ul>
+      <li>
+        <a data-bind="click: $parent.openApplication,
+                      text: $parent.linkText( $data )">
+        </a>
+      </li>
+      <!-- ko if: $data.municipality -->
+      <li data-bind="ltext: 'municipality.' + $data.municipality"></li>
+      <!-- /ko -->
+      <!-- ko if: $data.applicant -->
+      <li data-bind="text: $data.applicant"
+          class="info--applicant"></li>
+      <!-- /ko -->
+      <!-- ko if: $data.infoRequest -->
+      <li class="info--inforequest"
+          data-bind="ltext: 'applications.inforequest'"></li>
+      <!-- /ko -->
+      <!-- ko if: $data.operation -->
+      <li data-bind="ltext: 'operations.' + $data.operation"></li>
+      <!-- /ko -->
+      <li data-bind="ltext: $data.state"
+          class="info--state"></li>
+      <!-- ko if: $data.submitted -->
+      <li data-bind="text: $parent.dateText( 'submitted', $data.submitted )"></li>
+      <!-- /ko -->
+      <!-- ko if: $data.verdictDate -->
+      <li data-bind="text: $parent.dateText( 'info.verdictDate', $data.verdictDate )"></li>
+      <!-- /ko -->
+    </ul>
+    <!-- /ko -->
+  </div>
+</script>

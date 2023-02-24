@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="ok-dialog-template">
+  <div class="content">
+    <!-- ko if: isHtml -->
+    <p data-bind="html: text" class="dialog-desc"></p>
+    <!-- /ko -->
+    <!-- ko ifnot: isHtml -->
+    <p data-bind="text: text" class="dialog-desc"></p>
+    <!-- /ko -->
+  </div>
+  <div class="button-group ok">
+    <div data-bind="component: {name:'ok-button-group',
+                    params: {okFn: ok, okTitle: okTitle}}"></div>
+  </div>
+</script>

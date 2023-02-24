@@ -1,0 +1,194 @@
+
+<!-- Knockout template for building tab foremen list header -->
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-tasks-template">
+    <div data-test-id="tasks-foreman">
+      <h2 data-bind="ltext: 'tyonjohtajat'"></h2>
+      <icon-button params="buttonClass: 'btn-primary',
+                           id:          'invite-other-foreman-button',
+                           icon:        'circle-plus',
+                           click:       function() { inviteForeman(''); },
+                           ltext:       'application.parties.addForeman.description',
+                           enable:      canInvite">
+      </icon-button>
+      <div data-bind="saveIndicator: indicator"></div>
+      <!-- ko if: _.size( foremanRows() ) -->
+      <div data-bind="template: {name: 'all-foremen-table-template'}"></div>
+      <!-- /ko -->
+    </div>
+</script>
+
+<!-- Knockout template for the building tab foreman list -->
+<script class="ko-template" type="text/x-jquery-tmpl" id="all-foremen-table-template">
+  <foreman-assignments></foreman-assignments>
+  <div class="foreman-status-icons-legend"
+       aria-hidden="true">
+    <span data-bind="text: loc('states') + ':'"></span>
+    <div>
+      <i class="lupicon-circle-check"></i>
+      <span data-bind="ltext: 'foreman.task.ok.label'"></span>
+    </div>
+    <div>
+      <i class="lupicon-circle-dash"></i>
+      <span data-bind="ltext: 'foreman.task.new.label'"></span>
+    </div>
+
+    <div>
+      <i class="lupicon-circle-remove"></i>
+      <span data-bind="ltext: 'foreman.task.rejected.label'"></span>
+    </div>
+    <div>
+      <i class="lupicon-circle-attention"></i>
+      <span data-bind="ltext: 'foreman.task.required.label'"></span>
+    </div>
+  </div>
+  <table class="all-foremen-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th data-bind="ltext: 'application.foreman.table.name'"></th>
+        <th data-bind="ltext: 'application.foreman.table.permit-condition'"></th>
+        <th data-bind="ltext: 'application.foreman.table.substitute-for'"></th>
+        <th data-bind="ltext: 'application.foreman.table.responsibility-period'"></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: sortedForemanRows">
+      <!-- ko ifnot: $data.hidden -->
+      <tr data-bind="attr: {'data-test-name': $data.id ? $data.text : loc('osapuoli.tyonjohtaja.kuntaRoolikoodi.' + $data.lupapisteRole),
+                     'data-foreman-state': $data.statusName}">
+        <td data-bind="ariaText: $data.iconTooltip">
+          <div aria-hidden="true"
+               class="foreman-icon-tooltip-container">
+            <i data-bind="css: $data.icon"></i>
+            <div data-bind="text: $data.iconTooltip,
+                            attr: {class: 'foreman-icon-tooltip ' + $data.statusName}"></div>
+          </div>
+        </td>
+        <td>
+          <!-- Foreman app -->
+          <!-- ko if: $data.id -->
+          <a data-test-id="foreman-app-link"
+             data-bind="attr: {href: '#!/application/' + $data.id},
+                        text: $data.text"></a>
+          <br/>
+          <span data-bind="text: $data.responsibilities"></span>
+          <!-- /ko -->
+
+          <!-- Foreman requirement -->
+          <!-- ko ifnot: $data.id -->
+          <span data-bind="ltext: 'osapuoli.tyonjohtaja.kuntaRoolikoodi.' + $data.lupapisteRole"></span>
+          <!-- /ko -->
+
+          <!-- ko ifnot: _.isEmpty($data.terminationReason) -->
+          <div class="foreman-table-reason">
+            <span class="strong" data-bind="ltext: 'foreman.termination.reason'"></span>
+            <br/>
+            <span data-bind="text: $data.terminationReason"></span>
+          </div>
+          <!-- /ko -->
+        </td>
+        <td data-bind="text: $data.permitCondition"></td>
+        <td>
+          <!-- ko if: $data.id -->
+          <span data-bind="visible: isSubstitute">
+            <span data-bind="text: $data.substituteFor"></span>
+            <br/>
+            <span data-bind="text: $data.substituteDateRange"></span>
+          </span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $data.id -->
+          <span data-bind="text: $data.dateRange"></span>
+          <br/>
+          <span class="strong" data-bind="text: $data.dateRangeStatus"></span>
+          <br/>
+          <span data-bind="text: $data.requestDate"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- Approve termination request button -->
+          <button class="btn btn-primary"
+                  data-test-id="approve-termination"
+                  data-bind="visible: $parent.canApproveTermination($data),
+                             click:   $parent.approveTerminationRequest">
+            <i class="lupicon-check"></i>
+            <span data-bind="ltext: 'approve'"></span>
+          </button>
+
+          <!-- Request termination button -->
+          <button class="ghost"
+                  data-test-id="request-termination"
+                  data-bind="visible: $parent.canRequestTermination($data),
+                             click:   $parent.requestTermination">
+            <span data-bind="ltext:   'foreman.terminate'"></span>
+          </button>
+
+          <!-- Remove rejected foreman button -->
+          <button class="ghost"
+                  data-test-id="remove-foreman"
+                  data-bind="visible: $parent.canRemoveListing($data),
+                             click:   $parent.removeListing">
+            <span data-bind="ltext: 'remove'"></span>
+          </button>
+
+          <!-- Name a foreman button -->
+          <button class="ghost"
+                  data-test-id="invite-foreman"
+                  data-bind="visible: $data.lupapisteRole,
+                             enable:  $parent.canInvite,
+                             click:   function() { $parent.inviteForeman($data.lupapisteRole); },
+                             ltext:   'application.parties.addForeman'">
+            <span></span>
+          </button>
+
+          <!-- Link to foreman app -->
+          <a data-test-id="foreman-app-link"
+             data-bind="visible:  $data.id
+                                  && !$data.terminatable
+                                  && !$data.terminationRequested
+                                  && !$parent.canRemoveListing($data),
+                        ltext:    'view',
+                        attr:     {href: '#!/application/' + $data.id}"></a>
+
+        </td>
+      </tr>
+      <!-- /ko -->
+    </tbody>
+  </table>
+</script>
+
+<!-- Knockout template for the parties tab foreman list -->
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-list-template">
+  <ul class="invited-foremans" data-bind="foreach: foremanRows" data-test-id="invited-foremans">
+    <span></span>
+    <!-- ko if: $data.statusName !== "required" && $data.statusName !== "new" -->
+    <li class="foreman">
+      <span class="foreman-role" data-bind="text: $data.displayRole"></span>
+      <span class="foreman-name" data-bind="text: $data.fullName"></span>
+      <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
+      <a data-bind="attr: {href: '#!/application/' + $data.id}">
+        <span class="foreman-application" data-bind="text: $data.id"></span>
+      </a>
+      <span class="foreman-state"
+            data-bind="ltext: $data.state">
+      </span>
+    </li>
+    <!-- /ko -->
+  </ul>
+</script>
+
+<!-- Knockout template for parties tab foreman list container -->
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-template">
+  <div data-test-id="application-foreman-template">
+    <div class="foreman-info" data-bind="lhtml: 'help.AddForeman'"></div>
+    <div class="foreman-info" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'),
+                                         lhtml: 'help.AddForeman.buttonInfo'"
+         data-test-id="invite-foreman-button-info"></div>
+    <div class="foreman-info" data-bind="visible: !lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'),
+                                         lhtml: 'help.AddForeman.authorityInfo'"
+         data-test-id="invite-foreman-authority-info"></div>
+    <div data-bind="template: {name: 'application-foreman-list-template', data: $data}"></div>
+    <button class="positive margins-s" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'), click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
+  </div>
+</script>

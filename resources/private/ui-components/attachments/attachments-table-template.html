@@ -1,0 +1,197 @@
+<script type="text/x-jquery-tmpl" class="ko-template"
+        id="attachments-table-template">
+  <div class="attachments-table-container">
+    <table class="attachments-table table-even-odd">
+      <thead>
+        <tr>
+          <th data-bind="visible: columns.status"></th>
+          <th data-bind="visible: columns.drawing, ltext: 'attachment.th-drawing-number'"></th>
+          <th data-bind="visible: columns.content, ltext: 'attachment.th-content'" class="attachments-table--wide"></th>
+          <th data-bind="visible: columns.version, ltext: 'application.attachmentVersion'"></th>
+          <th data-bind="visible: columns.type, ltext: 'attachment.th-type-status'"></th>
+          <th data-bind="visible: columns.edited, ltext: 'attachment.th-edited'"></th>
+          <!-- ko if: $component.appModel.isArchivingProject() -->
+          <th data-bind="visible: columns.resell, ltext: 'attachments.resell.header'" data-test-id="myyntipalvelu-column"></th>
+          <!-- /ko -->
+          <!-- ko if: isAuthority() -->
+          <th data-bind="visible: columns.approve, ltext: 'ok'"
+              data-test-id="approve-column"></th>
+          <th data-bind="visible: columns.reject, ltext: 'attachment.th-not-ok'"
+              data-test-id="reject-column"></th>
+          <!-- /ko -->
+          <th data-bind="visible: columns.remove, ltext: 'remove'"></th>
+          <th data-bind="visible: columns.stamp, ltext: 'stamp.select'"></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: attachments">
+        <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
+                              'data-test-state': $parent.testState( $data ),
+                              'attachment-id': $data.id},
+                       click: $parent.getSelectRowFunction($data),
+                       clickBubble: false,
+                       css: {'attachment-row': $parent.selectableRows,
+                             'attachment-multiselect-row': $parent.selectableRows,
+                             'selected': $parent.getRowSelected($data)(),
+                             'even-row': util.isEven( $index() ),
+                             'odd-row': util.isOdd( $index() ),
+                             'row--rejected':  $parent.isRejected( $data )}">
+          <td data-bind="visible: $parent.columns.status">
+            <state-icons params="{attachment: $data, primary: true}"></state-icons>
+          </td>
+          <td data-bind="visible: $parent.columns.drawing">
+            <!-- ko if: $data.drawingNumber -->
+            <span data-bind="text: $data.drawingNumber" class="attachment-drawing-number"></span>
+            <!-- /ko -->
+          </td>
+          <!-- ko if: $parent.hasFile( $data ) -->
+          <td data-bind="visible: $parent.columns.content">
+            <a data-bind="attr: {'href': $parent.buildHash( $data )}, clickBubble: false, click: _.constant(true)"
+               data-test-id="open-attachment">
+                <!-- ko if: $parent.hasContents($data) -->
+                <span data-bind="text: $data.contents()" data-test-id="attachment-contents"></span>
+                <!-- /ko -->
+                <!-- ko ifnot: $parent.hasContents($data) -->
+                <attachment-type-id params="attachment: $data"></attachment-type-id>
+                <!-- /ko -->
+            </a>
+            <br>
+            <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.id},
+                          clickBubble: false,
+                          click: _.constant(true)"
+               target="_blank">
+              <span data-bind="text: latestVersion.filename"></span>
+            </a>
+            <span data-bind="downloadWithIconOnly: {attachmentId: $data.id}"></span>
+          </td>
+          <td data-bind="visible: $parent.columns.version" class="attachment-version-info">
+            <span data-bind="if: latestVersion">
+              <span data-bind="version: latestVersion.version"></span>
+            </span>
+          </td>
+          <td data-bind="visible: $parent.columns.type">
+            <attachment-type-id class="status-icon-text-line" params="attachment: $data"></attachment-type-id>
+            <br>
+            <state-icons params="{attachment: $data, primary: false}"></state-icons>
+          </td>
+          <td data-bind="visible: $parent.columns.edited">
+            <span data-bind="dateTimeString: latestVersion.created"></span><br>
+            <span data-bind="firstLastName: latestVersion.user"></span>
+          </td>
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.hasFile( $data ) -->
+          <td data-bind="visible: $parent.columns.content">
+            <attachment-type-id params="attachment: $data"></attachment-type-id>
+            <br>
+            <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
+          </td>
+          <td data-bind="visible: $parent.columns.version" class="attachment-version-info">
+          </td>
+          <td data-bind="visible: $parent.columns.type">
+            <!-- ko if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('bind-attachment') && $parent.upload -->
+            <attachment-upload params="proxy: {type: $data.type,
+                                       group: $data.group,
+                                       attachmentId: $data.id,
+                                       },
+                                       ltext: 'attachment.addFile',
+                                       upload: $component.upload,
+                                       template: 'attachment-upload-link-template'"></attachment-upload>
+            <!-- /ko -->
+          </td>
+          <td data-bind="visible: $parent.columns.edited">
+            <div data-bind="if: $data.authModel.ok('set-attachment-not-needed')" class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="attr: {'id': $parent.inputId( $index() ),
+                                       'data-test-id': 'not-needed-checkbox' },
+                                checked: $data.notNeeded">
+              <label class="checkbox-label"
+                     data-bind="attr: {'for': $parent.inputId( $index()),
+                                       'data-test-id': 'not-needed-label'},
+                                ltext: 'application.attachmentNotNeeded'"></label>
+            </div>
+          </td>
+          <!-- /ko -->
+          <!-- ko if: $component.appModel.isArchivingProject() -->
+          <td data-bind="visible: $parent.columns.resell">
+            <button class="btn-icon-only"
+                    data-bind="visible: $data.authModel.ok('set-myyntipalvelu-for-attachment'),
+                               css: { positive: $parent.isResellable( $data ),
+                                      approve: !$parent.isResellable( $data ) },
+                               click: $parent.toggleResell,
+                               clickBubble: false">
+              <i class="lupicon-check"></i>
+            </button>
+          </td>
+          <!-- /ko -->
+          <!-- ko if: $parent.isAuthority() -->
+          <td data-bind="visible: $parent.columns.stamp">
+            <div class="stampbox-wrapper">
+              <input type="checkbox"
+                     data-bind="checked: $parent.getRowSelected($data),
+                                enable: $parent.isStampingMode(),
+                                attr: {id: $data.id}">
+              <label class="stampbox-label" data-bind="attr: {'for': $data.id}"></label>
+            </div>
+
+            <span data-bind="text: loc(['stamp.file.status', $parent.getRowStatus($data)()]),
+                             visible: !$parent.isStampingMode()"
+                  data-test-id="attachment-status-text">
+            </span>
+          </td>
+          <td data-bind="visible: $parent.columns.approve">
+            <button class="btn-icon-only"
+                    data-bind="visible: $data.authModel.ok('approve-attachment'),
+                               css: { positive: $parent.isApproved( $data ),
+                                      'no-events': $parent.isApproved( $data ),
+                                      approve: !$parent.isApproved( $data ) },
+                               click: $parent.approve,
+                               clickBubble: false">
+              <i class="lupicon-check"></i>
+            </button>
+          </td>
+          <td data-bind="visible: $parent.columns.reject">
+            <button class="btn-icon-only"
+                    data-bind="visible: $data.authModel.ok('reject-attachment'),
+                               css: { negative: $parent.isRejected( $data ),
+                                      reject: !$parent.isRejected( $data ) },
+                               click: $parent.reject,
+                               clickBubble: false">
+              <i class="lupicon-circle-attention"></i>
+            </button>
+          </td>
+          <!-- /ko -->
+          <td data-bind="visible: $parent.columns.remove">
+            <button class="secondary btn-icon-only"
+                    data-bind="click: $parent.remove,
+                               clickBubble: false,
+                               enable: $data.authModel.ok('delete-attachment')"
+                    data-test-icon="delete-button">
+              <i class="lupicon-remove"></i>
+            </button>
+          </td>
+        </tr>
+        <!-- ko if: $parent.isRejected( $data ) -->
+        <tr class="reject-note-row"
+            data-bind="css: {'even-row': util.isEven( $index() ),
+                       'odd-row': util.isOdd( $index() )}">
+          <td colspan="10"
+              data-bind="component: {name: 'reject-note',
+                         params: {attachmentId: id,
+                         storeState: true,
+                         noteCss: 'table-reject-note',
+                         editorCss: 'table-reject-note-editor',
+                         prefix: util.getIn($data, ['type','type-group']) + '-' + util.getIn($data, ['type','type-id'])}}"></td>
+        </tr>
+        <!-- /ko -->
+        <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
+        <tr class="attachment-assignment-row" data-bind="testId: 'attachment-assignments-' + $data.id">
+          <td colspan="10">
+            <accordion-assignments params="documentAssignments: $component.assignments()[$data.id],
+                                           applicationId: $component.appModel.id,
+                                           authorities: $component.authorities"></accordion-assignments>
+          </td>
+        </tr>
+        <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
+</script>

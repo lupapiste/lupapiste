@@ -1,0 +1,280 @@
+
+#side-panel-template {
+  margin: 0;
+  padding: 0;
+}
+
+#side-panel {
+    @media print {
+        display: none;
+    }
+  z-index: 2001;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  top: 60px;
+
+  .content-wrapper {
+    overflow-y: scroll;
+    float: left;
+    height: 100%;
+    background-color: $white;
+    opacity: 0.98;
+    padding: $marginL;
+    width: 500px;
+    border-left: 1px solid get-signal( "blue" );
+  }
+
+  .header h1 {
+    text-transform: none;
+    font-weight: bold
+  }
+
+  // .header {
+  //   @include disable-select;
+  //   cursor: default;
+  //   h1 {
+  //     line-height: 30px;
+  //     overflow: auto;
+  //     clear: both;
+  //   }
+  //   .title {
+  //     float: left;
+  //   }
+  //   .close-btn {
+  //     @include spite-bg;
+  //     width: 16px;
+  //     height: 16px;
+  //     background-position: 0px -2700px;
+  //     cursor: pointer;
+  //     position: absolute;
+  //     top: $marginS;
+  //     right: $marginS;
+  //   }
+  //   .help {
+  //     margin-left: $marginM;
+  //     float: left;
+  //     &:after {
+  //       border-bottom-color: lighten($lp-dark-grey, 15%);
+  //     }
+  //   }
+  //   .icon.help.expanded {
+  //     margin-bottom: 22px;
+  //   }
+  // }
+
+  .content {
+    height: 100%;
+    textarea {
+      width: 100%;
+    }
+  }
+
+  .content-table {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    display: table;
+
+    .form-input.textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .content-row {
+      display: table-row;
+    }
+
+    .content-cell {
+      display: table-cell;
+      padding-bottom: $marginS;
+      position: relative;
+    }
+  }
+
+  .content.expanded, .content-table.expanded {
+    top: 200px;
+  }
+
+  .panel-info {
+    background: lighten($lp-dark-grey, 15%);
+    padding: $marginS;
+    clear: both;
+  }
+
+  #notice-template {
+    height: 100%;
+  }
+
+  .notice-panel {
+    height: 100%;
+
+    .notice-component {
+      .notice--urgency select {width: 100%}
+      .notice--notes textarea {width: 100%;
+                               height: 20em
+      }
+    }
+  }
+}
+
+#conversation-panel {
+  height: 100%;
+  padding-bottom: 46px;
+  .header {
+    h1 {
+      margin-bottom: 0;
+    }
+  }
+  .highlight-conversation {
+    $hl-border: 1px solid get-signal( "violet");
+    textarea {
+      border-left: $hl-border;
+      border-top: $hl-border;
+      border-bottom: $hl-border;
+    }
+  }
+}
+
+#side-panel .message-buttons {
+  button {
+    margin-bottom: $marginS;
+  }
+}
+
+
+
+//
+// Info side panel
+//
+
+.info-panel-container {
+  overflow-y: scroll;
+  padding: {left: $marginM;
+            right: $marginM;
+           }
+  h2 {
+    font-size: 18px;
+    margin-top: 2em;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  td.spacehog {
+    width: 100%;
+  }
+  .info-links-content {
+    height: 100%;
+    padding-bottom: 2 * $btn-height;
+    .new-link-indicator {
+      color: get-signal( "blue" );
+      margin-left: .2em;
+    }
+  }
+}
+
+@mixin info-table( $bg ) {
+  border: none;
+  margin-bottom: 0;
+  tr {
+    background-color: $bg;
+    border: none;
+    &:hover {
+      background-color: $bg;
+      border: none;
+    }
+    &:hover:nth-child(even) {
+      background: $bg;
+    }
+  }
+  @content;
+}
+
+table.info-link-editor-view {
+  td {
+    padding-left: 0;
+  }
+  @include info-table( transparent ) {}
+  a.link-btn--passive:active {
+    // In Firefox the active state gets stuck after drag'n'drop.
+    color: get-signal( "violet" );
+  }
+}
+
+table.info-link-editor-view.info-link-divider {
+  border-bottom: 1px solid $gray85;
+}
+
+.info-link-drop-zone {
+  border: 1px dashed get-signal( "blue" );
+  min-height: $btn-height;
+  width: 100%;
+
+}
+
+// Dragged link within list
+table.info-link-editor-view.dragging {
+  display: none;
+}
+
+// Drag element
+table.info-link-editor-view + .dragging {
+  display: block !important;
+  max-width: 30em;
+  background-color: $gray51;
+}
+
+
+span.info-link-text {
+  @include link-text( 20em );
+}
+
+span.info-link-text-wide {
+  @include link-text( 28em );
+}
+
+
+@media all and (max-width: $narrow-breakpoint) {
+  table.info-link-editor-view + .dragging {
+    max-width: 24em;
+  }
+  span.info-link-text {
+    max-width: 14em;
+  }
+
+  span.info-link-text-wide {
+    max-width: 22em;
+  }
+}
+
+.info-link-link {
+  margin-bottom: .5em;
+}
+
+
+
+
+table.info-link-editor-edit {
+  @include info-table( white );
+  margin-bottom: 2px;
+  tr:nth-child(odd) {
+    border-bottom: 1px solid $grid-border-color;
+  }
+  td {
+    padding: {
+    left: 5px;
+    right: 5px;
+    }
+  }
+  input {
+    box-sizing: border-box;
+    font-size: 16px;
+    border: none;
+    width: 100%;
+    padding: {
+      bottom: 2px;
+      top: 2px;
+    }
+  }
+}

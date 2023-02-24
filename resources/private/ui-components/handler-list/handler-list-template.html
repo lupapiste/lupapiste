@@ -1,0 +1,18 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="handler-list-template">
+
+  <p data-bind="ltext: 'application.handlers'"></p>
+  <span class="application_summary_text">
+    <ul class="handler-list"
+        data-bind="foreach: handlers">
+      <li data-bind="text: $parent.itemText( $data ),
+                     testId: 'handler-' + $index()"></li>
+    </ul>
+    <a class="handler-list-edit"
+       href="#"
+       data-bind="ltext: 'edit',
+                  click: editHandlers,
+                  visible: canEdit()"
+       data-test-id="edit-handlers"></a>
+  </span>
+</script>

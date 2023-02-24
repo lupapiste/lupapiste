@@ -1,0 +1,19 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="move-to-final-template">
+  <p>
+    <span data-bind="ltext: 'bulletin.application.state.label'"></span>
+    <span class="bulletin-state" data-bind="ltext: 'bulletin.state.final'"></span>
+  </p>
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'date-field',
+                                    params: {value: officialAt,
+                                             lLabel: 'bulletin.verdict.officialAt',
+                                             lPlaceholder: 'choose',
+                                             required: true,
+                                             id: 'officialAt'}}"></div>
+      </div>
+    </div>
+  </div>
+  <div data-bind="template: 'publish-button-template'"></div>
+</script>

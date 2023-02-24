@@ -1,0 +1,25 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="operation-editor-template">
+  <div>
+    <label class="lux lux--inline gap--r1-half align--middle"
+           data-bind="ltext: 'document.operation-editor.description',
+                      attr: {'for': docId + '-op-description-editor'}"></label>
+    <input class="lux align--middle long" type="text"
+           data-bind="textInput: description,
+                      enable: enabled,
+                      attr: {'data-test-id': docModel.testId('op-description-editor-' + docModel.schemaName),
+                             'id': docId + '-op-description-editor'}">
+    <ping params="indicator: indicator"
+          class="ping--block"></ping>
+    <!-- ko if: !isArchiveProject() -->
+    <button class="secondary gap--l1"
+            data-bind="attr: {'data-op-name': operation.name()},
+                       disable: isPrimaryOperation,
+                       click: clickStar,
+                       visible: showStar">
+      <i class="lupicon-star"></i>
+      <span data-bind="ltext: starTitle"></span>
+    </button>
+    <!-- /ko -->
+
+  </div>
+</script>

@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Nosto Consulting Oy, Pasi Lappalainen, tel. +358 400 858101, http://www.nostoconsulting.fi -->
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
+<!-- KRYSP projekti-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:yak="http://www.kuntatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
+		   xmlns:gml="http://www.opengis.net/gml"
+		   xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset"
+		   targetNamespace="http://www.kuntatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
+		   elementFormDefault="qualified"
+		   attributeFormDefault="unqualified"
+		   version="2.2.4">
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	<xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd"/>
+	<!--Local usage-->
+	<!--<xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\gml_dummy.xsd"/>
+	<xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset.xsd"/>-->
+	<!-- ================================================= -->
+	<!-- Package: <<XSDschema>> yleisenalueenkaytonlupahakemus  -->
+	<!-- ================================================= -->
+	<!-- Kohdejoukko: yleisenalueenkaytonlupahakemus -->
+	<xs:complexType name="AbstractYleisenAlueenKaytonLupaAsiaType" abstract="true">
+		<xs:annotation>
+			<xs:documentation>Yleisen alueen kayttolupien abstrakti kohde, josta periytetään eri lupatyypit(SIjoitus-,Työ- ja Käyttölupa)</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="kasittelytietotieto" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Kasittelytieto">
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="yht:KasittelyTiedotType">
+												<xs:sequence>
+													<xs:element name="kasittelija" type="yak:YleisenAlueenOsapuoliType" minOccurs="0"/>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="luvanTunnisteTiedot" type="yht:LuvanTunnisteTiedotType" minOccurs="0"/>
+					<xs:element name="alkuPvm" type="xs:date">
+						<xs:annotation>
+							<xs:documentation>Käyttöaika alkupäivämäärä</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="loppuPvm" type="xs:date">
+						<xs:annotation>
+							<xs:documentation>Käyttöaika loppupäivämäärä</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="kiinteistotunnus" type="yht:KiinteistotunnusType" minOccurs="0"/>
+					<xs:element name="sijaintitieto" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Sijainti" type="yht:SijaintiType" minOccurs="0"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="merkinnatJaPiirroksettieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element ref="yak:Merkinta"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="sijainninKuvaus" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Vapaamuotoinen sijainnin kuvaus</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="pintaala" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Kyseessä kohdealueen pinta-ala.</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:simpleContent>
+								<xs:extension base="xs:double">
+									<xs:attribute name="yksikko" fixed="m^2"/>
+								</xs:extension>
+							</xs:simpleContent>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="osapuolitieto" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Osapuoli" type="yak:YleisenAlueenOsapuoliType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="vastuuhenkilotieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Vastuuhenkilo" minOccurs="0">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="sukunimi" type="xs:string"/>
+											<xs:element name="etunimi" type="xs:string"/>
+											<xs:element name="henkilotunnus" minOccurs="0">
+												<xs:simpleType>
+													<xs:restriction base="xs:string">
+														<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][-+A][0-9][0-9][0-9][A-Y0-9]"/>
+													</xs:restriction>
+												</xs:simpleType>
+											</xs:element>
+											<xs:element name="osoitetieto">
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="osoite" type="yht:PostiosoiteType"/>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="puhelinnumero" type="xs:string"/>
+											<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
+											<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0"/>
+											<xs:element name="patevyystieto" minOccurs="0" maxOccurs="unbounded">
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="Patevyys">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="kuvaus" type="xs:string"/>
+																	<xs:element name="voimassaPvm" type="xs:date" minOccurs="0"/>
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="rooliKoodi" minOccurs="0">
+												<xs:simpleType>
+													<xs:restriction base="xs:string">
+														<xs:enumeration value="maksajan vastuuhenkilö"/>
+														<xs:enumeration value="lupaehdoista/työmaasta vastaava henkilö"/>
+														<xs:enumeration value="hankkeen vastuuhenkilö"/>
+													</xs:restriction>
+												</xs:simpleType>
+											</xs:element>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="maksajatieto">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Maksaja" type="yht:MaksajaType" minOccurs="0"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Liite" type="yak:YleisenAlueenLiiteType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="paatostieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Paatos" type="yak:PaatosType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="katselmustieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Katselmus" type="yak:KatselmusType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="lausuntotieto" type="yak:LausunnotType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="taydennyspyyntoteksti" type="xs:string" minOccurs="0"/>
+					<xs:element name="lupaAsianKuvaus" type="xs:string" minOccurs="0"/>
+					<xs:element name="lupakohtainenLisatietotieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="LupakohtainenLisatieto" type="yht:Attribuutti"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="kayttojaksotieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Toteutuneiden käyttöpäivien lukumäärä.</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Kayttojakso" type="yht:HetkijaksoType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="toimintajaksotieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Toimintajakso" type="yht:HetkijaksoType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="lisatiedot" type="xs:string" minOccurs="0"/>
+					<xs:element name="kunnonilmoitusPvm" type="xs:date" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Päivä, jolloin toiminnallinen kunto on ilmoitettu.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="valmistumisilmoitusPvm" type="xs:date" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Päivä, jolloin työ on ilmoitettu valmiiksi.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="lisaaikatieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Lisaaika">
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="yht:PvmjaksoType">
+												<xs:sequence>
+													<xs:element name="perustelu" type="xs:string">
+														<xs:annotation>
+															<xs:documentation>Hakijan perustelu lisäajalle.</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="sijoituslupaviitetieto" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation/>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Sijoituslupaviite">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="vaadittuKytkin" type="xs:boolean">
+												<xs:annotation>
+													<xs:documentation>Onko vaadittu sijoituslupaa</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+											<xs:element name="tunniste" type="xs:string" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Sijoitusluvan tunnistetieto = Sijoitusluvan kasittelytiedot elementin asiatunnus ?</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="YleisetAlueet" substitutionGroup="gml:_GML">
+		<xs:annotation>
+			<xs:documentation>Skeeman juurielementti</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="gml:AbstractFeatureType">
+					<xs:sequence>
+						<xs:element name="toimituksenTiedot" type="yht:AineistotoimituksentiedotType"/>
+						<xs:element name="yleinenAlueAsiatieto" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element ref="yak:_YleinenAlueLupa"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="_YleinenAlueLupa" type="gml:AbstractFeatureType" abstract="true"/>
+	<xs:simpleType name="SijoituslupaType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="pysyvien maanalaisten rakenteiden sijoittaminen"/>
+			<xs:enumeration value="pysyvien maanpäällisten rakenteiden sijoittaminen"/>
+			<xs:enumeration value="muu sijoituslupa"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TyolupaType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="katutyö"/>
+			<xs:enumeration value="vesihuoltoverkostotyö"/>
+			<xs:enumeration value="joukkoliikennetyö"/>
+			<xs:enumeration value="sähköverkostotyö"/>
+			<xs:enumeration value="kaukolämpöverkostotyö"/>
+			<xs:enumeration value="tietoliikenneverkostotyö"/>
+			<xs:enumeration value="kaasujohtoverkostotyö"/>
+			<xs:enumeration value="mainostaulut, -pilarit ja pysäkkikatokset"/>
+			<xs:enumeration value="verkoston liitostyö"/>
+			<xs:enumeration value="muu"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="KayttolupaType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"/>
+			<xs:enumeration value="mainoslaitteiden ja opasteviittojen sijoittaminen"/>
+			<xs:enumeration value="muut yleiselle alueelle kohdistuvat tilan käytöt"/>
+			<xs:enumeration value="erilaiset messujen ja tapahtumien aikaiset alueiden käytöt"/>
+			<xs:enumeration value="kadulta tapahtuvat nostot"/>
+			<xs:enumeration value="kadulle pystytettävät rakennustelineet"/>
+			<xs:enumeration value="kiinteistön rakentamis- ja korjaamistyöt, joiden suorittamiseksi rajataan osa kadusta tai yleisestä alueesta työmaaksi (ei kaivutöitä)"/>
+			<xs:enumeration value="muu kayttölupa"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Sijoituslupa" substitutionGroup="yak:_YleinenAlueLupa">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="yak:AbstractYleisenAlueenKaytonLupaAsiaType">
+					<xs:sequence>
+						<xs:element name="kayttotarkoitus" type="yak:SijoituslupaType">
+							<xs:annotation>
+								<xs:documentation>Sijoitusluvan käyttötarkoitus</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Tyolupa" substitutionGroup="yak:_YleinenAlueLupa">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="yak:AbstractYleisenAlueenKaytonLupaAsiaType">
+					<xs:sequence>
+						<xs:element name="kayttotarkoitus" type="yak:TyolupaType">
+							<xs:annotation>
+								<xs:documentation>Pääkäyttötarkoitus</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="kayttotarkoitusTarkenne" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Pääkäyttötarkoituksen tarkentavat arvot</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="kadun rakentaminen"/>
+									<xs:enumeration value="kadun kunnossapito"/>
+									<xs:enumeration value="asfaltointityö"/>
+									<xs:enumeration value="kiveystyö"/>
+									<xs:enumeration value="siltatyö"/>
+									<xs:enumeration value="vesijohdon rakentaminen"/>
+									<xs:enumeration value="vesijohdon kunnossapito"/>
+									<xs:enumeration value="vesijohdon vuotokorjaus (äkillinen)"/>
+									<xs:enumeration value="viemärin rakentaminen"/>
+									<xs:enumeration value="viemärin kunnossapito"/>
+									<xs:enumeration value="viemärin vuotokorjaus (äkillinen)"/>
+									<xs:enumeration value="ratatyö"/>
+									<xs:enumeration value="pysäkkityö"/>
+									<xs:enumeration value="muu joukkoliikennetyö"/>
+									<xs:enumeration value="kaapelityö (uudisrakentaminen)"/>
+									<xs:enumeration value="kaapelityö (verkon kunnossapito ja uusiminen)"/>
+									<xs:enumeration value="katuvalotyö"/>
+									<xs:enumeration value="liikennevalotyö"/>
+									<xs:enumeration value="kaappien yms. korjaustyö"/>
+									<xs:enumeration value="vikakorjaus (äkillinen)"/>
+									<xs:enumeration value="pysäkkikatosten, mainospylväiden yms. valaistus"/>
+									<xs:enumeration value="kaukolämpöverkon rakentaminen"/>
+									<xs:enumeration value="kaukolämpöverkon kunnossapito"/>
+									<xs:enumeration value="kaukolämmön vikakorjaus (äkillinen)"/>
+									<xs:enumeration value="puhelinkioskin poisto"/>
+									<xs:enumeration value="verkon rakentaminen"/>
+									<xs:enumeration value="verkon kunnossapito"/>
+									<xs:enumeration value="pysäkkikatokset"/>
+									<xs:enumeration value="mainostaulut ja -pilarit"/>
+									<xs:enumeration value="vesi"/>
+									<xs:enumeration value="viemäri"/>
+									<xs:enumeration value="kaukolämpö"/>
+									<xs:enumeration value="sähkö"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="muu" type="xs:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Käyttötarkoituksen muu - "lisätieto". esim. kaukoviilennys</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="johtoselvitysviitetieto">
+							<xs:annotation>
+								<xs:documentation/>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Johtoselvitysviite">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="vaadittuKytkin" type="xs:boolean">
+													<xs:annotation>
+														<xs:documentation>Onko vaadittu johtoselvitystä</xs:documentation>
+													</xs:annotation>
+												</xs:element>
+												<xs:element name="tunniste" type="xs:string" minOccurs="0">
+													<xs:annotation>
+														<xs:documentation>Johtoselvityksen tunnistetieto</xs:documentation>
+													</xs:annotation>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Kayttolupa" substitutionGroup="yak:_YleinenAlueLupa">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="yak:AbstractYleisenAlueenKaytonLupaAsiaType">
+					<xs:sequence>
+						<xs:element name="kayttotarkoitus" type="yak:KayttolupaType">
+							<xs:annotation>
+								<xs:documentation>Käyttöluvan tarkoitus</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Liikennejarjestelylupa" substitutionGroup="yak:_YleinenAlueLupa">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="yak:AbstractYleisenAlueenKaytonLupaAsiaType">
+					<xs:sequence>
+						<xs:element name="kayttotarkoitus" type="yak:TyolupaType">
+							<xs:annotation>
+								<xs:documentation>Pääkäyttötarkoitus</xs:documentation>
+								<xs:documentation>Pääkäyttötarkoitus</xs:documentation>
+								<xs:documentation>Pääkäyttötarkoitus</xs:documentation>
+								<xs:documentation>Pääkäyttötarkoitus</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="kayttotarkoitusTarkenne" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Pääkäyttötarkoituksen tarkentavat arvot</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="kadun rakentaminen"/>
+									<xs:enumeration value="kadun kunnossapito"/>
+									<xs:enumeration value="asfaltointityö"/>
+									<xs:enumeration value="kiveystyö"/>
+									<xs:enumeration value="siltatyö"/>
+									<xs:enumeration value="vesijohdon rakentaminen"/>
+									<xs:enumeration value="vesijohdon kunnossapito"/>
+									<xs:enumeration value="vesijohdon vuotokorjaus (äkillinen)"/>
+									<xs:enumeration value="viemärin rakentaminen"/>
+									<xs:enumeration value="viemärin kunnossapito"/>
+									<xs:enumeration value="viemärin vuotokorjaus (äkillinen)"/>
+									<xs:enumeration value="ratatyö"/>
+									<xs:enumeration value="pysäkkityö"/>
+									<xs:enumeration value="muu joukkoliikennetyö"/>
+									<xs:enumeration value="kaapelityö (uudisrakentaminen)"/>
+									<xs:enumeration value="kaapelityö (verkon kunnossapito ja uusiminen)"/>
+									<xs:enumeration value="katuvalotyö"/>
+									<xs:enumeration value="liikennevalotyö"/>
+									<xs:enumeration value="kaappien yms. korjaustyö"/>
+									<xs:enumeration value="vikakorjaus (äkillinen)"/>
+									<xs:enumeration value="pysäkkikatosten, mainospylväiden yms. valaistus"/>
+									<xs:enumeration value="kaukolämpöverkon rakentaminen"/>
+									<xs:enumeration value="kaukolämpöverkon kunnossapito"/>
+									<xs:enumeration value="kaukolämmön vikakorjaus (äkillinen)"/>
+									<xs:enumeration value="puhelinkioskin poisto"/>
+									<xs:enumeration value="verkon rakentaminen"/>
+									<xs:enumeration value="verkon kunnossapito"/>
+									<xs:enumeration value="pysäkkikatokset"/>
+									<xs:enumeration value="mainostaulut ja -pilarit"/>
+									<xs:enumeration value="vesi"/>
+									<xs:enumeration value="viemäri"/>
+									<xs:enumeration value="kaukolämpö"/>
+									<xs:enumeration value="sähkö"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="muu" type="xs:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Käyttötarkoituksen muu - "lisätieto". esim. kaukoviilennys</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="YleisenAlueenLiiteType">
+		<xs:complexContent>
+			<xs:extension base="yht:LiiteType">
+				<xs:sequence>
+					<xs:element name="tekija" type="yak:YleisenAlueenOsapuoliType" minOccurs="0"/>
+					<xs:element name="tyyppi" type="xs:string" minOccurs="0"/>
+					<xs:element name="metatietotieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Metatieto">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="metatietoArvo" type="xs:string" minOccurs="0"/>
+											<xs:element name="metatietoNimi" type="xs:string" minOccurs="0"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="YleisenAlueenOsapuoliType">
+		<xs:sequence>
+			<xs:element name="henkilotieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Henkilo" type="yht:YhteyshenkiloType">
+							<xs:annotation>
+								<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="yritystieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Yritys" type="yht:YritysType">
+							<xs:annotation>
+								<xs:documentation>Jos kyseessä on yritys tvs. niin tiedot siirretään tässä elementissä</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="turvakieltoKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="rooliKoodi" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="muu"/>
+						<xs:enumeration value="yhteyshenkilö"/>
+						<xs:enumeration value="työnsuorittaja"/>
+						<xs:enumeration value="hakija"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaatosType">
+		<xs:sequence>
+			<xs:element name="takuuaikaPaivat" type="xs:int" minOccurs="0"/>
+			<xs:element name="lupaehdotJaMaaraykset" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="paatoslinkki" type="xs:string" minOccurs="0"/>
+			<xs:element name="paatosdokumentinPvm" type="xs:date" minOccurs="0"/>
+			<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Liite" type="yak:YleisenAlueenLiiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LausunnotType">
+		<xs:sequence>
+			<xs:element name="Lausunto" type="yak:LausuntoType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LausuntoType">
+		<xs:sequence>
+			<xs:element name="viranomainen" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Taho jolta lausunto pyydetty</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pyyntoPvm" type="xs:date"/>
+			<xs:element name="maaraPvm" type="xs:date" minOccurs="0"/>
+			<xs:element name="lausuntotieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Lausunto">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="viranomainen" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>Lausunnon antanut taho</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="lausunto" type="xs:string"/>
+									<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Liite" type="yak:YleisenAlueenLiiteType"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element name="lausuntoPvm" type="xs:date"/>
+									<xs:element name="puoltotieto">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Puolto">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="puolto">
+																<xs:simpleType>
+																	<xs:restriction base="xs:string">
+																		<xs:enumeration value="ei tiedossa"/>
+																		<xs:enumeration value="ei puolla"/>
+																		<xs:enumeration value="puoltaa"/>
+																		<xs:enumeration value="ehdoilla"/>
+																		<xs:enumeration value="jätetty pöydälle"/>
+																	</xs:restriction>
+																</xs:simpleType>
+															</xs:element>
+															<xs:element name="lisatietotieto" minOccurs="0">
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element name="Lisatieto" type="yak:YleisenAlueenLiiteType"/>
+																	</xs:sequence>
+																</xs:complexType>
+															</xs:element>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Merkinta" type="yht:MerkintaType" substitutionGroup="gml:_Feature"/>
+	<xs:complexType name="KatselmusType">
+		<xs:sequence>
+			<xs:element name="muuTunnustieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="MuuTunnus" type="yht:MuuTunnusType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="pitoPvm" type="xs:date" minOccurs="0"/>
+			<xs:element name="pitaja" type="xs:string" minOccurs="0"/>
+			<xs:element name="katselmuksenLaji">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Aloituskatselmus"/>
+						<xs:enumeration value="Loppukatselmus"/>
+						<xs:enumeration value="Muu valvontakäynti"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="vaadittuLupaehtonaKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="huomautustieto" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Katselmuksessa annetut huomatukset/velvoitteet</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Huomautus" type="yak:HuomautusType" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="katselmuspoytakirja" type="yht:RakennusvalvontaLiiteType" minOccurs="0"/>
+			<xs:element name="tarkastuksenTaiKatselmuksenNimi" type="xs:string" minOccurs="0"/>
+			<xs:element name="lasnaolijat" type="xs:string" minOccurs="0"/>
+			<xs:element name="poikkeamat" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="HuomautusType">
+		<xs:sequence>
+			<xs:element name="kuvaus" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Huomautuksen kuvaus</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="maaraAika" type="xs:date" minOccurs="0"/>
+			<xs:element name="toteamisHetki" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Huomautus/velvoite on toteutunut</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="toteaja" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

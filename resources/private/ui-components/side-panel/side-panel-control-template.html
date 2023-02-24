@@ -1,0 +1,64 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="side-panel-control-template">
+  <!-- ko if: showControls -->
+  <!-- ko if: showConversationControl -->
+  <button class="navi-toggle"
+          data-test-id="side-panel-conversation"
+          data-bind="click: toggleFn( 'conversation' ),
+                     ariaLtext: 'conversation.title',
+                     css: {selected: showConversation}">
+    <i class="lupicon-conversation"
+       aria-hidden="true"></i>
+    <span class="wide-hide"
+          data-bind="ltext: 'conversation.title'"></span>
+    <!-- ko if: unseenComments -->
+    <span><span class="indicator"
+                data-bind="text: unseenComments"></span></span>
+    <!-- /ko -->
+  </button>
+  <!-- /ko -->
+
+  <!-- ko if: showNoticeControl -->
+  <button class="navi-toggle"
+          data-test-id="side-panel-notice"
+          data-bind="click: toggleFn( 'notice' ),
+                     ariaLtext: 'notice.title',
+                     css: {selected: showNotice}">
+    <i data-bind="attr: {class: noticeIcon}"
+       aria-hidden="true"></i>
+    <span class="wide-hide"
+          data-bind="ltext: 'notice.title'"></span>
+    <!-- ko if: unseenNotice -->
+    <span><span class="indicator">#</span></span>
+    <!-- /ko -->
+  </button>
+  <!-- /ko -->
+
+  <!-- ko if: showCompanyNotesControl -->
+  <button class="navi-toggle"
+          data-test-id="side-panel-company-notes"
+          data-bind="click: toggleFn( 'notes' ),
+                     ariaLtext: 'company-notes.title',
+                     css: {selected: showCompanyNotes}">
+    <i data-bind="attr: {class: noticeIcon}"
+       aria-hidden="true"></i>
+    <span class="wide-hide"
+          data-bind="ltext: 'company-notes.title'"></span>
+    <!-- ko if: unseenCompanyNotes -->
+    <span><span class="indicator">#</span></span>
+    <!-- /ko -->
+  </button>
+  <!-- /ko -->
+
+  <button class="navi-toggle wide-icon-only"
+          data-test-id="side-panel-info"
+          data-bind="click: toggleFn( 'info' ),
+                     ariaLtext: 'info.button',
+                     css: {selected: showInfo}">
+    <i data-bind="attr: {class: infoIcon}"
+       aria-hidden="true"></i>
+    <span data-bind="ltext: 'info.button'"></span>
+  </button>
+
+  <!-- /ko -->
+</script>

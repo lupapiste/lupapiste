@@ -1,0 +1,8 @@
+**/*.min.*js
+**/*.debug.js
+resources/private/jquery/*
+resources/private/jquery-upload/*
+resources/private/knockout/*
+resources/private/ol/*
+resources/public/lp-static/js/*
+resources/public/lp-static/js/out/*

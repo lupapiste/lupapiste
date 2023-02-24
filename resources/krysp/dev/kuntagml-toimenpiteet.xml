@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.8/yhteiset.xsd http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta/2.2.2/rakennusvalvonta.xsd">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>Sample</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Järvenpää</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2014-10-20</yht:toimitusPvm>
+    <yht:kuntakoodi>186</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.94">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2014-09-17Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2014-08-21Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2014-09-29Z</yht:pvm>
+          <yht:tila>rakennustyöt aloitettu</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>This is my id</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>18600014-0241</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2014-08-21Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pena Jouko Tapani</yht:etunimi>
+                  <yht:sukunimi>Panaani</yht:sukunimi>
+                </yht:nimi>
+                <yht:sahkopostiosoite>pena@example.com</yht:sahkopostiosoite>
+              </yht:henkilo>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pena Jouko Tapani</yht:etunimi>
+                  <yht:sukunimi>Panaani</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Kotituvantie 1</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>13401</yht:postinumero>
+                  <yht:postitoimipaikannimi>INARI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>pena@example.com</yht:sahkopostiosoite>
+              </yht:henkilo>
+              <yht:turvakieltoKytkin>true</yht:turvakieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.73896">
+          <yht:yksilointitieto>214796</yht:yksilointitieto>
+          <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Kylykylä</yht:kylanimi>
+                  <yht:kiinteistotunnus>18600303560006</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>false</yht:kokotilaKytkin>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:osoite>
+            <yht:kunta>186</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Kylykuja</yht:teksti>
+              <yht:teksti xml:lang="sv">Kylygränden</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>3</yht:osoitenumero>
+            <yht:osoitenumero2>5</yht:osoitenumero2>
+            <yht:jakokirjain>b</yht:jakokirjain>
+            <yht:porras>D</yht:porras>
+            <yht:huoneisto>35</yht:huoneisto>
+            <yht:postinumero>04420</yht:postinumero>
+            <yht:postitoimipaikannimi>JÄRVENPÄÄ</yht:postitoimipaikannimi>
+          </yht:osoite>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:uusi>
+            <rakval:kuvaus>Uusi</rakval:kuvaus>
+            <rakval:aloitusPvm>2014-09-29Z</rakval:aloitusPvm>
+          </rakval:uusi>
+          <rakval:rakennustieto>
+            <rakval:Rakennus gml:id="rakennus.4715">
+              <yht:yksilointitieto>214796</yht:yksilointitieto>
+              <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:valtakunnallinenNumero>100222397J</rakval:valtakunnallinenNumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>18600303560006</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>002</rakval:aanestysalue>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
+                <rakval:tilavuus>443</rakval:tilavuus>
+                <rakval:kokonaisala>129</rakval:kokonaisala>
+                <rakval:osoite>
+                  <yht:kunta>186</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="fi">Kylykuja</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>3</yht:osoitenumero>
+                  <yht:postinumero>04440</yht:postinumero>
+                  <yht:postitoimipaikannimi>JÄRVENPÄÄ</yht:postitoimipaikannimi>
+                </rakval:osoite>
+                <rakval:kerrosluku>1</rakval:kerrosluku>
+                <rakval:kerrosala>125</rakval:kerrosala>
+                <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine>
+                  <rakval:rakennusaine>puu</rakval:rakennusaine>
+                </rakval:kantavaRakennusaine>
+                <rakval:julkisivu>
+                  <rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali>
+                </rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:energialuokka>B</rakval:energialuokka>
+                <rakval:energiatehokkuusluku>139</rakval:energiatehokkuusluku>
+                <rakval:energiatehokkuusluvunYksikko>kWh/brm2/vuosi</rakval:energiatehokkuusluvunYksikko>
+                <rakval:paloluokka>P3</rakval:paloluokka>
+                <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                <rakval:lammonlahde>
+                  <rakval:muu>Muu</rakval:muu>
+                </rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                  <rakval:saunoja>1</rakval:saunoja>
+                </rakval:varusteet>
+              </rakval:rakennuksenTiedot>
+              <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
+              <rakval:omistajatieto>
+                <rakval:Omistaja>
+                  <yht:kuntaRooliKoodi>Rakennuksen omistaja</yht:kuntaRooliKoodi>
+                  <yht:VRKrooliKoodi>rakennuksen omistaja</yht:VRKrooliKoodi>
+                  <yht:henkilo>
+                    <yht:nimi>
+                      <yht:etunimi>Matti</yht:etunimi>
+                      <yht:sukunimi>Mainio</yht:sukunimi>
+                    </yht:nimi>
+                    <yht:osoite>
+                      <yht:osoitenimi>
+                        <yht:teksti>Mäennyppylänkatu 2 D 37</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>09990</yht:postinumero>
+                      <yht:postitoimipaikannimi>Testikaupunki</yht:postitoimipaikannimi>
+                    </yht:osoite>
+                  </yht:henkilo>
+                  <rakval:omistajalaji>
+                    <rakval:omistajalaji>muu yksityinen henkilö tai perikunta</rakval:omistajalaji>
+                  </rakval:omistajalaji>
+                </rakval:Omistaja>
+              </rakval:omistajatieto>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:laajennus>
+            <rakval:laajennuksentiedot>
+              <rakval:huoneistoala>
+                <yht:kayttotarkoitusKoodi>opetustilaa</yht:kayttotarkoitusKoodi>
+              </rakval:huoneistoala>
+            </rakval:laajennuksentiedot>
+            <rakval:kuvaus>Laajennus</rakval:kuvaus>
+            <rakval:perusparannusKytkin>true</rakval:perusparannusKytkin>
+          </rakval:laajennus>
+          <rakval:rakennustieto>
+            <rakval:Rakennus gml:id="rakennus.4716">
+              <yht:yksilointitieto>214796</yht:yksilointitieto>
+              <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:valtakunnallinenNumero>100222398K</rakval:valtakunnallinenNumero>
+                  <rakval:jarjestysnumero>2</rakval:jarjestysnumero>
+                  <rakval:kiinttun>18600303560006</rakval:kiinttun>
+                  <rakval:rakennusnro>002</rakval:rakennusnro>
+                  <rakval:aanestysalue>002</rakval:aanestysalue>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
+                <rakval:tilavuus>443</rakval:tilavuus>
+                <rakval:kokonaisala>129</rakval:kokonaisala>
+                <rakval:osoite>
+                  <yht:kunta>186</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="fi">Kylykuja</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>3</yht:osoitenumero>
+                  <yht:postinumero>04440</yht:postinumero>
+                  <yht:postitoimipaikannimi>JÄRVENPÄÄ</yht:postitoimipaikannimi>
+                </rakval:osoite>
+                <rakval:kerrosluku>1</rakval:kerrosluku>
+                <rakval:kerrosala>125</rakval:kerrosala>
+                <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine>
+                  <rakval:rakennusaine>puu</rakval:rakennusaine>
+                </rakval:kantavaRakennusaine>
+                <rakval:julkisivu>
+                  <rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali>
+                </rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:energialuokka>B</rakval:energialuokka>
+                <rakval:energiatehokkuusluku>139</rakval:energiatehokkuusluku>
+                <rakval:energiatehokkuusluvunYksikko>kWh/brm2/vuosi</rakval:energiatehokkuusluvunYksikko>
+                <rakval:paloluokka>P3</rakval:paloluokka>
+                <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                <rakval:lammonlahde>
+                  <rakval:muu>Muu</rakval:muu>
+                </rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                  <rakval:saunoja>1</rakval:saunoja>
+                </rakval:varusteet>
+              </rakval:rakennuksenTiedot>
+              <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:uudelleenrakentaminen>
+            <rakval:muutostyonLaji>perustusten ja kantavien rakenteiden muutos- ja korjaustyöt</rakval:muutostyonLaji>
+            <rakval:kuvaus>Uudelleenrakentaminen</rakval:kuvaus>
+            <rakval:perusparannusKytkin>true</rakval:perusparannusKytkin>
+          </rakval:uudelleenrakentaminen>
+          <rakval:rakennelmatieto>
+            <rakval:Rakennelma gml:id="rakennelma.4899">
+              <yht:yksilointitieto>214796</yht:yksilointitieto>
+              <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:kuvaus>
+                <rakval:kuvaus>Maalämpöpumppujärjestelmä</rakval:kuvaus>
+              </rakval:kuvaus>
+              <rakval:tunnus>
+                <rakval:jarjestysnumero>3</rakval:jarjestysnumero>
+                <rakval:kiinttun>18600000000000</rakval:kiinttun>
+                <rakval:rakennusnro>003</rakval:rakennusnro>
+                <rakval:aanestysalue>002</rakval:aanestysalue>
+              </rakval:tunnus>
+              <rakval:kayttotarkoitus>Maalämpöpumppujärjestelmä</rakval:kayttotarkoitus>
+            </rakval:Rakennelma>
+          </rakval:rakennelmatieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:purkaminen>
+            <rakval:kuvaus>Purkaminen</rakval:kuvaus>
+          </rakval:purkaminen>
+          <rakval:rakennelmatieto>
+            <rakval:Rakennelma gml:id="rakennelma.4900">
+              <yht:yksilointitieto>214796</yht:yksilointitieto>
+              <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:kuvaus>
+                <rakval:kuvaus>Maalämpöpumppujärjestelmä</rakval:kuvaus>
+              </rakval:kuvaus>
+              <rakval:tunnus>
+                <rakval:jarjestysnumero>3</rakval:jarjestysnumero>
+                <rakval:kiinttun>18600000000000</rakval:kiinttun>
+                <rakval:rakennusnro>003</rakval:rakennusnro>
+                <rakval:aanestysalue>002</rakval:aanestysalue>
+              </rakval:tunnus>
+              <rakval:kayttotarkoitus>Maalämpöpumppujärjestelmä</rakval:kayttotarkoitus>
+            </rakval:Rakennelma>
+          </rakval:rakennelmatieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:muuMuutosTyo>
+            <rakval:muutostyonLaji>rakennuksen pääasiallinen käyttötarkoitusmuutos</rakval:muutostyonLaji>
+            <rakval:kuvaus>Onpahan vaan muutostyö</rakval:kuvaus>
+            <rakval:perusparannusKytkin>true</rakval:perusparannusKytkin>
+            <rakval:rakennustietojaEimuutetaKytkin>true</rakval:rakennustietojaEimuutetaKytkin>
+          </rakval:muuMuutosTyo>
+          <rakval:rakennelmatieto>
+            <rakval:Rakennelma gml:id="rakennelma.4901">
+              <yht:yksilointitieto>214796</yht:yksilointitieto>
+              <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:kuvaus>
+                <rakval:kuvaus>Maalämpöpumppujärjestelmä</rakval:kuvaus>
+              </rakval:kuvaus>
+              <rakval:tunnus>
+                <rakval:jarjestysnumero>3</rakval:jarjestysnumero>
+                <rakval:kiinttun>18600000000000</rakval:kiinttun>
+                <rakval:rakennusnro>003</rakval:rakennusnro>
+                <rakval:aanestysalue>002</rakval:aanestysalue>
+              </rakval:tunnus>
+              <rakval:kayttotarkoitus>Maalämpöpumppujärjestelmä</rakval:kayttotarkoitus>
+            </rakval:Rakennelma>
+          </rakval:rakennelmatieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:kaupunkikuvaToimenpide>
+            <rakval:kuvaus>Kaupunkikuva</rakval:kuvaus>
+          </rakval:kaupunkikuvaToimenpide>
+          <rakval:rakennelmatieto>
+            <rakval:Rakennelma gml:id="rakennelma.4902">
+              <yht:yksilointitieto>214796</yht:yksilointitieto>
+              <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:kuvaus>
+                <rakval:kuvaus>Maalämpöpumppujärjestelmä</rakval:kuvaus>
+              </rakval:kuvaus>
+              <rakval:tunnus>
+                <rakval:jarjestysnumero>3</rakval:jarjestysnumero>
+                <rakval:kiinttun>18600000000000</rakval:kiinttun>
+                <rakval:rakennusnro>003</rakval:rakennusnro>
+                <rakval:aanestysalue>002</rakval:aanestysalue>
+              </rakval:tunnus>
+              <rakval:kayttotarkoitus>Maalämpöpumppujärjestelmä</rakval:kayttotarkoitus>
+            </rakval:Rakennelma>
+          </rakval:rakennelmatieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2017-10-04Z</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2014-10-04Z</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2019-10-04Z</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2014-09-19Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2014-10-03Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2014-09-18Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupatarkastaja</yht:paatoksentekija>
+            <yht:paatospvm>2014-09-17Z</yht:paatospvm>
+            <yht:pykala>124</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen>Poikekkaa meillä!</rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

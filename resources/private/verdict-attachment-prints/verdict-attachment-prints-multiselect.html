@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container" id="verdict-attachments-select">
+      <div class="nav-back-container">
+        <a class="btn left-align secondary"
+           data-bind="click: cancelSelecting"
+           data-test-id="back-to-application-from-multiselect">
+            <i class="lupicon-chevron-start"></i>
+          <span data-bind="ltext: 'application.return'"></span>
+        </a>
+      </div>
+      <div class="attachment-multiselect-content" data-bind="if: selectingMode">
+        <div id="attachments-multiselect-component-container"
+             data-bind="component: {name: 'attachments-multiselect',
+                                    params: {attachments: filteredAttachments(),
+                                             titleLoc: 'application.select-verdict-attachments',
+                                             okLoc: 'verdict-attachments-multiselect.mark-selected-as-verdict-attachments',
+                                             saveFn: setAttachmentsAsVerdictAttachment,
+                                             authKey: 'set-attachments-as-verdict-attachment'}}"></div>
+      </div>
+    </section>
+  </body>
+</html>

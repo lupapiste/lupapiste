@@ -1,0 +1,320 @@
+@use "sass:math";
+
+#calendar-admin>.container>div {
+  padding: 0px $baseline;
+}
+
+.calendar-slot-bubble {
+  font-size: $baseline * 0.66;
+  div {
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin-bottom: 0px;
+  }
+  &.weekday-1 {
+    float: left;
+    margin-left: 6%;
+  }
+  &.weekday-2 {
+    float: left;
+    margin-left: 25%;
+  }
+  &.weekday-3 {
+    float: left;
+    margin-left: 44%;
+  }
+  &.weekday-4 {
+    float: left;
+    margin-left: 63%;
+  }
+  &.weekday-5 {
+    right: 0px;
+    margin-right: 1%;
+  }
+
+  input[type=text] {
+    padding-left: math.div($baseline, 4);
+    width: $baseline * 2;
+  }
+
+  .amount-controls > [class^="lupicon-"]:before, [class*=" lupicon-"]:before {
+    position: relative;
+    top: math.div($baseline, 6);
+  }
+}
+
+#legend-greenbox {
+  height: 15px;
+  width: 15px;
+  background-color: $green-dark;
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
+#legend-orangebox {
+  height: 15px;
+  width: 15px;
+  background-color: $orange-dark;
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
+#triangle-topright {
+  width: 0;
+  height: 0;
+  float: right;
+  border-top: 15px solid grey;
+  border-left: 15px solid transparent;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
+.calendar-notification-list {
+  margin-bottom: 36px;
+}
+
+.calendar-pending-action {
+  width: 96%;
+
+  h3 {
+    margin-top: $marginM;
+    font-weight: bold;
+  }
+
+  .calendar-pending-action-item {
+    border: 1px solid $gray221;
+    margin-top: $marginM;
+
+    .times {
+      display: inline-block;
+      font-weight: bold;
+      vertical-align: top;
+      text-align: center;
+      margin: $marginS $marginM;
+    }
+
+    .titlebar {
+      display: inline-block;
+      border-left: 1px solid $gray221;
+      padding-left: 6px;
+      margin: $marginS 0px;
+      height: $baseline * 2;
+
+      button span {
+        display: inherit;
+      }
+
+      &.buttons-box {
+        float: right;
+        padding: $marginS;
+      }
+
+      &.undo-link, &.status {
+        float: right;
+        padding: $marginM;
+      }
+
+      &.status {
+        font-weight: bold;
+      }
+    }
+
+    .startTime {
+      display: inherit;
+      font-size: 20px;
+    }
+
+    .endTime {
+      display: inherit;
+      font-size: 12px;
+    }
+  }
+}
+
+.calendar-table {
+  width:100%;
+  min-height: $baseline * 6;
+  padding-top: $baseline;
+
+  .nav-actions {
+    width: 96%;
+    .month {
+      float: left;
+      margin-left: 5%;
+      padding-left: $marginM;
+      font-size: $baseline * 0.75;
+      font-weight: bold;
+    }
+    .nav-links {
+      vertical-align: top;
+    }
+    text-align: right;
+  }
+
+  table {
+    width: 96%;
+    tr {
+      border: none;
+    }
+
+    th {
+      background: $white;
+      font-size: $baseline * 0.75;
+      font-weight: normal;
+
+      &.date-today {
+        background: $gray221;
+        border: 1px solid #dddddd;
+      }
+    }
+
+    td {
+      background: $gray247;
+      padding: 0;
+      margin: $marginS;
+      width: 18%;
+      border: 1px solid #dddddd;
+
+      &:first-child {
+        font-size: $baseline * 0.75;
+        font-weight: normal;
+        background: $white;
+        width: 5%;
+        border: none;
+      }
+
+      &.date-today {
+        background: $gray221;
+      }
+
+      div.timestamp {
+        height: 60px; // hour slots => 1 px per minute
+      }
+
+      &.date div.timeline-slot {
+        height: 60px; // hour slots => 1 px per minute
+        border-bottom: 1px solid #ccc;
+
+        &:nth-child(even) {
+          background: $white;
+        }
+
+        &:hover {
+          background: $gray221;
+        }
+      }
+
+      &.date-today div.timeline-slot {
+        height: 60px; // hour slots => 1 px per minute
+        border-bottom: 1px solid #ccc;
+        background: $gray238;
+
+        &:hover {
+          background: $gray221;
+        }
+      }
+
+      div.calendar-slot {
+        position: absolute;
+        width: 100%;
+        padding: $marginS;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: $orange-dark; // This is needed because of text ellipsis
+
+        #triangle-topright {
+          margin-right: 0px !important;
+          margin-top: $marginS;
+        }
+
+        &.booked {
+          color: $white;
+          background: $green-dark;
+
+          a {
+            color: $white;
+          }
+        }
+
+        &.available-slot button.reserve-slot {
+          background: inherit;
+          width: 100%;
+          height: 100%;
+          font-size: $baseline * 0.95;
+          color: $orange-dark;
+          text-align: center;
+          display: table;
+        }
+
+        &.available-slot button.reserve-slot div {
+          display: inline;
+          margin-right: auto;
+          margin-left: auto;
+        }
+
+        &.available-slot button.reserve-slot div i, & button.reserve-slot div span {
+          display: table-cell;
+          vertical-align: middle;
+        }
+
+        &.reservation {
+          padding-top: 0;
+          padding-bottom: 0;
+          padding-left: math.div($baseline, 4);
+          color: white;
+          background: $green-dark;
+
+          &.read-only {
+            background: none;
+
+            div {
+              color: grey;
+            }
+          }
+
+          &.accepted {
+            color: white;
+            background: $orange-dark;
+
+            a {
+              color: white;
+            }
+          }
+
+
+
+          div {
+            height: 20px;
+          }
+        }
+
+      }
+    }
+
+  }
+}
+
+#mycalendar .container, #new-appointment .container {
+  padding: math.div($baseline, 2) $baseline;
+}
+
+#mycalendar {
+  h1 {
+    margin-top: $baseline;
+  }
+
+  div.view-toggle {
+    float: right;
+    padding-right: 4%;
+    text-align: right;
+  }
+}
+
+#application-calendar-tab div.times-filter-group {
+  margin-top: $baseline;
+}

@@ -1,0 +1,1838 @@
+@use 'sass:math';
+@use 'sass:color';
+
+legend {
+  font-size: $baseline * 0.9;
+  font-family: $font-heading;
+  margin:0 0 $marginM;
+}
+
+// Text fields
+//
+// :hover   - Subtle hover style
+// :focus   - Tell the user "Hello, you've selected me!"
+//
+// Styleguide 2.1
+/*
+[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], [type="time"], [type="number"], select, textarea {
+  background: #fff;
+  border: 1px solid #c9c9c9;
+  font-size: 0.875em;
+  margin:0;
+  outline: 0;
+  padding-left: $marginS;
+
+
+  // -webkit-transition: border 125ms ease;
+  // -moz-transition: border 125ms ease;
+  // -ms-transition: border 125ms ease;
+  // -o-transition: border 125ms ease;
+  // transition: border 125ms ease;
+
+  // -webkit-box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
+  // box-shadow: inset 0 2px 3px darken($lp-light-grey, 10%), 0 1px 0 #fff;
+
+  &:hover {
+//    border-color:#b5b5b5;
+  }
+
+  &:focus {
+    //border-color: #17c;
+    // -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
+  }
+  // newbies
+  &.source-value-changed {
+    border: 2px solid $green-dark;
+  }
+  &.err {
+    color: red;
+    border-color: red;
+    border-width: 3px;
+    border-radius: 2px;
+  }
+  &.warn {
+    border-color: red;
+    border-width: 3px;
+    border-radius: 2px;
+  }
+  &.tip {
+    border-color: lighten($lp-orange, 10%);
+    border-width: 1px;
+  }
+}
+*/
+// Drop-down
+//
+// Styleguide 2.2
+// select {
+//   margin:0;
+// }
+
+// Checkboxes
+//
+// Styleguide 2.3
+
+// label + label {
+//   margin-left:15px;
+// }
+
+// input[readonly], textarea[readonly] {
+//   background: none;
+//   border: none;
+//   font-size: 0.875em;
+//   margin:0;
+//   outline: 0;
+//   padding-left: 0.5em;
+//   cursor: text;
+//   -webkit-box-shadow: none;
+//   box-shadow: none;
+//   border-radius: 0;
+//   width: 100%;
+//   &:hover {
+
+//   }
+
+//   &:focus {
+
+//     -webkit-box-shadow: none;
+//   }
+
+// }
+
+// LUX FIXME
+.form-indicator {
+  z-index: 12000;
+  position: absolute;
+  min-height: 18px;
+  display: none;
+  top: 20px;
+  right: 8px;
+  padding: $marginS;
+  background-color: white;
+  border: 1px solid $lp-light-grey;
+  box-shadow: 1px 1px 2px $lp-dark-grey;
+  white-space: nowrap;
+
+  .icon {
+    @include spite-bg;
+    display: none;
+    height: 24px;
+    width: 24px;
+    vertical-align: top;
+    margin: 0;
+  }
+  .text {
+    display: inline-block;
+    vertical-align: top;
+  }
+  &.form-input-saved {
+    .icon {
+      background-position: 6px -2496px;
+      display: inline-block;
+    }
+
+  }
+  &.form-input-warn {
+    .icon {
+      background-position: 6px -3196px;
+      display: inline-block;
+    }
+  }
+  &.form-input-err {
+    .icon {
+      background-position: 6px -2396px;
+      display: inline-block;
+    }
+  }
+}
+
+span.group-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+div.warnings {
+  margin-bottom: 1em;
+  span.warning::before {
+    @include lupicon-font(14px);
+    content: "\e63c";
+    margin-right: 1em;
+    color: get-signal("red");
+  }
+}
+
+warnings.table-warnings ul.warnings {
+  margin-bottom: 0;
+}
+
+ping {
+  position: relative;
+  left: 80%;
+  top: 100;
+  &.ping--block {
+  display: inline-block;
+  left: 1em;
+  bottom: 1em;
+  top: unset;
+  }
+  > .ping-wrapper {
+    position: absolute;
+    z-index: 12000;
+    border: 1px solid get-gray( 5 );
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: $white;
+    box-shadow: 2px 2px get-gray( 12 );
+    .like-btn {
+      padding-left: 9px;
+      padding-right: 9px;
+
+      i {
+        padding: 0 0;
+      }
+      span {
+        padding-right: 10px;
+      }
+    }
+    &.ping--positive {
+      i {color: get-signal( "green" );}
+    }
+    &.ping--negative {
+      span {font-weight: bold}
+      i {color: get-signal( "red" );}
+    }
+    &.ping--primary {
+      i {color: get-signal( "blue" );}
+    }
+  }
+}
+
+.save-indicator {
+}
+
+// LUX FIXME
+// .errorPanel {
+//   z-index: 10000;
+//   position: absolute;
+//   width: 300px;
+//   display: none;
+//   top: 76px;
+//   left: 0px;
+//   padding: $marginS $marginM;
+//   color: get-signal( "red" );
+//   background-color: lighten($lp-light-grey, 40%);
+//   border: 1px solid get-signal( "red" );
+//   span {
+//     display: block;
+//     padding-top: $marginS;
+//     &:first-child {
+//       padding-top: 0;
+//     }
+//   }
+// }
+
+.errorPanel {
+  display: none;
+  &[data-docgen-error=true] {
+    display: initial;
+  }
+  span.warn {
+    border-left: 2px solid get-signal("red");
+    display: inline-block;
+    padding: 2px;
+  }
+
+}
+
+message-panel {
+  position: relative;
+}
+
+.form-entry {
+  display: inline-block;
+
+  margin-right: $marginS;
+  position: relative;
+  min-height: 48px;
+  vertical-align: bottom;
+  label {
+    display: inline-block;
+  }
+  button {
+    display: inline-block;
+  }
+  // .form-input {
+  //   margin-right: $marginL*1.5;
+  // }
+}
+
+.docgen-content .form-choice.checkbox-group {
+  // Move a checkbox's "other, what?" text field to it's own row
+  // it is not the same size as a checkbox so messes up the layout otherwise
+  .form-entry.toggle-when {
+    display: block;
+  }
+}
+
+@mixin form-entry-label-top {
+  margin-top: $marginM;
+  vertical-align: top;
+  .col--vertical > label,
+  > label {
+    display: block;
+  }
+}
+
+@mixin form-entry-item-wide {
+  > * {
+    width: 90%;
+  }
+}
+
+.form-entry.label--top {
+  @include form-entry-label-top;
+}
+
+.form-entry.item--wide {
+  @include form-entry-item-wide;
+}
+
+.form-entry.label--inline > label {
+  margin-top: 0;
+  display: inline-block;
+}
+
+.form-group.label--top > .form-entry {
+  @include form-entry-label-top;
+}
+
+.form-group.item--wide > .form-entry {
+  @include form-entry-item-wide;
+}
+
+.form-group.label--top > .form-entry.label--inline > label {
+  margin-top: 0;
+  display: inline-block
+}
+
+.form-entry-vcenter { line-height: 40px; }
+
+.form-full-width {
+  width: 60%;
+  .form-help {
+    right: -350px;
+  }
+  .form-label {
+    width: 90%;
+  }
+}
+
+.form-full-width > select, .form-full-width > label {
+  width: 80% !important;
+}
+
+.form-single-line {
+  display: block;
+}
+
+.form-header {
+}
+
+.form-label {
+  font-size: 16px;
+  line-height: $baseline;
+  margin-right: $marginS;
+  width: auto;
+  vertical-align: bottom;
+}
+
+// .form-label.tip {
+//   color: $lp-orange;
+
+//   &:after {
+//     content: "*";
+//     display: inline;
+//   }
+// }
+// .form-label.warn {
+//   color: get-signal( "red" );
+//   font-weight: bold;
+//   &:after {
+//     content: "!";
+//     display: inline;
+//   }
+// }
+
+// .form-label.empty-label {
+//   &.tip:after {
+//     content: "";
+//   }
+// }
+
+.form-container {
+  margin-top: $baseline;
+  padding: $baseline;
+  label {
+    display: inline-block;
+  }
+}
+
+.form-input {
+  //height: 22px;
+  line-height: $baseline;
+  margin: 2px $marginS $marginM 0;
+  width: $cols3;
+  display: block;
+
+  &.long {
+    width: $cols5;
+  }
+  &.long.full-width-component {
+    width: $cols11;
+  }
+}
+
+input.form-input.long {
+  width: $cols5;
+}
+
+input.form-input.full-width-component
+input.form-input.long.full-width-component {
+  width: $cols11;
+}
+
+input.form-input.inline {
+  display: inline;
+}
+
+.form-add {
+  display: block;
+}
+
+.form-input.file {
+  height: $baseline;
+}
+
+.form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
+  width: auto;
+  display: inline-block;
+  vertical-align: bottom;
+  margin: 0 $marginS 0 $marginS;
+  width: 14px;
+  height: 24px;
+  padding: 0;
+  &.error {
+    outline: 3px solid get-signal( "red" );
+  }
+  &.warning {
+    outline: 3px solid $lp-orange;
+  }
+  &.source-value-changed {
+    outline: 2px solid $green-dark;
+  }
+}
+
+// if map is not wrapped into another group padding is needed
+.accordion-fields > .docgen-component > .application-map-container {
+  padding: 6px
+}
+
+.form-input.combobox, select {
+  width: $cols3;
+  height: 30px;
+  padding: 4px;
+  &.long {
+   width: $cols5;
+  }
+}
+
+.form-input.other{
+  display: inline;
+  margin-top: -40px;
+  margin-left: $cols3 + 1em;
+  width: $cols3;
+}
+.form-group, .form-choice, .form-table {
+  overflow: visible;
+  //border-radius: 3px;
+  display: block;
+  //margin: 0 $marginS $marginS 0;
+  //padding: $marginS $marginS 0 $marginS;
+  //background: $lp-light-grey;
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+  box-sizing: border-box;
+  border-bottom: 1px solid $gray221;
+  &:last-child
+  {
+    border-bottom: none;
+  }
+  .form-group {
+    margin:$marginS;
+  }
+  .form-input {
+    display: block;
+  }
+  .form-input.checkbox, .form-input.radio {
+    margin: $marginL $marginS 0 0;
+    display: inline-block;
+  }
+  .form-label-checkbox{
+    vertical-align: middle;
+    width: auto !important;
+    margin-right: 4px;
+  }
+  .form-label-group, .form-label-table {
+    width: 100%;
+    display: block;
+    //text-transform: uppercase;
+    font-family: $font-heading;
+    font-weight: bold;
+    margin-bottom: $marginS;
+  }
+  .property-group-header {
+    .form-label-property-group {
+      @extend .form-label-group;
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0;
+      margin-right: 1em;
+    }
+
+  }
+  .form-entry {
+    display: inline-block;
+    width: 300px;
+    min-height: 48px;
+  }
+}
+
+.form-group {
+  border: none;
+  padding-top: $marginM;
+  padding-bottom: $marginM;
+}
+
+.form-group.border--bottom {
+  border-bottom: 1px solid $gray;
+}
+
+.form-choice {
+  .form-entry {
+    display: inline-block;
+    min-width: 45%;
+    // .form-input {
+    // display: inline-block;
+    // }
+    .form-input.textarea {
+      height: $baseline *3;
+      width: 80%;
+    }
+    .form-indicator{
+      top: 0;
+    }
+  }
+}
+.form-info {
+  display: inline;
+  color: get-signal( "red" );
+  margin: $marginM;
+}
+
+.docgen-content .form-choice .form-entry.form-full-width,
+.docgen-content .form-group .form-entry.form-full-width {
+  display: block !important;
+}
+
+.docgen-content .form-choice .form-entry.form-full-width.hidden-conditionally,
+.docgen-content .form-group .form-entry.form-full-width.hidden-conditionally {
+  display: none !important;
+}
+
+// .form-error {
+//   display: inline;
+//   color: get-signal( "red" );
+//   margin: $marginM;
+//   font-weight:bold;
+// }
+
+// .form-input-warn {
+//   font-weight:bold;
+// }
+
+// .form-input-err {
+//   font-weight:bold;
+// }
+
+.form-input.textarea {
+  height: $baseline *8;
+  width: 80%;
+}
+
+.form-input.textarea.high {
+  height: $baseline *9;
+  width: 80%;
+}
+
+.form-input.textarea.wide {
+  font-size: 16px;
+  padding-left: 6px;
+  width: 99%;
+}
+
+.form-input-and-unit {
+  display: table;
+  margin-right: $marginM;
+  white-space: nowrap;
+  input {
+    display: table-cell
+  }
+}
+
+.form-input-and-unit .form-input {
+  margin-right: $marginM;
+}
+
+.form-string-unit {
+  display: table-cell;
+  vertical-align: middle;
+  padding-bottom: 5px;
+}
+
+.form-input.tiny {
+ width: math.div($cols1, 2);
+}
+
+.form-input.short {
+  width: 7em;
+}
+
+.form-input.short-plus {
+ width: 1.5  * $cols1;
+}
+
+.form-input.short-plus-plus {
+  width: 1.7  * $cols1;
+}
+
+.form-input.medium {
+ width: $cols2;
+}
+
+.form-paragraph {
+  white-space: pre-wrap;
+  padding-left: 1em;
+}
+
+// docgen-spefic styles
+.docgen-content {
+  transition: width 600ms;
+  -webkit-transition: width 600ms; /* Safari */
+ .form-choice {
+    .form-entry {
+      min-height: 38px;
+      display: inline-block;
+      min-width: 49%;
+      width: auto;
+      margin-top: 8px;
+      height: auto;
+      label {
+        vertical-align: top;
+        //width: 90%
+      }
+      input {
+        vertical-align: text-top;
+      }
+      .form-input-and-unit {
+        //display: inline-block;
+        margin-right: $marginM;
+        input {
+          width: $cols1;
+        }
+      }
+      .form-input.checkbox {
+        margin-top: 0;
+      }
+    }
+  }
+  .form-entry {
+    min-width: 300px;
+    min-height: 64px;
+    margin-bottom: $marginM;
+
+    &.long {
+      min-width: 480px;
+    }
+    &.personSelector, &.companySelector {
+      display: block;
+      width: auto;
+      label {
+        display: block;
+      }
+      .form-input {
+        display: inline-block;
+      }
+    }
+  }
+  .form-entry.radioGroup {
+    min-height: 32px;
+    white-space: nowrap;
+    display: block;
+    width: auto;
+    min-width: initial;
+    .form-label-radio {
+      margin-right: $marginL;
+    }
+  }
+  .form-full-width {
+    width: 80%;
+  }
+  .form-group {
+    overflow: visible;
+    .form-entry {
+      .form-input.text, .form-input.combobox,  .form-input.email {
+      }
+      .form-label-select, .form-label-date {
+        vertical-align: text-bottom;
+      }
+    }
+    .form-entry.personSelector .form-label-select {
+      bottom: 80px;
+    }
+  }
+
+  .long {
+    width: $cols5;
+  }
+
+  .really-long {
+    width: $cols5;
+  }
+
+  .long.full-width-component,
+  .full-width-component {
+    width: $cols11;
+    display: block;
+  }
+
+  .form-table td, .form-table th {
+    padding: $marginS $marginM;
+  }
+
+  .huoneistot-table, .muutHankkeet-table {
+    td, th {
+      padding: $marginS * 0.7;
+    }
+  }
+  .form-string {
+    background: none;
+    border:none;
+  }
+  .form-table th:first-child {
+    border-left: none;
+  }
+
+  .form-table th {
+    vertical-align: bottom;
+    border-style: solid;
+    border-left: 1px solid #ffffff;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+  }
+
+  .form-table .form-input {
+    display: inline;
+    margin: 0;
+  }
+
+  .form-table {
+    .form-input .text {
+      height: 25px;
+    }
+    .form-input.warn {
+      border: 1px solid $red-dark;
+    }
+  }
+
+  .form-table .form-input.combobox, select {
+    min-width: $cols2;
+  }
+
+  .form-table .form-indicator {
+    top: 0;
+    height: 28px;
+    width: 28px;
+    padding: 0;
+
+    .icon {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .form-input-saved {
+      .icon {
+        background-position: 4px -2494px;
+      }
+    }
+  }
+
+  .form-table .form-entry {
+    display: block;
+    width: 100%;
+    min-width: 50px;
+    min-height: 30px;
+  }
+
+  // .form-table .errorPanel {
+  //   top: 38px;
+  // }
+
+  .form-table .form-help {
+    bottom: 45px;
+  }
+
+  .button-group {
+    width: 100%;
+    position: relative;
+    padding: {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      bottom: 10px;
+    }
+    background-color: $gray247;
+    border-bottom: 1px solid $gray221;
+  }
+
+  form.premises-upload {
+    display: inline-block;
+    i {
+      padding-right: 10px;
+    }
+  }
+}
+
+// Override default style on group level
+.form-group {
+  &.full-width-component-wrapper .form-entry {
+    .blockbox-wrapper {
+      width: 80%;
+    }
+    width: 80%;
+    min-height: auto;
+  }
+
+  &.full-width-component-wrapper {
+    margin-bottom: 12px;
+  }
+
+  &.form-group.checkbox-list-component-wrapper .form-entry {
+    width: $cols9;
+    min-height: auto;
+    margin-bottom: 0px;
+  }
+
+}
+
+// Padding tweaks for special cases.
+.accordion-fields > .form-entry,
+.accordion-fields > .verdict-info-fields,
+.accordion-fields .personSelector,
+.accordion-fields > div p {
+  padding: {
+    left: $marginS;
+    right: $marginS;
+  }
+}
+
+
+.accordion_content > .group-help-text {
+  display: block;
+  margin: $marginS;
+}
+
+.kiintun-and-maaraalatunnus {
+  .form-maaraala {
+    display: inline;
+  }
+  .form-input.text {
+    display: inline;
+    width: 48px;
+    margin: 0 4px;
+  }
+
+}
+
+.form-warning-message {
+  color: $negative;
+  line-height: 24px;
+  margin-top: $marginS;
+  margin-bottom: $marginS;
+  span {
+    margin-left: 3px;
+    vertical-align: top;
+  }
+}
+
+.group-buttons {
+  width: 100%;
+  display: block;
+  overflow-y: hidden;
+  text-transform: none;
+  .is-right {
+    float: right;
+    margin-left: $marginS;
+  }
+  .is-left {
+    float: left;
+    margin-right: $marginS;
+  }
+  padding-right: $marginS;
+  padding-left: $marginS;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+
+  }
+}
+
+// Top-level group buttons tweaks
+.accordion-toggle > .group-buttons {
+  background-color: $gray247;
+  border: 1px solid $gray221;
+  border-top: none;
+  padding: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  margin: 0;
+}
+
+div.sticky {
+  background-color: $gray247;
+}
+
+
+
+.button-group button.is-right {
+  margin-right: 0;
+}
+
+.form-approval-status {
+  text-transform: none;
+  //width: 100%;
+  display: none;
+  min-height: 32px;
+
+  &.empty {
+    display: none;
+    height: 0;
+  }
+
+  .form-buttons {
+    //display:inline-block;
+    text-align: right;
+    float: right;
+     min-width: 200px;
+  }
+  i.approved, i.rejected  {
+    display: none;
+  }
+  &.approved {
+    i.approved {
+      display: table-cell;
+    }
+  }
+  &.rejected {
+    i.rejected {
+      display: table-cell;
+    }
+  }
+}
+
+.form-approval-status.approved,
+.form-approval-status.rejected {
+  display: inline-block;
+}
+
+.form-approval-status.stamped {
+  display: inline-block;
+}
+
+.is-status > .like-btn {
+  @include btn-height;
+  min-width: 500px;
+  span {
+    color: get-signal( "gray" );
+  }
+  span.is-details--rejected {
+    color: get-signal( "red" );
+  }
+  .lupicon-circle-attention {
+    color: get-signal( "red" );
+  }
+  .lupicon-circle-check {
+    color: get-signal( "green" );
+  }
+  .approved {
+    padding-right: $icon-pad;
+  }
+  .lupicon-circle-stamp {
+    color: get-signal( "green" );
+  }
+}
+
+@mixin description-bubble-mixin( $width: 100%, $margin-top: 15px, $arrow-left: 5%, $padding: $marginS) {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: $width;
+  border-radius: 2px;
+  border: 1px solid get-signal( "blue" );
+  padding: $padding;
+  margin-top: $margin-top;
+  &:after, &:before {
+             bottom: 100%;
+             left: $arrow-left;
+             border: solid transparent;
+             content: " ";
+             height: 0;
+             width: 0;
+             position: absolute;
+             pointer-events: none;
+           }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: transparentize( get-signal( "blue"), 1 );
+    border-bottom-color: get-signal( "blue");
+    border-width: 11px;
+    margin-left: -11px;
+  }
+  input {
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+    box-shadow: none;
+    color: $gray51;
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+
+@include input-and-button( reject-edits ) {}
+
+@mixin reject( $margin-left: 34px,
+               $margin-top: -6px,
+               $color: inherit) {
+  margin: {
+    left: $margin-left;
+    top: $margin-top;
+  }
+  font-size: 16px;
+  color: $color;
+}
+
+.reject-note {
+  @include reject( $color: get-signal( "gray" ));
+  padding-right: 1em;
+}
+
+.reject-note--rejected {
+  color: get-signal( "red" );
+}
+
+.reject-note-editor {
+  @include reject;
+  //@include description-bubble-mixin( initial, $padding: 0);
+  display: inline-block;
+}
+
+.accordion-reject-note {
+  @include reject( $margin-left: 44px, $color: $gray153 );
+}
+
+.accordion-reject-note-editor {
+  @include reject( 45px );
+  //@include description-bubble-mixin( initial, 0, $padding: 0);
+  margin-left: 45px;
+}
+
+.toolbar-reject-note {
+  @include reject( $margin-left: 44px, $color: $gray153 );
+  color: $gray153;
+  min-height: 40px;
+  line-height: 40px;
+}
+
+.toolbar-reject-note-editor {
+  @include reject( 45px );
+  //@include description-bubble-mixin( initial, 10px, $padding: 0);
+  //min-height: 40px;
+  margin-left: 45px;
+  margin-bottom: 10px;
+}
+
+.attachment-reject-note-editor {
+  @include reject;
+  //@include description-bubble-mixin( initial, 0, $padding: 0 );
+  margin-bottom: 10px;
+  //float: none;
+}
+
+.table-reject-note {
+  @include reject( 0, 0 );
+}
+
+.table-reject-note-editor {
+  @include reject( 0 );
+  //@include description-bubble-mixin( initial, 0, 18px, $padding: 0 );
+  //float: none;
+}
+
+// Top-level form-approval-status
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: 1px solid $gray221;
+  float: left;
+  .like-btn {
+    padding: {
+      left: 10px;
+    }
+    span {
+      color: $gray153;
+    }
+    span.is-details--rejected {
+      color: get-signal( "red" );
+    }
+  }
+}
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: none;
+}
+
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+  .like-btn {
+    padding: {
+//      left: 10px;
+      top: 4px;
+    }
+    margin-bottom: 6px;
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
+    span.is-details--rejected {
+      color: get-signal( "red" );
+    }
+  }
+}
+
+// Top-level reject button should be invisible
+// when the bar is in rejected mode.
+/* button.rejected ~ .group-buttons .is-top.rejected { */
+/*   display: none; */
+/* } */
+
+.is-middle {
+  vertical-align: middle;
+}
+
+
+.description-bubble {
+  //@include description-bubble-mixin;
+}
+
+.container-bubble {
+  $color: get-signal( "violet" );
+  $bg: $white;
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: $bg;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid $color;
+  padding: {
+    left: $marginM;
+    right: $marginM;
+    bottom: $marginM;
+    top: 0;
+  }
+  margin-top: 15px;
+
+  &.half-width {
+    width: 50%;
+  }
+
+  &:after, &:before {
+    bottom: 100%;
+    left: 5%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+
+  }
+
+  &.arrow-2nd-col:before, &.arrow-2nd-col:after {
+    left: 60%;
+  }
+
+  &:after {
+    border-color: transparentize( $bg, 1 );
+    border-bottom-color: $bg;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: transparentize( $color , 1 );
+    border-bottom-color: $color;
+    border-width: 11px;
+    margin-left: -11px;
+  }
+}
+
+.description-bubble.is-closed {
+  display: none;
+}
+
+.form-help {
+  display: none;
+  position: absolute;
+  z-index: 11000;
+  bottom: 70px;
+  left: 0;
+  .form-help-bubble {
+    @include bubble( $gray247, get-signal( "blue"), "down", $left: 10%);
+    //min-height: 100px;
+    padding: $marginM $marginM $marginM $marginM;
+    width: 350px;
+    color: $gray51;
+    box-shadow: 2px 2px 3px $gray;
+    text-align: left;
+  }}
+.form-full-width {
+  .form-help {
+    top: 4px;
+    left: 85%;
+    bottom: auto;
+    .form-help-bubble {
+      @include bubble( $gray247, get-signal( "blue"), "left", $bottom: 90%);
+      &:after, &:before {left: unset;
+                         top: unset;}
+    }
+  }
+}
+
+.three-col {
+  width: 100%;
+
+  .form-input {
+    width: 17.25em;
+  }
+
+  .col1 {
+    float: left;
+    padding-right: $marginM;
+  }
+
+  .col2 {
+    float: left;
+    padding-left: $marginM;
+    padding-right: $marginM;
+  }
+  .col3 {
+    float: left;
+    padding-left: $marginM;
+  }
+}
+
+foreman-history {
+  h2 {
+    background-color: $lp-light-grey !important;
+  }
+  th.first {
+    width: 10%;
+  }
+  th.second {
+    width: 15%;
+  }
+  th.third {
+    width: 10%;
+  }
+  th.fourth {
+    width: 20%;
+  }
+  th.fifth {
+    width: 45%;
+  }
+}
+
+.indicator-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+div.alleYli-radioGroup {
+  display: inline-block;
+  margin-top: $marginL;
+}
+
+// Grid styles
+$col: 25%;
+// default columns 4
+$max-columns: 12;
+
+@mixin column-width ($width) {
+  width: $width;
+  min-width: $width;
+  max-width: $width;
+}
+
+@mixin column ($size) {
+  position: relative;
+  float: left;
+  @include column-width($size * $col);
+  // display: inline-block;;
+  padding-left: $grid-margin;
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      display: block;
+    }
+  }
+}
+
+.form-grid {
+  // overflow-y: hidden;
+  width: 100%;
+  border-top: 1px solid $grid-border-color;
+  color: $gray51;
+  padding-left: $grid-margin;
+  padding-right: $grid-margin;
+
+  &.no-top-border {
+    border-top: none;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  h2 {
+    margin: $marginM 0;
+  }
+
+  // TODO could be removed after accordion styles are revamped
+  p {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .col--no-margin {
+    padding: 0 !important;
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
+
+  select::-ms-expand {
+      display: none;
+  }
+
+  button::-moz-focus-inner {
+    border: 0;
+  }
+
+  input[type=text], input[type=password], input[type=number], select, textarea, span.form-string {
+    //@include input-fields;
+
+    width: 100%;
+  }
+
+  // for localized-string-template
+  span.form-string {
+    display: block;
+  }
+
+  textarea {
+    height: $grid-textarea-height;
+    padding: $marginS $marginM;
+  }
+
+
+
+  select.required, input.required {
+    border-color: $input-required-border-color;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 2px;
+    bottom: 1px;
+    color: $orange-dark;
+    pointer-events:none;
+
+    // show white box behind selector arrow to hide default select arrows on IE9
+    background-color: #fff;
+    width: 30px;
+    line-height: $grid-input-height - 2px;
+    vertical-align: middle;
+  }
+
+  .select-arrow.disabled {
+    background-color: $input-disabled-background-color;
+    color: $input-select-disabled-icon;
+  }
+
+  // input[type=text]:disabled, textarea:disabled, select:disabled, .checkbox-wrapper.disabled {
+  //   border-color: $input-disabled-border-color;
+  //   background-color: $input-disabled-background-color;
+  // }
+
+  // input[type=text].err, input[type=password].err {
+  //   border: 1px solid $negative;
+  //   color: $negative;
+  // }
+
+  .submit-button {
+    display: table-row;
+    .submit-button__item {
+      display: table-cell;
+      &:first-child {
+        width: 100%;
+      }
+    }
+
+    .submittable {
+      input {
+        border-color: $positive;
+      }
+    }
+  }
+
+  .search-field {
+    position: relative;
+    input {
+      padding-right: 40px !important;
+    }
+
+    &.active {
+      i {
+        color: $orange-light;
+      }
+    }
+    i {
+      color: $primary;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+  }
+
+  button.input-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+
+  @for $i from 1 through $max-columns {
+    .col-#{$i} {
+      @include column($i);
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+    .col-#{$i}.col--full > * {
+      width: 100%;
+    }
+
+  }
+
+  .row {
+    @include clearfix;
+    margin: $grid-margin 0;
+  }
+
+  .row--no-margin {
+    margin: 0;
+  }
+
+  .row--no-bottom-margin {
+    margin-bottom: 0;
+  }
+
+  .autocomplete-component {
+    width: 100%;
+  }
+
+  .error-message {
+    background-color: $negative;
+    color: #fff;
+    margin: 0;
+    padding: $marginS;
+    font-style: normal;
+    font-weight: bold;
+    &:before {
+      @include lupicon-font;
+      content: "\e63c";
+      margin-right: $marginS;
+    }
+  }
+}
+
+.info-message {
+  border-left: 8px solid get-signal( "gray" );
+  padding: $marginS;
+  display: block;
+}
+
+@mixin info-msg( $cls, $bd) {
+  input[type=password].#{$cls} {
+    border-color: $bd;
+  }
+  .info-message.#{$cls} {
+    border-left: 8px solid $bd;
+    padding-left:  16px;
+    background-color: color.scale( $bd, $lightness: 80% );
+  }
+}
+
+@include info-msg( poor, $red );
+@include info-msg( low, get-red( 13) );
+@include info-msg( average, get-violet( 10 ) );
+@include info-msg( good, get-blue( 10 ) );
+@include info-msg( excellent, $green );
+
+
+.no-padding {
+  padding: 0 !important;
+}
+
+// Support for form-cell component wrapper.
+// The component's use cases and visuals
+// are similar to error-message, but it
+// is laid out differently and encompasses
+// the input as well.
+.form-cell__message {
+  background-color: $positive;
+  color: white;
+  display: inline-block;
+  width: 100%;
+}
+
+.form-cell--warning {
+  // input, select {
+  //   border: 1px solid $negative !important;
+  //   color: $negative !important;
+  //   margin-bottom: 0 !important;
+  // }
+  .form-cell__message {
+    background-color: $negative;
+  }
+}
+
+// .form-cell--required {
+//   input, select {
+//     border: 1px solid $orange-dark !important;
+//     margin-bottom: 0 !important;
+//   }
+// }
+
+label.mandatory:after {
+  content: " *";
+  color: $label-required-star-color;
+}
+
+.form-cell--message {
+  input, select {
+    border: 1px solid $positive !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+
+@for $i from 1 through $max-columns {
+  .form-grid.form-grid--columns-#{$i} > .row {
+    @for $j from 1 through $i {
+      .col-#{$j} {
+        @include column-width(math.div(100%, $i) *  $j);
+      }
+    }
+  }
+}
+
+.form-grid--no-border {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  @for $i from 1 through $max-columns {
+    .col-#{$i} {
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+  }
+}
+
+// .identifier-editors {
+//   input[type=text], input[type=password], select, textarea {
+//     padding: 0 $marginM;
+//     min-height: $grid-input-height;
+//     height: $grid-input-height;
+//     box-sizing: border-box;
+//     font-size: $grid-font-size;
+//     color: $input-color;
+//     border: 1px solid $input-border-color;
+//     -webkit-appearance: none;
+//     -webkit-border-radius: 0px;
+//     -moz-appearance:none;
+
+//     margin: 0 $marginS;
+//     &.required {
+//       border-color: lighten($lp-orange, 10%);
+//     }
+//     &:focus {
+//       color: $input-focus-color;
+//       border-color: $input-focus-border-color;
+//     }
+//   }
+//   &> div {
+//     margin: $marginM $marginM;
+//   }
+//   button {
+//     margin: 0 $marginM;
+//   }
+//   label.required {
+//     color: $lp-orange;
+//     &:after {
+//       content: "*";
+//       display: inline;
+//     }
+//   }
+// }
+
+select.dropdown--full-width {
+  min-width: 100%;
+}
+
+select.dropdown--plain {
+  border: none;
+  background-image: white;
+  padding-left: 0;
+  &:disabled {
+    border: none;
+    background-image: none;
+    background-color: white;
+
+  }
+}
+
+.grid-style-input {
+  @include input-fields;
+}
+
+textarea.grid-style-input {
+  height: $grid-textarea-height;
+  padding: $marginS $marginM;
+}
+
+textarea.grid-style-input.really-high {
+  height: $grid-textarea-height * 2;
+}
+
+textarea.grid-style-input.wide {
+  width: 100%;
+}
+
+.no-wrap-whitespace {
+  white-space: nowrap;
+}
+
+.wrapped_text {
+  white-space: pre-wrap;
+}
+
+.cell-span {
+  line-height: $btn-height;
+}
+
+.check-string {
+  @extend .btn-base;
+  display: block;
+}
+
+.task-title {
+  display: inline-block;
+  max-width: 50em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.review-done {
+  margin: $marginL;
+}
+
+
+
+.foreman-info {
+  padding-left: $marginS;
+}
+
+.building-select-container {
+  margin-left: $marginS;
+  .building-select-box {
+    position: relative;
+    width: 30em;
+  }
+}
+
+.link-permit-selector {
+  padding-left: $marginS;
+  label.form-label {
+    width: 100%;
+  }
+  // .errorPanel {
+  //   top: -80px;
+  //   left: 200px;
+  // }
+}
+
+@mixin row-label-x ($n, $row-margin: 10px) {
+  margin: {
+    top: $row-margin;
+    bottom: $row-margin;
+  }
+  .inline {
+    display: inherit;
+  }
+  .form-label {
+    display: table-cell;
+    vertical-align: bottom;
+    height: $n * 24 + 1px;
+    padding-bottom: 1px;
+  }
+  .form-input {
+    margin: 0;
+  }
+}
+
+.row.label-x-2 {
+  @include row-label-x( 2 );
+}
+
+.row.label-x-3 {
+  @include row-label-x( 3, 5 );
+}
+
+.row.row--tight {
+  margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+}
+
+
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: $btn-height;
+  line-height: $btn-height;
+}
+
+.calculation-error {
+  color: $red-darkest;
+  line-height: $btn-height;
+  text-align: center;
+  display: inherit;
+  margin-bottom: 0;
+}
+
+input.form-input.layout--full-width,
+textarea.form-input.layout--full-width,
+select.form-input.layout--full-width {
+  width: 100%;
+}
+
+input.form-input.layout--initial-width,
+textarea.form-input.layout--initial-width,
+select.form-input.layout--initial-width {
+  width: initial;
+}
+
+.form-group .application-map-container {
+  margin-top: $marginL;
+}
+
+// Cloudpermit style form groups where its edit functions are only shown when the group (or a child) has focus
+.form-card {
+  padding: $marginM;
+  border-radius: 3px;
+  background-color: $gray238;
+  border: 1px solid $gray238; // Eliminates element jumping on focus
+
+  &.focus {
+    background-color: $violet-background;
+    border: 1px solid $violet-100;
+  }
+
+  .button-panel {
+    min-width: 300px; // Eliminates width jumping button visibility is toggled on focus/blur
+  }
+
+  .warnings {
+    margin-bottom: 0;
+  }
+
+  // Child cards have different default background to stand out from the main card
+  .form-card {
+    background-color: $white;
+    &.focus {
+      background-color: $violet-20;
+    }
+    button {
+      margin-top: -8px;
+      margin-bottom: -8px;
+    }
+  }
+}
+
+.form-entry.full-width-component{
+  width: $cols11;
+}

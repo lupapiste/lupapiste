@@ -1,0 +1,35 @@
+{:linters {:unresolved-symbol  {:exclude [(lupapalvelu.action/defraw)
+                                          (lupapalvelu.action/defquery)
+                                          (lupapalvelu.action/defcommand)
+                                          (lupapalvelu.action/defexport)
+                                          (lupapalvelu.migration.core/defmigration)
+                                          (slingshot.slingshot/try+)
+                                          (plumbing.core/defnk)
+                                          (midje.sweet/facts)
+                                          (midje.sweet/fact)
+                                          (lupapalvelu.rest.rest-api/defendpoint)
+                                          (lupapalvelu.rest.rest-api/defendpoint-for)
+                                          (lupapalvelu.permissions/defcontext)
+                                          (noir.core/defpage)
+                                          (rum.core/defc)
+                                          (rum.core/defcs)
+                                          (sade.strings/defalias)
+                                          (lupapalvelu.document.validator/defvalidator)
+                                          (sade.files/with-temp-file)
+                                          (sade.files/with-zip-file)]}
+           :warn-on-reflection {:level :warning}}
+ :lint-as {lupapalvelu.permit/defpermit  clojure.core/def
+           monger.operators/defoperator  clojure.core/def
+           reagent.core/with-let         clojure.core/let
+           sade.core/def-                clojure.core/def
+           sade.schemas/defdynamicschema clojure.core/defn
+           sade.shared-util/fn->         clojure.core/->
+           sade.shared-util/fn->>        clojure.core/->>
+           sade.strings/defalias         clojure.core/def
+           ;; pcond-> stuff does not work.
+           ;; sade.util/pcond-> clojure.core/cond->
+           ;; sade.util/pcond->> clojure.core/cond->>
+           sade.util/fn->                clojure.core/->
+           sade.util/fn->>               clojure.core/->>
+           promesa.core/let              clojure.core/let
+           mount.core/defstate           clojure.core/def}}

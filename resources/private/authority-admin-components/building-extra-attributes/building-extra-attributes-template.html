@@ -1,0 +1,312 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="building-extra-attributes-template">
+
+      <div id="building-extra-attributes">
+
+        <!-- ko if: initialFetchPending -->
+        <div class="pate-spin"><i class="lupicon-refresh"></i></div>
+        <!-- /ko -->
+
+        <!-- ko if: allowedForOrg -->
+        <h2 data-bind="ltext: 'building-extra-attributes.heading'"></h2>
+
+        <!-- ko if: invalidRowExists -->
+        <div class="warning">
+          <p data-bind="ltext: 'building-extra-attributes.error.invalid-rows'"></p>
+          <ul data-bind="foreach: invalidRows">
+            <li>
+              <a data-bind="text:  $component.faultyRowText($data),
+                            click: $component.searchVtjprt"></a>
+
+            </li>
+          </ul>
+          </p>
+        </div>
+        <!-- /ko -->
+
+        <!-- ko if: allowImport -->
+        <span class="group-help-text">
+          <span data-bind="ltext: 'building-extra-attributes.info.excel'"></span>
+          <a data-bind="attr: {href: buildingsExcelDownloadUrl() }, ltext: 'building-extra-attributes.info.excel.downloadLink'"></a>
+        </span>
+        <!-- /ko -->
+
+        <div class="search-and-filters">
+          <div class="filter-group">
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     id="selectAllIdentifiers"
+                     data-bind="checked: allFiltersSelected,
+                                disable: waiting() || invalidRowExists(),
+                                click:  onSelectAll">
+              <label for="selectAllIdentifiers" class="inline-label checkbox-label show-changes-label">
+                <span class="upper-case"
+                      data-bind="ltext: 'building-extra-attributes.filters.show-all'"></span>
+              </label>
+            </div>
+
+            <div class="filter-group__toggles">
+              <div class="filter-wrapper">
+                <input type="checkbox"
+                       id="vtjprt-filter"
+                       data-test-id="vtjprt-filter"
+                       data-bind="checked: filters.vtjprt.selected,
+                                  disable: waiting() || invalidRowExists()">
+                <label class="filter-label"
+                       for="vtjprt-filter"
+                       data-bind="ltext: 'building-extra-attributes.filters.vtjprt'">
+                </label>
+              </div>
+
+              <div class="filter-wrapper">
+                <input type="checkbox"
+                       id="ratu-filter"
+                       data-test-id="ratu-filter"
+                       data-bind="checked: filters.ratu.selected,
+                                  disable: waiting() || invalidRowExists()">
+                <label class="filter-label"
+                       for="ratu-filter"
+                       data-bind="ltext: 'building-extra-attributes.filters.ratu'">
+                </label>
+              </div>
+
+              <div class="filter-wrapper">
+                <input type="checkbox"
+                       id="kiinteistotunnus-filter"
+                       data-test-id="kiinteistotunnus-filter"
+                       data-bind="checked: filters.kiinteistotunnus.selected,
+                                  disable: waiting() || invalidRowExists()">
+                <label class="filter-label"
+                       for="kiinteistotunnus-filter"
+                       data-bind="ltext: 'building-extra-attributes.filters.kiinteistotunnus'">
+                </label>
+              </div>
+
+              <div class="filter-wrapper">
+                <input type="checkbox"
+                       id="archival-errors-filter"
+                       data-test-id="archival-errors-filter"
+                       data-bind="checked: filters.archivingErrors.selected,
+                                  disable: waiting() || invalidRowExists()">
+                <label class="filter-label"
+                       for="archival-errors-filter"
+                       data-bind="ltext: 'building-extra-attributes.filters.errors-in-archive-update'">
+                </label>
+              </div>
+
+              <div class="filter-wrapper">
+                <input type="checkbox"
+                       id="modified-filter"
+                       data-test-id="modified-filter"
+                       data-bind="checked: filters.unpublishedChanges.selected,
+                                  disable: waiting() || invalidRowExists()">
+                <label class="filter-label"
+                       for="modified-filter"
+                       data-bind="ltext: 'building-extra-attributes.filters.modified'">
+                </label>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="search">
+            <div class="search-box-container">
+              <label class="inline-label search-label" for="building-search">
+                <i class="lupicon-search"></i>
+              </label>
+              <input id="building-search"
+                     data-bind="value: search,
+                                valueUpdate: 'afterkeydown',
+                                disable: waiting() || invalidRowExists()" />
+            </div>
+          </div>
+
+        </div>
+
+        <div data-bind="component: paging"
+             class="applications-search-component"></div>
+
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'building-extra-attributes.fields.sent-to-archive'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.vtjprt'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.visibility'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.publicity'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.visible-in-store'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.ratu'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.kiinteistotunnus'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.address'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.comment'"></th>
+              <th data-bind="ltext: 'building-extra-attributes.fields.remove'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: rows">
+            <tr data-bind="attr: {title: loc('building-extra-attributes.fields.last-modified') + ': ' + $component.formatTime(modified.value())}">
+
+              <td title=""
+                  data-bind="css: {'report-link': $component.hasArchivalAttempt($data)},
+                             click: $component.showBuildingArchiveReport">
+                <div class="latest-archival-info">
+                  <i data-bind="css: $component.archiveReportIconCssClasses($data)"></i>
+                  <a data-bind="text: $component.showTime(sentToArchive)"></a>
+                </div>
+              </td>
+
+              <td>
+                <input class="grid-style-input"
+                       data-bind="value: vtjprt.value,
+                                  css: {'missing-value': !hasExternalBuildingIdentifierField()},
+                                  enable: vtjprt.canEdit">
+                <!-- ko if: vtjprt.error() && vtjprt.value() -->
+                <br>
+                <span class="field-error"
+                      data-bind="text: $component.errorMsg('vtjprt', vtjprt.error())"></span>
+                <!-- /ko -->
+              </td>
+
+              <td>
+                <select class="dropdown"
+                        data-test-id="building-extra-attributes-visibility"
+                        data-bind="options: $component.visibilityOptions,
+                                   optionsCaption: loc('building-extra-attributes.visibility-select'),
+                                   optionsText: $component.visibilityTextFn,
+                                   value: visibility.value,
+                                   enable: visibility.canEdit">
+              </td>
+              <td>
+                <select class="dropdown"
+                        data-test-id="building-extra-attributes-publicity"
+                        data-bind="options: $component.publicityClassOptions,
+                                   optionsCaption: loc('building-extra-attributes.publicity-class-select'),
+                                   optionsText: $component.publicityClassTextFn,
+                                   value: publicity.value,
+                                   enable: publicity.canEdit">
+              </td>
+              <td>
+                <div class="checkbox-wrapper">
+                  <!-- ko if: isSecret -->
+                  <input type="checkbox"
+                         data-bind="checked: false,
+                                    enable: false,
+                                    attr: {'id': 'myyntipalvelussa-'+id.value(),
+                                           'data-test-id': 'myyntipalvelussa-'+id.value()}">
+                  <label data-bind="attr: {'for': 'myyntipalvelussa-'+id.value()}"
+                         class="inline-label checkbox-label table-checkbox-label"></label>
+                  <!-- /ko -->
+                  <!-- ko if: !isSecret() -->
+                  <input type="checkbox"
+                         data-bind="checked: myyntipalvelussa.value,
+                                    enable: myyntipalvelussa.canEdit,
+                                    attr: {'id': 'myyntipalvelussa-'+id.value(),
+                                           'data-test-id': 'myyntipalvelussa-'+id.value()}">
+                  <label data-bind="attr: {'for': 'myyntipalvelussa-'+id.value()}"
+                         class="inline-label checkbox-label table-checkbox-label"></label>
+                  <!-- /ko -->
+
+                </div>
+
+              </td>
+
+              <td>
+                <input class="grid-style-input"
+                       data-bind="value: ratu.value,
+                                  enable: ratu.canEdit">
+                <br>
+                <!-- ko if: ratu.error -->
+                <br>
+                <span class="field-error"
+                      data-bind="text: $component.errorMsg('ratu', ratu.error())"></span>
+                <!-- /ko -->
+
+              </td>
+
+              <td>
+                <input class="grid-style-input"
+                       data-bind="value: kiinteistotunnus.value,
+                                  enable: kiinteistotunnus.canEdit">
+                <!-- ko if: kiinteistotunnus.error -->
+                <br>
+                <span class="field-error"
+                      data-bind="text: $component.errorMsg('kiinteistotunnus', kiinteistotunnus.error())"></span>
+                <!-- /ko -->
+              </td>
+
+              <td>
+                <input class="grid-style-input"
+                       data-bind="value: address.value,
+                                  enable: address.canEdit">
+              </td>
+
+              <td>
+                <input class="grid-style-input"
+                       data-bind="value: comment.value,
+                                  enable: comment.canEdit">
+              </td>
+
+              <td class="action-column">
+                <!-- ko if: $component.hasEditPermission && !$component.waiting()-->
+                <i class="lupicon-remove primary" data-bind="click: $component.remove"></i>
+                <!-- /ko -->
+              </td>
+
+            </tr>
+
+          </tbody>
+        </table>
+
+        <div data-bind="component: paging"
+             class="applications-search-component"></div>
+
+        <div class="actions">
+
+          <div class="button-group building-attributes-buttons">
+
+            <button class="positive building-action-btn"
+                    data-test-id="building-extra-attributes.add-new-button"
+                    data-bind="click: addNew,
+                               enable: !invalidRowExists() && !waiting() && hasEditPermission">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'building-extra-attributes.add-new'"></span>
+            </button>
+
+            <!-- ko if: allowImport -->
+            <form enctype="multipart/form-data" data-bind="submit: submitExcel" class="upload-component buildings-upload">
+              <input class="hidden" type="file"
+                     name="files[]"
+                     data-bind="event: {change: fileChanged},
+                                enable: allowImport"
+                     data-test-id="buildings-upload-input"/>
+              <button class="btn-primary building-action-btn"
+                      data-bind="click: chooseFile,
+                                 disable: importPending,
+                                 css: {waiting: importPending}">
+                <i class="lupicon-upload"></i>
+                <i class="wait spin lupicon-refresh"></i>
+                <span data-bind="ltext: 'building-extra-attributes.uploadBuildingsButton'"></span>
+              </button>
+            </form>
+            <!-- /ko -->
+
+            <button class="primary building-action-btn"
+                    data-test-id="building-extra-attributes.send-to-archive"
+                    data-bind="click: updateInArchive,
+                               enable: !invalidRowExists() && !waiting() && hasUnpublishedRows() && hasEditPermission">
+              <!-- ko if: archiveUpdatePending -->
+              <i class="icon-spin lupicon-refresh"></i>
+              <!-- /ko -->
+              <!-- ko ifnot: archiveUpdatePending -->
+              <i class="lupicon-archives"></i>
+              <!-- /ko -->
+              <span data-bind="text: updateInArchiveButtonText()"></span>
+            </button>
+
+          </div>
+
+        </div>
+        <!-- /ko -->
+      </div>
+
+
+</script>

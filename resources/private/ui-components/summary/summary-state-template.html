@@ -1,0 +1,22 @@
+!<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-state-template">
+  <label class="lux"
+         data-bind="attr: {for: uniqId},
+                    ltext: 'state.application'"></label>
+  <!-- ko if: editing -->
+  <select class="lux full-width"
+          data-test-id="change-state-select"
+          data-bind="attr: {id: uniqId},
+                     options: states,
+                     value: state,
+                     optionsText: optionText,
+                     valueAllowUnset: true"></select>
+  <!-- /ko -->
+  <!-- ko ifnot: editing -->
+  <span data-bind="attr: {id: uniqId},
+                   ltext: state"></span>
+       <!-- ko if: state() == "open" -->
+       <span data-bind="lhtml: 'state.open.clarification'"></span>
+       <!-- /ko -->
+  <!-- /ko -->
+</script>

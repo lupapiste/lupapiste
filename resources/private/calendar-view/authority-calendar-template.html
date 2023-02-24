@@ -1,0 +1,67 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-authority-calendar-template">
+  <div>
+    <div>
+      <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+    </div>
+
+    <div data-bind="ifnot: pendingNotifications().length == 0">
+      <h3 style="font-weight: bold"><i class="lupicon-circle-attention negative"></i>&nbsp;<span data-bind="ltext: 'application.calendar.new-calendar-messages'"></span></h3>
+    </div>
+
+    <calendar-notification-list params="items: pendingNotifications, actionRequired: true, linkToApplications: false"></calendar-notification-list>
+
+    <div>
+      <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+    </div>
+
+    <!-- ko if: noCalendarFoundForOrganization -->
+      <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+    <!-- /ko -->
+
+    <!-- ko ifnot: noCalendarFoundForOrganization -->
+      <div class="times-filter-group">
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
+          <select class="form-input combobox tip" data-test-id="attendee-select"
+                  data-bind="options: authorizedParties,
+                             optionsText: util.partyFullName,
+                             optionsCaption: loc('choose'),
+                             value: selectedParty">
+          </select>
+        </span>
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
+          <select class="form-input combobox tip" data-test-id="reservation-type-select"
+                  data-bind="options: reservationTypes,
+                             optionsText: function(item) { return _.get(item, 'name'); },
+                             optionsCaption: loc('choose'),
+                             value: selectedReservationType">
+          </select>
+        </span>
+      </div>
+
+      <calendar-view params="searchConditions: { client: selectedParty,
+                                                 authority: authority,
+                                                 reservationType: selectedReservationType },
+                             view: 'applicationView',
+                             currentRole: 'authority',
+                             applicationModel: applicationModel,
+                             reservationTypes: reservationTypes,
+                             defaultLocation: defaultLocation">
+      </calendar-view>
+
+      <div>
+        <div id="legend-orangebox"></div><span data-bind="ltext: 'application.calendar.legend.accepted-appointment'"></span>
+        <div id="legend-greenbox"></div><span data-bind="ltext: 'application.calendar.legend.waiting-for-acceptance'"></span>
+
+        <!-- ko if: selectedParty -->
+        <div style="display: inline-block;">
+          <div id="triangle-topright"></div>
+        </div>
+        <span data-bind="text: util.partyFullName(selectedParty())"></span> <span data-bind="ltext: 'application.calendar.legend.appointment-with-another-authority'"></span>
+        <!-- /ko -->
+      </div>
+    <!-- /ko -->
+  </div>
+
+</script>

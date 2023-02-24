@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ppst:Popast
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.1.2/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <ppst:toimituksenTiedot>
+    <yht:aineistonnimi>Sample</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Järvenpää</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2014-01-07</yht:toimitusPvm>
+    <yht:kuntakoodi>186</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </ppst:toimituksenTiedot>
+  <ppst:poikkeamisasiatieto>
+    <ppst:Poikkeamisasia gml:id="poikkasia.1">
+      <ppst:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-12-31Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </ppst:kasittelynTilatieto>
+      <ppst:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-12-31Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+        </yht:Tilamuutos>
+      </ppst:kasittelynTilatieto>
+      <ppst:kuntakoodi>186</ppst:kuntakoodi>
+      <ppst:luvanTunnistetiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0192-POI</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-186-2013-00032</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>18600013-0192</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-12-31Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </ppst:luvanTunnistetiedot>
+      <ppst:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </ppst:referenssiPiste>
+      <ppst:paatostieto>
+        <yht:Paatos>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Rakennustarkastaja</yht:paatoksentekija>
+            <yht:paatospvm>2013-12-31Z</yht:paatospvm>
+            <yht:pykala>12</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Päätösote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-12-31T10:21:25Z</yht:muokkausHetki>
+              <yht:tyyppi>Päätösote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </ppst:paatostieto>
+      <ppst:lisatietotieto>
+        <ppst:Lisatieto>
+          <ppst:asioimiskieli>suomi</ppst:asioimiskieli>
+          <ppst:suoramarkkinointikieltoKytkin>false</ppst:suoramarkkinointikieltoKytkin>
+        </ppst:Lisatieto>
+      </ppst:lisatietotieto>
+      <ppst:asianTiedot>
+        <ppst:Asiantiedot>
+          <ppst:poikkeamisasianKuvaus>Haetaan poikkeamispäätöstä rakentaa...</ppst:poikkeamisasianKuvaus>
+        </ppst:Asiantiedot>
+      </ppst:asianTiedot>
+    </ppst:Poikkeamisasia>
+  </ppst:poikkeamisasiatieto>
+</ppst:Popast>

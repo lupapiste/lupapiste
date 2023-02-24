@@ -1,0 +1,52 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="banner-notification-template">
+      <img data-bind="attr: {src: image}" style="width: 100%; aspect-ratio: 41 / 18;" />
+      <div data-bind="ltext: title"
+           style="margin: 16px 32px; text-align: center; font-weight: bold; font-size: 1.2em; color: #191147;"></div>
+      <div data-bind="ltext: content"
+           style="margin: 16px 24px; text-align: center; line-height: 1.3em; white-space: pre-wrap; color: #191147;"></div>
+      <div style="text-align: center; display: flex; flex-direction: column; align-items: center; margin: 16px;">
+        <!-- ko if: $data.readMoreLink && $data.readMoreText -->
+        <a target="_blank"
+           rel="noopener noreferrer"
+           data-bind="attr: {href: readMoreLink}, ltext: readMoreText"
+           style="cursor: pointer;
+                  font-weight: 600;
+                  background: #4f0891;
+                  color: #fff;
+                  padding: 0.3em 1.2em;
+                  border-radius: 0.5em;
+                  text-transform: uppercase;
+                  text-decoration: none;
+                  margin-bottom: 16px;"></a>
+        <!-- /ko -->
+        <button data-bind="click: $parents[1].closeDialog, text: closeText"
+                style="cursor: pointer;
+                       font-weight: 600;
+                       color: #4f0891;
+                       text-transform: uppercase;
+                       border: none;
+                       appearance: none;
+                       background: transparent;"></button>
+      </div>
+      <button data-bind="click: $parents[1].closeDialog, attr: {'aria-label': closeText}"
+              class="lupicon-remove"
+              style="position: absolute;
+                     top: 10px;
+                     right: 10px;
+                     background: #cfd9f7;
+                     display: flex;
+                     align-items: center;
+                     justify-content: center;
+                     width: 40px;
+                     height: 40px;
+                     border-radius: 20px;
+                     cursor: pointer;
+                     font-size: 16px;
+                     appearance: none;
+                     border: none;">
+        </button>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="custom-notification-dialog-template">
+      <div class="content" data-bind="template: {name: notificationData.template, data: notificationData}"></div>
+</script>

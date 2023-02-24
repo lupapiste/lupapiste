@@ -1,0 +1,319 @@
+
+.icon, .icon-small, .icon-tiny, .icon-large, .ui-icon {
+  display: inline-block;
+  @include spite-bg;
+  overflow: hidden;
+}
+
+$spritegrid: 100px;
+
+
+.icon {
+  height: 20px;
+  width: 20px;
+  overflow: hidden;
+  &.inline-left {
+    margin-right: 6px;
+    float: left;
+    margin-top: 6px;
+  }
+  &.inline-right {
+    margin-right: 6px;
+    float: right;
+    margin-top: 6px;
+  }
+
+  &.document-orange {
+    background-position: 0px 0px;
+    width: 24px;
+    height: 24px;
+  }
+  &.logout {
+    background-position: 0px -100px;
+    width: 24px;
+    height: 24px;
+  }
+  &.person-orange {
+    background-position: 0px -200px;
+    width: 24px;
+    height: 24px;
+  }
+  &.drill-down-orange {
+    background-position: 0px -300px;
+    width: 18px;
+    height: 18px;
+  }
+  &.drill-right-orange {
+    background-position: 0px -400px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-right-grey {
+    background-position: 0px -500px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-right-black {
+    background-position: 0px -600px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-right-white {
+    background-position: 0px -700px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-down-grey {
+    background-position: 0px -800px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-down-white {
+    background-position: 0px -900px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-down-black {
+    background-position: 0px -5700px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-left-grey {
+    background-position: 0px -1600px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-left-black {
+    background-position: 0px -1700px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-left-all-black {
+    background-position: 0px -2000px;
+    width: 10px;
+    height: 12px;
+  }
+  &.drill-left-black-bigger {
+    background-position: 0px -3100px;
+    width: 12px;
+    height: 12px;
+  }
+  &.drill-down-black-smaller {
+    background-position: 0px -3400px;
+    width: 9px;
+    height: 8px;
+  }
+  &.drill-up-black-smaller {
+    background-position: 0px -3300px;
+    width: 9px;
+    height: 8px;
+  }
+  &.add {
+    background-position: 0px -2200px;
+    width: 15px;
+    height: 15px;
+  }
+  &.search {
+    background-position: 0px -2300px;
+    width: 14px;
+    height: 14px;
+  }
+  &.missing {
+    background-position: 0px -2400px;
+    width: 16px;
+    height: 16px;
+  }
+  &.ok {
+    background-position: 0px -2500px;
+    width: 16px;
+    height: 16px;
+  }
+  &.info-indicator {
+    background-position: 0px -2600px;
+    width: 16px;
+    height: 16px;
+  }
+  &.remove {
+    background-position: 0px -2700px;
+    width: 15px;
+    height: 15px;
+  }
+  &.wait {
+    background-position: 0px -2800px;
+  }
+  &.info-big {
+    background-position: 0px -2900px;
+    width: 30px;
+    height:32px;
+    margin-left: -$marginS;
+    margin-bottom: -$marginS;
+  }
+  &.help {
+    background-position: 0px -2900px;
+    width: 30px;
+    height:32px;
+    overflow: visible;
+  }
+  &.new {
+    background-position: 0px -3000px;
+    width: 16px;
+    height: 16px;
+  }
+  &.print {
+    background-position: 0px -3500px;
+    width: 16px;
+    height: 15px;
+  }
+  &.send {
+    background-position: 0px -3600px;
+    height: 15px;
+    width: 17px;
+  }
+  &.approve {
+    background-position: 0px -3700px;
+    height: 17px;
+    width: 17px;
+  }
+  &.stamp {
+    background-position: 0px -3800px;
+    height: 16px;
+    width: 16px;
+  }
+  &.add-grey {
+    background-position: 0px -3900px;
+    height: 16px;
+    width: 16px;
+  }
+  &.complement {
+    background-position: 0px -4000px;
+    height: 16px;
+    width: 16px;
+  }
+  &.remove-grey {
+    background-position: 0px -4100px;
+    cursor: pointer;
+    height: 16px;
+    width: 16px;
+  }
+  &.edit {
+    background-position: 0px -4200px;
+    cursor: pointer;
+  }
+  &.refresh-grey {
+    background-position: 0px -4697px;
+    width: 16px;
+    height: 16px;
+  }
+  &.signed {
+    background-position: 0px -4900px;
+    width: 18px;
+    height: 18px;
+  }
+  &.signed-white {
+    background-position: 0px -5800px;
+    width: 16px;
+    height: 16px;
+  }
+  &.stamped {
+    background-position: 0px -5000px;
+    height: 18px;
+    width: 18px;
+  }
+  &.transfered {
+    background-position: 0px -5100px;
+    height: 17px;
+    width: 25px;
+  }
+  &.mark-seen {
+    background-position: 0px -5198px;
+    width: 25px;
+    height: 15px;
+  }
+  &.urgent {
+    width: 24px;
+    height: 24px;
+    background-position: 0px -5300px;
+  }
+  &.hold {
+    width: 24px;
+    height: 24px;
+    background-position: 0px -5500px;
+  }
+  &.verdict-attachment {
+    width: 8px;
+    height: 18px;
+    background-position: 0px -5900px;
+  }
+  &.scroll-up {
+    background-position: 0px -6100px;
+    width: 24px;
+    height: 19px;
+  }
+
+  &.approve-grey {
+    background-position: 0px -6200px;
+    width: 16px;
+    height: 16px;
+  }
+  &.help-new {
+    background-position: 0px -6300px;
+    width: 24px;
+    height: 24px;
+  }
+  &.toj {
+    background-position: 0px -6400px;
+    width: 24px;
+    height: 24px;
+  }
+  &.archive {
+    background-position: 0px -6500px;
+    width: 24px;
+    height: 24px;
+  }
+  &.star-selected {
+    background-position: 0px -6600px;
+    width: 18px;
+    height: 18px;
+  }
+  &.star-unselected {
+    background-position: 0px -6700px;
+    width: 18px;
+    height: 18px;
+  }
+
+  //states
+  &:hover {
+    background-position-x: $spritegrid * -1;
+  }
+  // &:active {
+  //   background-position-x: $spritegrid * -2;
+  // }
+  // &:disabled {
+  //   background-position-x: $spritegrid * -3;
+  // }
+}
+
+[type=submit], .btn, button {
+  .icon.left-align {
+    position: absolute;
+    left: $marginM;
+    bottom: 0;
+    top: 0;
+    margin: auto;
+  }
+  .icon.right-align {
+    position: absolute;
+    right: $marginS;
+    bottom: 0;
+    top: 0;
+    margin: auto;
+  }
+}
+
+h1 .icon {
+  margin-right: 3px;
+}
+
+// jqueryUI datepicker
+
+

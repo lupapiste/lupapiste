@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
+<!-- KRYSP projekti-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mkmu="http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.paikkatietopalvelu.fi/gml/maankaytonmuutos" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0.1">
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd"/>
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	<!--Local usage-->
+	<!--<xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\yhteiset\gml_dummy.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset\yhteiset.xsd"/>-->
+	<!-- ================================================= -->
+	<!-- Package: <<XSDschema>> maankaytonmuutos -->
+	<!-- ================================================= -->
+	<!-- Kohdejoukko: Luvat -->
+	<xs:element name="Maankaytonmuutos" type="gml:FeatureCollectionType" substitutionGroup="gml:_FeatureCollection">
+		<xs:annotation>
+			<xs:documentation>Skeeman juurielementti</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="_Maankayttomuutos" type="mkmu:AbstractMaankayttomuutosFeatureType" abstract="true" substitutionGroup="gml:_Feature"/>
+	<xs:element name="Tonttijako" type="mkmu:TonttijakolaadintaType" substitutionGroup="mkmu:_Maankayttomuutos"/>
+	<xs:element name="Asemakaava" type="mkmu:AsemakaavalaadintaType" substitutionGroup="mkmu:_Maankayttomuutos"/>
+	<xs:element name="RantaAsemakaava" type="mkmu:RantaAsemakaavalaadintaType" substitutionGroup="mkmu:_Maankayttomuutos"/>
+	<xs:element name="Yleiskaava" type="mkmu:YleiskaavalaadintaType" substitutionGroup="mkmu:_Maankayttomuutos"/>
+	<xs:complexType name="TonttijakolaadintaType">
+		<xs:complexContent>
+			<xs:extension base="mkmu:AbstractMaankayttomuutosFeatureType">
+				<xs:sequence>
+					<xs:element name="uusiKytkin" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Uusi(true) tai muutos olemassaolevaan</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="AsemakaavalaadintaType">
+		<xs:complexContent>
+			<xs:extension base="mkmu:AbstractMaankayttomuutosFeatureType">
+				<xs:sequence>
+					<xs:element name="uusiKytkin" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Uusi(true) tai muutos olemassaolevaan</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="RantaAsemakaavalaadintaType">
+		<xs:complexContent>
+			<xs:extension base="mkmu:AbstractMaankayttomuutosFeatureType">
+				<xs:sequence>
+					<xs:element name="uusiKytkin" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Uusi(true) tai muutos olemassaolevaan</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="YleiskaavalaadintaType">
+		<xs:complexContent>
+			<xs:extension base="mkmu:AbstractMaankayttomuutosFeatureType">
+				<xs:sequence>
+					<xs:element name="uusiKytkin" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Uusi(true) tai muutos olemassaolevaan</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="kuvaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="OsapuoliType">
+		<xs:sequence>
+			<xs:element name="roolikoodi">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Maksaja"/>
+						<xs:enumeration value="Hakija"/>
+						<xs:enumeration value="Asianosainen"/>
+						<xs:enumeration value="Asiamies"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="turvakieltokytkin" type="xs:boolean"/>
+			<xs:element name="asioimiskieli" type="xs:string" minOccurs="0"/>
+			<xs:element name="henkilotieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Henkilo" type="yht:YhteyshenkiloType">
+							<xs:annotation>
+								<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot. Henkilö voi olla itsenäinen henkilö että yhteyshenkilö yritykselle. Rooli ratkaisee käytön.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="yritystieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Yritys" type="yht:YritysType">
+							<xs:annotation>
+								<xs:documentation>Jos kyseessä on yritys tvs. niin tiedot siirretään tässä elementissä</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="vainsahkoinenAsiointiKytkin" type="xs:boolean"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="AbstractMaankayttomuutosFeatureType">
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="toimituksenTiedottieto">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="ToimituksenTiedot" type="yht:AineistotoimituksentiedotType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="hakemustieto">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Hakemus" type="mkmu:HakemusType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="paatostieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Paatos" type="mkmu:PaatosType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="referenssisijaintitieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Referenssisijainti" type="yht:SijaintiType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="toimituksenTila">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Hakemus"/>
+								<xs:enumeration value="Toimitusmääräys"/>
+								<xs:enumeration value="Kuulutus"/>
+								<xs:enumeration value="Kutsukirje"/>
+								<xs:enumeration value="Alkukokous"/>
+								<xs:enumeration value="Jatkokokous"/>
+								<xs:enumeration value="Loppukokous"/>
+								<xs:enumeration value="Lähetetty rekisteröitäväksi"/>
+								<xs:enumeration value="Muodostusluettelo"/>
+								<xs:enumeration value="Kiinteistörekisterin pitäjän päätös"/>
+								<xs:enumeration value="Kiinnityksistä vapauttaminen"/>
+								<xs:enumeration value="Rekisteröity"/>
+								<xs:enumeration value="Maastomittauspyyntö"/>
+								<xs:enumeration value="Maastotyöt"/>
+								<xs:enumeration value="Jakautunut"/>
+								<xs:enumeration value="Jätetty sikseen"/>
+								<xs:enumeration value="Ilmoitus käräjätuomarille"/>
+								<xs:enumeration value="Ilmoitus maanmittaustoimistolle"/>
+								<xs:enumeration value="Ilmoitus hakijalle"/>
+								<xs:enumeration value="Ilmoitus maistraatille"/>
+								<xs:enumeration value="Ilmoitus verotoimistolle"/>
+								<xs:enumeration value="Ilmoitus yhdistämispäätöksestä"/>
+								<xs:enumeration value="Viikkoilmoitus"/>
+								<xs:enumeration value="Laskutuspäivämäärä"/>
+								<xs:enumeration value="Peruuntumispäivämäärä"/>
+								<xs:enumeration value="Valitus maaoikeuteen"/>
+								<xs:enumeration value="Maaoikeuden päätös"/>
+								<xs:enumeration value="Valitus KKO:een"/>
+								<xs:enumeration value="KKO:n päätös"/>
+								<xs:enumeration value="Valitus lääninoikeuteen"/>
+								<xs:enumeration value="Lääninoikeuden päätös"/>
+								<xs:enumeration value="Valitus KHO:lle"/>
+								<xs:enumeration value="KHO:n päätös"/>
+								<xs:enumeration value="Keskeytetty"/>
+								<xs:enumeration value="Lähetetty mikrofilmattavaksi"/>
+								<xs:enumeration value="Arkistoitu"/>
+								<xs:enumeration value="Rakennuslupakartta asiakaspalveluun"/>
+								<xs:enumeration value="Piirrettäväksi"/>
+								<xs:enumeration value="Toimitusmääräyksen siirto"/>
+								<xs:enumeration value="Valitusajan päättymispvm"/>
+								<xs:enumeration value="Hakemus peruttu"/>
+								<xs:enumeration value="Ilmoitus katoon ja tonttiosastolle"/>
+								<xs:enumeration value="Skannattu"/>
+								<xs:enumeration value="Asianosaiset hyväksyneet toimituksen"/>
+								<xs:enumeration value="Valmis rekisteröitäväksi"/>
+								<xs:enumeration value="Neuvottelu hakijan kanssa"/>
+								<xs:enumeration value="Piirretty"/>
+								<xs:enumeration value="Jatkokokouksen kutsukirje"/>
+								<xs:enumeration value="Esirekisteröity"/>
+								<xs:enumeration value="Tiedotettu"/>
+								<xs:enumeration value="Laskutettu"/>
+								<xs:enumeration value="Poistettu"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="toimitusnumero" type="xs:string" minOccurs="0"/>
+					<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Liite" type="yht:LiiteType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="kiinteisto" type="yht:KiinteistotunnusType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="maaraAla" minOccurs="0" maxOccurs="unbounded">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:pattern value="(([0-9]{3}){2}([0-9]{4}){2}[MT][0-9]{4})"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ToimitustietoType">
+		<xs:complexContent>
+			<xs:restriction base="gml:FeaturePropertyType">
+				<xs:sequence minOccurs="0">
+					<xs:element ref="mkmu:_Maankayttomuutos"/>
+				</xs:sequence>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="HakemusType">
+		<xs:sequence>
+			<xs:element name="hakemustunnustieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Hakemustunnus" type="yht:MuuTunnusType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="osapuolitieto" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Osapuoli" type="mkmu:OsapuoliType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="sijaintitieto" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Sijainti" type="yht:SijaintiType" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Liite" type="yht:LiiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="kohdekiinteisto" type="yht:KiinteistotunnusType" maxOccurs="unbounded"/>
+			<xs:element name="maaraAla" minOccurs="0" maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="(([0-9]{3}){2}([0-9]{4}){2}[MT][0-9]{4})"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="tilatieto" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Tila">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="pvm" type="xs:date"/>
+									<xs:element name="kasittelija" type="xs:string" minOccurs="0"/>
+									<xs:element name="hakemuksenTila">
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:enumeration value="Rekisteröity"/>
+												<xs:enumeration value="Päättynyt"/>
+												<xs:enumeration value="Vireillä"/>
+												<xs:enumeration value="Haettu"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="kuvaus" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PaatosType">
+		<xs:sequence>
+			<xs:element name="poytakirjatieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Poytakirja" type="mkmu:PoytakirjaType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="pvm" type="xs:date" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="toimitusnumero" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="paatosnumero" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PoytakirjaType">
+		<xs:sequence>
+			<xs:element name="paatos" type="xs:string"/>
+			<xs:element name="paatoksentekija" type="xs:string"/>
+			<xs:element name="pykala" type="xs:string" minOccurs="0"/>
+			<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Liite" type="yht:LiiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="maankayttomuutosTieto" type="mkmu:ToimitustietoType" substitutionGroup="gml:featureMember"/>
+</xs:schema>

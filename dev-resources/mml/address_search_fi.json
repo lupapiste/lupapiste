@@ -1,0 +1,96 @@
+{
+  "type" : "FeatureCollection",
+  "features" : [ {
+    "type" : "Feature",
+    "properties" : {
+      "katunimi" : "Merikatu",
+      "katunumero" : "1",
+      "kieli" : "fin",
+      "jarjestysnumero" : "1",
+      "kuntatunnus" : "091",
+      "kuntanimiFin" : "Helsinki",
+      "kuntanimiSwe" : "Helsingfors",
+      "source" : "interpolated-road-addresses",
+      "gid" : "nlsfi:interpolated-road-addresses#1",
+      "distance" : null,
+      "rank" : 0,
+      "country" : "Suomi",
+      "country_gid" : "whosonfirst:country:85633143",
+      "continent" : "Eurooppa",
+      "continent_gid" : "whosonfirst:continent:102191581",
+      "country_a" : "FIN",
+      "label" : "Merikatu 1 (Helsinki)",
+      "match_type" : "interpolated",
+      "accuracy" : "point",
+      "municipality" : "091",
+      "label:kuntatunnus" : "Helsinki",
+      "label:municipality" : "Helsinki"
+    },
+    "geometry" : {
+      "type" : "Point",
+      "coordinates" : [ 386195.013, 6670561.341 ]
+    }
+  } ],
+  "geocoding" : {
+    "status" : "success",
+    "metadata" : [ {
+      "rawTerm" : "merikatu* 1 helsinki",
+      "searchTerm" : "merikatu* 1",
+      "searchTermParts" : [ "merikatu*", "1" ],
+      "seartchTermPartCount" : 2,
+      "matchedParts" : [ "helsinki" ],
+      "matchingCodelists" : {
+        "municipality" : {
+          "091" : {
+            "value" : "091",
+            "label" : "Helsinki",
+            "status" : "valid",
+            "lang" : "eng",
+            "codelist" : "municipality",
+            "codelistgroup" : "geographic-names"
+          }
+        },
+        "subregion" : {
+          "011" : {
+            "value" : "011",
+            "label" : "Helsinki",
+            "status" : "valid",
+            "lang" : "eng",
+            "codelist" : "subregion",
+            "codelistgroup" : "geographic-names"
+          }
+        }
+      },
+      "similarTerms" : [ {
+        "text" : "Helsinki",
+        "similarity" : 0.44999998807907104,
+        "word_similarity" : 1.0,
+        "count" : 4
+      } ]
+    } ],
+    "sources" : {
+      "interpolated-road-addresses" : {
+        "status" : "success",
+        "duration" : 6,
+        "links" : [ ]
+      }
+    },
+    "query" : {
+      "sources" : "interpolated-road-addresses",
+      "crs" : "EPSG:3067",
+      "requestCrs" : "EPSG:3067",
+      "scaleDenominator" : 5000,
+      "excludesMaps" : { },
+      "text" : "merikatu* 1, helsinki",
+      "querySize" : 100
+    },
+    "version" : "2.0.1",
+    "attribution" : "https://www.maanmittauslaitos.fi/en/opendata-licence-cc40",
+    "engine" : {
+      "name" : "maanmittauslaitos.fi/geocoding",
+      "author" : "National Land Survey of Finland",
+      "version" : "2.0.1"
+    },
+    "timestamp" : 1669705149101
+  }
+}

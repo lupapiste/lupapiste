@@ -1,0 +1,60 @@
+#indicator {
+  .indicator-bar {
+    display: none;
+    position: fixed;
+    width: 100%;
+    z-index: 2004;
+    color: $white;
+    font-size: 18px;
+    box-sizing: border-box;
+    margin-top: -2px;
+  }
+
+  .indicator-box {
+    min-width: $application-min-width;
+    padding: $marginM $marginL;
+    &.indicator-box--hand {
+      cursor: pointer;
+    }
+  }
+
+  a {
+    color: $white;
+    font-weight: bold;
+  }
+
+  .indicator-bar.positive {
+    background-color: $positive;
+   }
+
+   .indicator-bar.primary {
+    background-color: $primary;
+  }
+
+  .indicator-bar.negative {
+    background-color: $negative;
+  }
+  .indicator-bar.hidden {
+    visibility: hidden;
+  }
+
+  .indicator-info {
+    vertical-align: top;
+    display: table-cell;
+  }
+
+  .indicator-message {
+    vertical-align: top;
+    display: table-cell;
+    width: 100%;
+    padding: {
+      left: $marginL;
+      right: $marginL;
+    }
+  }
+
+  .indicator-close {
+    vertical-align: top;
+    display: table-cell;
+  }
+}

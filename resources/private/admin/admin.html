@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="admin">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <div class="spacerL">
+          <h2>Lataa hakemusdata taustaj&auml;rjestelm&auml;st&auml;</h2>
+          <form action="/api/raw/admin-download-application-data" method="get" class="xml-download">
+            <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+            <input class="textinput textinput--big-long" type="text" name="applicationId" placeholder="LP-tunnus">
+            <button type="submit" class="primary">
+              <i class="lupicon-download"></i><span>Lataa</span>
+            </button>
+          </form>
+        </div>
+        <div class="spacerL">
+          <h2>Lataa hakemusdata taustaj&auml;rjestelm&auml;st&auml; kuntalupatunnuksella</h2>
+          <form action="/api/raw/admin-download-application-data-with-kuntalupatunnus" method="get" class="xml-download">
+            <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+            <input class="textinput textinput--big-long" type="text" name="kuntalupatunnus" placeholder="kuntalupatunnus">
+            <input class="textinput textinput--big-long" type="text" name="municipality" placeholder="kunnan id, esim. '753'">
+            <select id="choose-permit-type" name="permitType" class="dropdown">
+              <option value="R">R</option>
+              <option value="YA">YA</option>
+              <option value="YI">YI</option>
+              <option value="YL">YL</option>
+              <option value="VVVL">VVVL</option>
+              <option value="P">P</option>
+              <option value="MAL">MAL</option>
+              <option value="KT">KT</option>
+              <option value="MM">MM</option>
+            </select>
+            <button type="submit" class="primary">
+              <i class="lupicon-download"></i><span>Lataa</span>
+            </button>
+          </form>
+        </div>
+        <div class="spacerL">
+          <h2>Lataa lista kaikista viranomaisk&auml;ytt&auml;jist&auml;</h2>
+          <form action="/api/raw/admin-download-authority-usernames" method="get" class="xml-download">
+            <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+            <button type="submit" class="primary">
+              <i class="lupicon-download"></i><span>Lataa</span>
+            </button>
+          </form>
+        </div>
+        <div class="spacerL">
+          <h2>Lataa rakennus-XML taustaj&auml;rjestelm&auml;st&auml;</h2>
+          <form action="/api/raw/admin-download-building-info" method="get" class="xml-download">
+            <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+            <input class="textinput textinput--big-long" type="text" name="applicationId" placeholder="LP-tunnus">
+            <button type="submit" class="primary">
+              <i class="lupicon-download"></i><span>Lataa</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

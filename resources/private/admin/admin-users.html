@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="users">
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2>K&auml;ytt&auml;j&auml;t</h2>
+
+        <div class="fancy-users-table"></div>
+
+        <div id="addAuthAdmin">
+          <button class="btn-primary"
+                  data-bind="toggleClick: authorityAdminUsers.showForm,
+                             ltext: 'add.authorityAdmin'"></button>
+          <button class="btn-primary"
+                  data-bind="click: restApiUsers.addRestUser,
+                             ltext: 'add.rest-api-user'"></button>
+          <button class="btn-primary"
+                  data-bind="click: systemUsers.addSystemUser,
+                             ltext: 'add.system-user'"></button>
+          <button class="btn-primary"
+                  data-bind="click: financialHandlerUser.addFinancialHandlerUser,
+                             ltext: 'admin.add-financial-handler'"
+                  data-test-id="add-financial-user"></button>
+          <button class="btn-primary"
+                  data-bind="click: digitizationProjectUser.addUser,
+                             ltext: 'admin.add-digitization-project-user'"
+                  data-test-id="add-digitization-project-user"></button>
+          <button class="btn-primary"
+                  data-bind="toggleClick: emailUsers.showForm,
+                             ltext: 'admin.change-user-email'"
+                  data-test-id="change-user-email"></button>
+
+          <!-- ko if: authorityAdminUsers.showForm -->
+          <cljs-admin_users_create-authority-user params="{}">
+          </cljs-admin_users_create-authority-user>
+          <!-- /ko -->
+
+          <!-- ko if: emailUsers.showForm -->
+          <cljs-admin_users_change-user-email params="{}">
+          </cljs-admin_users_change-user-email>
+          <!-- /ko -->
+
+          <div id="add-rest-api-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.add-rest-user.dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: restApiUsers">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <div>
+                    <label data-bind="ltext: 'admin.add-dialog.organization-code'" class="form-label" for="admin.rest-api.add.organizationCode"></label>
+                    <input class="form-input" data-bind="textInput: organizationCode"
+                           id="admin.rest-api.add.organizationCode" type="text"/>
+                  </div>
+
+                  <div>
+                    <label data-bind="ltext: 'userinfo.username'" class="form-label" for="admin.rest-api.add.username"></label>
+                    <input class="form-input" data-bind="textInput: username"
+                           id="admin.rest-api.add.username" type="text" readonly/>
+                  </div>
+
+                  <div>
+                    <label data-bind="ltext: 'admin.restapi.userinfo.firstName'" class="form-label" for="admin.rest-api.add.firstName"></label>
+                    <input class="form-input" data-bind="textInput: firstName"
+                           id="admin.rest-api.add.firstName" type="text"/>
+                  </div>
+
+                   <div>
+                     <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="admin.rest-api.add.lastName"></label>
+                     <input class="form-input" data-bind="textInput: lastName"
+                            id="admin.rest-api.add.lastName" type="text"/>
+                   </div>
+
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
+                          class="positive btn-dialog"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: userAdded">
+                  <h2 data-bind="ltext: 'admin.add-rest-user.dialog.userAdded'"></h2>
+                  <p>
+                    <div data-bind="ltext: 'admin.add-rest-user.dialog.username'"></div>
+                    <div data-bind="text: createdUserUsername"></div>
+                    <div data-bind="ltext: 'admin.add-rest-user.dialog.password'"></div>
+                    <pre href="#" data-bind="text: createdPw"></pre>
+                  </p>
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>
+              </div>
+            </div>
+          </div>
+          <div id="add-system-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.system-user.dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: systemUsers">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <div>
+                    <label data-bind="ltext: 'userinfo.municipalityname'" class="form-label" for="admin.system-user.add.municipalityName"></label>
+                    <input class="form-input" data-bind="textInput: municipalityName"
+                           id="admin.system-user.add.municipalityName" type="text"/>
+                  </div>
+
+                  <div>
+                    <label data-bind="ltext: 'admin.add-dialog.organization-ids'" class="form-label" for="admin.system-user.add.organizationIds"></label>
+                    <input class="form-input" data-bind="textInput: organizationIds"
+                           id="admin.system-user.add.organizationIds" type="text"/>
+                  </div>
+
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
+                          class="positive btn-dialog"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: userAdded">
+                  <h2 data-bind="ltext: 'admin.add-rest-user.dialog.systemUserAdded'"></h2>
+                  <p>
+                    <div data-bind="ltext: 'admin.add-rest-user.dialog.username'"></div>
+                    <div data-bind="text: createdUserUsername"></div>
+                  </p>
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>
+              </div>
+            </div>
+          </div>
+
+          <div id="add-digitization-project-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.add.digitization-project-user.dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: digitizationProjectUser">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <div>
+                    <label data-bind="ltext: 'admin.digitization-project-user.username-label'" class="form-label" for="digitization-project-user.add.email"></label>
+                    <input class="form-input" data-bind="textInput: email"
+                           id="digitization-project-user.add.email" type="text"/>
+
+                    <label data-bind="ltext: 'userinfo.firstName'" class="form-label" for="digitization-project-user.add.firstName"></label>
+                    <input class="form-input" data-bind="textInput: firstName"
+                           id="digitization-project-user.add.firstName" type="text"/>
+
+                    <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="digitization-project-user.add.lastName"></label>
+                    <input class="form-input" data-bind="textInput: lastName"
+                           id="digitization-project-user.add.lastName" type="text"/>
+                  </div>
+                  <div>
+                    <label data-bind="ltext: 'admin.add-dialog.organization-ids'" class="form-label" for="digitization-project-user.add.organizations"></label>
+                    <input class="form-input" data-bind="textInput: organizationIds"
+                           id="digitization-project-user.add.organizations" type="text"/>
+                  </div>
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
+                          class="positive btn-dialog"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: userAdded">
+                  <h2 data-bind="ltext: 'admin.digitization-project-user.user-created'"></h2>
+                  <p>
+                  <div data-bind="ltext: 'admin.add-dialog.activationLinks'"></div>
+                  <div data-bind="text: createdUserUsername"></div>
+                  <a href="#" data-bind="text: createdUserlinkFi, attr: {href: createdUserlinkFi}"></a><br/>
+                  <a href="#" data-bind="text: createdUserlinkSv, attr: {href: createdUserlinkSv}"></a>
+                  </p>
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close" data-test-id="add-digitization-project-user-ok"></button>
+              </div>
+            </div>
+          </div>
+
+          <div id="add-financial-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.add-financial-handler'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: financialHandlerUser">
+              <div data-bind="visible: phase() === 1">
+              <form>
+                <div>
+                  <label data-bind="ltext: 'financialAuthority.name'" class="form-label" for="admin.financial.add.name"></label>
+                  <input class="form-input" data-bind="textInput: name"
+                         id="admin.financial.add.name" type="text"/>
+                </div>
+
+                <div>
+                  <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label" for="admin.financial.add.email"></label>
+                  <input class="form-input" data-bind="textInput: email"
+                         id="admin.financial.add.email" type="text"/>
+                </div>
+
+                <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
+                        class="positive btn-dialog"
+                        data-test-id="add-financial-user-continue"></button>
+              </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: userAdded">
+                  <h2 data-bind="ltext: 'admin.add-dialog.financialUserAdded'"></h2>
+                  <p>
+                  <div data-bind="ltext: 'admin.add-dialog.activationLinks'"></div>
+                  <div data-bind="text: createdUserUsername"></div>
+                  <a href="#" data-bind="text: createdUserlinkFi, attr: {href: createdUserlinkFi}"></a><br/>
+                  <a href="#" data-bind="text: createdUserlinkSv, attr: {href: createdUserlinkSv}"></a>
+                  </p>
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close" data-test-id="add-financial-user-ok"></button>
+              </div>
+            </div>
+          </div>
+
+          <div id="edit-user-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.editOrganizations.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: editOrgsForUser">
+              <div data-bind="visible: phase() === 1">
+                <h3 data-bind="text: email"></h3>
+                <div data-bind="ltext: 'admin.editOrganizations.info'"></div>
+                <div>
+                  <form>
+                    <div>
+                      <label data-bind="ltext: 'admin.add-dialog.organization-ids'" class="form-label" for="user.edit.organizations"></label>
+                      <input class="form-input" data-bind="textInput: organizationIds"
+                             id="user.edit.organizations" type="text"/>
+                    </div>
+                    <button data-bind="click: next, ltext: 'admin.add-dialog.continue'"
+                            class="positive btn-dialog"></button>
+                  </form>
+                </div>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: changesAreDone">
+                  <h2 data-bind="text: email"></h2>
+                  <div data-bind="visible: !changedOrgIds(), ltext: 'admin.editOrganizations.noOrgs'"></div>
+                  <!-- ko if:  changedOrgIds() -->
+                  <div data-bind="ltext: 'admin.editOrganizations.newOrgs'"></div>
+                  <p>
+                  <div data-bind="text: changedOrgIds"></div>
+                  </p>
+                  <!-- /ko -->
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close" data-test-id="edit-user-ok"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

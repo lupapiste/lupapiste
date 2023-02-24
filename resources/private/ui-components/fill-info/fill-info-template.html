@@ -1,0 +1,18 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="fill-info-template">
+  <div class="fill-info-toolbar">
+    <button data-bind="click: fillUserInfo,
+                       visible: authorization.ok('set-current-user-to-document')"
+            class="positive"
+            data-test-id="fill-info-button">
+      <i class="lupicon-user-pen"></i>
+      <span data-bind="ltext: 'fillInfoButton'"></span>
+    </button>
+    <!-- ko if: showAttachmentsOption -->
+    <toggle params="value: fillAttachments,
+                    ltext:'application.attachmentsCopyOwn',
+                    testId: 'also-fill-attachments',
+                    prefix: 'buttonbox'"></toggle>
+    <!-- /ko -->
+  </div>
+</script>

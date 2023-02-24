@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="preamble-summary-template">
+  <div role="complementary"
+       data-bind="ariaLtext: `a11y.summary.landmark`">
+    <!-- ko ifnot:  rootApplication.isMapExtended -->
+    <preamble-title params="application: rootApplication.application">
+    </preamble-title>
+    <!-- /ko -->
+    <!-- ko if: rootApplication.application.state() === 'draft' -->
+    <div class="pate-note"
+         data-bind="lhtml: 'application.state.draft.help'"></div>
+    <!-- /ko -->
+    <!-- ko if: rootApplication.application.hasInvites -->
+    <div class="pate-note"
+         data-bind="lhtml: 'application.invite.help'"></div>
+    <!-- /ko -->
+    <application-summary params="tosFunctions: rootApplication.tosFunctions">
+    </application-summary>
+    <application-actions></application-actions>
+  </div>
+</script>

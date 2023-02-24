@@ -1,0 +1,16 @@
+body.welcome {
+  @media (max-width:$breakpoint7){
+    width: $cols7;
+  }
+  @media (max-width:$breakpoint6){
+    width: $cols6;
+  }
+  @media (max-width:$breakpoint5){
+    width: 100%;
+  }
+}
+
+.welcome-register-section {
+  margin-top: $marginL;
+}
+

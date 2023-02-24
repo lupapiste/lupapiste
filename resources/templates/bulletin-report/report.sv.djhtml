@@ -1,0 +1,139 @@
+<h1>Lupapiste: Anslagsinformation</h1>
+<h2>Behandlingsbeteckning</h2>
+<p>
+  {{application-id}} / {{address}}
+</p>
+<p>
+  Anslag till ansökan
+  {% if past-start-date? %} har börjat {% else %} ska börja {% endif %}
+  {{start-date|date:"cccc":sv}} {{start-date|date:"d.M.YYYY 'kl.' HH:mm":sv}}
+  och
+  {% if past-end-date? %} slutade {% else %} slutar {% endif %}
+  {{end-date|date:"cccc":sv}} {{end-date|date:"d.M.YYYY 'kl.' HH:mm":sv}}.
+</p>
+<p>
+  Tiden har bestämts av datumen för beslutet
+  {% if section %}
+    §{{section}}
+  {% endif %}
+
+  {% if verdict-date %}
+    Beslutet har fattats {{verdict-date|date:"cccc":sv}}
+    {{verdict-date|date:"d.M.YYYY":sv}}.
+  {% endif %}
+  {% if given-date %}
+    Beslutet har givande den {{given-date|date:"cccc d.M.YYYY":sv}}.
+  {% endif %}
+</p>
+<h2>Besök till anslag {{application-id}}</h2>
+<p>
+  Enligt redovisning för Lupapiste det där anslag
+  {% if visits %}
+    har tittat
+    {% if visit-count = 1 %}
+      en gång den
+    {% else %}
+      {{visit-count}} gånger i följande tider.
+      {% if visit-limit %}
+        Listan visar de första {{visit-limit}} vyerna.
+      {% endif %}
+    {% endif %}
+    <table class="visits">
+      <tbody>
+        {% for visit in visits %}
+          <tr>
+            <td class="weekday">{{visit|date:"ccc":sv}}</td>
+            <td class="date">{{visit|date:"d.M.YYYY"}}</td>
+            <td class="klo">klo</td>
+            <td class="time">{{visit|date:"HH:mm:ss"}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    har inte visats.
+  {% endif %}
+</p>
+<h2>Anslags innehåll</h2>
+Viss information är endast synlig för autentiserade användare.
+
+<div class="bulletin">
+  <table class="details">
+    <tbody>
+      <tr class="below-one above-one">
+        <td><strong>{{address}}</strong></td>
+        <td>{{description-html|safe}}</td>
+      </tr>
+      <tr>
+        <td class="left">Fastighetsbeteckning</td>
+        <td class="right">{{property-id}}</td>
+      </tr>
+      <tr>
+        <td class="left">Handläggningskommun</td>
+        <td class="right">{% loc municipality %}</td>
+      </tr>
+      {% if kuntalupatunnus %}
+        <tr>
+          <td class="left">Kommuntillståndsnummer</td>
+          <td class="right">{{kuntalupatunnus}}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td class="left">Givet</td>
+        <td class="right">{{given-date|date:"d.M.YYYY"}}</td>
+      </tr>
+      <tr class="below-two">
+        <td class="left">Överklagandet upphör</td>
+        <td class="right">{{end-date|date:"d.M.YYYY"}}</td>
+      </tr>
+      {% for paatos in paatokset %}
+        {% for pk in paatos.poytakirjat %}
+          <tr>
+            <td class="left">
+              <strong>Beslut</strong>
+            </td>
+            <td class="right">
+              {% if pk.section %}
+                §{{pk.section}}
+              {% endif %}
+              {{pk.paatoskoodi}}
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>{{pk.text-html|safe}}</td>
+          </tr>
+          <tr class="below-one">
+            <td class="left">Beslutsfattare</td>
+            <td>
+              {{pk.paatoksentekija}}<br>
+              {{pk.verdict-date|date:"d.M.YYYY"}}
+            </td>
+          </tr>
+        {% endfor %}
+        {% if paatos.lupamaaraykset %}
+          {% for m in paatos.lupamaaraykset %}
+            <tr>
+              <td class="left">
+                {% loc m.loc-fn %}
+              </td>
+              <td class="right">
+                <ul>
+                  {% for item in m.items %}
+                    <li>
+                      {% if m.safe? %}
+                        {{item|safe}}
+                      {% else %}
+                        {{item}}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+    </tbody>
+  </table>
+      {% endfor %}
+</div>

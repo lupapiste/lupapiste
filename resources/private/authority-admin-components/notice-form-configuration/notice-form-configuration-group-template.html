@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="notice-form-configuration-group-template">
+  <div class="notice-form-configuration-group">
+    <h2 data-bind="ltext: 'notice-forms.config.title'"></h2>
+    <notice-form-configuration params="formType: 'construction',
+                                       showIntegration: true,
+                                       organization: organization"></notice-form-configuration>
+    <notice-form-configuration params="formType: 'terrain',
+                                       organization: organization"></notice-form-configuration>
+    <notice-form-configuration params="formType: 'location',
+                                       organization: organization"></notice-form-configuration>
+  </div>
+</script>

@@ -1,0 +1,33 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="preamble-title-template">
+  <div class="preamble-title">
+    <div class="dsp--flex flex--between flex--align-center gap--b1">
+      <!-- ko ifnot: editAddress -->
+      <h1 data-bind="text: application.address"></h1>
+      <!-- /ko -->
+      <!-- ko if: editAddress -->
+      <input class="lux" type="text"
+             data-bind="value: application.address(),
+                        required: true,
+                        lplaceholder: 'application.address',
+                        event: {blur: changeAddress}">
+      <!-- /ko -->
+      <!-- ko if: editLocation -->
+      <icon-button params="click: changeLocation,
+                           icon: 'location',
+                           ltext: 'a11y.summary.edit-location'"></icon-button>
+      <!-- /ko -->
+      <!-- ko if: canEdit -->
+      <button data-bind="ltext: editMode() ? 'a11y.summary.stop-edit' : 'a11y.summary.edit',
+                         css: {primary: !editMode(),
+                         secondary: editMode()},
+                         toggleClick: editMode"></button>
+      <!-- /ko -->
+    </div>
+
+    <!-- ko if: operationTitle -->
+    <h2 data-bind="text: operationTitle"></h2>
+    <!-- /ko -->
+
+  </div>
+</script>

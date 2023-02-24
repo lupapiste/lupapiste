@@ -1,0 +1,88 @@
+#verdict {
+
+  section {
+   margin-top: $marginL;
+   h2 {
+     margin-bottom: 0;
+   }
+  }
+
+  .attachments h3 {
+    /* emulate h2 */
+    font-size: $baseline * 0.9;
+    font-weight: bold;
+  }
+}
+
+.verdict-info-fields {
+  overflow: auto;
+}
+
+.verdict-signature-fields {
+  overflow-y: hidden;
+  float: right;
+  margin-right: 5em;
+  width: 240px;
+  .value {
+    float: right;
+  }
+}
+
+.verdict-content {
+  padding: {
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+}
+  h2 {
+    margin: {
+    top: 5px;
+    bottom: 10px;
+  }
+  }
+}
+
+// File upload component
+
+ul.upload-files {
+  display: table;
+  list-style: none;
+  padding: {
+    bottom: .5em;
+    left: 0;
+  }
+  li {
+    display: table-row;
+    span, a {
+      display: table-cell;
+    }
+    span {
+      padding-right: 2em;
+    }
+    span.upload-files__size {
+      text-align: right;
+    }
+  }
+}
+
+ul.appeals-files {
+  list-style: none;
+  display: table;
+  padding-left: 0;
+  li {
+    display: table-row;
+    a, span {
+      display: table-cell;
+    }
+    span {
+      font-style: italic;
+      padding-left: 1em;
+    }
+    span.appeals-files__size {
+      text-align: right;
+    }
+  }
+}
+
+
+@include note-table ( appeals ) {}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ah:LausuntoVastaus xmlns:ah="http://www.lupapiste.fi/asianhallinta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lupapiste.fi/asianhallinta asianhallinta.xsd"
+             version="1.3" messageId="statement-request_1">
+    <ah:HakemusTunnus>LP-297-2015-00001</ah:HakemusTunnus>
+    <ah:AsianTunnus>2015-1234</ah:AsianTunnus>
+    <ah:Lausunto>
+        <ah:LausuntoTunnus>321</ah:LausuntoTunnus><!-- Lupapisteen ID lausunnolle -->
+        <ah:Saateteksti>Lausuisitko lausunnon, plz</ah:Saateteksti>
+        <ah:Pyytaja>Sipoon rakennusvalvonta (Sonja Sibbo)</ah:Pyytaja>
+        <ah:PyyntoPvm>2017-05-05</ah:PyyntoPvm>
+        <ah:Maaraaika>2017-05-10</ah:Maaraaika>
+        <ah:AsianTunnus>L1234-2017</ah:AsianTunnus>
+        <ah:Lausunnonantaja>Eija Esimerkki</ah:Lausunnonantaja>
+        <ah:LausuntoPvm>2017-05-07</ah:LausuntoPvm>
+        <ah:Puolto>puollettu</ah:Puolto>
+        <ah:LausuntoTeksti>Hyvä homma</ah:LausuntoTeksti>
+    </ah:Lausunto>
+    <ah:Liitteet>
+        <ah:Liite>
+            <ah:Kuvaus>Liitteen kuvaus</ah:Kuvaus>
+            <ah:Tyyppi>Lausunto</ah:Tyyppi>
+            <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment.pdf</ah:LinkkiLiitteeseen>
+        </ah:Liite>
+    </ah:Liitteet>
+</ah:LausuntoVastaus>

@@ -1,0 +1,434 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="archival-summary-template">
+  <div data-bind="visible: !tosFunctionExists()" data-test-id="tos-function-missing">
+    <h2 data-bind="ltext: 'archivalSummary.tosFunction.missing.title'"></h2>
+    <div class="info-line like-btn">
+      <i class="lupicon-circle-attention"></i>
+      <!-- ko if: $root.tosFunctions().length > 0 -->
+      <span data-bind="ltext: 'archivalSummary.tosFunction.missing.guide'"></span>
+      <!-- /ko -->
+      <!-- ko if: $root.tosFunctions().length <= 0 -->
+      <span data-bind="ltext: 'archivalSummary.tosFunction.not.published'"></span>
+      <a class="tos-function-error" data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
+        <span data-bind="ltext: 'archivalSummary.tosFunction.link.title'"></span></a>
+      <!-- /ko -->
+    </div>
+  </div>
+
+  <div data-bind="ifnot: $root.authorization.ok('application-date-within-time-limit')">
+    <div class="info-line like-btn">
+      <i class="lupicon-circle-attention"></i>
+      <span data-bind="text: loc('archivalSummary.submitted-application-too-old-for-archival', archivingTimestampField())"></span>
+    </div>
+  </div>
+
+  <div data-bind="if: $root.authorization.ok('application-date-within-time-limit')">
+    <!-- ko if: tosFunctionExists() -->
+    <div data-bind="if: showArchived" class="archival-summary-document-set">
+      <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+      <div data-bind="ltext: 'archivalSummary.guide'"></div>
+
+      <div data-bind="if: !_.isEmpty(archivedDocuments())" data-test-id="archived-application-documents">
+        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
+      </div>
+
+      <div data-test-id="archived-pre-groups">
+        <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups()) && !$root.application.isArchivingProject()"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
+      </div>
+      <div data-test-id="archived-post-groups">
+        <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true}}"></div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-primary waiting" data-bind="enable: archiveButtonEnabled,
+                                                       click: archiveSelected,
+                                                       testId: 'archive-selected',
+                                                       css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
+
+          <i class="lupicon-archives-in"></i>
+          <i class="spin lupicon-refresh wait"></i>
+          <span data-bind="ltext: 'arkistoidaan', visible: !_.isEmpty(archivingInProgressIds())"></span>
+          <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
+        </button>
+        <!-- ko if: $component.canArchive -->
+        <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
+        <a href="#" data-bind="click: selectAllPreAttachments, ltext: 'stamp.preAttachments', visible: !$root.application.isArchivingProject()"></a>
+        <a href="#" data-bind="click: selectAllPostAttachments, ltext: 'stamp.postAttachments', visible: !$root.application.isArchivingProject()"></a>
+        <a href="#" data-bind="click: unselectAll, ltext: 'unstamp.all', visible: archiveButtonEnabled"></a>
+        <!-- /ko -->
+      </div>
+    </div>
+
+    <div data-bind="if: showNotArchived" class="archival-summary-document-set">
+      <h1><span data-bind="ltext: 'archivalSummary.notArchivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+
+      <div data-bind="if: !_.isEmpty(notArchivedDocuments())" data-test-id="not-archived-application-documents">
+        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
+      </div>
+
+      <div data-test-id="not-archived-pre-groups">
+        <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups()) && !$root.application.isArchivingProject()"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
+      </div>
+      <div data-test-id="not-archived-post-groups">
+        <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
+      </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
+        <div class="tos-function-correction spacerL">
+          <div>
+            <h2 data-bind="ltext: 'tos.function.fix'"></h2>
+            <p data-bind="ltext: 'tos.function.fix.guide'"></p>
+            <div>
+              <div class="form-part">
+                <label for="tos-function-correction-function" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.select'"></label><br>
+                <select class="dropdown" id="tos-function-correction-function"
+                        data-test-id="tos-function-correction-select"
+                        data-bind="options: $root.tosFunctions,
+                                   optionsText: function(item) { return item.code + ' - ' + item.name; },
+                                   optionsValue: 'code',
+                                   value: $component.newTosFunction,
+                                   valueAllowUnset: true,
+                                   enable: $root.authorization.ok('force-fix-tos-function-for-application')" ></select>
+              </div>
+              <div class="form-part">
+                <label for="tos-function-correction-reason" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.reason'"></label><br>
+                <input type="text" id="tos-function-correction-reason" data-test-id="tos-function-correction-input" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
+              </div>
+              <div class="form-part">
+                <button class="btn-primary" data-test-id="tos-function-correction-button" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /ko -->
+
+        <div data-bind="if: archivingDates.initial()
+                        || archivingDates.application()
+                        || archivingDates.completed()"
+             class="spacerL">
+          <h2 data-bind="ltext: 'archivalSummary.archivalDates'"></h2>
+          <div data-bind="if: archivingDates.initial">
+            <span data-bind="ltext: 'archivalSummary.archivalDates.initial'"></span>
+            <span data-bind="dateString: archivingDates.initial"></span>
+          </div>
+          <div data-bind="if: archivingDates.application">
+            <span data-bind="ltext: 'archivalSummary.archivalDates.application'"></span>
+            <span data-bind="dateString: archivingDates.application"></span>
+          </div>
+          <div data-bind="if: archivingDates.completed">
+            <span data-bind="ltext: 'archivalSummary.archivalDates.completed'"></span>
+            <span data-bind="dateString: archivingDates.completed"></span>
+          </div>
+        </div>
+
+        <!-- ko if: showMarkArchivedSection -->
+        <div class="mark-as-archived">
+          <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
+          <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
+          <button class="btn-primary" data-bind="click: markPreVerdictPhaseArchived,
+                                                 visible: markPreVerdictPhaseArchivedEnabled">
+            <i class="lupicon-check"></i>
+            <span data-bind="ltext: 'archivalSummary.markArchived.button'"></span>
+          </button>
+          <button class="btn-primary" data-bind="click: markFullyArchived,
+                                                 visible: markFullyArchivedEnabled">
+            <i class="lupicon-check"></i>
+            <span data-bind="ltext: 'archivalSummary.markFullyArchived.button'"></span>
+          </button>
+        </div>
+        <!-- /ko -->
+
+    </div>
+
+</script>
+<script type="text/x-jquery-tmpl" class="ko-template" id="archival-summary-attachment-table">
+  <!-- ko foreach: groups -->
+  <table class="reset w--100 bd--gray gap--b2">
+    <caption class="h3 txt--left gap--t1"
+             data-bind="text: name, testId: $data.groupName + '-header'"></caption>
+
+    <thead class="bg--dark-gray ">
+      <th class="pad--v1 pad--l2"
+          data-bind="ltext: 'a11y.information'"></th>
+      <!-- ko if: $parent.showWillPublish -->
+      <th class="txt--center padd--v1 pad--h2">A</th>
+      <!-- /ko -->
+      <th class="txt--left pad--v1 pad--h2 w--100" data-bind="ltext: 'application.attachmentType'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="ltext: 'sailytysaika'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="ltext: 'henkilotiedot'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="ltext: 'attachment.stamped'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="if: $parent.showWillPublish">
+        <span data-bind="ltext: 'julkaistaan'"></span>
+      </th>
+    </thead>
+
+    <tbody data-bind="foreach: attachments">
+      <tr data-bind="testId: $data.attachmentType(),
+                     attr: {'data-test-group': $parent.groupName},
+                     css: {'bg--gray': util.isEven( $index() ),
+                     'bd--b-gray': !$data.showAdditionalControls()}">
+        <td class="txt--center">
+          <icon-button params="click: $data.toggleAdditionalControls,
+                               icon: $data.showAdditionalControls() ? 'chevron-up' : 'chevron-down',
+                               ltext: 'edit',
+                               iconOnly: true,
+                               buttonClass: 'tertiary',
+                               attr: {'aria-expanded': $data.showAdditionalControls}"></icon-button>
+        </td>
+        <!-- ko if: $parents[1].showWillPublish -->
+        <td class="txt--center pad--v1 pad--h2">
+          <!-- ko if: _.includes($component.archivingInProgressIds(), $data.id) -->
+          <i class="icon-spin lupicon-refresh"></i>
+          <!-- /ko -->
+          <!-- ko ifnot: _.includes($component.archivingInProgressIds(), $data.id) -->
+          <!-- ko if: $data.archivable() && !$data.archived() -->
+          <toggle params="value: $data.sendToArchive,
+                          noText: true,
+                          enable: $component.canArchive,
+                          ltext: 'arkistoidaan',
+                          testId: 'send-to-archive',
+                          prefix: 'blockbox'"></toggle>
+          <!-- /ko -->
+          <i class="lupicon-circle-attention fg--negative"
+             data-bind="visible: !$data.archivable(), attr: {title: loc($data.archivabilityError())}"></i>
+          <i class="lupicon-archives fg--positive"
+             data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
+          <!-- /ko -->
+        </td>
+        <!-- /ko -->
+        <td class="pad--v1 pad--h2">
+          <div class="attachment-type-container">
+            <div class="group-label">
+              <div>
+                <span data-bind="if: $data.type">
+                  <span data-test-id="type-group" data-bind="text: loc(['attachmentType', ko.unwrap($data.type)['type-group'], '_group_label'])"></span>
+                </span>
+                <span data-bind="if: $data.attachmentType()">
+                  - <span data-test-id="type-id" data-bind="text: loc(['attachmentType', $data.attachmentType()])"></span>
+                </span>
+                <span data-bind="if: $data.ramLink">
+                  <span data-bind="ltext: 'ram.postfix'"></span>
+                </span>
+                <span data-bind="if: !type">
+                  <i data-bind="ltext: 'attachment.noName'"></i>
+                </span>
+              </div>
+              <!-- ko if: $data.contents -->
+              <div class="attachment-content-desc"><span data-bind="text: $data.contents"></span></div>
+              <!-- /ko -->
+            </div>
+          </div>
+        </td>
+        <td class="pad--v1 pad--h2 ws--nowrap" data-bind="text: $data.retentionDescription"></td>
+        <td class="pad--v1 pad--h2 ws--nowrap" data-bind="text: $data.personalDataDescription"></td>
+        <td class="pad--v1 txt--center">
+          <i class="lupicon-circle-stamp fg--positive"
+             data-bind="visible: $data.latestVersion.stamped, attr: {title: loc('attachment.stamped')}"></i>
+          <span data-bind="visible: !$data.latestVersion.stamped, ltext: 'no'"></span>
+        </td>
+        <td  data-bind="if: $parents[1].showWillPublish"
+             class="pad--v1 txt--center">
+          <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu']),
+                        ltitle: 'yes'"
+             class="lupicon-check fg--positive"></i>
+          <span data-bind="visible: !util.getIn($data, ['metadata','myyntipalvelu']), ltext: 'no'"></span>
+        </td>
+      </tr>
+      <!-- ko if: $data.showAdditionalControls -->
+      <tr class="bd--b-gray archival-extra-information"
+          data-bind="css: {'bg--gray': util.isEven( $index() )}">
+        <td></td>
+        <td data-bind="attr: {colSpan: $parents[1].showWillPublish ? 6 : 5}"
+            class="pad--1">
+          <div class="flex--wrap flex--gap4">
+            <div class="flex--column flex--gap4">
+              <!-- ko if: $data.typeChange.changingTypeAllowed() -->
+              <div>
+                <div class="header" data-bind="ltext: 'attachment.editAdditionalData'"></div>
+                <div class="bodyform pad--2">
+                  <label class="dsp--block"
+                         data-bind="ltext: 'attachment.chooseType',
+                                    attr: {for: 'attachment-type-select' + $index()}">
+                  </label>
+                  <select class="lux w--max-30em w--100 gap--b1"
+                          data-bind="value: $data.typeChange.attachmentType,
+                                     attr: {id: 'attachment-type-select' + $index()},
+                                     foreach: $data.typeChange.selectableAttachmentTypes">
+                    <optgroup data-bind="attr: {label: label}, foreach: types">
+                      <option data-bind="text: label, value: value"></option>
+                    </optgroup>
+                  </select>
+                  <label class="dsp--block gap--t1"
+                         data-bind="ltext: 'attachment.label.contents',
+                                    attr: {for: 'attachment-contents' + $index()}"></label>
+                  <input class="lux w--max-30em w--100 gap--b1" type="text"
+                         data-test-id="attachment-contents-update"
+                         data-bind="value: $data.contents,
+                                    attr: {id: 'attachment-contents' + $index()}"/>
+                </div>
+              </div>
+              <!-- /ko -->
+              <!-- ko ifnot: _.isEmpty($data.metadata) -->
+              <div data-bind="component: {name: 'metadata-editor',
+                              params: {attachmentId: $data.id,
+                              metadata: $data.metadata,
+                              application: $root.application}}"></div>
+              <!-- /ko -->
+            </div>
+
+            <!-- ko ifnot: _.isEmpty($data.latestVersion) -->
+            <div class="additional-data-container" style="max-width: 50%">
+              <div class="header" data-bind="ltext: 'esikatselu'"></div>
+              <div class="bodyform pad--1">
+                  <a data-bind="attr: {href: '/api/raw/latest-attachment-version?&attachment-id=' + ko.unwrap(id)}" target="_blank">
+                    <img data-bind="attr: {src: '/api/raw/latest-attachment-version?preview=true&attachment-id=' + ko.unwrap(id)}" style="width: 100%">
+                  </a>
+              </div>
+            </div>
+            <div class="flex--column flex--gap4 flex--align-start">
+              <!-- ko if: convertableToPdfA -->
+              <icon-button params="icon: 'refresh',
+                                   waiting: $data.processing,
+                                   click: _.partial($component.convertToPdfA, $data),
+                                   ltext: 'Konvertoi PDF/A-muotoon'"></icon-button>
+              <!-- /ko -->
+
+              <!-- ko if: showArchivalError -->
+              <div>
+                <div class="header" data-bind="ltext: 'archivalSummary.previousConversionResult'"></div>
+                <div class="bodyform pad--2">
+                  <div data-bind="ltext: latestVersion.archivabilityError,
+                                  css: {'w--max-30em': !showConversionLog()}"></div>
+                  <div data-bind="ifnot: _.isEmpty(latestVersion.conversionLog)">
+                    <button class="tertiary gap--v1"
+                            data-bind="toggleClick: showConversionLog,
+                                       ariaExpanded: showConversionLog">
+                      <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap(showConversionLog),
+                                    'lupicon-chevron-small-down': showConversionLog}"
+                         aria-hidden="true"></i>
+                      <span data-bind="ltext: 'attachment.showConversionLog'"></span>
+                    </button>
+
+                    <div data-bind="slider: showConversionLog">
+                      <table class="table">
+                        <tbody data-bind="foreach: latestVersion.conversionLog">
+                          <tr>
+                            <td data-bind="text: $data"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /ko -->
+            </div>
+            <!-- /ko -->
+        </td>
+        </div>
+      </tr>
+      <!-- /ko -->
+    </tbody>
+  </table>
+  <!-- /ko -->
+</script>
+
+<script type="text/x-jquery-tmpl" class="ko-template" id="archival-summary-document-table">
+  <table class="reset w--100 bd--gray gap--b2">
+    <caption class="h3 txt--left gap--t1"
+             data-bind="ltext: 'archivalSummary.mainDocuments',
+                        testId: 'application-documents-header'"></caption>
+    <thead class="bg--dark-gray ">
+      <th class="pad--v1 pad--l2"
+          data-bind="ltext: 'a11y.information'"></th>
+      <!-- ko if: showWillPublish -->
+      <th class="txt--center padd--v1 pad--h2">A</th>
+      <!-- /ko -->
+      <th class="txt--left pad--v1 pad--h2 w--100" data-bind="ltext: 'application.attachmentType'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="ltext: 'sailytysaika'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="ltext: 'henkilotiedot'"></th>
+      <th class="txt--left pad--v1 pad--h2" data-bind="if: showWillPublish">
+        <span data-bind="ltext: 'julkaistaan'"></span>
+      </th>
+    </thead>
+
+    <tbody data-bind="foreach: documents">
+      <tr data-bind="testId: $data.documentType + '-document',
+                     css: {'bg--gray': util.isEven( $index() ),
+                     'bd--b-gray': !$data.showAdditionalControls()}"
+          data-test-group="application-documents">
+        <td class="txt--center">
+          <icon-button params="click: $data.toggleAdditionalControls,
+                               icon: $data.showAdditionalControls() ? 'chevron-up' : 'chevron-down',
+                               ltext: 'edit',
+                               iconOnly: true,
+                               buttonClass: 'tertiary',
+                               attr: {'aria-expanded': $data.showAdditionalControls}"></icon-button>
+        </td>
+        <!-- ko if: $parent.showWillPublish -->
+        <td class="txt--center pad--v1 pad--h2">
+          <!-- ko if: _.includes($component.archivingInProgressIds(), $data.id) -->
+          <i class="icon-spin lupicon-refresh"></i>
+          <!-- /ko -->
+          <!-- ko ifnot: _.includes($component.archivingInProgressIds(), $data.id) -->
+          <!-- ko ifnot: $data.archived -->
+          <toggle params="value: $data.sendToArchive,
+                          noText: true,
+                          enable: $component.canArchive,
+                          ltext: 'arkistoidaan',
+                          testId: 'send-to-archive',
+                          prefix: 'blockbox'"></toggle>
+          <!-- /ko -->
+          <i class="lupicon-archives fg--positive"
+             data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
+          <!-- /ko -->
+        </td>
+        <!-- /ko -->
+        <td class="pad--v1 pad--h2">
+          <div class="attachment-type-container">
+            <div data-bind="ltext: $data.documentNameKey"></div>
+          </div>
+        </td>
+        <td class="pad--v1 pad--h2 ws--nowrap" data-bind="text: $data.retentionDescription"></td>
+        <td class="pad--v1 pad--h2 ws--nowrap" data-bind="text: $data.personalDataDescription"></td>
+        <td  data-bind="if: $parent.showWillPublish"
+             class="pad--v1 txt--center">
+          <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu']),
+                        ltitle: 'yes'"
+             class="lupicon-check fg--positive"></i>
+          <span data-bind="visible: !util.getIn($data, ['metadata','myyntipalvelu']),
+                           ltext: 'no'"></span>
+        </td>
+      </tr>
+      <!-- ko if: $data.showAdditionalControls -->
+      <tr class="bd--b-gray archival-extra-information"
+          data-bind="css: {'bg--gray': util.isEven( $index() )}">
+        <td></td>
+        <td data-bind="attr: {colSpan: $parent.showWillPublish ? 5 : 4}"
+            class="pad--1">
+          <div class="flex--wrap flex--gap4">
+            <!-- ko ifnot: _.isEmpty($data.metadata) -->
+            <div data-bind="component: {name: 'metadata-editor',
+                            params: {caseFile: $data.id.indexOf( 'case-file' ) !== -1,
+                            metadata: $data.metadata,
+                            application: $root.application}}"></div>
+            <!-- /ko -->
+            <div class="additional-data-container">
+              <div class="header" data-bind="ltext: 'esikatselu'"></div>
+              <div class="bodyform pad--1">
+                <a data-bind="attr: {href: '/api/raw/' + previewAction + '?lang=fi&id=' + $root.application.id()}" target="_blank">
+                  <span data-bind="ltext: 'attachment.pdf'"></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <!-- /ko -->
+    </tbody>
+  </table>
+</script>

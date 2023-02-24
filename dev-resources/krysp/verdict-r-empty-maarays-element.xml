@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd">
+ <gml:boundedBy>
+  <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#3134">
+   <gml:coordinates>532562.957,7125601.361 534320.571,7126542.850</gml:coordinates>
+  </gml:Box>
+ </gml:boundedBy><gml:featureMember>
+  <rakval:RakennusvalvontaAsia>
+    <rakval:kasittelynTilatieto>
+      <yht:Tilamuutos>
+        <yht:pvm>2015-06-30</yht:pvm>
+        <yht:tila>lupa hyväksytty</yht:tila>
+      </yht:Tilamuutos>
+    </rakval:kasittelynTilatieto>
+    <rakval:luvanTunnisteTiedot>
+      <yht:LupaTunnus>
+        <yht:kuntalupatunnus>205-2015-277</yht:kuntalupatunnus>
+        <yht:muuTunnustieto>
+          <yht:MuuTunnus>
+            <yht:tunnus>LP-205-2015-00069</yht:tunnus>
+            <yht:sovellus>Lupapistetunnus</yht:sovellus>
+          </yht:MuuTunnus>
+        </yht:muuTunnustieto>
+        <yht:saapumisPvm>2015-05-26</yht:saapumisPvm>
+      </yht:LupaTunnus>
+    </rakval:luvanTunnisteTiedot>
+    <rakval:osapuolettieto>
+      <yht:Osapuolet>
+        <yht:osapuolitieto>
+          <yht:Osapuoli>
+            <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+            <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+            <yht:yritys>
+              <yht:nimi>Acme Oyj</yht:nimi>
+              <yht:liikeJaYhteisotunnus>8775360-2</yht:liikeJaYhteisotunnus>
+              <yht:postiosoitetieto>
+                <yht:postiosoite>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="und">Acmenkatu 87</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>87100</yht:postinumero>
+                  <yht:postitoimipaikannimi>KAJAANI</yht:postitoimipaikannimi>
+                </yht:postiosoite>
+              </yht:postiosoitetieto>
+              <yht:puhelin>020 123 1234</yht:puhelin>
+              <yht:sahkopostiosoite>testi@example.com</yht:sahkopostiosoite>
+            </yht:yritys>
+            <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+          </yht:Osapuoli>
+        </yht:osapuolitieto>
+        <yht:osapuolitieto>
+          <yht:Osapuoli>
+            <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+            <yht:VRKrooliKoodi>maksaja</yht:VRKrooliKoodi>
+            <yht:yritys>
+              <yht:nimi>Acme Oyj</yht:nimi>
+              <yht:liikeJaYhteisotunnus>0102327-1</yht:liikeJaYhteisotunnus>
+              <yht:postiosoitetieto>
+                <yht:postiosoite>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="und">Järvikatu 9</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00370</yht:postinumero>
+                  <yht:postitoimipaikannimi>Helsinki</yht:postitoimipaikannimi>
+                </yht:postiosoite>
+              </yht:postiosoitetieto>
+              <yht:puhelin>044 231 4321</yht:puhelin>
+              <yht:sahkopostiosoite>tom.tester@example.com</yht:sahkopostiosoite>
+            </yht:yritys>
+            <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+          </yht:Osapuoli>
+        </yht:osapuolitieto>
+        <yht:suunnittelijatieto>
+          <yht:Suunnittelija>
+            <yht:suunnittelijaRoolikoodi>ARK-rakennussuunnittelija</yht:suunnittelijaRoolikoodi>
+            <yht:VRKrooliKoodi>rakennussuunnittelija</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Testaaja Taneli</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="und">Järvikatu 9</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>00370</yht:postinumero>
+                <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>taneli.testaaja@example.com</yht:sahkopostiosoite>
+              <yht:puhelin>050 123 1234</yht:puhelin>
+            </yht:henkilo>
+            <yht:koulutus>diplomi-insinööri</yht:koulutus>
+            <yht:valmistumisvuosi>0</yht:valmistumisvuosi>
+            <yht:vaadittuPatevyysluokka>2</yht:vaadittuPatevyysluokka>
+          </yht:Suunnittelija>
+        </yht:suunnittelijatieto>
+      </yht:Osapuolet>
+    </rakval:osapuolettieto>
+    <rakval:rakennuspaikkatieto>
+      <rakval:Rakennuspaikka>
+        <yht:yksilointitieto>120474203</yht:yksilointitieto>
+        <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+        <yht:rakennuspaikanKiinteistotieto>
+          <yht:RakennuspaikanKiinteisto>
+            <yht:kiinteistotieto>
+              <yht:Kiinteisto>
+                <yht:kiinteistotunnus>20500700010004</yht:kiinteistotunnus>
+              </yht:Kiinteisto>
+            </yht:kiinteistotieto>
+            <yht:hallintaperuste>oma</yht:hallintaperuste>
+          </yht:RakennuspaikanKiinteisto>
+        </yht:rakennuspaikanKiinteistotieto>
+        <yht:kaavanaste>asema</yht:kaavanaste>
+        <yht:rakennusoikeusYhteensa>215358.000</yht:rakennusoikeusYhteensa>
+        <yht:osoite>
+          <yht:osoitenimi>
+            <yht:teksti xml:lang="und">Acmenkatu 15</yht:teksti>
+          </yht:osoitenimi>
+          <yht:postinumero>87100</yht:postinumero>
+          <yht:postitoimipaikannimi>KAJAANI</yht:postitoimipaikannimi>
+        </yht:osoite>
+      </rakval:Rakennuspaikka>
+    </rakval:rakennuspaikkatieto>
+    <rakval:toimenpidetieto>
+      <rakval:Toimenpide>
+        <rakval:muuMuutosTyo>
+          <rakval:muutostyonLaji>rakennuksen pääasiallinen käyttötarkoitusmuutos</rakval:muutostyonLaji>
+          <rakval:kuvaus>muu</rakval:kuvaus>
+          <rakval:perusparannusKytkin>false</rakval:perusparannusKytkin>
+        </rakval:muuMuutosTyo>
+        <rakval:rakennustieto>
+          <rakval:Rakennus>
+            <yht:yksilointitieto>120474141</yht:yksilointitieto>
+            <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+            <rakval:sijaintitieto>
+              <rakval:Sijainti>
+                <yht:osoite>
+                  <yht:yksilointitieto>120474244</yht:yksilointitieto>
+                  <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+                  <yht:kunta>Kajaani</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="fi">Acmenkatu</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>87</yht:osoitenumero>
+                  <yht:postinumero>87100</yht:postinumero>
+                  <yht:postitoimipaikannimi>KAJAANI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:tyhja />
+              </rakval:Sijainti>
+            </rakval:sijaintitieto>
+            <rakval:rakennuksenTiedot>
+              <rakval:rakennustunnus>
+                <rakval:valtakunnallinenNumero>102627626K</rakval:valtakunnallinenNumero>
+                <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                <rakval:kiinttun>20500700010004</rakval:kiinttun>
+                <rakval:rakennusnro>044</rakval:rakennusnro>
+                <rakval:aanestysalue>002</rakval:aanestysalue>
+              </rakval:rakennustunnus>
+              <rakval:kayttotarkoitus>699 muut teollisuuden tuotantorakennukset</rakval:kayttotarkoitus>
+              <rakval:tilavuus>51140</rakval:tilavuus>
+              <rakval:kokonaisala>5148</rakval:kokonaisala>
+              <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+              <rakval:osoite>
+                <yht:kunta>Kajaani</yht:kunta>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="fi">Acmenkatu</yht:teksti>
+                </yht:osoitenimi>
+                <yht:osoitenumero>87</yht:osoitenumero>
+                <yht:postinumero>87100</yht:postinumero>
+                <yht:postitoimipaikannimi>KAJAANI</yht:postitoimipaikannimi>
+              </rakval:osoite>
+              <rakval:kerrosluku>4</rakval:kerrosluku>
+              <rakval:kerrosala>5148</rakval:kerrosala>
+              <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+              <rakval:kantavaRakennusaine>
+                <rakval:rakennusaine>betoni</rakval:rakennusaine>
+              </rakval:kantavaRakennusaine>
+              <rakval:julkisivu>
+                <rakval:julkisivumateriaali>betoni</rakval:julkisivumateriaali>
+              </rakval:julkisivu>
+              <rakval:verkostoliittymat>
+                <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+              </rakval:verkostoliittymat>
+              <rakval:paloluokka>P1</rakval:paloluokka>
+              <rakval:lammitystapa>ilmakeskus</rakval:lammitystapa>
+              <rakval:lammonlahde>
+                <rakval:polttoaine>kauko tai aluelämpö</rakval:polttoaine>
+              </rakval:lammonlahde>
+              <rakval:varusteet>
+                <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                <rakval:koneellinenilmastointiKytkin>true</rakval:koneellinenilmastointiKytkin>
+                <rakval:saunoja>2</rakval:saunoja>
+                <rakval:uima-altaita>0</rakval:uima-altaita>
+                <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+              </rakval:varusteet>
+              <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+            </rakval:rakennuksenTiedot>
+            <rakval:rakentajatyyppi>liiketaloudellinen</rakval:rakentajatyyppi>
+            <rakval:omistajatieto>
+              <rakval:Omistaja>
+                <yht:kuntaRooliKoodi>6</yht:kuntaRooliKoodi>
+                <yht:VRKrooliKoodi>6</yht:VRKrooliKoodi>
+                <yht:yritys>
+                  <yht:nimi>Acme Oyj</yht:nimi>
+                  <yht:liikeJaYhteisotunnus>8775360-2</yht:liikeJaYhteisotunnus>
+                  <yht:postiosoitetieto>
+                    <yht:postiosoite>
+                      <yht:osoitenimi>
+                        <yht:teksti xml:lang="und">Acmenkatu 87</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>87100</yht:postinumero>
+                      <yht:postitoimipaikannimi>KAJAANI</yht:postitoimipaikannimi>
+                    </yht:postiosoite>
+                  </yht:postiosoitetieto>
+                  <yht:puhelin>020 123 1234</yht:puhelin>
+                  <yht:sahkopostiosoite>testi@example.com</yht:sahkopostiosoite>
+                </yht:yritys>
+                <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                <rakval:omistajalaji>
+                  <rakval:omistajalaji>yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)</rakval:omistajalaji>
+                </rakval:omistajalaji>
+              </rakval:Omistaja>
+            </rakval:omistajatieto>
+          </rakval:Rakennus>
+        </rakval:rakennustieto>
+      </rakval:Toimenpide>
+    </rakval:toimenpidetieto>
+    <rakval:paatostieto>
+      <yht:Paatos>
+        <yht:lupamaaraykset>
+          <yht:kerrosala>5148.000</yht:kerrosala>
+          <yht:kokonaisala>5148.000</yht:kokonaisala>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>pohjakatselmus</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>osittainen loppukatselmus</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>lämpö-, vesi- ja ilmanvaihtolaitteiden katselmus</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>lämpö-, vesi- ja ilmanvaihtolaitteiden katselmus</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>osittainen loppukatselmus</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>rakennuksen paikan tarkastaminen</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>aloituskokous</yht:katselmuksenLaji>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:maarays>
+            <yht:sisalto>Ympäristöluvan lupamääräykset huomioitava suunnittelussa ja rakentamisessa:
+Päästöt pintavesiin ja viemäriin sekä ilmaan.
+Melu
+Jätteiden käsittely ja hyödyntämien 
+Varastointi
+Häiriötilanteet ja muut poikkeukselliset tilanteet</yht:sisalto>
+          </yht:maarays>
+          <yht:maarays />
+          <yht:maarays>
+            <yht:sisalto>Palotarkastuksen lausunnon vaatimukset huomioitava kohteen suunnittelussa ja toteutuksessa.
+1. kerroksen prosessitilassa esitettävä työskentely- ja huoltotilojen enimmäispoistumismatkat ja lisättävä
+poistumisovia tarpeen mukaan.</yht:sisalto>
+          </yht:maarays>
+          <yht:maarays>
+            <yht:sisalto>Ennen kunkin työvaiheen aloittamista on rakennusvalvontaviranomaiselle esitettävä: Rakennepiirustukset
+Pintavesien hallintasuunnitelma
+Kiinteistön vesi- ja viemärilaitteiden suunnitelmat
+Ilmanvaihtolaitteistojen suunnitelmat
+Käyttö- ja huolto-ohje
+Perustusten kuivatussuunnitelma</yht:sisalto>
+          </yht:maarays>
+          <yht:vaadittuTyonjohtajatieto>
+            <yht:VaadittuTyonjohtaja>
+              <yht:tyonjohtajaLaji>Vastaava työnjohtaja</yht:tyonjohtajaLaji>
+            </yht:VaadittuTyonjohtaja>
+          </yht:vaadittuTyonjohtajatieto>
+          <yht:vaadittuTyonjohtajatieto>
+            <yht:VaadittuTyonjohtaja>
+              <yht:tyonjohtajaLaji>KVV-työnjohtaja</yht:tyonjohtajaLaji>
+            </yht:VaadittuTyonjohtaja>
+          </yht:vaadittuTyonjohtajatieto>
+          <yht:vaadittuTyonjohtajatieto>
+            <yht:VaadittuTyonjohtaja>
+              <yht:tyonjohtajaLaji>IV-työnjohtaja</yht:tyonjohtajaLaji>
+            </yht:VaadittuTyonjohtaja>
+          </yht:vaadittuTyonjohtajatieto>
+        </yht:lupamaaraykset>
+        <yht:paivamaarat>
+          <yht:lainvoimainenPvm>2015-07-17</yht:lainvoimainenPvm>
+          <yht:voimassaHetkiPvm>2020-07-17</yht:voimassaHetkiPvm>
+          <yht:antoPvm>2015-07-02</yht:antoPvm>
+        </yht:paivamaarat>
+        <yht:poytakirja>
+          <yht:paatos>Päätösteksti: Hankkeeseen ryhtyvän huolehtimisvelvollisuus:
+
+Huolehdittava siitä, että rakennus suunnitellaan ja rakennetaan rakentamista koskevien säännösten ja määräysten sekä myönnetyn luvan mukaisesti.  Hänellä tulee olla hankkeen vaativuus huomioonottaen riittävät edellytykset sen toteuttamiseen sekä käytettävissä pätevä henkilöstö. (MRL 119 §)
+
+Huolehdittava myös siitä, että rakennushankkeessa on kelpoisuusvaatimukset täyttävät suunnittelijat ja työnjohtajat ja että muillakin rakennushankkeessa toimivilla on heidän tehtäviensä vaativuus huomioon otettuna riittävä asiantuntemus ja ammattitaito.
+
+Rakennus on suunniteltava ja rakennettava ja rakennuksen muutos- ja korjaustyöt tehtävä sekä rakennuksen käyttötarkoituksen muutos toteutettava siten, että rakennus täyttää siihen yleisesti ennakoitavissa oleva kuormitus ja rakennuksen käyttötarkoitus huomioon ottaen 117a-117g §:ssä tarkoitetut olennaiset tekniset vaatimukset (MRL 117 §)
+
+Vastaavan työnjohtajan, kiinteistön vesi- ja viemärilaitteistojen sekä ilmanvaihtolaitteistojen rakentamisesta vastaavien työnjohtajien on vastattava rakennustyön kokonaisuudesta ja laadusta, sekä huolehdittava, että rakennustyö tehdään myönnetyn luvan, rakentamista koskevien säännösten ja määräysten sekä hyvän rakennustavan mukaisesti. (MRL 122 §, MRA 71 § ja 73 §, SrMK A1, 4.3.1) Päätösehdotuksen lisäteksti: Rakennushankkeeseen ryhtyvälle määrätyt tarkastukset ja tarkastusasiakirjat:
+
+Rakennustyössä vastaavan työnjohtajan, erityisalan työnjohtajan tai vastuullisten suunnittelijoiden tulee suorittaa seuraavat tarkastukset ja tehdä niistä merkinnät rakennustyön tarkastusasiakirjaan (MRL 150 b ja f §, MRA 77, SrMK A1, 4.2 ja 7.1)
+- Vastaavan työnjohtajan tarkastusasiakirja
+- KVV-asennusten  tarkastusasiakirja
+- IV-asennusten tarkastusasiakirja
+</yht:paatos>
+          <yht:paatoskoodi>hyväksytty</yht:paatoskoodi>
+          <yht:paatoksentekija>Rakennustarkastaja</yht:paatoksentekija>
+          <yht:paatospvm>2015-06-30</yht:paatospvm>
+          <yht:pykala>123</yht:pykala>
+        </yht:poytakirja>
+      </yht:Paatos>
+    </rakval:paatostieto>
+    <rakval:asianTiedot>
+      <rakval:Asiantiedot />
+    </rakval:asianTiedot>
+  </rakval:RakennusvalvontaAsia>
+</gml:featureMember></wfs:FeatureCollection>

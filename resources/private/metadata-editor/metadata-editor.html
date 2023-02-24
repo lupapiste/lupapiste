@@ -1,0 +1,111 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="metadata-editor-template">
+    <div class="metadata-editor-container">
+      <div class="editor">
+        <div class="editor-header">
+          <div data-bind="ltext: 'attachment.tosMetadata'"></div>
+          <div class="edit-button-container" data-bind="if: modificationAllowed">
+            <!-- ko ifnot: editable -->
+            <icon-button params="click: edit,
+                                 buttonClass: 'white-button',
+                                 ltext: 'edit',
+                                 iconOnly: true,
+                                 testId: 'edit-metadata',
+                                 icon: 'pen'"></icon-button>
+            <!-- /ko -->
+            <!-- ko if: editable -->
+            <icon-button params="click: cancelEdit,
+                                 buttonClass: 'white-button',
+                                 ltext: 'cancel',
+                                 iconOnly: true,
+                                 testId: 'cancel-metadata-edit',
+                                 icon: 'circle-remove'"></icon-button>
+            <!-- /ko -->
+          </div>
+        </div>
+        <div class="editor-form" data-bind="if: !_.isEmpty(editedMetadata())">
+
+          <div data-bind="template: {name: 'metadata-list-template',
+                          data: {schemaList: schema, values: editedMetadata, invalidFields: invalidFields,
+                                 editable: editable, disabledFields: disabledFields, disableAll: false}}">
+          </div>
+
+          <div data-bind="if: editable" class="editor-buttons">
+            <button class="btn-primary save" data-bind="click: save, enable: invalidFields().length === 0, testId:'save-metadata'">
+              <i class="lupicon-save"></i>
+              <span data-bind="ltext: 'save'"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+</script>
+
+<script type="text/x-jquery-tmpl" class="ko-template" id="metadata-list-template">
+    <div data-bind="foreach: schemaList">
+      <div data-bind="if: $data.values">
+        <label data-bind="ltext: type,
+                          for: $component.typeId( type )"></label><br>
+        <div data-bind="visible: !$parent.editable(),
+                        ltext: function(){return $parent.values()[type]() ? $parent.values()[type]() : '<Arvo puuttuu>';}()"></div>
+        <select class="lux"
+                data-bind="visible: $parent.editable,
+                           id: $component.typeId( type ),
+                           options: values,
+                           optionsText: loc,
+                           value: $parent.values()[type],
+                           valueAllowUnset: true,
+                           disable: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type),
+                           testId: type"></select>
+      </div>
+      <div data-bind="if: $data.inputType && !$data.calculated" class="text-input-container">
+        <!-- ko if: inputType === "checkbox" -->
+        <!-- ko ifnot: $parent.editable -->
+        <label data-bind="ltext: type"></label><br>
+        <!-- /ko -->
+        <!-- ko if: $parent.editable -->
+        <toggle class="no-border gap--v1"
+                params="value: $parent.values()[type],
+                        invalid: $parent.invalidFields().indexOf(type) >= 0,
+                        disable: $parent.disableAll || $parent.disabledFields &&  _.includes($parent.disabledFields(), type),
+                        testId: type,
+                        ltext: type,
+                        prefix: 'blockbox'"></toggle>
+        <!-- /ko -->
+        <span data-bind="visible: !$parent.editable() && $parent.values()[type](), ltext: 'yes'"></span>
+        <span data-bind="visible: !$parent.editable() && !$parent.values()[type](), ltext: 'no'"></span>
+        <!-- /ko -->
+        <!-- ko if: inputType !== "checkbox" -->
+        <label data-bind="ltext: type,
+                          for: $component.typeId( type )"></label><br>
+        <input class="lux"
+               data-bind="visible: $parent.editable,
+                          id: $component.typeId( type ),
+                          attr: {type: inputType},
+                          textInput: $parent.values()[type],
+                          valueRequired: $parent.values()[type],
+                          ariaInvalid: !_.isBlank($parent.values()[type]()) && $parent.invalidFields().indexOf(type) >= 0,
+                          disable: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type),
+                          testId: type">
+        <span data-bind="visible: !$parent.editable(), text: $parent.values()[type]"></span>
+        <span data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></span>
+        <!-- /ko -->
+      </div>
+      <div data-bind="if: $data.calculated && $data.inputType === 'date' && $parent.values()[type]" class="text-input-container">
+        <label data-bind="ltext: type"></label><br>
+        <span data-bind="dateString: $parent.values()[type]"></span>
+      </div>
+      <!-- ko if: $data.subfields -->
+      <div class="subtable">
+        <h4 data-bind="ltext: type"></h4>
+        <div data-bind="template: {name: 'metadata-list-template',
+                        data: {schemaList: subfields, values: function() {return $parent.values()[type]}, invalidFields: $parent.invalidFields,
+                               editable: $parent.editable, disableAll: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type)}}"></div>
+      </div>
+      <!-- /ko -->
+      <!-- ko if: $data.dependencies && _.isFunction($parent.values()[type]) && $data.dependencies[$parent.values()[type]()] -->
+      <div data-bind="template: {name: 'metadata-list-template',
+                      data: {schemaList: $data.dependencies[$parent.values()[type]()], values: $parent.values, invalidFields: $parent.invalidFields,
+                             editable: $parent.editable, disableAll: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type)}},"></div>
+      <!-- /ko -->
+    </div>
+</script>

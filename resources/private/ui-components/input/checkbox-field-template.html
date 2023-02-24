@@ -1,0 +1,19 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="checkbox-field-template">
+      <div class="col--horizontal checkbox-wrapper" data-bind="css: {disabled: disable}">
+        <input type="checkbox"
+               data-bind="checked: value,
+                          attr: {id: id, name: id, 'data-test-id': id},
+                          disable: disable,
+                          ariaText: hasHtmlLabel ? null : label" />
+        <!-- ko if: hasHtmlLabel -->
+        <label class="inline-label checkbox-label"
+               data-bind="html: label, attr: {'for': id, 'data-test-id': id + '-label'}">
+        </label>
+        <!-- /ko -->
+        <!-- ko ifnot: hasHtmlLabel -->
+        <label class="inline-label checkbox-label"
+               data-bind="text: label, attr: {'for': id, 'data-test-id': id + '-label'}"
+               aria-hidden="true"></label>
+        <!-- /ko -->
+      </div>
+</script>

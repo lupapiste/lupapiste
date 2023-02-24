@@ -1,0 +1,52 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-steps-template">
+  <div class="company-steps">
+    <h1 data-bind="ltext: texts.title"
+        data-test-id="register-company-title"></h1>
+    <!-- ko if: texts.subtitle -->
+    <h2 data-bind="text: texts.subtitle"
+        class="register-company-subtitle"
+        data-test-id="register-company-subtitle"></h2>
+    <!-- /ko -->
+    <div class="tabby">
+      <div class="tabby__row"
+           data-bind="foreach: stepNames"> <!-- Row for names -->
+        <!-- ko if: $index -->
+        <div data-bind="css: $parent.dynamicLineCss">
+        </div>
+        <!-- /ko -->
+        <div class="tabby__cell">
+          <div class="circle-title"
+               data-bind="ltext: $data"></div>
+        </div>
+      </div>
+      <div class="tabby__row"
+           data-bind="foreach: stepNames"> <!-- Row for number circles -->
+        <!-- ko if: $index -->
+        <div class="tabby__cell">
+          <div class="edge"
+               data-bind="css: $parent.stepCss( $index )">&nbsp;</div>
+        </div>
+        <!-- /ko -->
+        <div class="tabby__cell">
+          <div class="circle-row">
+            <div class="circle-pad">
+              <div class="edge"
+                   data-bind="visible: $index,
+                              css: $parent.stepCss( $index )">&nbsp;</div>
+            </div>
+            <div class="circle-number"
+                 data-bind="text: $index() + 1,
+                            css: $parent.stepCss( $index )">
+            </div>
+            <div class="circle-pad">
+              <div class="edge"
+                   data-bind="visible: !$parent.isLast( $index()),
+                              css: $parent.stepCss( $index() + 1)">&nbsp;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

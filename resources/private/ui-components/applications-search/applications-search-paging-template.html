@@ -1,0 +1,48 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="applications-search-paging-template">
+      <div class="paging"
+           data-bind="ifnot: dataProvider.pending">
+        <p class="results" data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></p>
+        <div>
+          <!-- ko if: toStartBtn -->
+          <button class="primary"
+                  data-test-id="paging-last"
+                  data-bind="click: toFirstPage, enable: enablePrevButton">
+            <i class="lupicon-chevron-left"></i>
+          </button>
+          <!-- /ko -->
+          <button class="primary previous"
+                  data-test-id="paging-previous"
+                  data-bind="click: prev, enable: enablePrevButton">
+            <i class="lupicon-chevron-left"></i>
+            <span data-bind="ltext: 'previous'"></span>
+          </button>
+          <button class="primary"
+                  data-test-id="paging-next"
+                  data-bind="click: next, enable: enableNextButton">
+            <span data-bind="ltext: 'next'"></span>
+            <i class="lupicon-chevron-right"></i>
+          </button>
+          <!-- ko if: toEndBtn -->
+          <button class="primary"
+                  data-test-id="paging-last"
+                  data-bind="click: toLastPage, enable: enableNextButton">
+            <i class="lupicon-chevron-right"></i>
+          </button>
+          <!-- /ko -->
+          <!-- ko if: limits && !disable() -->
+          <div class="button-group">
+            <!-- ko foreach: limits -->
+            <a class="link-btn link-btn--link"
+               data-bind="css: {active: $component.limit() === $data},
+                          attr: {'data-test-id': 'limit-' + $data},
+                          click: $component.setLimit">
+              <span class="limits" data-bind="text: $data"></span>
+              <span class="separator"></span>
+            </a>
+            <!-- /ko -->
+            <p data-bind="ltext: $data.itemsPerPageTextKey"></p>
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+</script>

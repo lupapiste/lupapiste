@@ -1,0 +1,61 @@
+// Note: The fonts are loaded in the template.html.
+// Earlier @import approach resulted in a peculiar hard to trace rendering bug,
+//where some texts were invisible until hard reload, window size change or zooming.
+
+$font-body: 'Inter', sans-serif;
+$font-heading: 'Inter', sans-serif;
+$font-size-body: 15px;
+
+@mixin engraved{ text-shadow: 0px 1px 0px rgba(255,255,255,.3), 0px -1px 0px rgba(0,0,0,.7);}
+
+* {
+  font-family: $font-body;
+}
+
+body {
+  font-size: $font-size-body;
+  line-height: $baseline;
+  margin-bottom: $baseline;
+  color: $primary-text;
+}
+
+p {
+  color: $primary-text;
+  margin-bottom: $baseline;
+  line-height: $baseline;
+}
+
+h1, .h1 {
+  font-family: $font-heading;
+  font-weight: normal;
+  font-size: $baseline;
+  margin-bottom: $marginM;
+  text-transform: uppercase;
+
+}
+
+h2, .h2 {
+  font-size: $baseline * 0.9;
+  font-family: $font-heading;
+  margin-bottom: $marginS;
+  text-transform: none;
+}
+
+h3, .h3 {
+  font-size: $baseline * 0.75;
+  font-family: $font-heading;
+  font-weight: normal;
+  margin-bottom: $marginS;
+  text-transform: none;
+}
+i {
+  margin-bottom: $marginM;
+}
+
+.success-message {
+  color: $green-dark;
+}
+
+blockquote {
+  margin-left: 2em;
+}

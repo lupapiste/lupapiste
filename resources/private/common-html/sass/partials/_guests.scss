@@ -1,0 +1,24 @@
+
+.auth-table {
+  tr {
+    background-color: initial;
+    &:active {
+      background-color: initial;
+    }
+  }
+}
+
+.application-guests {
+  margin-bottom: 20px;
+}
+
+// Support for using spin next to form-input;
+.spin-container {
+  display: inline-block;
+  margin-top: 4px;
+  width: initial;
+  vertical-align: top;
+  i.spin {
+    display: table-cell;
+  }
+}

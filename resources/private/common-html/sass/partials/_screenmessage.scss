@@ -1,0 +1,60 @@
+@mixin message-icon {
+  content:"";
+  display: block;
+  @include spite-bg;
+  background-position: 0px -4800px;
+  height:32px;
+  width: 30px;
+  margin: $marginM $marginM $marginS $marginM;
+  float: left;
+}
+
+#sys-notification {
+  color: white;
+  box-sizing: border-box;
+
+  .notification-info {
+    vertical-align: top;
+    float: left;
+  }
+  .notification-close {
+    vertical-align: top;
+    float: right;
+  }
+  .notification-list {
+    display: inline;
+    vertical-align: top;
+    ul {
+      width: 95%;
+      list-style: none;
+      font-size: 1.2em;
+      padding-left: 0;
+      display: inline-block;
+      li {
+        margin-left: $marginL;
+        margin-right: $marginL;
+        border-bottom: 2px dashed white;
+        padding: 1em 0;
+        a {
+          color: white;
+          text-decoration: underline;
+        }
+        a:hover {
+          text-decoration: none;
+        }
+        &:first-child {
+          padding-top: 0;
+        }
+        &:last-child {
+          margin-bottom: 0px;
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+.screenmessagebutton {
+  width: 170px;
+}

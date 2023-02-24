@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="statement">
+    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'statement' -->
+    <div class="statement-top">
+      <div class="container">
+        <a class="btn primary inline-block"
+           data-test-id="statement-return"
+           data-bind="attr: {href: '#!/application/' + $root.service.applicationId() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
+            <i aria-hidden="true" class="lupicon-chevron-start"></i>
+            <span data-bind ="ltext: 'application.return'"></span>
+        </a>
+
+        <div class="tabs-container">
+          <!-- ko if: _.size( tabs() ) > 1 -->
+          <ul data-bind="foreach: tabs" class="tabs">
+            <li data-bind="testId: 'statement-tab-selector-' + $data,
+                           click: $parent.selectTab">
+              <a href="#" class="btn plain-tab"
+                 data-bind="ltext: 'statement.tab.' + $data,
+                            css: {active: $parent.selectedTab() === $data}"></a>
+            </li>
+          </ul>
+          <!-- /ko -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="statement-edit-container">
+        <div data-bind="component: { name: 'statement-edit',
+                                     params: { applicationTitle: $root.service.applicationTitle,
+                                               applicationId: $root.service.applicationId,
+                                               data: $root.service.data,
+                                               commands: $root.service.commands['statement'],
+                                               authModel: $root.authModel,
+                                               target: $root.targeted.defaults.target} },
+                        visible: $root.selectedTab() === 'statement'"></div>
+        <div data-bind="component: { name: 'statement-reply-request',
+                                     params: { applicationTitle: $root.service.applicationTitle,
+                                               data: $root.service.data,
+                                               commands: $root.service.commands['reply-request'],
+                                               authModel: $root.authModel } },
+                        visible: $root.selectedTab() === 'reply-request'"></div>
+        <div data-bind="component: { name: 'statement-edit-reply',
+                                     params: { applicationTitle: $root.service.applicationTitle,
+                                               data: $root.service.data,
+                                               commands: $root.service.commands['reply'],
+                                               authModel: $root.authModel } },
+                        visible: $root.selectedTab() === 'reply'"></div>
+      </div>
+
+      <div data-bind="component: {name: 'targeted-attachments', params: $root.targeted}"></div>
+
+      <div id="statement-control-button-container">
+        <div data-bind="component: { name: 'statement-control-buttons',
+                                     params: { applicationId: $root.service.applicationId,
+                                               statementId: $root.service.statementId,
+                                               authModel: $root.authModel,
+                                               submitAllowed: $root.service.submitAllowed,
+                                               waiting: $root.service.pending,
+                                               commands: $root.service.commands,
+                                               selectedTab: $root.selectedTab } }"></div>
+      </div>
+    </div>
+    <!-- /ko -->
+  </section>
+</body>
+</html>

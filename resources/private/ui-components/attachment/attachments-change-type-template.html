@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-change-type-template">
+  <div class="content pad--v2 pad--h1">
+    <label for="attachment-type-select"
+           class="form-label"
+           data-bind="ltext: 'attachment.chooseType'">
+    </label>
+    <select id="attachment-type-select"
+            class="lux w--100"
+            data-bind="enable: changingTypeAllowed(),
+                       value: attachmentType,
+                       foreach: selectableAttachmentTypes">
+      <optgroup data-bind="attr: {label: label}, foreach: types">
+        <option data-bind="text: label, value: value"></option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="button-group ok">
+    <ok-button-group params="okFn: ok"></ok-button-group>
+  </div>
+</script>

@@ -1,0 +1,119 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="attachments-multiselect-template">
+        <h1 data-bind="visible: params.titleLoc, ltext: params.titleLoc"></h1>
+        <h1 data-bind="visible: params.title, text: params.title"></h1>
+        <div class="clear">
+            <div data-bind="if: postFiles().length > 0">
+              <h2>
+                <span data-bind="ltext: 'application.attachments.post-verdict'"></span>
+              </h2>
+              <div class="clear" data-bind="template: {name: 'attachments-multiselect-table', data: postFiles()}"></div>
+            </div>
+            <div data-bind="if: preFiles().length > 0">
+              <h2>
+                <span data-bind="ltext: 'application.attachments.pre-verdict'"></span>
+              </h2>
+              <div class="clear" data-bind="template: {name: 'attachments-multiselect-table', data: preFiles()}"></div>
+            </div>
+          <div class="right">
+            <!-- ko ifnot: allSelected -->
+            <a href="#" data-bind="ltext: 'verdict-attachments-multiselect.select-all', click: selectAll" data-test-id="verdict-attachments-multiselect-select-all"></a>
+            <!-- /ko -->
+            <!-- ko if: allSelected -->
+            <a href="#" data-bind="ltext: 'verdict-attachments-multiselect.select-none', click: selectNone" data-test-id="verdict-attachments-multiselect-select-none"></a>
+            <!-- /ko -->
+          </div>
+        </div>
+
+        <div class="attachment-multiselect-buttons">
+          <button data-bind="click: start,
+                             ltext: params.okLoc,
+                             clickBubble: false,
+                             enable: $parent.authorization && $parent.authorization.ok(params.authKey)"
+            class="btn btn-primary"
+            data-test-id="multiselect-action-button">
+          </button>
+          <button data-bind="ltext: 'application.return', click: $parent.cancelSelecting"
+            class="btn close"
+            data-test-id="cancel-verdict-attachments-selecting">
+          </button>
+        </div>
+</script>
+
+<script type="text/x-jquery-tmpl" class="ko-template" id="attachments-multiselect-table">
+        <table class="table attachments-template-table">
+          <tbody data-bind="foreach: $data">
+            <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">
+              <td data-bind="text: name" colspan="5" data-test-id="attachment-group-header-text"></td>
+              <td colspan="2" class="attachment-group-select">
+                <!-- ko ifnot: isGroupSelected -->
+                <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect"
+                            data-test-id="attachments-group-select"></a>
+                <!-- /ko -->
+                <!-- ko if: isGroupSelected -->
+                <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parents[1].toggleGroupSelect"
+                            data-test-id="attachments-group-deselect"></a>
+                <!-- /ko -->
+              </td>
+            </tr>
+            <tr>
+              <th data-bind="ltext: 'application.attachmentState'">Tila</th>
+              <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+              <th data-bind="ltext: 'application.attachmentInfo'">Milloin tarvitaan</th>
+              <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+              <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+              <th></th>
+            </tr>
+
+            <!-- ko foreach: attachments -->
+            <tr class="attachment-row attachment-multiselect-row" data-bind="click: $parents[2].selectRow,
+                                                                             clickBubble: false,
+                                                                             css: {selected: selected}">
+              <td>
+                <state-icons params="attachment: $data"></state-icons>
+              </td>
+              <td class="attachment-type-group">
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+              </td>
+              <td class="attachment-type-id">
+                  <attachment-type-id params="attachment: $data"></attachment-type-id>
+                  <div class="attachment-content-desc" data-bind="if: $data.contents">
+                    <span data-bind="text: $data.contents" data-test-id="attachment-contents"></span>
+                  </div>
+              </td>
+              <td class="attachment-help-info">
+                <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+              </td>
+              <td class="attachment-file-info">
+                <span data-bind="if: $data.latestVersion">
+                  <a href="#" data-bind="text: latestVersion.filename,
+                                         attr: {href: '/api/raw/latest-attachment-version?download=true&attachment-id=' + $data.id,
+                                                title: loc('download')},
+                                         click: function() {return true;},
+                                         clickBubble: false"></a>
+                  <br/>
+                  <i data-bind="ltext: latestVersion.contentType"></i>
+                  <i data-bind="size: latestVersion.size"></i>
+                </span>
+                <!-- ko ifnot: $data.latestVersion -->
+                <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + application.id + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                <!-- /ko -->
+              </td>
+              <td class="attachment-file-changed">
+                <span data-bind="if: $data.latestVersion">
+                  <span data-bind="dateString: modified"></span>
+                  <span data-bind="fullName: latestVersion.user"></span>
+                </span>
+              </td>
+              <td>
+                <input type="checkbox" data-bind="checked: $data.selected, click: function() {return true;}, clickBubble: false" />
+              </td>
+            </tr>
+            <!-- /ko -->
+          </tbody>
+        </table>
+     </script>

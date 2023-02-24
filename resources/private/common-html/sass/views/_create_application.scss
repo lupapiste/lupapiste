@@ -1,0 +1,289 @@
+.ui-autocomplete-loading {
+  background: white url("/lp-static/img/ajax-loader-16.gif") right center no-repeat;
+}
+
+.create-application-search-box {
+  background: $lp-light-grey;
+  padding: $marginL;
+  margin-bottom: $marginM;
+  min-height: $baseline*4;
+  p {
+    margin-bottom: $marginM;
+    padding: 0;
+    width: 80%;
+  }
+
+}
+
+.map-select-info {
+  background: $white;
+  position: relative;
+  min-height: 580px - $marginM;
+  h3 {
+    text-transform:uppercase;
+  }
+  p {
+    margin-bottom: 24px;
+    width: 100%;
+  }
+  button {
+    margin-bottom: 0px;
+    position: absolute;
+    bottom: $marginM;
+    width: 80%;
+    left: 12px;
+    span {
+      width: 100%;
+    }
+  }
+  input {
+    width: 90%;
+  }
+  .use-manual-entry {
+    color: get-signal( "red" );
+    margin-bottom: 15px;
+  }
+  .warning-message {
+    color: $negative;
+    margin-bottom: 15px;
+  }
+  .checkbox-wrapper {
+    border: none;
+  }
+}
+
+.create-application-map {
+  position: relative;
+  background: white;
+}
+
+.create-info-text {
+}
+
+.create-content {
+  width: 75%;
+  float: right;
+}
+
+
+
+.more-prev-app-info-needed-desc {
+  color: get-signal( "red" );
+  margin-top: $marginL;
+  margin-bottom: 0;
+}
+
+
+
+
+.address-search {
+  width: $cols4;
+  display: inline-block;
+  //height: 25px;
+  vertical-align: middle;
+}
+
+.create-application-details {
+  width: 800px;
+  height: 200px;
+}
+
+.create-application-form {
+  display: inline-block;
+}
+
+.create-application-actions {
+  width: $cols4;
+  display: inline-block;
+  float: right;
+  vertical-align: bottom;
+}
+
+.btn-create-application {
+  line-height: 60px;
+}
+
+.label-container {
+  display: inline-block;
+  width: $cols2;
+}
+
+.top-marginM {
+  margin-top: $marginM;
+}
+.top-marginL {
+  margin-top: $marginL*2;
+}
+.bottom-marginM {
+  margin-bottom: $marginM !important;
+}
+
+.bottom-marginL {
+  margin-bottom: $marginL !important;
+}
+
+#popup-id_close {
+  @include spite-bg;
+  background-position: 0px -4100px;
+  top: 4px !important;
+  right: 4px !important;
+}
+#popup-id_contentDiv {
+  padding: 0;
+  width: 95% !important;
+  overflow: hidden;
+
+}
+#popup-id_GroupDiv {
+  padding: {
+    left: 16px;
+    top: 8px;
+    bottom: 8px;
+    right: 8px;
+  }
+}
+#popup-id {
+  background: white;
+  color: black;
+  background: rgba(255,255,255, 0.95)!important;
+  overflow: visible !important;
+  box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
+  border: 1px solid $lp-dark-grey;
+  p {
+  //color: black;
+  }
+  &:before {
+    content: " ";
+    display: block;
+    position: absolute;
+    left: -51px;
+    top: 330px;
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 51px solid $lp-dark-grey;
+    border-bottom: 25px solid transparent;
+  }
+  &:after {
+    content: " ";
+    display: block;
+    position: absolute;
+    left: -50px;
+    top: 330px;
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 50px solid rgba(255, 255, 255, 0.95);
+    border-bottom: 25px solid transparent;
+    z-index: 2;
+  }
+}
+
+.create-help.lupicon-circle-question {
+  &:before {
+    vertical-align: top;
+    font-size: 2 * $lupicon-size;
+  }
+  vertical-align: top;
+}
+
+.copy-selection-wrapper {
+  margin-top: $marginS;
+  margin-bottom: $marginM;
+}
+
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid $positive;
+  background-color: $input-disabled-background-color;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
+
+  [class^="lupicon-"].right,
+  [class*="lupicon-"].right {
+    margin-right: 6px;
+    float: right;
+  }
+}
+
+.copy-auth-selection-text {
+  margin-bottom: $marginM;
+}
+
+.copy-phase-buttons {
+  margin-top: $marginL;
+}
+
+.copy-state-indication {
+  margin: 0 0 $marginM 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+
+  div {
+    height: 24px;
+    .active-phase {
+      color: white;
+      background-color: $green-dark;
+      &:after {
+        border-left: 11px solid $green-dark;
+      }
+    }
+
+    .completed-phase {
+      color: white;
+      background-color: $gray-link;
+      &:after {
+        border-left: 11px solid $gray-link;
+      }
+    }
+
+    span {
+      background-color: $app-gray-light;
+      color: darken($lp-light-grey, 40%);
+      position: relative;
+      padding: 4px 8px 4px 24px;
+      display: inline-block;
+      margin: 0px -4px 0 0;
+      border: none;
+      &:first-child {
+        padding: 4px 8px 4px 8px;
+      }
+      &:last-child:after {
+        border-left: none;
+      }
+
+      &:after {
+        display: inline-block;
+        position: absolute;
+        content: " ";
+        width: 0;
+        height: 0;
+        top: -1px;
+        right: -9px;
+        border-top: 17px solid transparent;
+        border-left: 11px solid $app-gray-light;
+        border-bottom: 17px solid transparent;
+        z-index: 1;
+      }
+    }
+  }
+}
+
+.property-formation-app-location-info {
+  margin-top: $marginL;
+  font-size: 20px;
+}
+
+form.previous-permit-form {
+  max-width: 50%;
+  div.previous-permit-form__entry,
+  div.help-box {
+    margin-bottom: $marginM;
+  }
+}

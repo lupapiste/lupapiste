@@ -1,0 +1,65 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="applications-search-filters-list-template">
+  <div class="form-grid form-grid--no-border applications-search-filters-list">
+    <div class="row row--no-margin">
+      <div class="col-2">
+        <div data-bind="component: {name: 'submit-button', params: {value: newFilterName,
+                        id: 'new-filter-name',
+                        lLabel: 'applications.search.name-and-save-filter',
+                        lSubmitTitle: 'applications.search.save-filter',
+                        submitFn: saveFilter}}"
+             data-test-id="new-filter-submit-button"></div>
+      </div>
+
+      <div class="col-1 col--full">
+        <br/>
+        <button class="secondary" data-test-id="clear-saved-filters" data-bind="click: clearFilters">
+          <i class="lupicon-remove"></i>
+          <span data-bind="ltext: 'applications.search.clear-filters'"></span>
+        </button>
+      </div>
+
+      <div class="col-1 col--full">
+        <br/>
+        <button class="secondary" data-test-id="toggle-saved-filters" data-bind="toggleClick: showSavedFilters, css: {toggled: showSavedFilters}">
+          <i class="lupicon-chevron-down"></i>
+          <i class="lupicon-chevron-up toggle"></i>
+          <span data-bind="ltext: 'applications.search.saved-filters'"></span>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="row" data-test-id="saved-filters-list" data-bind="slider: showSavedFilters">
+      <!-- ko if savedFilters().length > 0 -->
+      <div class="col-4 applications-search-filters-list__filters" data-bind="foreach: savedFilters">
+        <div class="applications-search-filters-list__filter-row" data-bind="attr: {'data-test-id': 'saved-filter-row-' + $data.title()}">
+          <div class="applications-search-filters-list__filter-item">
+            <div data-bind="component: {name: 'text-field', params: {value: $data.title,
+                            id: id,
+                            disable: true}}">
+            </div>
+          </div>
+
+          <div class="applications-search-filters-list__filter-item applications-search-filters-list__filter-item--default-filter">
+            <button class="secondary"
+                    data-bind="attr: {'data-test-id': 'set-' + $data.title() + '-as-default-filter'},
+                               click: $data.defaultFilter, css: {active: $data.isDefaultFilter}">
+              <i class="lupicon-star"></i>
+              <span data-bind="ltext: 'applications.search.set-default-filter', visible: !$data.isDefaultFilter()"></span>
+              <span data-bind="ltext: 'applications.search.set-as-default-filter', visible: $data.isDefaultFilter"></span>
+            </button>
+          </div>
+
+          <div class="applications-search-filters-list__filter-item applications-search-filters-list__filter-item--remove"
+               data-bind="attr: {'data-test-id': 'remove-filter-' + $data.title()},
+                          component: { name: 'remove-button', params: {removeFn: function() {$data.removeFilter($data);} }}"></div>
+        </div>
+      </div>
+      <!-- /ko -->
+      <!-- ko if: savedFilters().length === 0 -->
+      <p data-bind="ltext: 'applications.search.no-saved-filters'"></p>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>

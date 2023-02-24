@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html >
+<body>
+  <section class="page container" id="task"
+           role="main" data-bind="with: task">
+    <!-- ko ifnot: $data.state === 'faulty_review_task' -->
+    <drop-zone></drop-zone>
+    <!-- /ko -->
+    <h1><span data-bind="attr: {'data-test-state': $data.state}"></span><span class="task-title"
+                                                                              data-bind="text: displayName"></span></h1>
+    <div class="clear-fix inner-margins">
+      <icon-button params="ltext: 'application.return',
+                           icon: 'chevron-start',
+                           buttonClass: 'secondary',
+                           click: returnToApplication"></icon-button>
+      <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing(), visible: $root.authorization.ok('review-can-be-marked-done')" class="positive">
+        <i aria-hidden="true" class="lupicon-eye"></i>
+        <span data-bind="ltext: 'task.review-done'"></span>
+      </button>
+      <button data-test-id="resend-review" data-bind="click: resendReview, enable: !$root.processing(), visible: $root.authorization.ok('resend-review-to-backing-system')" class="positive">
+        <i aria-hidden="true" class="lupicon-circle-arrow-right"></i>
+        <span data-bind="ltext: 'task.resend-review'"></span>
+      </button>
+      <!-- ko if: approvable || rejectable -->
+      <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
+      <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
+      <!-- /ko -->
+      <button data-test-id="mark-faulty" data-bind="click: markFaulty, visible: $root.authorization.ok('mark-review-faulty')" class="negative">
+        <i aria-hidden="true" class="lupicon-remove"></i>
+        <span data-bind="ltext: 'task.mark-faulty'"></span>
+      </button>
+
+      <button data-test-id="delete-task"
+              data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"
+              class="secondary" style="float:right"></button>
+    </div>
+
+    <div class="review-done help-box" data-bind="ltext: 'task.review-done.help', visible: $root.authorization.ok('review-can-be-marked-done')"></div>
+    <div class="review-done help-box" data-bind="ltext: 'task.review-faulty.help', visible: $data.state === 'faulty_review_task'"></div>
+
+    <!-- ko ifnot: $data.state === 'faulty_review_task' -->
+    <div id="taskAttachments"
+         data-bind="component: {name: 'targeted-attachments', params: $parent.attachmentsModel}">
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: $data.addedToService -->
+     <div data-bind="component: {name: 'docgen-group',
+                                 params: {schema: $data.schema,
+                                          path: [],
+                                          applicationId: $data.applicationId,
+                                          documentId: $data.id,
+                                          service: $root.dataService,
+                                          authModel: $root.authorization,
+                                          i18npath: [$data.schema.info.i18name || $data.schema.info.name]}}"></div>
+    <!-- /ko -->
+  </section>
+</body>
+</html>

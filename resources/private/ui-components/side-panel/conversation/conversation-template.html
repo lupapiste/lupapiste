@@ -1,0 +1,131 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="conversation-template">
+  <div>
+    <form class="conversation-form">
+        <div data-bind="component: {name: 'textarea-field',
+                        params: {value: text,
+                        id: 'application-new-comment-text',
+                        maxlength: 4000,
+                        lLabel: 'application.conversationPrompt',
+                        lPlaceholder: 'comment.placeholder',
+                        disable: !authorization.ok('add-comment')}},
+                        hasFocus: textSelected,
+                        css: {'highlight-conversation': highlightConversation},
+                        visible: authorization.ok('add-comment')"></div>
+
+        <div class="gap--b1">
+          <!-- ko if: showStateOpenApplication -->
+          <icon-button class="gap--r1"
+                       params="disable: submitDisabled,
+                               click: stateOpenApplication,
+                               waiting: pending,
+                               testId: 'application-open-application-btn',
+                               icon: 'circle-question',
+                               ltext: 'application.conversationOpen',
+                               type: 'submit'">
+          </icon-button>
+          <!-- /ko -->
+          <!-- ko if: authorization.ok('add-comment') -->
+          <icon-button class="gap--r1"
+                       params="disable: submitDisabled,
+                               click: submit,
+                               waiting: pending,
+                               testId: 'application-new-comment-btn',
+                               type: 'submit',
+                             icon: 'envelope',
+                             ltext: 'application.conversationSend'">
+          </icon-button>
+          <!-- /ko -->
+          <a data-bind="attr: {href: '/api/raw/download-conversation-pdf?id=' + applicationId()}"
+             class="btn positive">
+            <i aria-hidden="true" class="lupicon-download"></i>
+            <span data-bind="ltext: 'application.conversationDownload'"></span>
+          </a>
+        </div>
+
+      <!-- ko if: authorization.ok('can-mark-answered') -->
+      <div>
+        <icon-button params="click: markAnswered,
+                             testId: 'comment-request-mark-answered',
+                             type: 'submit',
+                             icon: 'circle-check',
+                             ltext: 'comment-request-mark-answered-label'">
+        </icon-button>
+      </div>
+      <!-- /ko -->
+      <div class="gap--t1" data-bind="if: canTargetToAuthority">
+        <div data-bind="component: {name: 'select-field',
+                        params: {value: to,
+                        options: authorities,
+                        optionsText: function(item) {
+                        return item.lastName + ' ' + item.firstName;
+                        },
+                        optionsValue: 'id',
+                        lOptionsCaption: 'comment-request-prompt',
+                        lLabel: 'comment-request-label',
+                        id: 'side-panel-assigneed-authority'}}"></div>
+      </div>
+      <!-- ko if: mainConversation -->
+      <div class="gap--t1">
+        <div data-bind="component: {name: 'checkbox-field',
+                        params: {value: showAttachmentComments,
+                        lLabel: 'conversation.attachment.toggle',
+                        id: 'show-attachment-comments'}}"></div>
+        <!-- ko if: authorization.ok('new-pate-verdict-draft') || authorization.ok('new-legacy-verdict-draft') -->
+        <div data-bind="component: {name: 'checkbox-field',
+                        params: {value: showPreparationComments,
+                        lLabel: 'conversation.preparation.toggle',
+                        id: 'show-preparation-comments'}}"></div>
+        <!-- /ko -->
+
+      </div>
+      <!-- /ko -->
+    </form>
+
+    <div class="gap--t1" data-bind="foreach: comments" data-test-id="comments-table">
+      <div class="is-comment"
+           data-bind="css: {
+                      'comment-bubble-authority':  $parent.isAuthorityComment($data),
+                      'comment-bubble':            !$parent.isAuthorityComment($data),
+                      'attachment': $parent.isForAttachment($data),
+                      'for-me':     $parent.isForMe($data),
+                      },
+                      visible: $parent.isVisible($data)">
+        <div class="header">
+          <span class="sender">
+            <span data-bind="fullName: user"></span>
+            <span class="role" data-bind="ltext: $parent.commentRole( $data )"></span>
+            <!-- ko with: $data.to -->
+            <span class="to" data-bind="fullName: $data"></span>
+            <!-- /ko -->
+          </span>
+          <span class="timestamp" data-bind="dateTimeString: created"></span>
+        </div>
+        <div class="content">
+          <!-- ko if: $parent.isForAttachment($data) -->
+          <span class="target" data-bind="if: target.id">
+            <!-- ko if: target.attachmentType -->
+            <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId() + '/' + target.id},
+                          ltext: $parent.getAttachmentTypeLocKey($data)"></a>
+            <!-- /ko -->
+            <!-- ko ifnot: target.attachmentType -->
+            <span class="deleted" data-bind="ltext: 'attachment.removed'"></span>
+            <!-- /ko -->
+          </span>
+          <!-- /ko -->
+          <!-- ko if: $parent.isCalendarComment($data) -->
+          <span class="target" data-bind="with: $parent.reservationForComment($data)">
+            <span data-bind="ltext: 'application.calendar.comment.' + $parent.target.type"></span>
+            <span data-bind="text: reservationType.name"></span>
+            <span data-bind="dateTimeString: startTime"></span>
+          </span>
+          <!-- /ko -->
+          <span data-bind="text: $parent.getCommentText($data)"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="process-nav"></div>
+</script>

@@ -1,0 +1,500 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachment-details-template">
+
+  <div class="attachment-info">
+    <drop-zone></drop-zone>
+    <div class="container">
+      <div>
+        <icon-button class="gap--r4"
+                     params="click: $data.backToApplication,
+                             buttonClass: 'secondary',
+                             testId: 'back-to-application-from-attachment',
+                             ltext: 'application.return',
+                             icon: 'chevron-start'"></icon-button>
+        <icon-button class="gap--r1"
+                     params="enable: Boolean( $data.previousAttachmentId ),
+                             click: $data.openPreviousAttachment,
+                             buttonClass: 'secondary',
+                             icon: 'chevron-left',
+                             ltext: 'previous'">
+        </icon-button>
+        <icon-button params="enable: Boolean( $data.nextAttachmentId ),
+                             click: $data.openNextAttachment,
+                             buttonClass: 'secondary',
+                             icon: 'chevron-right',
+                             ltext: 'next'">
+        </icon-button>
+      </div>
+
+
+      <div class="hr"></div>
+
+      <div>
+        <!-- ko if: isApprovable() -->
+        <icon-button class="gap--r2"
+                     params="click: $data.approveAttachment,
+                             buttonClass: $data.isApproved() ? 'primary' : 'secondary',
+                             id: 'test-attachment-approve',
+                             icon: 'check',
+                             ltext: 'document.approve'">
+        </icon-button>
+        <!-- /ko -->
+        <!-- ko if: isRejectable() -->
+        <button id="test-attachment-reject"
+                data-bind="ltext: 'attachment.reject',
+                           click: $data.rejectAttachment,
+                           css: {primary: $data.isRejected(),
+                                 secondary: !$data.isRejected()}"
+                class="gap--r2 txt--upper"></button>
+        <!-- /ko -->
+        <!-- ko if: changingTypeAllowed() -->
+        <button class="secondary gap--r2"
+                data-test-id="change-attachment-type"
+                data-bind="click: $data.showChangeTypeDialog,
+                           ltext: 'attachment.changeType'">
+        </button>
+        <!-- /ko -->
+        <!-- ko if: isDeletable() -->
+        <icon-button params="click: $data.deleteAttachment,
+                             testId: 'delete-attachment',
+                             buttonClass: 'secondary',
+                             icon: 'remove',
+                             ltext: 'attachment.delete'">
+        </icon-button>
+        <!-- /ko -->
+      </div>
+
+      <div data-test-id="approval-component"
+           data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
+      <div data-bind="component: {name: 'reject-note',
+                      params: {attachmentId: id,
+                      editorCss: 'attachment-reject-note-editor',
+                      prefix: 'details-reject'}}"></div>
+      <div data-test-id="attachment-page-stamping-component"
+           data-bind="component: { name:'attachment-page-stamping',
+                      params: {attachment: $data.attachment} }"></div>
+
+      <div class="col1" data-bind="if: $data.ramMessage">
+        <br />
+        <div class="stacked legends">
+          <div class="like-btn">
+            <i aria-hidden="true" class="lupicon-circle-attention negative"></i>
+            <span data-test-id="ram-message"
+                  data-bind="text: $data.ramMessage"></span>
+          </div>
+        </div>
+      </div>
+      <div class="attachment-info-wrapper">
+        <div class="attachment-info-header">
+          <h1 class="help-adjacent-title">
+            <span data-bind="visible: $data.isRamAttachment(),
+                             ltext: 'ram.prefix'"
+                  data-test-id="ram-prefix"></span>
+            <span data-bind="text: $data.applicationTitle"></span>: <span data-bind="ltext: $data.name"></span>
+            <span data-bind="if: $data.hasVersion()">
+              <span data-bind="ltext: 'attachment.version'">versio</span>
+              <span id="test-attachment-version"
+                    data-bind="version: $data.attachment().latestVersion.version">0.0</span>
+            </span>
+          </h1>
+          <span data-bind="component: {
+                           name: 'help-toggle',
+                           params: { flag: $data.showHelp,
+                           lhtml: $data.isRamAttachment() ? 'ram.help' : 'attachment.view.desc' }}"></span>
+        </div>
+      </div>
+
+      <div class="clear"></div>
+      <div class="col1">
+        <div class="attachment-file-versions">
+          <div>
+            <attachment-upload class="gap--r1"
+                               params="id: id, ltext: 'attachment.addVersion', upload: $component.upload"
+                               data-bind="visible: !$data.readOnly()"></attachment-upload>
+            <icon-button class="gap--r1"
+                         params="click: $data.newRamAttachment,
+                                 visible: $data.creatingRamAllowed(),
+                                 testId: 'add-ram-attachment',
+                                 icon: 'circle-plus',
+                                 ltext: 'ram.new'">
+            </icon-button>
+            <icon-button params="click: _.wrap( showAttachmentVersionHistory, util.flipObservable),
+                                 id: 'show-attachment-versions',
+                                 icon: showAttachmentVersionHistory()
+                                 ? 'chevron-small-down' : 'chevron-small-right',
+                                 visible: $data.hasVersion(),
+                                 buttonClass: 'secondary',
+                                 ltext: 'attachment.showVersionHistory',
+                                 attr: {'aria-expanded': '' + showAttachmentVersionHistory(),
+                                 'aria-controls': 'attachment-file-versions-region'}">
+            </icon-button>
+          </div>
+          <div class="attachment-file-versions-content"
+               id="attachment-file-versions-region"
+               role="region"
+               data-bind="ariaLtext: 'attachment.versionHistory',
+                          if: $data.showAttachmentVersionHistory">
+            <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
+            <table data-test-id="attachment-versions-table" class="table table-even-odd">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.attachmentState'"></th>
+                  <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
+                  <th data-bind="ltext: 'attachment.version'">Versio</th>
+                  <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
+                  <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
+                  <th data-bind="ltext: 'attachment.autoConversion'">Muunnettu</th>
+                  <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.versions">
+                <tr data-bind="attr: {'data-test-id': 'version-row-' + $data.version.major + '.' + $data.version.minor},
+                               css: {'even-row': util.isEven( $index() ),
+                               'odd-row': util.isOdd( $index() ),
+                               'version-row--noted': $data.note}">
+                  <td>
+                    <i aria-hidden="true"
+                       data-bind="css: {'lupicon-circle-check positive': $data.approved,
+                                        'lupicon-circle-attention negative': $data.rejected,
+                                        'bubble-hover': true},
+                                  testId: $parent.versionTestId( $index, $data ),
+                                  ariaLtext: $parent.versionStateText( $data )">
+                      <span class="bubble-hover-text" data-bind="text: $data.hovertext"></span>
+                    </i>
+                  </td>
+                  <td>
+                    <!-- TODO: download via service -->
+                    <span data-bind="text: $data.filename, visible: !$data.fileId"></span>
+                    <a data-bind="text: $data.filename,
+                                  visible: _.isString($data.fileId),
+                                  attr: {href: '/api/raw/download-attachment?file-id=' + $data.fileId + '&id=' + $component.applicationId,
+                                  title: $data.filename}"></a>
+                  </td>
+                  <td data-bind="version: $data.version"></td>
+                  <td data-bind="dateString: $data.created"></td>
+                  <td>
+                    <span data-bind="firstLastName: $data.user"></span>
+                  </td>
+                  <td data-bind="if: $data.autoConversion" style="text-align:center">
+                    <span class="lupicon-circle-check positive"></span>
+                  </td>
+                  <td>
+                    <button class="tertiary gap--v05"
+                            data-bind="click: $parent.deleteVersion,
+                                       ltext: 'remove',
+                                       visible: $data.canDelete"
+                            data-test-id="delete-version"></button>
+                  </td>
+                </tr>
+                <!-- ko if: $data.note -->
+                <tr class="version-reject-note-row"
+                    data-bind="css: {'even-row': util.isEven( $index() ),
+                               'odd-row': util.isOdd( $index() )}">
+                  <td  colspan="7"
+                       data-bind="text: $data.note,
+                                  css: {'reject-note--rejected': $data.rejected},
+                                  testId: $parent.versionTestId( $index, $data, 'note')"></td>
+                </tr>
+                <!-- /ko -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <ram-links params="{attachment: $data.attachment}"></ram-links>
+        <div>
+          <div class="attachment-label gap--b2 gap--r2">
+            <div id="attachment-latest-version-info"
+                 class="gap--b3"
+                 data-bind="with: $data.attachment().latestVersion">
+              <div>
+                <span class="attachment-label-header-item" id="test-attachment-file-name">
+                  <!-- TODO: download via service -->
+                  <a data-bind="text: $data.filename,
+                                attr: {href: '/api/raw/latest-attachment-version?download=true&attachment-id=' + $parent.id}">
+                  </a>
+                </span>
+                <span class="attachment-label-header-item">
+                  <span data-bind="ltext: 'attachment.version'">Versio</span>
+                  <span data-bind="version: $data.version"></span>
+                </span>
+                <span class="attachment-label-header-item" data-bind="dateTimeString: $data.created"></span>
+                <span class="attachment-label-header-item" data-bind="firstLastName: $data.user"></span>
+              </div>
+              <div data-bind="if: $data.fileId !== $data.originalFileId">
+                <span class="attachment-label-info-item">
+                  <span data-bind="ltext: 'attachment.downloadOriginalVersion.info',
+                                   visible: !ko.unwrap($data.autoConversion)"></span>
+                  <span data-bind="ltext: 'attachment.downloadOriginalVersion.autoConversionInfo',
+                                   visible: $data.autoConversion"></span>
+                  <span id="original-file">
+                    <!-- TODO: download via service -->
+                    <a data-bind="ltext: 'attachment.downloadOriginalVersion.link', attr: {href: '/api/raw/download-attachment?file-id=' + $data.originalFileId + '&id=' + $component.applicationId}"></a>
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <div class="dsp--flex flex--align-end">
+                <div class="att-field gap--t1 w--60">
+                  <label data-bind="ltext: 'attachment.label.contents'",
+                         for="attachment-contents"></label>
+                  <combobox params="value: $data.attachment().contents,
+                                    list: contentsList,
+                                    id: 'attachment-contents',
+                                    enable: $data.metaUpdateAllowed(),
+                                    testId: 'attachment-contents-input'"></combobox>
+                </div>
+                <div class="att-field gap--t1 w--40">
+                  <label data-bind="ltext: 'attachment.drawing-number'"
+                         for="attachment-drawing-number"></label>
+                  <input class="lux"
+                         type="text"
+                         id="attachment-drawing-number"
+                         data-bind="value: $data.attachment().drawingNumber,
+                                    enable: $data.metaUpdateAllowed(),
+                                    testId: 'attachment-drawing-number'">
+                </div>
+              </div>
+              <div class="attachment-info-field  gap--t1">
+                <label data-bind="ltext: 'attachment.label.operation'"
+                       for="attachment-operation"></label>
+                <div data-bind="component: { name: 'attachment-group-autocomplete',
+                                params: { disable: operationSelectorDisabled,
+                                group: attachment().group,
+                                id: 'attachment-operation'} }"></div>
+              </div>
+
+              <!-- ko if: $component.showBackendId -->
+              <div class="attachment-info-field  gap--t1">
+                <label data-bind="ltext: 'digitizer.backendId'"></label>
+                <div data-bind="component: { name: 'attachment-backendid-autocomplete',
+                                params: { selected: attachment().backendId,
+                                disabled: false} }"></div>
+              </div>
+              <!-- /ko -->
+
+              <div class="attachment-details-toggles">
+                <div class="attachment-info-field"
+                     data-bind="if: $data.setConstructionTimeVisible()">
+                  <toggle params="value: $data.attachment().manuallySetConstructionTime,
+                                  prefix: 'blockbox',
+                                  ltext: 'attachment.label.manuallySetConstructionTime',
+                                  testId: 'attachment-is-manually-set-construction-time',
+                                  enable: $data.setConstructionTimeEnabled()"></toggle>
+                </div>
+
+                <div class="attachment-info-field"
+                     data-bind="if: $data.setForPrintingAllowed()">
+                  <toggle params="value: $data.attachment().forPrinting,
+                                  ltext: 'attachment.label.verdictAttachment',
+                                  prefix: 'blockbox',
+                                  testId: 'is-verdict-attachment'"></toggle>
+
+                </div>
+
+                <div class="attachment-info-field"
+                     data-bind="if: $data.setNotNeededAllowed()">
+                  <toggle params="value: $data.attachment().notNeeded,
+                                  ltext: 'application.attachmentNotNeeded',
+                                  prefix: 'blockbox',
+                                  testId: 'is-not-needed'"></toggle>
+                </div>
+              </div>
+
+              <div class="clear">
+                <h3 class="help-adjacent-title"
+                    data-bind="ltext: 'attachment.visibility'"></h3>
+                <span data-bind="component: {name: 'help-toggle',
+                                 params: {lhtml: 'help.attachment.visibility'}}"></span>
+                <select class="lux"
+                        data-test-id="attachment-visibility"
+                        data-bind="options: $data.visibilities,
+                                   ariaLtext: 'attachment.visibility',
+                                   optionsText: $data.getVibilityOptionsText,
+                                   value: $data.attachment().visibility,
+                                   valueAllowUnset: true,
+                                   enable: $data.setVisibilityAllowed()"></select>
+              </div>
+
+              <div data-bind="if: isArchived" class="archive-valid">
+                <i aria-hidden="true"
+                   class="lupicon-archives positive"
+                   data-bind="attr: {title: loc('arkistoitu')}"></i>
+                <span data-bind="ltext: 'attachment.archived'"></span>
+              </div>
+
+              <div data-bind="if: $data.permanentArchiveEnabled() && $data.hasVersion()">
+                <div class="archive-valid"
+                     data-bind="with: $data.attachment().latestVersion">
+                  <div class="spacerM">
+                    <i data-bind="css: {'lupicon-circle-check': $data.archivable,
+                                  'positive': $data.archivable,
+                                  'lupicon-circle-attention': !$data.archivable,
+                                  'negative': !$data.archivable}"></i>
+                    <span data-bind="ltext: $component.archivabilityText"></span>
+                  </div>
+                  <!-- ko if: $component.convertableToPdfA -->
+                  <icon-button params="click: $component.convertToPdfA,
+                                       disable: $component.processing,
+                                       waiting: $component.processing,
+                                       ltext: 'Konvertoi PDF/A-muotoon'">
+                  </icon-button>
+                  <!-- /ko -->
+                  <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
+                    <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>
+                    <div data-bind="foreach: $data['missing-fonts']">
+                      <span data-bind="text: $data"></span><br>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="gap--v3"
+               data-bind="if: $data.hasVersion()">
+            <h3 data-bind="ltext: 'attachment.signatures'"></h3>
+            <div class="signature-table"
+                 data-bind="if: $data.hasSignature()">
+              <!-- ko foreach: { data: $data.attachment().signatures, as: 'signature' } -->
+              <div class="signature-row">
+                <div class="signature-cell"
+                     data-bind="firstLastName: signature.user"
+                     data-test-id="attachment-signature-fullname"></div>
+                <div class="signature-cell">
+                  <span data-bind="ltext: 'attachment.version'"></span>
+                  <span data-bind="version: signature.version"
+                        data-test-id="attachment-signature-version"></span>
+                </div>
+                <div class="signature-cell"
+                     data-bind="dateTimeString: signature.created"
+                     data-test-id="attachment-signature-date"></div>
+              </div>
+              <!-- /ko -->
+            </div>
+            <icon-button params="click: $data.beginSign,
+                                 testId: 'signLatestAttachmentVersion',
+                                 visible: $data.signingAllowed() && $data.hasVersion(),
+                                 icon: 'circle-pen',
+                                 ltext: 'attachment.signLatest'">
+            </icon-button>
+          </div>
+
+          <!-- ko if: $data.permanentArchiveEnabled() && !_.isEmpty($data.attachment().metadata) && $data.tosOperationsEnabled() -->
+          <div class="gap--t2">
+            <icon-button params="click: _.wrap( $data.showTosMetadata, util.flipObservable ),
+                                 testId: 'show-attachment-tos-metadata',
+                                 icon: $data.showTosMetadata()
+                                 ? 'chevron-small-down' : 'chevron-small-right',
+                                 attr: {'aria-expanded': '' + $data.showTosMetadata(),
+                                 'aria-controls': 'tos-metadata-region'},
+                                 buttonClass: 'secondary',
+                                 ltext: 'attachment.showTosMetadata'">
+            </icon-button>
+
+            <div class="tos-metadata-content"
+                 role="region"
+                 id="tos-metadata-region"
+                 data-bind="slider: $data.showTosMetadata">
+              <div data-bind="component: {name: 'metadata-editor',
+                              params: {attachmentId: $data.attachment().id, metadata: $data.attachment().metadata, application: $data.application}}">
+              </div>
+            </div>
+          </div>
+          <!-- /ko -->
+
+          <!-- ko if: $data.attachment().latestVersion && !_.isEmpty($data.attachment().latestVersion.conversionLog) -->
+          <div class="gap--v2">
+            <icon-button params="click: _.wrap( $data.showConversionLog, util.flipObservable ),
+                                 icon: $data.showConversionLog()
+                                 ? 'chevron-small-down' : 'chevron-small-right',
+                                 buttonClass: 'secondary',
+                                 ltext: 'attachment.showConversionLog',
+                                 attr: {'aria-expanded': '' + $data.showConversionLog(),
+                                 'aria-controls': 'conversion-log-region'}">
+            </icon-button>
+
+            <div role="region" id="conversion-log-region"
+                 data-bind="slider: $data.showConversionLog">
+              <table class="table">
+                <tbody data-bind="foreach: $data.attachment().latestVersion.conversionLog">
+                  <tr>
+                    <td data-bind="text: $data"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /ko -->
+
+        </div>
+      </div>
+
+      <div class="col2"
+           data-bind="if: $data.hasVersion()">
+        <!-- Preview images and pdf files only -->
+        <div class="file-preview"
+             data-bind="visible: $data.hasPreview()">
+          <div class="file-preview-image"
+               data-bind="if: $data.previewIs('image')">
+            <div class="file-preview-content">
+              <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.attachment().id}">
+                <img data-bind="attr: {src: '/api/raw/latest-attachment-version?attachment-id=' + $data.attachment().id}"
+                     src="/lp-static/img/ajax-loader.gif" alt=""/>
+              </a>
+            </div>
+          </div>
+
+          <div class="file-preview-pdf"
+               data-bind="if: $data.previewIs('pdf') || $data.previewIs('plainText')">
+            <div class="file-preview-content">
+              <a class="btn secondary gap--b2"
+                 role="button"
+                 data-bind="attr: {href: $data.previewUrl},
+                            toggleClick: $data.showPreview,
+                            ariaExpanded: $data.showPreview"
+                 target="file-preview-iframe-name"
+                 data-test-id="file-preview">
+                <i aria-hidden="true"
+                   data-bind="css: {'lupicon-chevron-small-right': !$data.showPreview(),
+                              'lupicon-chevron-small-down': $data.showPreview()}"></i>
+                <span data-bind="ltext: 'attachment.pdf.preview.link'"></span>
+              </a>
+              <div data-bind="visible: $data.showPreview">
+                <div data-bind="if: $data.rotationAllowed()"
+                     data-test-id="pdf-rotation-buttons">
+                  <icon-button params="click: _.partial($data.rotate, -90),
+                                       icon: 'rotate-left',
+                                       buttonClass: 'tertiary',
+                                       ltext: 'rotate-left'">
+                  </icon-button>
+                  <icon-button class="gap--h1"
+                               params="click: _.partial($data.rotate, 180),
+                                       icon: 'refresh',
+                                       buttonClass: 'tertiary',
+                                       ltext: 'rotate-over'">
+                  </icon-button>
+                  <icon-button params="click: _.partial($data.rotate, 90),
+                                       icon: 'rotate-right',
+                                       buttonClass: 'tertiary',
+                                       ltext: 'rotate-right'">
+                  </icon-button>
+                </div>
+                <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="test-txt-file-preview"
+             class="file-preview"
+             data-bind="visible: !$data.hasPreview()">
+          <p data-bind="ltext: 'attachment.noPreview'"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</script>
