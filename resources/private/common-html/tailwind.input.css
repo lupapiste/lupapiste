@@ -1,0 +1,180 @@
+/* CSS Import statements should be before any other rules. */
+@import url("https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap&family=Roboto+Mono&display=swap");
+
+@layer legacy, theme, base, components, utilities;
+
+@import "tailwindcss/theme" layer(theme);
+@import "./lp-theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+@plugin "tailwindcss-debug-screens";
+
+@plugin "tailwindcss-scoped-preflight" {
+  isolationStrategy: inside;
+  selector: .twp;
+  except: .no-twp;
+}
+
+@config "../../../config/tailwind.config.js";
+
+@theme {
+  /* Remember to update also core.front.media-query if you change the screen definitions */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  /* xxxl added to support the pre-tailwind lupapiste max-width */
+  --breakpoint-3xl: 1660px;
+
+  --text-base: 0.9375rem;
+  --text-base-lg: 1rem;
+
+
+  /* Following color variables i.e. var(--ui-green) reference CSS custom properties declared in
+   * /resources/private/common-html/sass/partials/_colors.scss */
+  /* TODO: Duplicated variables aren't required if tailwind theme is the master source later. */
+  --color-success: var(--ui-green);
+  --color-warn: var(--ui-yellow);
+  --color-fail: var(--ui-red);
+  --color-bypass: var(--ui-gray);
+
+  --color-ui-lp-ui-accent-04: var(--ui-lp-ui-accent-04);
+  --color-ui-lp-sea-blue-85: var(--ui-lp-sea-blue-85);
+  --color-ui-lp-blueish: var(--ui-lp-blueish);
+  --color-ui-night-sky: var(--ui-night-sky-100);
+  --color-ui-night-sky-10: var(--ui-night-sky-10);
+  --color-ui-night-sky-20: var(--ui-night-sky-20);
+  --color-ui-night-sky-30: var(--ui-night-sky-30);
+  --color-ui-night-sky-40: var(--ui-night-sky-40);
+  --color-ui-night-sky-50: var(--ui-night-sky-50);
+  --color-ui-night-sky-60: var(--ui-night-sky-60);
+  --color-ui-night-sky-70: var(--ui-night-sky-70);
+  --color-ui-night-sky-80: var(--ui-night-sky-80);
+  --color-ui-night-sky-90: var(--ui-night-sky-90);
+  --color-ui-night-sky-100: var(--ui-night-sky-100);
+  --color-ui-night-sky-110: var(--ui-night-sky-110);
+  --color-ui-night-sky-120: var(--ui-night-sky-120);
+  --color-ui-night-sky-130: var(--ui-night-sky-130);
+  --color-ui-night-sky-140: var(--ui-night-sky-140);
+  --color-ui-night-sky-150: var(--ui-night-sky-150);
+  --color-ui-night-sky-160: var(--ui-night-sky-160);
+  --color-ui-night-sky-170: var(--ui-night-sky-170);
+  --color-ui-night-sky-180: var(--ui-night-sky-180);
+  --color-ui-night-sky-190: var(--ui-night-sky-190);
+  --color-ui-black: var(--ui-black);
+  --color-ui-blue: var(--ui-blue-100);
+  --color-ui-blue-10: var(--ui-blue-10);
+  --color-ui-blue-20: var(--ui-blue-20);
+  --color-ui-blue-30: var(--ui-blue-30);
+  --color-ui-blue-40: var(--ui-blue-40);
+  --color-ui-blue-50: var(--ui-blue-50);
+  --color-ui-blue-60: var(--ui-blue-60);
+  --color-ui-blue-70: var(--ui-blue-70);
+  --color-ui-blue-80: var(--ui-blue-80);
+  --color-ui-blue-90: var(--ui-blue-90);
+  --color-ui-blue-100: var(--ui-blue-100);
+  --color-ui-blue-110: var(--ui-blue-110);
+  --color-ui-blue-120: var(--ui-blue-120);
+  --color-ui-blue-130: var(--ui-blue-130);
+  --color-ui-blue-140: var(--ui-blue-140);
+  --color-ui-blue-150: var(--ui-blue-150);
+  --color-ui-blue-160: var(--ui-blue-160);
+  --color-ui-blue-170: var(--ui-blue-170);
+  --color-ui-blue-180: var(--ui-blue-180);
+  --color-ui-blue-190: var(--ui-blue-190);
+  --color-ui-yellow: var(--ui-yellow);
+  --color-ui-green: var(--ui-green);
+  --color-ui-red: var(--ui-red);
+  --color-ui-dark-red: var(--ui-dark-red);
+  --color-ui-red-10: var(--ui-red-10);
+  --color-ui-red-20: var(--ui-red-20);
+  --color-ui-red-30: var(--ui-red-30);
+  --color-ui-red-40: var(--ui-red-40);
+  --color-ui-red-50: var(--ui-red-50);
+  --color-ui-red-60: var(--ui-red-60);
+  --color-ui-red-70: var(--ui-red-70);
+  --color-ui-red-80: var(--ui-red-80);
+  --color-ui-red-90: var(--ui-red-90);
+  --color-ui-red-100: var(--ui-red-100);
+  --color-ui-red-110: var(--ui-red-110);
+  --color-ui-red-120: var(--ui-red-120);
+  --color-ui-red-130: var(--ui-red-130);
+  --color-ui-red-140: var(--ui-red-140);
+  --color-ui-red-150: var(--ui-red-150);
+  --color-ui-red-160: var(--ui-red-160);
+  --color-ui-red-170: var(--ui-red-170);
+  --color-ui-red-180: var(--ui-red-180);
+  --color-ui-red-190: var(--ui-red-190);
+  --color-ui-violet: var(--ui-violet-100);
+  --color-ui-violet-10: var(--ui-violet-10);
+  --color-ui-violet-20: var(--ui-violet-20);
+  --color-ui-violet-30: var(--ui-violet-30);
+  --color-ui-violet-40: var(--ui-violet-40);
+  --color-ui-violet-50: var(--ui-violet-50);
+  --color-ui-violet-60: var(--ui-violet-60);
+  --color-ui-violet-70: var(--ui-violet-70);
+  --color-ui-violet-80: var(--ui-violet-80);
+  --color-ui-violet-90: var(--ui-violet-90);
+  --color-ui-violet-100: var(--ui-violet-100);
+  --color-ui-violet-110: var(--ui-violet-110);
+  --color-ui-violet-120: var(--ui-violet-120);
+  --color-ui-violet-130: var(--ui-violet-130);
+  --color-ui-violet-140: var(--ui-violet-140);
+  --color-ui-violet-150: var(--ui-violet-150);
+  --color-ui-violet-160: var(--ui-violet-160);
+  --color-ui-violet-170: var(--ui-violet-170);
+  --color-ui-violet-180: var(--ui-violet-180);
+  --color-ui-violet-190: var(--ui-violet-190);
+  --color-ui-white: var(--ui-white);
+  --color-ui-dark-gray: var(--ui-dark-gray);
+  --color-ui-gray: var(--ui-gray);
+  --color-ui-light-gray: var(--ui-light-gray);
+  --color-ui-focus-background: var(--ui-focus-background);
+  --color-ui-plain: var(--ui-plain);
+  /* Why are the numbers like this? */
+  /* We should use 10-100 or something instead for util names */
+  --color-ui-gray-17: var(--ui-gray-17);
+  --color-ui-gray-34: var(--ui-gray-34);
+  --color-ui-gray-51: var(--ui-gray-51);
+  --color-ui-gray-68: var(--ui-gray-68);
+  --color-ui-gray-85: var(--ui-gray-85);
+  --color-ui-gray-102: var(--ui-gray-102);
+  --color-ui-gray-119: var(--ui-gray-119);
+  --color-ui-gray-136: var(--ui-gray-136);
+  --color-ui-gray-153: var(--ui-gray-153);
+  --color-ui-gray-170: var(--ui-gray-170);
+  --color-ui-gray-187: var(--ui-gray-187);
+  --color-ui-gray-204: var(--ui-gray-204);
+  --color-ui-gray-221: var(--ui-gray-221);
+  --color-ui-gray-238: var(--ui-gray-238);
+  --color-ui-gray-247: var(--ui-gray-247);
+  --color-ui-panel-background: var(--ui-panel-background);
+  --color-ui-blue-background: var(--ui-blue-background);
+  --color-ui-violet-background: var(--ui-violet-background);
+  --color-ui-green-background: var(--ui-green-background);
+
+}
+
+.lp-theme {
+  --dialog-ease: cubic-bezier(0.32,0.72,0,1);
+}
+
+html {
+  /* Setup here for some for cases where these are needed for some margins in new views etc.
+   * but these variables aren't currently used in the original styles. */
+  --header-height: 60px;
+  --footer-top-margin: 72px;
+}
+
+/* Use this together with .twp to disable styles from our old sass files
+ * affecting base elements (like h1) */
+.nobase {
+}
+
+@import "./dashboard";
+@import "./dialog";
+
+/* Place react-day-picker styles in tailwind css, as the calendar styles are build with twp reset. */
+@import "react-day-picker/style.css";
+@import "./react-day-picker.css";

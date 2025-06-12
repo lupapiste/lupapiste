@@ -1,0 +1,197 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:fi "Rivitalo", :sv "Radhus"},
+   :codeValue "1",
+   :created "2025-06-02T08:10:33.605Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/1/members/",
+   :modified "2025-12-03T08:53:39.804Z",
+   :status "VALID",
+   :id "a28142ab-b124-42ef-9e6f-7ebb7640f06d",
+   :statusModified "2025-06-02T08:10:33.605Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/1",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/1",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Asuinkerrostalo", :sv "Flervåningsbostadshus"},
+   :codeValue "2",
+   :created "2025-06-02T08:10:33.618Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/2/members/",
+   :modified "2025-12-03T08:53:39.818Z",
+   :status "VALID",
+   :id "de3d30ca-ed07-4d68-8b79-3e0dc139379e",
+   :statusModified "2025-06-02T08:10:33.618Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/2",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/2",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Toimistorakennus ja terveyskeskus",
+    :sv "Kontorsbyggnad och hälsocentral"},
+   :codeValue "3",
+   :created "2025-06-02T08:10:33.625Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/3/members/",
+   :modified "2025-12-03T08:53:39.831Z",
+   :status "VALID",
+   :id "3fd91af8-7a62-462d-b605-1e467d5a58ba",
+   :statusModified "2025-06-02T08:10:33.625Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/3",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/3",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi
+    "Liikerakennus, tavaratalo, kauppakeskus, myymälärakennus, myymälähalli, teatteri, ooppera-, konsertti- ja kongressitalo, elokuvateatteri, kirjasto, arkisto, museo, taidegalleria ja näyttelyhalli",
+    :sv
+    "Affärsbyggnad, varuhus, köpcentrum, butiksbyggnad med undantag av livsmedelsaffärer på under 2000 m2, butikshall, teater, opera-, konsert- och kongresshus, biograf, bibliotek, arkiv, museum, konstgalleri och utställningshall"},
+   :codeValue "4",
+   :created "2025-06-02T08:10:33.633Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/4/members/",
+   :modified "2025-12-03T08:53:39.844Z",
+   :status "VALID",
+   :id "a4af9401-6d2b-413c-b980-a762ee6ac8db",
+   :statusModified "2025-06-02T08:10:33.633Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/4",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/4",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi
+    "Majoitusliikerakennus, hotelli, asuntola, palvelutalo, vanhainkoti ja hoitolaitos",
+    :sv
+    "Inkvarteringsbyggnad, hotell, internat, servicehus, ålderdomshem och vårdanstalt"},
+   :codeValue "5",
+   :created "2025-06-02T08:10:33.640Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/5/members/",
+   :modified "2025-12-03T08:53:39.857Z",
+   :status "VALID",
+   :id "edc69c9f-d2f8-44a9-a90f-a0a30f528f7e",
+   :statusModified "2025-06-02T08:10:33.640Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/5",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/5",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Opetusrakennus ja päiväkoti",
+    :sv "Undervisningsbyggnad och daghem"},
+   :codeValue "6",
+   :created "2025-06-02T08:10:33.648Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/6/members/",
+   :modified "2025-12-03T08:53:39.870Z",
+   :status "VALID",
+   :id "8b0a4796-a5e6-46e9-9756-d55864877f3c",
+   :statusModified "2025-06-02T08:10:33.648Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/6",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/6",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Liikuntahalli", :sv "Idrottshall"},
+   :codeValue "7",
+   :created "2025-06-02T08:10:33.658Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/7/members/",
+   :modified "2025-12-03T08:53:39.883Z",
+   :status "VALID",
+   :id "4a9ada6a-a9a6-491b-89ac-a91162be6c01",
+   :statusModified "2025-06-02T08:10:33.658Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/7",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/7",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Sairaala", :sv "Sjukhus"},
+   :codeValue "8",
+   :created "2025-06-02T08:10:33.667Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/8/members/",
+   :modified "2025-12-03T08:53:39.895Z",
+   :status "VALID",
+   :id "8651ebbe-02d3-4b46-ab87-aa7f7f81bbd4",
+   :statusModified "2025-06-02T08:10:33.667Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/8",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/8",
+   :hierarchyLevel 1}
+  {:description
+   {:fi
+    "Koskee lämmitetyltä nettoalalta uli 1 000 neliömetrin suuruisia varastorakennuksia, liikenteen rakennuksia, uimahalleja ja jäähalleja"},
+   :prefLabel
+   {:fi "Varastorakennus, liikenteen rakennus, uimahalli ja jäähalli",
+    :sv "Lagerbyggnad, trafikbyggnad, simhall och ishall"},
+   :codeValue "9",
+   :created "2025-06-02T08:10:33.675Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/9/members/",
+   :modified "2025-12-03T08:53:39.907Z",
+   :status "VALID",
+   :id "80f845ce-82cb-48e4-95a0-af995bd0f6bd",
+   :statusModified "2025-06-02T08:10:33.675Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/codes/9",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksenkayttotarkoitusvahahiilisyydenarvioinnissa/code/9",
+   :hierarchyLevel 1}),
+ :modified "2025-12-03T11:36:09.560Z"}

@@ -1,0 +1,46 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:asi="http://www.suomi.fi/asiointitili">
+  <soapenv:Body>
+    <asi:LahetaViesti xmlns:asi="http://www.suomi.fi/asiointitili">
+      <asi:Viranomainen>
+        <asi:ViranomaisTunnus>{{Viranomainen.viranomaisTunnus}}</asi:ViranomaisTunnus>
+        <asi:PalveluTunnus>{{Viranomainen.palveluTunnus}}</asi:PalveluTunnus>
+        <asi:KayttajaTunnus>{{Viranomainen.kayttajaTunnus}}</asi:KayttajaTunnus>
+        <asi:Yhteyshenkilo Nimi="Jesse Malkamäki" Sahkoposti="jesse.malkamaki@cloudpermit.com" Matkapuhelin="+358041234567"/>
+        <asi:SanomaTunniste>{{Viranomainen.sanomaTunniste}}</asi:SanomaTunniste>
+        <asi:SanomaVersio>{{Viranomainen.sanomaVersio}}</asi:SanomaVersio>
+        <asi:SanomaVarmenneNimi>{{Viranomainen.sanomaVarmenneNimi}}</asi:SanomaVarmenneNimi>
+      </asi:Viranomainen>
+      <asi:Kysely>
+        <asi:Paperi>false</asi:Paperi>
+        <asi:Kohteet>
+          <asi:Kohde>
+            <asi:Asiakas AsiakasTunnus="{{Asiakas.asiakasTunnus}}" TunnusTyyppi="{{Asiakas.tunnusTyyppi}}">
+              <asi:Osoite>
+                <asi:Nimi>{{Asiakas.nimi}}</asi:Nimi>
+                <asi:Lahiosoite>{{Asiakas.osoite}}</asi:Lahiosoite>
+                <asi:Postinumero>{{Asiakas.postiNumero}}</asi:Postinumero>
+                <asi:Postitoimipaikka>{{Asiakas.kaupunki}}</asi:Postitoimipaikka>
+                <asi:Maa>{{Asiakas.maa}}</asi:Maa>
+              </asi:Osoite>
+            </asi:Asiakas>
+            <asi:ViranomaisTunniste>{{viranomaisTunniste}}</asi:ViranomaisTunniste>
+            <asi:Nimeke>{{nimeke}}</asi:Nimeke>
+            <asi:LahetysPvm>{{lahetysPvm}}</asi:LahetysPvm>
+            <asi:KuvausTeksti>{{kuvausTeksti}}</asi:KuvausTeksti>
+            <asi:Tiedostot>
+              {{#Tiedostot}}
+              <asi:Tiedosto>
+                <asi:TiedostonKuvaus>{{tiedostonKuvaus}}</asi:TiedostonKuvaus>
+                <asi:TiedostoSisalto>{{tiedostoSisalto}}</asi:TiedostoSisalto>
+                <asi:TiedostoMuoto>{{tiedostoMuoto}}</asi:TiedostoMuoto>
+                <asi:TiedostoNimi>{{tiedostoNimi}}</asi:TiedostoNimi>
+              </asi:Tiedosto>
+              {{/Tiedostot}}
+            </asi:Tiedostot>
+          </asi:Kohde>
+        </asi:Kohteet>
+        <asi:Tulostustoimittaja>Edita</asi:Tulostustoimittaja>
+      </asi:Kysely>
+    </asi:LahetaViesti>
+  </soapenv:Body>
+</soapenv:Envelope>

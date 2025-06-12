@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="applications" data-test-id="own-applications"
+           role="main">
+    <!-- ko if: invitesModel.invites().length -->
+    <div id="invitations" data-bind="with: invitesModel">
+      <div class="container bg--violet">
+        <h1 class="h3"
+            data-bind="ltext: 'application.invites'"></h1>
+        <div data-bind="foreach: invites" >
+          <div class="flex--between flex--wrap flex--gap2 pad--b2">
+            <div>
+              <strong class="dsp--block"
+                      data-bind="text: headerText"></strong>
+              <div>
+                <span data-bind="ltext: 'inviter'"></span>
+                <span data-bind="fullName: inviter"></span>
+              </div>
+            </div>
+            <div>
+              <span data-bind="dateString: created"></span>
+            </div>
+            <div class="dsp--flex flex--gap2 flex--wrap">
+              <a data-bind="ltext: 'applications.openApplication',
+                            attr: {href: '#!/application/' + application.id}"
+                 class="btn primary"
+                 data-test-id="open-application-button"></a>
+              <!-- ko if: !lupapisteApp.models.globalAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths") -->
+              <button data-bind="ltext: 'applications.approveInvite',
+                                 click: $parent.approveInvite,
+                                 enable: lupapisteApp.models.globalAuthModel.ok('approve-invite')"
+                      class="primary"
+                      data-test-id="accept-invite-button"></button>
+              <!-- /ko -->
+              <button class="secondary"
+                      data-bind="ltext: 'applications.declineInvite',
+                                 click: $parent.declineInvite"
+                      data-test-id="decline-invite-button"></button>
+            </div>
+          </div>
+          <!-- ko if: $data.text -->
+          <div class="ws--pre-wrap pad--2"
+             data-bind="text: $data.text,
+                        attr: {'data-test-id': 'invitation-text-' + $index()}">
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+    </div>
+     <!-- /ko -->
+    <!-- ko if: lupapisteApp.models.currentUser.loaded() && init() -->
+    <div data-bind="component: 'applications-search'"
+         class="applications-search-container"></div>
+    <!-- /ko -->
+  </section>
+</body>
+</html>

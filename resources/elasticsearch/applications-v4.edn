@@ -1,0 +1,142 @@
+{:properties
+ {:_attachment_indicator_reset {:type "date" :format "epoch_millis" :index false :doc_values false}
+  :_comments-seen-by           {:properties {:key   {:type "keyword" :index false :doc_values false}
+                                             :value {:type "date" :format "epoch_millis" :index false :doc_values false}}}
+  :_statements-seen-by         {:properties {:key   {:type "keyword" :index false :doc_values false}
+                                             :value {:type "date" :format "epoch_millis" :index false :doc_values false}}}
+  :_stats                      {:type       "object"
+                                :properties {:processing {:type       "object"
+                                                          :properties {:status     {:type "integer"}
+                                                                       :complexity {:type "integer"}
+                                                                       :used       {:type "integer" :index false :doc_values false}
+                                                                       :remaining  {:type "integer"}
+                                                                       :delays     {:type "integer" :index false :doc_values false}
+                                                                       :requests   {:type "integer"}
+                                                                       :deadline   {:type  "date" :format     "epoch_millis"
+                                                                                    :index false  :doc_values false}}}}}
+  :_verdicts-seen-by           {:properties {:key   {:type "keyword" :index false :doc_values false}
+                                             :value {:type "date" :format "epoch_millis" :index false :doc_values false}}}
+  :address                     {:type "keyword"}
+  :applicant                   {:type "keyword"}
+  :archived                    {:type       "object"
+                                :properties {:application {:type "date" :format "epoch_millis"}
+                                             :completed   {:type "date" :format "epoch_millis"}}}
+  :attachments                 {:properties
+                                {:id            {:type "keyword" :index false :doc_values false}
+                                 :approvals     {:properties
+                                                 {:key   {:type "keyword" :index false :doc_values false}
+                                                  :value {:properties {:state {:type "keyword" :index false :doc_values false}}}}}
+                                 :auth          {:properties {:id {:type "keyword" :index false :doc_values false}}}
+                                 :latestVersion {:properties
+                                                 {:created        {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                                  :fileId         {:type "keyword" :index false :doc_values false}
+                                                  :originalFileId {:type "keyword" :index false :doc_values false}
+                                                  :stamped        {:type "boolean" :index false :doc_values false}
+                                                  :user           {:properties
+                                                                   {:id   {:type "keyword" :index false :doc_values false}
+                                                                    :role {:type "keyword" :index false :doc_values false}}}}}
+                                 :metadata      {:properties
+                                                 {:julkisuusluokka {:type "keyword" :index false :doc_values false}
+                                                  :nakyvyys        {:type "keyword" :index false :doc_values false}}}
+                                 :source        {:properties
+                                                 {:id   {:type "keyword" :index false :doc_values false}
+                                                  :type {:type "keyword" :index false :doc_values false}}}
+                                 :target        {:properties
+                                                 {:id   {:type "keyword" :index false :doc_values false}
+                                                  :type {:type "keyword" :index false :doc_values false}}}
+                                 :versions      {:properties
+                                                 {:created        {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                                  :fileId         {:type "keyword" :index false :doc_values false}
+                                                  :originalFileId {:type "keyword" :index false :doc_values false}
+                                                  :stamped        {:type "boolean" :index false :doc_values false}
+                                                  :user           {:properties
+                                                                   {:id   {:type "keyword" :index false :doc_values false}
+                                                                    :role {:type "keyword" :index false :doc_values false}}}}}}}
+  :auth                        {:type       "nested"
+                                :properties {:id           {:type "keyword"}
+                                             :role         {:type "keyword"}
+                                             :company-role {:type "keyword"}}}
+  :authorityNotice             {:type "text" :index false}
+  :authorityNoticeEdited       {:type "date" :format "epoch_millis" :index false :doc_values false}
+  :buildings                   {:type       "object"
+                                :properties {:nationalId {:type "keyword"}}}
+  :closed                      {:type "date" :format "epoch_millis"}
+  :comments                    {:properties {:created {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                             :text    {:type "text" :index false}
+                                             :roles   {:type "keyword" :index false :doc_values false}
+                                             :target  {:properties {:type {:type "keyword" :index false :doc_values false}
+                                                                    :id   {:type "keyword" :index false :doc_values false}}}
+                                             :user    {:properties {:id {:type "keyword" :index false :doc_values false}}}}}
+  :company-notes               {:type       "nested"
+                                :properties {:companyId {:type "keyword"}
+                                             :tags      {:type "keyword"}}}
+  :created                     {:type "date" :format "epoch_millis"}
+  :creator                     {:type       "object"
+                                :properties {:firstName {:type "text" :index false}
+                                             :lastName  {:type "text" :index false}}}
+  :documents                   {:properties
+                                {:data {:properties
+                                        {:tyoaika-alkaa-ms   {:properties
+                                                              {:value {:type "date" :format "epoch_millis"}}}
+                                         :tyoaika-paattyy-ms {:properties
+                                                              {:value {:type "date" :format "epoch_millis"}}}}}}}
+  :facta-imported              {:type "boolean"}
+  :handler-sortfield           {:type "keyword"}
+  :handlers                    {:type       "nested"
+                                :properties {:userId    {:type "keyword"}
+                                             :roleId    {:type "keyword"}
+                                             :firstName {:type "text" :index false}
+                                             :lastName  {:type "text" :index false}}}
+  :history                     {:properties {:state   {:type "keyword" :index false :doc_values false}
+                                             :ts      {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                             :comment {:type "text" :index false}}}
+  :id                          {:type "keyword"}
+  :indicator-data              {:properties {:document-modifications {:type "integer" :index false :doc_values false}}}
+  :infoRequest                 {:type "boolean"}
+  :kind                        {:type "keyword" :index false :doc_values false}
+  :kuntalupatunnus             {:type "keyword" :index false :doc_values false}
+  :location                    {:properties {:x {:type "float" :index false :doc_values false}
+                                             :y {:type "float" :index false :doc_values false}}}
+  :location-wgs84              {:type "geo_point"}
+  :modified                    {:type "date" :format "epoch_millis"}
+  :municipality                {:type "keyword"}
+  :organization                {:type "keyword"}
+  :pate-verdicts               {:properties
+                                {:id        {:type "keyword" :index false :doc_values false}
+                                 :modified  {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                 :published {:properties
+                                             {:published {:type "date" :format "epoch_millis" :index false :doc_values false}}}}}
+  :permitSubtype               {:type "keyword"}
+  :permitType                  {:type "keyword"}
+  :primaryOperation            {:type       "object"
+                                :properties {:id          {:type "keyword" :index false :doc_values false}
+                                             :name        {:type "keyword"}
+                                             :description {:type "text" :index false}
+                                             :created     {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                             :extinct     {:type "date" :format "epoch_millis" :index false :doc_values false}}}
+  :propertyId                  {:type "keyword"}
+  :secondaryOperations         {:type       "nested"
+                                :properties {:id          {:type "keyword" :index false :doc_values false}
+                                             :name        {:type "keyword"}
+                                             :description {:type "text" :index false}
+                                             :created     {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                             :extinct     {:type "date" :format "epoch_millis" :index false :doc_values false}}}
+  :state                       {:type "keyword"}
+  :statements                  {:properties {:person {:properties {:email  {:type "keyword" :index false :doc_values false}
+                                                                   :userId {:type "keyword" :index false :doc_values false}}}
+                                             :given  {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                             :id     {:type "keyword" :index false :doc_values false}
+                                             :state  {:type "keyword" :index false :doc_values false}}}
+  :submitted                   {:type "date" :format "epoch_millis"}
+  :tags                        {:type "keyword"}
+  :text-search                 {:type "text"}
+  :urgency                     {:type "keyword" :index false :doc_values false}
+  :verdictDate                 {:type "date" :format "epoch_millis"}
+  :verdicts                    {:properties {:id        {:type "keyword" :index false :doc_values false}
+                                             :timestamp {:type "date" :format "epoch_millis" :index false :doc_values false}
+                                             :draft     {:type "boolean" :index false :doc_values false}
+                                             :paatokset {:properties {:poytakirjat {:properties {:paatospvm {:type       "date"
+                                                                                                             :format     "epoch_millis"
+                                                                                                             :index      false
+                                                                                                             :doc_values false}}}}}}}
+  :warrantyEnd                 {:type "date" :format "epoch_millis"}}}

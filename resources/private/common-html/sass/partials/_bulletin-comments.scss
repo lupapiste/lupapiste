@@ -1,0 +1,70 @@
+@use "base";
+@use "buttons";
+@use "colors";
+@use "theme";
+
+.bulletin-comment {
+  border: 1px solid theme.$grid-border-color;
+  margin-bottom: theme.$grid-margin;
+  .bulletin-comment__header {
+    background-color: colors.$gray221;
+    padding: base.$marginS base.$marginM;
+  }
+  .bulletin-comment__index {
+    margin-right: base.$marginS;
+    &:after {
+      content: ".";
+    }
+  }
+  .bulletin-comment__name {
+    @include buttons.styled-input( "link" );
+    &:after {
+      content: ",";
+    }
+  }
+  .bulletin-comment__body {
+    padding: base.$marginS base.$marginM;
+    clear: both;
+    pre {
+      white-space: pre-wrap;
+    }
+  }
+  .bulletin-comment__attachments {
+    margin-bottom: base.$marginS;
+    display: table;
+    .bulletin-comment__attachment {
+      display: table-row;
+      .bulletin-comment_attachment-link {
+        display: table-cell;
+        padding-right: theme.$grid-margin;
+      }
+      .bulletin-comment__attachment-type {
+        display: table-cell;
+        &:after {
+          content: ")";
+        }
+        &:before {
+          content: "(";
+        }
+      }
+    }
+  }
+}
+
+.bulletin-comment-spinner {
+  color: colors.$gray221;
+  padding: 0 50%;
+}
+
+.bulletin-proclamation-header {
+  overflow: auto;
+  line-height: theme.$grid-min-height;
+  vertical-align: middle;
+  margin-bottom: theme.$grid-margin;
+  .bulletin-proclamation-text {
+    float: left;
+  }
+  .bulletin-proclamation-sort {
+    float: right;
+  }
+}

@@ -1,0 +1,86 @@
+@startuml
+' The data model for Ryhti-compliant building data.
+' Actually contains data for all "building objects" (rakennuskohde):
+' 1) Rakennus (building)
+' 2) Rakennelma (structure)
+' 3) Erityis(tä toimintaa varten rakennettava )alue (area to be built for specific activity)
+' These share a lot of the same information so can share a lot of code and interface. '
+
+legend top left
+ Rakennuskohteen tietomallikaavio.
+
+ Osa kenttien arvoista on jätetty pois kaavion selkeyden vuoksi; nämä löytyvät kommenteissa mainituilta tiketeiltä.
+ Kantava ajatus on että tehdään yksi rakennuskohde(rekisteri) johon tallennetaan kaikki rakennuskohteet
+ (rakennus, rakennelma, ja erityistä toimintaa varten rakennettava alue).
+
+ Kaaviota luetaan vasemmalta oikealle.
+endlegend
+
+map Rakennuskohde {
+ id => UUID
+ kohteen laji => rakennus, rakennelma tai erityisalue
+ käyttötarkoitus => vaihtoehdot riippuvat kohteen lajista
+ tiedon laji => toteuma tai suunnitelma
+ pysyvä tunnus => PRT, PRKT tai null
+ nimi =>
+ kuvaus =>
+ tilapäinen =>
+ purkamisen määräaika =>
+ osoitteet => [Osoite]
+ sijainti => Sijainti
+ hallinnollinen sijaintiyksikkö => Sijainti(yksikkö)
+ päätöksen sijaintiyksikkö => Sijainti(yksikkö)
+ omistajat => [Omistaja]
+ osat => [KohteenOsa]
+ kerrosluku => (vain rakennuksella ja rakennelmalla)
+ perusparannuspäivä => (vain rakennuksella)
+}
+
+map KohteenOsa {
+id => UUID
+elinkaaritila => vaihtoehdot riippuvat kohteen lajista
+valmistumispäivämäärä =>
+purkamispäivämäärä =>
+liite => Liite
+BIM-malli => BIM-malli
+talotekniikkatiedot => Tekniset tiedot
+rakennelman osan tiedot => RakennelmanOsanTiedot
+rakennuksen osan tiedot => RakennuksenOsanTiedot
+}
+
+map RakennelmanOsanTiedot {
+liittyvä valmis osa => KohteenOsa
+ositteluperuste =>
+osittelukuvaus =>
+suojelutapa =>
+purkamisen syy =>
+kulttuurihistoriallinen merkitys =>
+materiaalitiedot => Materiaalitiedot
+energiatiedot => Energiatiedot
+ulkokuoren tiedot => Ulkokuori
+varusteet => [Varuste]
+}
+
+map RakennuksenOsanTiedot {
+väestönsuoja =>
+kokoontumistila =>
+hissi =>
+sisäänkäynti =>
+käyttötiedot => Käyttötiedot
+sisätilojen tiedot => Sisätilat
+huoneistot => [Huoneisto]
+}
+
+note bottom of Rakennuskohde : LPK-7121 Rakennus\nLPK-7439 Rakennelma\nLPK-7559 Erityisalue\n\nLPK-7433 Osoite\nLPK-7437 Sijainti(yksikkö)\nLPK-7450 Omistaja
+note bottom of Rakennuskohde : Rakennus, rakennelma ja erityisalue\nyhdistettynä toiston välttämiseksi.
+note bottom of KohteenOsa : LPK-7441 Rakennuksen osa\nLPK-7440 Rakennelman osa\nLPK-7559 Erityisalue\n\nLPK-7449 Liite\nLPK-7593 BIM\nLPK-7443 Tekniset tiedot
+note bottom of KohteenOsa : Erityisalueella aina vain yksi "osa"\njolla vain alajoukko kentistä ja\ntalotekniikkatiedoista vain verkostoliittymät.
+note bottom of RakennelmanOsanTiedot: LPK-7447 Materiaalitiedot\nLPK-7444 Energiatiedot\nLPK-7609 Ulkokuori\nLPK-7443 Tekniset tiedot (varuste)
+note bottom of RakennelmanOsanTiedot : Sekä rakennuksen että rakennelman\nosalla on nämä kentät.
+note bottom of RakennuksenOsanTiedot : LPK-7442 Käyttötiedot\nLPK-7637 Sisätilat\nLPK-7445 Huoneisto
+note bottom of RakennuksenOsanTiedot : Vain rakennuksen osalla\non nämä kentät.
+
+
+
+
+@enduml

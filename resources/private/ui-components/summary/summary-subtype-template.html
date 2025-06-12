@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-subtype-template">
+  <label class="lux"
+         data-bind="ltext: 'a11y.summary.subtype',
+                    required: required,
+                    attr: {for: uniqId}"></label>
+  <!-- ko if: editing -->
+  <select class="lux"
+          data-bind="options: subtypes,
+                     required: required,
+                     value: selected,
+                     optionsText: optionsText"
+          id="permitSubtypeSelect">
+  </select>
+  <!-- ko if: help -->
+  <help-toggle params="lhtml: help"></help-toggle>
+  <!-- /ko -->
+  <!-- /ko -->
+  <!-- ko ifnot: editing -->
+  <span data-bind="text: text"></span>
+  <!-- /ko -->
+</script>

@@ -1,0 +1,50 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="applications-foreman-documents-es-search-results-template">
+      <div class="tabs-content">
+        <!-- ko if: dataProvider.pending -->
+        <div class="btn search-results-waiting">
+          <i class="lupicon-refresh spin primary"></i>
+          <span data-bind="ltext: 'applications.loading'"></span>
+        </div>
+        <!-- /ko -->
+        <!-- ko ifnot: dataProvider.pending -->
+        <table id="applications-list" class="application-foreman-search-result__table" data-bind="if: gotResults()">
+          <thead>
+            <tr data-bind="foreach: columns">
+              <th data-bind="click: $data.clickFn, css: $data.css, attr: $data.attr">
+                <span data-bind="ltext: $data.ltext"></span>
+                <i class="lupicon-chevron-small-up" data-bind="visible: $data.isAscending"></i>
+                <i class="lupicon-chevron-small-down" data-bind="visible: $data.isDescending"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: {data: data, afterRender: scrollPop}">
+            <tr class="application-row"
+                tabindex="0"
+                data-bind="click: $parent.openApplication,
+                           event: {keypress: $parent.keyOpenApplication},
+                           attr: {'data-id': $data.id, 'data-test-address': $data.address}">
+
+              <td data-test-col-name="id">
+                <span data-bind="text: $data['application-id']"></span>
+                </br>
+                <span data-bind="text: $data.kuntalupatunnus"></span>
+              </td>
+              <td data-bind="ltext: ($data.type === 'application' ? 'permitSubtype.tyonjohtaja-hakemus' : 'permitSubtype.tyonjohtaja-ilmoitus')" data-test-col-name="type"></td>
+              <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
+              <td data-bind="text: $data.foreman" data-test-col-name="foreman"></td>
+              <td data-bind="ltext: $data.foremanRoleI18nkey" data-test-col-name="foremanRole"></td>
+              <td data-bind="text: $data.foremanTasksText" data-test-col-name="foremanTasks"></td>
+              <td data-bind="dateTimeString: $data.submitted" data-test-col-name="submitted"></td>
+              <td data-bind="ltext: $data.state, attr: {'data-test-row-state': $data.state}" data-test-col-name="status"></td>
+              <td data-bind="foreach: $data.handlers" data-test-col-name="authority">
+                <span class="handlers" data-bind="fullName: $data"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- ko ifnot: gotResults -->
+        <p data-bind="ltext: 'applications.search.no-results'"></p>
+        <!-- /ko -->
+        <!-- /ko -->
+      </div>
+</script>

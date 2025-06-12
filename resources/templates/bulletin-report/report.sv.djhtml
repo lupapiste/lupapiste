@@ -1,0 +1,139 @@
+<h1>Lupapiste: {% if kuulutus? %}Kungörelsens detaljer{% else %}Anslagsinformation{% endif %}</h1>
+<h2>Behandlingsbeteckning</h2>
+<p>
+  {{application-id}} / {{address}}
+</p>
+<p>
+  {% if kuulutus? %}Kungörelsen{% else %}Anslaget{% endif %} för ansökan
+  {% if past-start-date? %} har börjat {% else %} börjar {% endif %}
+  {{start-date|date:"cccc":sv}}en den {{start-date|date:"d.M.YYYY 'kl.' HH:mm":sv}}
+  och
+  {% if past-end-date? %} har avslutats {% else %} avslutas {% endif %}
+  {{end-date|date:"cccc":sv}}en den {{end-date|date:"d.M.YYYY 'kl.' HH:mm":sv}}.
+</p>
+<p>
+  Tidpunkterna baserar sig på datumen för beslutet{% if not section %}.{% endif %}
+  {% if section %}
+    §{{section}}.
+  {% endif %}
+
+  {% if verdict-date %}
+    Beslutet har fattats den {{verdict-date|date:"cccc":sv}}
+    {{verdict-date|date:"d.M.YYYY":sv}}.
+  {% endif %}
+  {% if given-date %}
+    Beslutet har givits den {{given-date|date:"cccc d.M.YYYY":sv}}.
+  {% endif %}
+</p>
+<h2>Besök på {% if kuulutus? %}kungörelse{% else %}anslag{% endif %} {{application-id}}</h2>
+<p>
+  Enligt Lupapistes logg har {% if kuulutus? %}denna kungörelse{% else %}detta anslag{% endif %}
+  {% if visits %}
+    besökts
+    {% if visit-count = 1 %}
+      en gång vid följande tidpunkt.
+    {% else %}
+      {{visit-count}} gånger vid följande tidpunkter.
+      {% if visit-limit %}
+        Listan visar de första {{visit-limit}} besöken.
+      {% endif %}
+    {% endif %}
+    <table class="visits">
+      <tbody>
+        {% for visit in visits %}
+          <tr>
+            <td class="weekday">{{visit|date:"ccc":sv}}</td>
+            <td class="date">{{visit|date:"d.M.YYYY"}}</td>
+            <td class="klo">klo</td>
+            <td class="time">{{visit|date:"HH:mm:ss"}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    inte besökts.
+  {% endif %}
+</p>
+<h2>{% if kuulutus? %}Kungörelsens{% else %}Anslags{% endif %} innehåll</h2>
+Viss information är endast synlig för autentiserade användare.
+
+<div class="bulletin">
+  <table class="details">
+    <tbody>
+      <tr class="below-one above-one">
+        <td><strong>{{address}}</strong></td>
+        <td>{{description-html|safe}}</td>
+      </tr>
+      <tr>
+        <td class="left">Fastighetsbeteckning</td>
+        <td class="right">{{property-id}}</td>
+      </tr>
+      <tr>
+        <td class="left">Handläggningskommun</td>
+        <td class="right">{% loc municipality %}</td>
+      </tr>
+      {% if kuntalupatunnus %}
+        <tr>
+          <td class="left">Kommuntillståndsnummer</td>
+          <td class="right">{{kuntalupatunnus}}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td class="left">Givet</td>
+        <td class="right">{{given-date|date:"d.M.YYYY"}}</td>
+      </tr>
+      <tr class="below-two">
+        <td class="left">Överklagandet upphör</td>
+        <td class="right">{{end-date|date:"d.M.YYYY"}}</td>
+      </tr>
+      {% for paatos in paatokset %}
+        {% for pk in paatos.poytakirjat %}
+          <tr>
+            <td class="left">
+              <strong>Beslut</strong>
+            </td>
+            <td class="right">
+              {% if pk.section %}
+                §{{pk.section}}
+              {% endif %}
+              {{pk.paatoskoodi}}
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>{{pk.text-html|safe}}</td>
+          </tr>
+          <tr class="below-one">
+            <td class="left">Beslutsfattare</td>
+            <td>
+              {{pk.paatoksentekija}}<br>
+              {{pk.verdict-date|date:"d.M.YYYY"}}
+            </td>
+          </tr>
+        {% endfor %}
+        {% if paatos.lupamaaraykset %}
+          {% for m in paatos.lupamaaraykset %}
+            <tr>
+              <td class="left">
+                {% loc m.loc-fn %}
+              </td>
+              <td class="right">
+                <ul>
+                  {% for item in m.items %}
+                    <li>
+                      {% if m.safe? %}
+                        {{item|safe}}
+                      {% else %}
+                        {{item}}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+    </tbody>
+  </table>
+      {% endfor %}
+</div>

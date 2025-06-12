@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ppst:Popast xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ymv="http://www.kuntatietopalvelu.fi/gml/ymparisto/vesihuoltolaki" xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" xmlns:ymy="http://www.kuntatietopalvelu.fi/gml/ymparisto/ymparistoluvat" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:mkos="http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet" xmlns:kiito="http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus" xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta" xmlns:ymi="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset" xmlns:ppst="http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu" xmlns:ymm="http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.2.4/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd">
+  <ppst:toimituksenTiedot>
+    <yht:aineistonnimi>Sipoo KuntaGML</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Sipoo</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2023-09-14</yht:toimitusPvm>
+    <yht:kuntakoodi>753</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </ppst:toimituksenTiedot>
+  <ppst:suunnittelutarveasiatieto>
+    <ppst:Suunnittelutarveasia gml:id="stratkaisu.178">
+      <ppst:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2023-06-07</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Valpas valiokunta</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </ppst:kasittelynTilatieto>
+      <ppst:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2023-06-07</yht:pvm>
+          <yht:tila>luvalla ei loppukatselmusehtoa, lupa valmis</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Valpas valiokunta</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </ppst:kasittelynTilatieto>
+      <ppst:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2021-08-02</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </ppst:kasittelynTilatieto>
+      <ppst:kuntakoodi>753</ppst:kuntakoodi>
+      <ppst:luvanTunnistetiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>23-0123-SUU</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>75300023-0123</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2021-08-02</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </ppst:luvanTunnistetiedot>
+      <ppst:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Tarmo</yht:etunimi>
+                  <yht:sukunimi>Tarvetsa</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Ratkaisunraitti 6 A</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>04320</yht:postinumero>
+                  <yht:postitoimipaikannimi>Toisaalla</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>tarmo.tarvetsa@example.net</yht:sahkopostiosoite>
+                <yht:puhelin>4422881100</yht:puhelin>
+                <yht:henkilotunnus>060434-6871</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+              <yht:postitetaanKytkin>false</yht:postitetaanKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Miss</yht:etunimi>
+                  <yht:sukunimi>Moneypenny</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Penninväylä 9</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>04321</yht:postinumero>
+                  <yht:postitoimipaikannimi>Aarresaari</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:henkilotunnus>230969-3163</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+        </yht:Osapuolet>
+      </ppst:osapuolettieto>
+      <ppst:rakennuspaikkatieto>
+        <ppst:Rakennuspaikka gml:id="rpaikka.10023">
+          <yht:yksilointitieto>11111</yht:yksilointitieto>
+          <yht:alkuHetki>2021-08-04T00:00:00</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:tilannimi>Treasure Island</yht:tilannimi>
+                  <yht:kiinteistotunnus>75340200100019</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4258">
+                  <gml:pos>25.2984978467 60.4171662876</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>yleis</yht:kaavanaste>
+          <yht:osoite>
+            <yht:kunta>753</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Hupsistie</yht:teksti>
+              <yht:teksti xml:lang="sv">Humbugsvägen</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>100</yht:osoitenumero>
+            <yht:postinumero>04320</yht:postinumero>
+            <yht:postitoimipaikannimi>Away</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>oikeusvaikutteinen yleiskaava</yht:kaavatilanne>
+        </ppst:Rakennuspaikka>
+      </ppst:rakennuspaikkatieto>
+      <ppst:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4258">
+          <gml:pos>25.2984978467 60.4171662876</gml:pos>
+        </gml:Point>
+      </ppst:referenssiPiste>
+      <ppst:lausuntotieto>
+        <ppst:Lausunto>
+          <yht:viranomainen>Sipoon Silmä - Sibbo Ögon</yht:viranomainen>
+          <yht:pyyntoPvm>2021-08-14</yht:pyyntoPvm>
+          <yht:lausuntotieto>
+            <yht:Lausunto>
+              <yht:viranomainen>Sipoon Silmä - Sibbo Ögon</yht:viranomainen>
+              <yht:lausunto>Donec at interdum quam, at varius sapien. Fusce orci augue, ornare ac rhoncus vel, rhoncus convallis velit. Aliquam scelerisque feugiat lorem, nec ornare enim condimentum id.</yht:lausunto>
+              <yht:lausuntoPvm>2021-08-18</yht:lausuntoPvm>
+              <yht:puoltotieto>
+                <yht:Puolto>
+                  <yht:puolto>lausunto</yht:puolto>
+                </yht:Puolto>
+              </yht:puoltotieto>
+            </yht:Lausunto>
+          </yht:lausuntotieto>
+        </ppst:Lausunto>
+      </ppst:lausuntotieto>
+      <ppst:paatostieto>
+        <yht:Paatos>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2023-07-16</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2023-07-17</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2025-07-16</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2023-06-15</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2023-07-15</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2023-06-14</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Phasellus pharetra nunc sed malesuada dignissim. Donec rutrum tellus ac rhoncus mollis. Vivamus placerat leo et commodo dapibus. Mauris commodo leo nibh, vitae vehicula orci pellentesque at.</yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Valpas valiokunta</yht:paatoksentekija>
+            <yht:paatospvm>2023-06-07</yht:paatospvm>
+            <yht:pykala>789</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </ppst:paatostieto>
+      <ppst:lisatietotieto>
+        <ppst:Lisatieto>
+          <ppst:asioimiskieli>suomi</ppst:asioimiskieli>
+          <ppst:suoramarkkinointikieltoKytkin>false</ppst:suoramarkkinointikieltoKytkin>
+        </ppst:Lisatieto>
+      </ppst:lisatietotieto>
+      <ppst:asianTiedot>
+        <ppst:Asiantiedot>
+          <ppst:suunnittelutarveasianKuvaus>Nulla et ex et velit fringilla molestie in quis felis. Duis ultrices tempor ipsum nec blandit. Curabitur sagittis ligula nec porta laoreet. Phasellus accumsan mi et eleifend lacinia.</ppst:suunnittelutarveasianKuvaus>
+        </ppst:Asiantiedot>
+      </ppst:asianTiedot>
+    </ppst:Suunnittelutarveasia>
+  </ppst:suunnittelutarveasiatieto>
+</ppst:Popast>

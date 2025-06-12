@@ -1,0 +1,40 @@
+/* Media object (http://stubbornella.org/content/2010/06/25/the-media-object-saves-hundreds-of-lines-of-code) */
+.media{
+  display:block;
+}
+
+.img{
+  float:left;
+  margin-right:1em;
+  img{
+    display:block;
+  }
+}
+
+/* Reversed image location (right instead of left). */
+.img-rev{
+  float:right;
+  margin-left:1em;
+}
+
+.body{
+  overflow:hidden;
+}
+
+.body > :last-child{
+  margin-bottom:0;
+}
+
+/* The nav abstraction (http://csswizardry.com/2011/09/the-nav-abstraction/) */
+.nav {
+  list-style:none;
+  margin-left:0;
+
+  li {
+    display:inline;
+  }
+
+  a {
+    display:inline-block;
+  }
+}

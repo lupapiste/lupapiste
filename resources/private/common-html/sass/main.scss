@@ -1,0 +1,5 @@
+// Place all Sass styles into legacy layer, which is
+// below any tailwind layers.
+@layer legacy {
+  @import "_main_impl";
+}

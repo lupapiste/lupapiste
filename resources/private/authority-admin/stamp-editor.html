@@ -1,0 +1,7 @@
+<section class="page" id="stamp-editor">
+  <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
+                      if: organization.organizationId">
+    <cljs-auth-admin_stamp_editor params="{ authModel: authorization }"></cljs-auth-admin_stamp_editor>
+  </div>
+</section>

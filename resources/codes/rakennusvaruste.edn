@@ -1,0 +1,192 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "Electricity", :fi "Sähkö", :sv "El"},
+   :codeValue "01",
+   :created "2021-07-29T08:38:54.947Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/01/members/",
+   :modified "2023-12-04T11:17:51.293Z",
+   :status "VALID",
+   :id "7e521a55-1768-4c05-a661-adca75b539ae",
+   :statusModified "2021-07-29T08:38:54.947Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Natural gas", :fi "Kaasu", :sv "Gas"},
+   :codeValue "02",
+   :created "2021-07-29T08:38:54.952Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/02/members/",
+   :modified "2023-12-04T11:17:51.311Z",
+   :status "VALID",
+   :id "8dc97b7a-e771-48f0-899a-997eed2e9008",
+   :statusModified "2021-07-29T08:38:54.952Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Wastewater drain",
+    :fi "Jätevesiviemäri",
+    :sv "Spillvattenavlopp"},
+   :codeValue "03",
+   :created "2021-07-29T08:38:54.966Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/03/members/",
+   :modified "2023-12-04T11:17:51.319Z",
+   :status "VALID",
+   :id "0922d80a-2d65-4266-948f-dde7d0a661be",
+   :statusModified "2021-07-29T08:38:54.966Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Water line", :fi "Vesijohto", :sv "Vattenledning"},
+   :codeValue "04",
+   :created "2021-07-29T08:38:54.971Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/04/members/",
+   :modified "2023-12-04T11:17:51.326Z",
+   :status "VALID",
+   :id "7ab750ce-5163-48b0-af55-a7e73cec3bfc",
+   :statusModified "2021-07-29T08:38:54.971Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Hot water", :fi "Lämmin vesi", :sv "Varmt vatten"},
+   :codeValue "05",
+   :created "2021-07-29T08:38:54.975Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/05/members/",
+   :modified "2023-12-04T11:17:51.333Z",
+   :status "VALID",
+   :id "d2540a41-eb62-47fd-a833-fb970ea6fa24",
+   :statusModified "2021-07-29T08:38:54.975Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Mechanical ventilation",
+    :fi "Koneellinen ilmastointi",
+    :sv "Maskinell ventilation"},
+   :codeValue "06",
+   :created "2021-07-29T08:38:54.980Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/06/members/",
+   :modified "2023-12-04T11:17:51.341Z",
+   :status "VALID",
+   :id "6a6ad1d8-1beb-4701-977c-800232909141",
+   :statusModified "2021-07-29T08:38:54.980Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Solar panel", :fi "Aurinkopaneeli", :sv "Solpanel"},
+   :codeValue "07",
+   :created "2021-07-29T08:38:54.984Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/07/members/",
+   :modified "2023-12-04T11:17:51.348Z",
+   :status "VALID",
+   :id "253d4244-277d-464e-b387-705237a4d50f",
+   :statusModified "2021-07-29T08:38:54.984Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/07",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Lift", :fi "Hissi", :sv "Hiss"},
+   :codeValue "08",
+   :created "2021-07-29T08:38:54.988Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/08/members/",
+   :modified "2023-12-04T11:17:51.355Z",
+   :status "VALID",
+   :id "d67688ca-f1d7-4a64-ae9a-6bb755f1a410",
+   :statusModified "2021-07-29T08:38:54.988Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/08",
+   :order 8,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/08",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Pool", :fi "Uima-allas", :sv "Simbassäng"},
+   :codeValue "09",
+   :created "2021-07-29T08:38:54.992Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/09/members/",
+   :modified "2023-12-04T11:17:51.362Z",
+   :status "VALID",
+   :id "12c422df-8011-4b22-875c-a56110346155",
+   :statusModified "2021-07-29T08:38:54.992Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/09",
+   :order 9,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/09",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Sauna", :fi "Sauna", :sv "Bastu"},
+   :codeValue "10",
+   :created "2021-07-29T08:38:54.996Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/10/members/",
+   :modified "2023-12-04T11:17:51.369Z",
+   :status "VALID",
+   :id "3f5c5e9c-1f77-4752-af0d-e3dfe22725d0",
+   :statusModified "2021-07-29T08:38:54.996Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/RakennusVaruste/codes/10",
+   :order 10,
+   :uri "http://uri.suomi.fi/codelist/rytj/RakennusVaruste/code/10",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:29:45.839Z"}

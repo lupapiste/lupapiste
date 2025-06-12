@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="bim-checking-plan-defaults">
+  <div class="container container--authority-admin"
+       data-bind="if: organization.organizationId() &&
+                      lupapisteApp.models.rootVMO.currentPage() === 'bim-checking-plan-defaults'">
+
+    <!-- ko if: $root.authorization.ok('bim-checking-plans-for-org') -->
+    <cljs-auth-admin_bim_checking-plan-defaults params="organizationId: organization.organizationId()">
+    </cljs-auth-admin_bim_checking-plan-defaults>
+    <!-- /ko -->
+
+  </div>
+</section>
+</body>
+</html>

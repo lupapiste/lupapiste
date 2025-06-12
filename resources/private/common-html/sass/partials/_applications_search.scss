@@ -1,0 +1,362 @@
+@use "base";
+@use "colors";
+@use "lupicons";
+@use "mixins";
+@use "theme";
+@use "typography";
+
+@use 'sass:math';
+
+.applications-search-container {
+  background-color: colors.$panel-background;
+}
+
+.applications-search-top {
+  background-color: colors.$panel-background;
+  .container {
+    margin-bottom: 0;
+  }
+  .applications-search-control {
+    min-height: 48px;
+  }
+  .button-group {
+    float: right;
+    margin-bottom: theme.$grid-margin;
+    button {
+      margin-left: theme.$grid-margin;
+    }
+  }
+  h1 {
+    display: inline-block;
+  }
+}
+
+.archiving-top {
+  .button-group {
+    float: right;
+    margin-top: -25px;
+    button {
+      margin-left: theme.$grid-margin;
+    }
+  }
+}
+
+#invitations {
+  margin-bottom: -(base.$marginL);
+  > .container {
+    margin-top: -2px;
+    padding-top: 16px;
+    margin-bottom: 0;
+  }
+}
+
+.applications-search-component {
+  clear: both;
+  .button-group {
+    float: right;
+    margin-bottom: theme.$grid-margin;
+  }
+}
+
+.search-tabs {
+  ul {
+    display: inline-block;
+    list-style: none;
+    padding: 0;
+    margin-right: base.$marginS;
+    line-height: 40px; // buttons next to tabs are 40px
+    vertical-align: middle;
+  }
+  li {
+    background-color: colors.$gray247;
+    color: theme.$color-text;
+
+    cursor: pointer;
+    margin-right: base.$marginS;
+    display: inline-block;
+    padding: 0 base.$marginL;
+    &.selected {
+      background-color: colors.$gray221
+    }
+  }
+  input {
+    display: inline-block;
+    margin: 0;
+  }
+  button {
+    margin: 0 base.$marginS;
+    width: initial;
+    padding: 0 base.$marginL;
+    .icon {
+      position: relative;
+      top: 2px;
+      margin-right: base.$marginM;
+    }
+  }
+}
+
+.paging {
+  color: colors.$gray51;
+  margin-bottom: base.$marginM;
+  p {
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 0;
+  }
+  button {
+    margin-right: math.div(theme.$grid-margin, 2);
+  }
+  .results {
+  margin-bottom: base.$marginS;
+  }
+  a:not(:last-of-type) {
+    span.separator::after {
+      content: "|";
+    }
+  }
+  span.limits {
+    font-size: typography.$font-size-body;
+    padding-right: 5px !important;
+    padding-left: 2px !important;
+  }
+  .previous {
+    padding-right: 10px;
+  }
+}
+
+div.search {
+  position: relative;
+  input {
+    padding-right: 40px !important;
+  }
+
+  &.active {
+    i {
+      color: colors.resolve-color( "primary", "background", "active");
+    }
+  }
+  i {
+    color: colors.resolve-color( "primary", "background", "enabled");
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+}
+
+.application-search-component {
+  ul {
+    padding: 0;
+  }
+  input[type=text].lux.hasDatepicker {
+    min-width: 100px;
+    display: inline;
+    margin-top: 0px;
+    margin-right: 0px;
+    width: initial;
+    vertical-align: top;
+  }
+}
+
+.applications-search-filters-list {
+
+  .applications-search-filters-list__filters {
+    display: table;
+  }
+
+  .applications-search-filters-list__filter-row {
+    display: table-row;
+  }
+
+  .applications-search-filters-list__filter-item {
+    background-color: colors.$white;
+    display: table-cell;
+    vertical-align: top;
+    height: theme.$grid-input-height;
+    &:first-child {
+      width: 100%;
+    }
+    button {
+      width: 100%;
+    }
+  }
+  .applications-search-filters-list__filter-item--default-filter {
+    min-width: 250px;
+    max-width: 250px;
+    width: 250px;
+    overflow: hidden;
+  }
+  .applications-search-filters-list__filter-item--remove {
+    min-width: 105px;
+    max-width: 105px;
+    width: 105px;
+  }
+}
+
+.applications-search-results__indicator {
+  color: colors.get-signal( "night-sky" );
+  padding: 0 0 0 0 !important;
+  word-wrap: break-word;
+  white-space: nowrap;
+  font-weight: bold;
+  & > div, & > a {
+    height: auto !important;
+    padding: 0 base.$marginS !important;
+    i {
+      display: table-cell;
+      margin-bottom: 0;
+    }
+    span:not(.tooltip-bubble) {
+      padding-left: 2px;
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+  a {
+    color: colors.get-signal( "blue" );
+    display: block;
+    cursor: pointer;
+    line-height: 22px;
+    & > * {
+      vertical-align: middle;
+    }
+    &:hover {
+      text-decoration: none;
+      color: colors.get-signal( "night-sky" );
+    }
+    &:focus {
+      outline: 2px solid colors.get-signal( "blue" );
+      background: colors.$blue-10;
+    }
+  }
+  .application-search-results__urgency {
+    &.urgent {
+      color: theme.$red-dark;
+    }
+    &.pending {
+      color: theme.$orange-dark;
+    }
+  }
+}
+
+.applications-search-tabs {
+  display: inline-block;
+  background-color: colors.$white;
+}
+
+.container.application-search-result-container {
+  margin-top: 0;
+  background-color: colors.$white;
+}
+
+
+.application-search-result__table, .application-foreman-search-result__table {
+  th {
+    @include mixins.disable-select;
+    white-space: nowrap;
+  }
+}
+
+.application-search-result__table {
+  th {
+    &.first {
+
+    }
+    &.second {
+
+    }
+    &.third {
+
+    }
+    &.fourth {
+
+    }
+    &.fifth {
+      width: 10%;
+    }
+    &.sixth {
+      width: 5%;
+    }
+    &.seventh {
+      width: 5%;
+    }
+    &.eight {
+      width: 10%;
+    }
+    &.ninth {
+      width: 10%;
+    }
+  }
+}
+
+.application-foreman-search-result__table {
+  th {
+    &.first {
+    }
+    &.second {
+      width: 15%;
+    }
+    &.third {
+      width: 5%;
+    }
+    &.fourth {
+      width: 20%;
+    }
+    &.fifth {
+      width: 15%;
+    }
+    &.sixth {
+      width: 15%;
+    }
+    &.seventh {
+      width: 5%;
+    }
+    &.eight {
+      width: 15%;
+    }
+  }
+}
+
+.assignments-search-result__table {
+  th {
+    vertical-align: middle;
+    white-space: nowrap;
+
+    &.third {  // Sijainti
+      width: 10%;
+    }
+    &.fourth { // Aihe
+      width: 25%;
+    }
+    &.fifth { // Kuvaus
+      width: 100%;
+    }
+    &.sixth { // Author
+      width: 15%;
+    }
+  }
+
+  tr {
+    td.created {
+      color: theme.$red-dark;
+    }
+    td.completed {
+      color: colors.$green;
+    }
+    td.targets-added {
+      color: theme.$red-dark;
+    }
+    td.application-id {
+      white-space: nowrap;
+    }
+  }
+}
+
+.search-results-waiting {
+  i.spin {
+    font-size: 2 * lupicons.$lupicon-size;
+    padding: 0;
+  }
+  span {
+    padding-left: 2em;
+  }
+}

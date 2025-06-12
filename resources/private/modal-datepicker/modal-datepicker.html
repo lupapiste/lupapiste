@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="modal-datepicker" style="visibility: visible; display: block;">
+      <div id="dialog-modal-datepicker" class="window autosized" >
+        <div data-bind="with: constructionStateChangeModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: dialogHeader"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+
+          <div class="dialog-content">
+
+            <p data-bind ="lhtml: dialogHelpParagraph"></p>
+
+            <label class="form-label" data-bind="ltext: dateSelectorLabel"></label><br/>
+            <input type="text" class="form-input long" id="modal-datepicker-date" data-test-id="modal-datepicker-date"
+                   data-bind="datepicker: dateObservable,
+                              dateInvalidClass: {isInvalid: isInvalid}"/>
+            <br>
+
+            <div data-bind="if: errorMessage" >
+              <div data-bind="ltext: errorMessage" class="context-error"></div>
+            </div>
+
+            <button class="btn btn-primary btn-dialog"
+                    data-bind="ltext: dialogButtonSend,
+                               click: confirm,
+                               disable: isInvalid"
+                    data-test-id="modal-datepicker-continue">
+            </button>
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

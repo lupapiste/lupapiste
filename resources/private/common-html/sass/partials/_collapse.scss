@@ -1,0 +1,29 @@
+// CLJS variant of the slider, uses CSS transitions instead of jQueryUI
+// Cljs component handles setting the height by checking the
+// height of content before transitions, as (most) browsers
+// don't support transition between named values (auto) and numeric (0px).
+
+.collapse_slider {
+  transition: height 300ms ease-in-out;
+  overflow: hidden;
+  height: 0;
+
+  .collapse_wrapper {
+    display: flex;
+    width: 100%;
+  }
+
+  .collapse_content {
+    width: 100%;
+  }
+
+  &.entered {
+    height: auto;
+    overflow: visible;
+  }
+
+  // Currently unmounted on exit -> not used
+  &.exited {
+    visibility: hidden;
+  }
+}

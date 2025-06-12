@@ -1,0 +1,28 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+       id="review-request-summary-template">
+  <div class="review-request-summary">
+    <!-- ko ifnot: _.isEmpty( buildings ) -->
+    <h4 data-bind="ltext: 'review-request.buildings'"></h4>
+    <ul class="review-request--content"
+        data-bind="foreach: buildings">
+      <li data-bind="text: text"></li>
+    </ul>
+    <!-- /ko -->
+    <h4 data-bind="ltext: 'notice-form.message'"></h4>
+    <div class="review-request--message"
+         data-bind="text: message"></div>
+    <h4 data-bind="ltext: 'notice-form.customer'"></h4>
+    <div class="review-request--content">
+      <span data-bind="text: contact.name"></span>,
+      <span data-bind="text: contact.email"></span>,
+      <span data-bind="text: contact.phone"></span>
+    </div>
+    <!-- ko if: canCancel -->
+    <br>
+    <icon-button params="ltext: 'review-request.cancel',
+                         icon: 'remove',
+                         buttonClass: 'negative',
+                         click: cancelRequest"></icon-button>
+    <!-- /ko -->
+  </div>
+</script>

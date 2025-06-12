@@ -1,0 +1,38 @@
+@use "sass:color";
+@use "base";
+@use "frameless";
+@use "theme";
+
+/* Side bar styles*/
+.action-bar-button {
+  width: 150px;
+  margin: 4px;
+  }
+
+.action-bar {
+  position: fixed;
+  top: 450px;
+  right: 30px;
+
+  width: 20%;
+  @media only screen and (width) {
+    width: frameless.$cols3;
+  }
+}
+
+.instructions {
+  background-color: white;
+  box-shadow: 2px 2px 1px #888888;
+  display: inline-block;
+  margin: base.$marginS 0 base.$marginS base.$marginS;
+  padding: base.$marginM;
+  position: relative;
+  border: 1px solid color.adjust(theme.$lp-light-grey, $lightness: -5%);
+}
+
+.sidebar {
+  /* Default width for browsers that don't support media queries */
+  width: 20%;
+  float: right;
+  z-index: 2;
+}

@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="last-page-add-operation-template">
+  <div>
+    <div class="gap--t1 gap--b1"
+         data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
+
+    <div class="last-page--create-buttons">
+      <icon-button params="click: addOperation,
+                           waiting: processing,
+                           testId: 'add-operation-to-application',
+                           icon: 'circle-plus',
+                           ltext: 'operations.add'"></icon-button>
+    </div>
+
+  </div>
+</script>

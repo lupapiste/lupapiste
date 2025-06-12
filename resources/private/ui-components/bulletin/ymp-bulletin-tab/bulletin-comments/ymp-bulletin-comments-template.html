@@ -1,0 +1,71 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="ymp-bulletin-comments-template">
+  <div>
+    <button class="secondary back-button" data-bind="click: hideComments">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+    <div>
+      <h1 data-bind="ltext: 'bulletin.comments.title'"></h1>
+    </div>
+    <div class="bulletin-proclamation-header">
+      <span class="bulletin-proclamation-text" data-bind="text: proclaimedHeader"></span>
+      <button class="bulletin-proclamation-sort primary" data-bind="toggleClick: asc, ltext: sortButtonText"></button>
+    </div>
+  </div>
+
+  <!-- ko foreach: comments -->
+  <div class="bulletin-comment">
+    <div class="bulletin-comment__header flex gap-2 justify-between">
+      <div class="flex gap-2">
+        <span class="bulletin-comment__index" data-bind="text: $parent.commentIndex($index())"></span>
+        <a  href="#" class="text-nowrap"
+            data-bind="fullName: $data['contact-info'],
+                       click: $parent.selectComment"></a>
+        <span class="text-nowrap"
+              data-bind="dateTimeString: $data.created"></span>
+        <div class="description-bubble mx-2" data-bind="slider: $parent.selectedComment() === $data.id">
+          <span class="bulletin-comment__description" data-bind="text: $parent.description($data)"></span>
+        </div>
+      </div>
+      <!-- ko if: $parent.canReply( $data ) -->
+      <a data-bind="click: $parent.createReply" href="#">
+        <span class="text-nowrap"
+              data-bind="ltext: 'replies.ask-for-reply'"></span>
+        </a>
+      <!-- /ko -->
+      <!-- ko if: $parent.getReplyStatus($data) === "answered" -->
+      <a data-bind="click: $parent.goToReplies"
+         href="#">
+        <span data-bind="ltext: 'replies.has-answer'"></span>
+      </a>
+      <!-- /ko -->
+      <!-- ko if: $parent.getReplyStatus($data) === "waiting-for-answer" -->
+      <a data-bind="click: $parent.goToReplies"
+         href="#">
+        <span data-bind="ltext: 'replies.waiting-for-answer'"></span>
+      </a>
+      <!-- /ko -->
+
+    </div>
+    <div class="bulletin-comment__body">
+      <!-- ko if: $data.attachments.length > 0 -->
+      <div class="bulletin-comment__attachments" data-bind="foreach: $data.attachments">
+        <div class="bulletin-comment__attachment">
+          <a class="link-btn bulletin-comment_attachment-link" target="_blank" data-bind="attr: {href: '/api/raw/download-bulletin-comment-attachment?attachmentId=' + $data.fileId}">
+            <span data-bind="text: $data.filename"></span>
+          </a>
+          <span class="bulletin-comment__attachment-type">
+            <span data-bind="ltext: $data.contentType"></span>
+            <span data-bind="size: $data.size"></span>
+          </span>
+        </div>
+      </div>
+      <!-- /ko -->
+      <div>
+        <pre data-bind="text: comment"></pre>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+  <div class="bulletin-comment-spinner" data-bind="component: {name: 'infinite-scroll', params: {load: commentsLeft, loadFn: fetchComments}}"></div>
+</script>

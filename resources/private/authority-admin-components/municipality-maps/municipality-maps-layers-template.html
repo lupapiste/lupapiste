@@ -1,0 +1,71 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="municipality-maps-layers-template">
+        <div data-bind="if: serverLayers">
+          <h3 data-bind="ltext: 'auth-admin.municipality-maps.layers'"></h3>
+          <table class="table table-striped" data-test-id="layers-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'auth-admin.municipality-maps.layername'"></th>
+                <th data-bind="ltext: 'auth-admin.municipality-maps.layer'"></th>
+                <th data-bind="ltext: 'auth-admin.municipality-maps.preview'"></th>
+                <th data-bind="ltext: 'auth-admin.actions'"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="munimaps--wide"
+                    data-bind="ltext: 'auth-admin.municipality-maps.taustakartta'"></td>
+                <td></td>
+               <td class="munimaps--check">
+                  <input type="checkbox"
+                         data-bind="checked: backgroundVisible">
+                </td>
+              </tr>
+              <!-- ko foreach: userLayers -->
+              <tr>
+                <!-- ko if: fixed -->
+                <td data-bind="text: $parent.shortLoc(name())"></td>
+                <!-- /ko -->
+                <!-- ko ifnot: fixed -->
+                <td class="munimaps--wide">
+                  <input type="text"
+                         data-bind="value: name,
+                                    attr: {'data-test-id': 'layer' + $index() + '-input'}">
+                </td>
+                <!-- /ko -->
+                <td class="munimaps--wide">
+                  <select data-bind="value: id,
+                                     options: $parent.serverLayers,
+                                     optionsText: 'title',
+                                     optionsValue: 'name',
+                                     optionsCaption: loc( 'choose'),
+                                     valueAllowUnset: true,
+                                     disable: $parent.readOnly,
+                                     attr: {'data-test-id': 'layer' + $index() + '-select'}">
+                  </select>
+                </td>
+                <td class="munimaps--check">
+                  <input type="checkbox"
+                         data-bind="checked: preview,
+                                    attr: {'data-test-id': 'layer' + $index() + '-check'}">
+                </td>
+                <td class="munimaps--action">
+                  <a href="#"
+                     data-bind="ifnot: fixed,
+                                click: $parent.removeLayer,
+                                attr: {'data-test-id': 'layer' + $index() + '-remove'}">
+                    <span data-bind="text: '[' + loc( 'remove' ) + ']'">
+                    </span>
+                  </a>
+                </td>
+              </tr>
+              <!-- /ko -->
+            </tbody>
+          </table>
+          <button class="positive"
+                  data-bind="click: addLayer, disable: readOnly"
+                  data-test-id="layers-add">
+            <i class="lupicon-circle-plus"></i>
+            <span data-bind="ltext: 'auth-admin.municipality-maps.add'"></span>
+          </button>
+        </div>
+      </script>

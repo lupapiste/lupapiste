@@ -1,0 +1,191 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Solar panel field",
+    :fi "Aurinkopaneelikenttä",
+    :sv "Solpanelfält"},
+   :codeValue "01",
+   :created "2022-06-13T09:46:03.082Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/01/members/",
+   :modified "2023-11-30T10:59:57.187Z",
+   :status "VALID",
+   :id "989f1b29-a15d-4f94-936d-51e3733c0071",
+   :statusModified "2022-06-13T09:46:03.082Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Landfill", :fi "Kaatopaikka", :sv "Avstjälpningsplats"},
+   :codeValue "02",
+   :created "2022-06-13T09:46:19.981Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/02/members/",
+   :modified "2023-11-30T10:59:57.204Z",
+   :status "VALID",
+   :id "bc99696b-7a47-4d89-a086-c93840572c27",
+   :statusModified "2022-06-13T09:46:19.981Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Park", :fi "Puisto", :sv "Park"},
+   :codeValue "03",
+   :created "2022-06-13T09:46:31.572Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/03/members/",
+   :modified "2023-11-30T10:59:57.212Z",
+   :status "VALID",
+   :id "a35cea03-f678-493e-a603-a82c6ac0276f",
+   :statusModified "2022-06-13T09:46:31.572Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Parking area", :fi "Pysäköintialue", :sv "Parkeringsplats"},
+   :codeValue "04",
+   :created "2023-02-20T13:13:48.223Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/04/members/",
+   :modified "2023-11-30T10:59:57.219Z",
+   :status "VALID",
+   :id "1ebc7cd3-62d4-4119-8a6b-0fb43ea8c796",
+   :statusModified "2023-02-20T13:13:48.223Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/04",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Event area", :fi "Tapahtuma-alue", :sv "Evenemangsområde"},
+   :codeValue "05",
+   :created "2023-02-20T13:13:48.231Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/05/members/",
+   :modified "2023-11-30T10:59:57.227Z",
+   :status "VALID",
+   :id "1d0dfec0-593b-49be-b318-9fd9d29a56c9",
+   :statusModified "2023-02-20T13:13:48.231Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/05",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Marketplace", :fi "Tori", :sv "Torg"},
+   :codeValue "06",
+   :created "2023-02-20T13:13:48.239Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/06/members/",
+   :modified "2023-11-30T10:59:57.234Z",
+   :status "VALID",
+   :id "3763df2d-e015-4836-836b-0e017ee0889b",
+   :statusModified "2023-02-20T13:13:48.239Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/06",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Sports area", :fi "Urheilualue", :sv "Idrottsområde"},
+   :codeValue "07",
+   :created "2023-02-20T13:13:48.246Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/07/members/",
+   :modified "2023-11-30T10:59:57.241Z",
+   :status "VALID",
+   :id "9d069aab-8153-4964-bacd-89254c5dcb03",
+   :statusModified "2023-02-20T13:13:48.246Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/07",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Storage area", :fi "Varastointialue", :sv "Lagerområde"},
+   :codeValue "08",
+   :created "2023-02-20T13:13:48.254Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/08/members/",
+   :modified "2023-11-30T10:59:57.248Z",
+   :status "VALID",
+   :id "bfba0f93-3b0b-4aad-9acb-a025b8c71136",
+   :statusModified "2023-02-20T13:13:48.254Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/08",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/08",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other landscape-altering action",
+    :fi "Muu maisemaa muuttava toimenpide",
+    :sv "Annan åtgärd som ändrar landskapet"},
+   :codeValue "99",
+   :created "2023-02-20T13:13:48.261Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/99/members/",
+   :modified "2023-11-30T10:59:57.255Z",
+   :status "VALID",
+   :id "5af5a4ac-86d0-4e69-8886-54f13588ae14",
+   :statusModified "2023-02-20T13:13:48.261Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rakrek/codeschemes/erityistatoimintaavartenrakennettavanalueentyyppi/codes/99",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rakrek/erityistatoimintaavartenrakennettavanalueentyyppi/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-03-26T07:24:45.831Z"}

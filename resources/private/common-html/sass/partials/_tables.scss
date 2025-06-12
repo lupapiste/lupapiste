@@ -1,0 +1,1009 @@
+@use "sass:color";
+@use "base";
+@use "buttons";
+@use "colors";
+@use "frameless";
+@use "inputs";
+@use "theme";
+@use "typography";
+
+@use 'sass:math';
+
+// Default table
+//
+// Styleguide 4.1
+
+$tr-color-even: colors.get-gray(15);
+
+// Removes the default stylization from a table
+@mixin plain-table {
+  tr {
+    border: 0;
+
+    th, td {
+      background-color: white;
+      padding: 0;
+      border: 0;
+      height: auto;
+      min-height: auto;
+    }
+  }
+}
+
+@mixin selected-row() {
+  &.selected {
+    background-color: color.adjust(theme.$lp-orange, $lightness: 20%);
+    color: black;
+
+    &:hover {
+      background-color: color.adjust(theme.$lp-orange, $lightness: 25%);
+      color: black;
+    }
+  }
+}
+
+@mixin no-row-hover() {
+  tr {
+    &:hover {
+      background-color: white;
+    }
+
+    &:hover:nth-child(even) {
+      background: $tr-color-even;
+    }
+  }
+}
+
+.table {
+    font-size: 16px;
+    line-height: base.$baseline;
+}
+
+// Note: the default table (without any classes) is extensively styled
+// due to legacy reasons. Use reset style to remove all the
+// default styling.
+
+table:not(.reset):not(.ui-datepicker-calendar):where(:not(.nobase, .nobase *)) {
+  width: 100%;
+  margin-bottom: base.$marginL;
+  color: colors.$gray51;
+
+  tbody.inspection-summary-template {
+    border: 1px solid colors.$gray221;
+
+    &:nth-child(odd) {
+      background: white;
+    }
+
+    &:nth-child(even) {
+      background: $tr-color-even;
+    }
+
+    &:hover {
+      background-color: colors.$gray238;
+
+      &:active {
+        background-color: colors.$gray221;
+      }
+    }
+  }
+
+
+  th {
+    background: colors.$gray221;
+    padding-left: base.$marginM;
+    padding-right: base.$marginM;
+    vertical-align: middle;
+    /* Hide "double chevron" when there's one inside a button and one next to it: */
+    button + i {
+      display: none;
+    }
+  }
+
+  tr {
+    background: colors.$white;
+    border: 1px solid colors.$gray221;
+
+    &:nth-child(even) {
+      background: $tr-color-even;
+    }
+
+    // &:hover {
+    //   background-color: $gray238;
+    //   &:active {
+    //     background-color: $gray221;
+    //   }
+    // }
+    &.application-row {
+      &:hover,
+      &:focus {
+        background-color: colors.$blue-10;
+        color: colors.$night-sky-100;
+      }
+
+      &:active {
+        background-color: colors.get-blue(18);
+      }
+    }
+
+    &.attachment-row {
+      cursor: pointer;
+
+      td:last-child {
+        text-align: right;
+      }
+    }
+
+    &.attachment-multiselect-row {
+      @include selected-row;
+
+      td.attachment-file-info {
+        span.attachment-file-name {
+          display: block;
+        }
+      }
+    }
+
+    &.inspection-summary-template-row {
+      background: inherit;
+      border: none;
+    }
+
+    &.not-in-printing-order {
+      color: colors.get-gray(6);
+    }
+
+    &.warning {
+      background-color: theme.$orange;
+    }
+  }
+
+  th, td {
+    padding: base.$marginS base.$marginM;
+    text-align: left;
+    height: theme.$grid-min-height;
+    min-height: theme.$grid-min-height;
+
+    &.btn {
+      margin-bottom: 0px;
+    }
+
+    .icon {
+      margin: base.$marginM base.$marginM base.$marginS base.$marginM;
+    }
+
+    &.actions {
+      a {
+        margin-right: base.$marginM;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+// Enable horizontal scrolling when needed
+@media (max-width: 1080px) {
+  table:not(.reset):not(.ui-datepicker-calendar):not(.attachment-batch-table):not(:where(.nobase, .nobase *)) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+table.no-stripes:not( .reset ) {
+  tr:nth-child(even) {
+    background: initial
+  }
+}
+
+th.action-column, td.action-column {
+  .icon {
+    margin: 0;
+  }
+}
+
+tbody:where(:not(.nobase, .nobase *)), tfoot:where(:not(.nobase, .nobase *)) {
+  td {
+    vertical-align: middle;
+  }
+}
+
+
+.dataTables_wrapper {
+  position: relative;
+}
+
+.table-filter {
+  float: right;
+  position: absolute;
+  top: -(base.$marginL)*1.5;
+  right: 0;
+}
+
+table.tasks thead tr:first-child td {
+  padding-left: 0
+}
+
+.tasks-content {
+  margin-top: base.$marginM;
+  margin-bottom: base.$marginM;
+}
+
+table.tasks {
+  .task-state {
+    width: 22px;
+
+    .icon {
+      margin: base.$marginM base.$marginS base.$marginS base.$marginS;
+    }
+  }
+}
+
+// Main attachments table
+table.attachments-table {
+
+  .status-icon-text-line {
+    white-space: nowrap;
+  }
+}
+
+
+// Multiselect attachments table
+table.attachments-template-table {
+
+  .center {
+    text-align: center;
+  }
+
+  th {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  th:first-child {
+    padding-left: 16px;
+  }
+
+  th:last-child {
+    padding-right: 16px;
+  }
+
+  td {
+    &.attachmentState {
+      padding: 0 0 0 12px;
+      white-space: nowrap;
+
+      .icon {
+        margin: base.$marginS;
+        vertical-align: middle;
+      }
+    }
+
+    &.attachment-type-group, &.attachment-type-id, &.attachment-help-info, &.attachment-not-needed, &.attachment-file-info, &.attachment-file-changed {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
+    &.attachment-group-select {
+      a {
+        font-size: typography.$font-size-body;
+        font-weight: normal;
+        float: right;
+      }
+    }
+
+    &.attachment-type-group, &.attachment-type-id {
+      max-width: 150px;
+      word-wrap: break-word;
+    }
+
+    &.attachment-help-info {
+      max-width: 200px;
+      word-wrap: break-word;
+    }
+
+    &.attachment-file-info, &.attachment-file-changed {
+      max-width: 230px;
+      word-wrap: break-word;
+    }
+
+    &.attachment-version-info {
+      max-width: 60px;
+      word-wrap: break-word;
+    }
+  }
+}
+
+// Percentage width and px scroll height convenience
+// classes.
+@for $w from 1 through 21 {
+  .width-#{$w * 5} {
+    min-width: $w * 5%;
+    max-width: $w * 5%;
+    width: $w * 5%;
+  }
+  .scroll-#{$w * 50}px {
+    max-height: $w * 50px;
+    overflow-y: auto;
+  }
+}
+
+// Em scroll height convenience classes.
+@for $h from 1 through 101 {
+  .scroll-#{$h}em {
+    max-height: #{$h}em;
+    overflow-y: auto;
+  }
+}
+
+.header-table {
+  margin-top: 30px;
+
+  table {
+    margin: 0;
+  }
+}
+
+.header-table > tbody > tr > td {
+  padding: 0;
+}
+
+.header-table > tfoot > tr:hover {
+  background-color: transparent;
+}
+
+td.positive {
+  background-color: colors.$positive;
+  color: colors.$white;
+}
+
+td.negative {
+  background-color: colors.$negative;
+  color: colors.$white;
+}
+
+@mixin note-table($name) {
+  .#{$name}-table {
+    @extend .table;
+
+    td.#{$name}-table--action {
+      text-align: right;
+
+      a {
+        padding-right: 2em;
+      }
+    }
+
+    td.#{$name}-table--icons {
+      text-align: center;
+      color: colors.$primary;
+    }
+
+    tr.#{$name}-table__note {
+      padding: {
+        left: 2em;
+        right: 2em;
+      }
+      background-color: white;
+
+      &:active {
+        background-color: initial;
+      }
+
+      td.#{$name}-table--extra {
+        white-space: pre-wrap;
+      }
+
+      td.#{$name}-table--no-extra {
+        color: colors.$gray187;
+      }
+    }
+
+    div.bubble-dialog {
+      border: none;
+    }
+  }
+  @content;
+}
+
+@include note-table(reviews) {
+}
+
+table.review-buildings-table {
+  @extend .table;
+
+  th.review-buildings--description {
+    min-width: 20em;
+  }
+
+  select.dropdown {
+    min-width: 10em;
+  }
+
+  div.docgen-checkbox-wrapper {
+    border: none;
+    text-align: center;
+  }
+
+  div.docgen-checkbox-wrapper.wrapper--disabled {
+    // Initial value does not work with IE9.
+    background-color: transparent;
+  }
+}
+
+@include note-table(company-users) {
+}
+
+table.company-users-table {
+  select {
+    width: 10em;
+  }
+
+  tr:hover, tr:active {
+    background-color: transparent;
+  }
+}
+
+@mixin even-odd() {
+  @include no-row-hover;
+  tr.even-row,
+  tr.even-row:hover {
+    background-color: $tr-color-even;
+  }
+  tr.odd-row,
+  tr.odd-row:hover {
+    background-color: white;
+  }
+}
+
+table.table-even-odd {
+  @include even-odd;
+}
+
+table.reviews-table {
+  @include even-odd;
+}
+
+div.attachments-table-container {
+  padding: {
+    top: 1em;
+    right: .6em;
+    left: 0;
+  }
+
+  table.attachments-table {
+    margin-bottom: 1em;
+
+    th {
+      white-space: nowrap;
+    }
+
+    tr {
+      @include selected-row;
+
+      &.row--rejected {
+        border-bottom: none;
+
+        td {
+          padding-bottom: 0;
+        }
+      }
+
+      &.reject-note-row {
+        border-top: none;
+        padding: 0;
+
+        > td {
+          padding: {
+            top: 0;
+            left: 4px;
+            right: 0;
+            bottom: 4px;
+          }
+          min-height: 0;
+          height: auto;
+        }
+      }
+    }
+
+    .checkbox-wrapper {
+      border: none;
+
+      .checkbox-label {
+        padding-top: 2px;
+        padding-left: 0;
+        white-space: nowrap;
+      }
+    }
+
+    td {
+      vertical-align: top;
+    }
+
+    .attachments-table--wide {
+      width: 50%;
+    }
+
+    .attachments-table--widest {
+      width: 80%;
+    }
+
+    span.attachment-drawing-number {
+      display: block;
+      min-width: 4em;
+      max-width: 7em;
+      overflow-wrap: break-word;
+      margin-right: -1px;
+    }
+
+    input[type=text] {
+      padding-left: math.div(base.$baseline, 4);
+      padding-right: math.div(base.$baseline, 4);
+      width: base.$baseline;
+    }
+
+    #reject-edit-input {
+      width: 20em;
+    }
+
+    .amount-controls > [class^="lupicon-"]:before, [class*=" lupicon-"]:before {
+      position: relative;
+      top: math.div(base.$baseline, 6);
+      margin: math.div(base.$baseline, 4);
+      color: theme.$orange-dark;
+      cursor: pointer;
+    }
+
+  }
+}
+
+table.suti-admin-table {
+  margin-top: base.$marginM;
+
+  td:nth-child(even) {
+    width: 50%;
+
+    input {
+      width: 90%;
+    }
+  }
+}
+
+div.suti-admin-container .serversettings--wide {
+  width: 50%;
+}
+
+.suti-display {
+  margin-bottom: base.$marginM;
+
+  .rollup-button {
+    span {
+      text-transform: uppercase;
+    }
+  }
+
+  .form-grid, .checkbox-wrapper {
+    border: none;
+  }
+
+  .suti-display--error {
+    color: colors.$negative;
+  }
+}
+
+.view-with-download {
+  .download {
+    white-space: nowrap;
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    a:hover > span {
+      text-decoration: underline;
+    }
+  }
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+
+  i {
+    margin-left: 1px;
+    margin-right: 1px;
+    cursor: default;
+  }
+}
+
+th.full-width-column {
+  width: 100%;
+}
+
+@for $i from 1 through 10 {
+  th.column--#{$i}0 {
+    width: 10% * $i;
+  }
+}
+
+
+.form-table--waste {
+  @include no-row-hover;
+
+  table {
+    width: 100%;
+  }
+
+  .form-input {
+    height: initial;
+  }
+
+  th {
+    white-space: nowrap;
+    @media (max-width: 890px) {
+      white-space: initial;
+    }
+  }
+
+  td.action-column {
+    text-align: center;
+
+    i {
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+  }
+
+  tfoot {
+    height: initial;
+    font-size: 16px;
+
+    tr {
+      border: none;
+    }
+
+    .footer-sum--total {
+      text-indent: 10px;
+      font-weight: bold;
+    }
+
+    .footer-sum--result {
+      //color: $gray119;
+      white-space: nowrap;
+    }
+
+    .footer-sum--error {
+      color: theme.$red-dark;
+    }
+
+    .td-left {
+      text-indent: 10px;
+    }
+
+    .td-center {
+      text-align: center;
+    }
+  }
+}
+
+.form-table--waste.waste-report-table {
+  th {
+    white-space: initial;
+  }
+}
+
+select.waste-unit-select {
+  font-size: 16px;
+  width: 5em;
+}
+
+.batch-container {
+  margin-bottom: 10px;
+}
+
+.batch-password > input#batch-password {
+  width: 20em;
+}
+
+.attachment-batch-table {
+  @include no-row-hover;
+
+  td {
+    word-break: break-all;
+  }
+
+  .td-center {
+    text-align: center;
+
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
+
+  input {
+    vertical-align: middle;
+  }
+
+  i.icon-spin.lupicon-refresh {
+    color: colors.$gray153;
+  }
+
+  .batch-autocomplete {
+    @include inputs.autocomplete(attachment-type-autocomplete);
+  }
+
+  .batch-drawing {
+    max-width: 4em;
+  }
+
+  tfoot {
+    > tr {
+      border: none;
+
+      > td {
+        padding: 0;
+        word-break: normal;
+
+        a.link-btn {
+          white-space: normal;
+          text-align: center;
+        }
+      }
+    }
+  }
+
+  .fill-pin {
+    position: relative;
+    display: inline-block;
+
+    icon-button.fill-down {
+      position: absolute;
+      right: 0;
+      bottom: 100%;
+      z-index: 100;
+
+      button {
+        margin-bottom: 1px;
+        max-height: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  tr:nth-child(4n+3),
+  tr:nth-child(4n+4) {
+    background: $tr-color-even;
+  }
+
+  tr:nth-child(4n+1),
+  tr:nth-child(4n+2) {
+    background: #ffffff;
+
+    &:hover {
+      background: #ffffff;
+    }
+  }
+
+  tr.file {
+    border-bottom: 0;
+  }
+
+  tr.metadata {
+    border-top: 0;
+  }
+}
+
+div.handler-roles-container {
+  margin-bottom: base.$marginL;
+
+  table.handler-roles {
+    margin-top: base.$marginL;
+    margin-bottom: base.$marginS;
+    @include no-row-hover;
+
+    input {
+      width: 80%;
+    }
+
+    i.lupicon-undo {
+      cursor: pointer;
+    }
+  }
+
+  div.handler-role-warning {
+    text-align: center;
+    border: 1px solid colors.$negative;
+    color: colors.$negative;
+    width: 100%;
+    min-height: buttons.$btn-height;
+    line-height: buttons.$btn-height;
+    font-size: 16px;
+  }
+}
+
+.tabby {
+  display: table;
+  width: 100%;
+  margin: {
+    top: base.$marginS;
+    bottom: base.$marginS;
+  }
+
+  .tabby__row {
+    display: table-row;
+    width: 100%;
+
+    .tabby__cell {
+      display: table-cell;
+      padding: {
+        top: base.$marginS;
+        bottom: base.$marginS;
+        left: 2 * base.$marginS;
+        right: 0;
+      }
+      vertical-align: middle;
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &.tabby--top {
+        vertical-align: top;
+      }
+    }
+  }
+}
+
+@each $i in 10, 20, 25, 33, 40, 50, 75, 80, 90, 100 {
+  .tabby--#{$i} {
+    width: $i * 1%;
+  }
+}
+
+table.company-report-table {
+  width: 45%;
+  margin-top: 10px;
+}
+
+td.users-table-actions {
+  white-space: nowrap;
+
+  i {
+    pointer-events: none;
+  }
+
+  span {
+    pointer-events: none;
+  }
+
+  button:first-child {
+    margin-right: 12px;
+  }
+}
+
+div.dictionary {
+  margin-bottom: base.$marginL;
+
+  .tabby {
+    margin-bottom: base.$marginL;
+  }
+
+  .tabby__row:nth-child(odd) {
+    background-color: $tr-color-even;
+  }
+
+  .tabby__row.tabby--white {
+    background-color: white;
+  }
+
+  .tabby > .tabby__row > .tabby__cell {
+    padding: {
+      left: 1em;
+      right: 1em;
+      top: .5em;
+      bottom: .5em;
+    }
+  }
+
+  .tabby__row.dictionary--header {
+    background-color: colors.$gray221;
+    font-weight: bold;
+  }
+
+  .tabby__cell.dictionary--action {
+    text-align: center;
+  }
+
+  input {
+    width: 80%;
+  }
+
+  div.dictionary--fixed {
+    white-space: nowrap;
+  }
+  &.no-gap {
+    margin-bottom: 0;
+    .tabby {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.huoneistot-table {
+  padding-top: base.$marginS;
+
+  .checkbox-label:before {
+    margin-right: 0 !important;
+  }
+
+  .readonly {
+    color: grey;
+  }
+
+  .checkbox-wrapper {
+    display: block;
+  }
+
+  .checkbox-label {
+    text-align: center;
+  }
+
+  .form-input.tiny {
+    width: frameless.$cols1 !important;
+  }
+
+  th {
+    span {
+      font-size: 14px;
+    }
+  }
+
+  .form-label {
+    display: inline;
+    width: initial;
+    vertical-align: initial;
+    font-weight: bold;
+  }
+
+  .checkbox-wrapper {
+    border: none;
+  }
+
+  .dropdown {
+    height: 30px;
+    min-width: 140px;
+    lineheight: default;
+  }
+
+  input[type=text] {
+    height: 26px;
+    min-width: 32px;
+  }
+
+
+  // .err {
+  //   color: red !important;
+  //   border-color: red !important;
+  //   border-width: 1px !important;
+  //   border-radius: 1px !important;
+  // }
+  // .warn {
+  //   border-color: red !important;
+  //   border-width: 1px !important;
+  //   border-radius: 0px !important;
+  // }
+  // .tip {
+  //   border-color: lighten($lp-orange, 10%);
+  //   border-width: 1px;
+  // }
+}
+
+tr.empty {
+  border: none !important;
+
+  td {
+    height: 10px !important;
+  }
+}

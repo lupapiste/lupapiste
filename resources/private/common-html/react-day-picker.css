@@ -1,0 +1,48 @@
+/* React-day-picker
+   Tune styles a bit closer to v7 */
+.rdp-root {
+  --rdp-day-height: 40px;
+  --rdp-day-width: 40px;
+  --rdp-day_button-height: 38px;
+  --rdp-day_button-width: 38px;
+
+  --rdp-accent-color: var(--ui-blue-60);
+  --rdp-today-color: var(--ui-red-110);
+  --rdp-weekday-opacity: 1;
+}
+
+.rdp-day_button {
+  &:hover {
+    background-color: var(--ui-blue-10);
+  }
+}
+
+.rdp-today {
+  .rdp-day_button {
+    font-weight: bold;
+  }
+}
+
+.rdp-selected {
+  .rdp-day_button {
+    border: none;
+    background-color: var(--rdp-accent-color);
+    color: var(--ui-white);
+    font-weight: normal;
+  }
+}
+
+.rdp-month_caption {
+  font-weight: normal;
+}
+
+.rdp-week_number {
+  padding-right: 8px;
+  border-right: 1px solid var(--ui-gray-221);
+  color: var(--ui-gray-102);
+}
+
+.rdp-weekday {
+  color: var(--ui-gray-102);
+}
+

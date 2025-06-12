@@ -1,0 +1,30 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="create-scope-template">
+<div class="content">
+  <label class="form-label">Hakemustyyppi</label>
+  <select data-bind="options: permitTypes,
+                     optionsText: _.partial(permitTypeLoc),
+                     value: permitType"></select>
+  <label class="form-label">Kunta</label>
+  <div data-bind="component: {name: 'autocomplete',
+                              params: {options: municipalities,
+                                       selectedOption: municipality}}"></div>
+  <div style="margin-top: 1em"><label class="form-label">
+    <input type="checkbox" data-bind="checked: applicationEnabled" class="form-input">
+    Hakemukset p&auml;&auml;ll&auml;
+  </label></div>
+  <div><label class="form-label">
+    <input type="checkbox" data-bind="checked: infoRequests" class="form-input">
+    Neuvontapyynn&ouml;t p&auml;&auml;ll&auml;</label></div>
+  <div><label class="form-label">
+    <input type="checkbox" data-bind="checked: openInfoRequests">
+    Avoin neuvontapyynt&ouml; p&auml;&auml;ll&auml;</label></div>
+  <label class="form-label">S&auml;hk&ouml;postiosoite avoimille neuvontapyynn&ouml;ille</label>
+  <input type="text" data-bind="value: openInfoRequestEmail">
+  <label class="form-label">Palvelu avataan</label>
+  <input type="text" data-bind="datepicker: opening">
+
+  <div data-bind="component: {name: 'submit-button-group',
+                              params: { submit: saveScope,
+                                        submitTitle: 'Tallenna'}}"></div>
+</div>
+</script>

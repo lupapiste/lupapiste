@@ -1,0 +1,320 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:fi
+    "Kokonaishiilijalanjäljen raja-arvo saa ylittyä enintään viisi prosenttia, jos raja-arvon alittavan uuden rakennuksen suunnittelu ja toteuttaminen on erityisen vaikeaa"},
+   :codeValue "01",
+   :created "2025-09-30T13:23:41.631Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01/members/",
+   :modified "2025-09-30T13:23:41.631Z",
+   :status "VALID",
+   :id "bc853016-ff7c-4901-bebf-d75f2c84c2f7",
+   :statusModified "2025-09-30T13:23:41.631Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Rakennuksen ominaispiirteiden takia"},
+   :codeValue "11",
+   :created "2025-09-30T13:23:41.651Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/11/members/",
+   :modified "2025-09-30T13:23:41.651Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Kokonaishiilijalanjäljen raja-arvo saa ylittyä enintään viisi prosenttia, jos raja-arvon alittavan uuden rakennuksen suunnittelu ja toteuttaminen on erityisen vaikeaa"},
+    :codeValue "01",
+    :created "2025-09-30T13:23:41.631Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01/members/",
+    :modified "2025-09-30T13:23:41.631Z",
+    :status "VALID",
+    :id "bc853016-ff7c-4901-bebf-d75f2c84c2f7",
+    :statusModified "2025-09-30T13:23:41.631Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "974fa4ec-c593-470f-ba9f-2b879329025f",
+   :statusModified "2025-09-30T13:23:41.651Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/11",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/11",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi "Rakennuksen käyttötarkoituksen ominaispiirteiden takia"},
+   :codeValue "12",
+   :created "2025-09-30T13:23:41.659Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/12/members/",
+   :modified "2025-09-30T13:23:41.659Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Kokonaishiilijalanjäljen raja-arvo saa ylittyä enintään viisi prosenttia, jos raja-arvon alittavan uuden rakennuksen suunnittelu ja toteuttaminen on erityisen vaikeaa"},
+    :codeValue "01",
+    :created "2025-09-30T13:23:41.631Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01/members/",
+    :modified "2025-09-30T13:23:41.631Z",
+    :status "VALID",
+    :id "bc853016-ff7c-4901-bebf-d75f2c84c2f7",
+    :statusModified "2025-09-30T13:23:41.631Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "dec4ed09-f991-4bd9-a47d-2db4fb9194ab",
+   :statusModified "2025-09-30T13:23:41.659Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/12",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/12",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi "Rakennuksen sijaintipaikan ominaispiirteiden takia"},
+   :codeValue "13",
+   :created "2025-09-30T13:23:41.667Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/13/members/",
+   :modified "2025-09-30T13:23:41.667Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Kokonaishiilijalanjäljen raja-arvo saa ylittyä enintään viisi prosenttia, jos raja-arvon alittavan uuden rakennuksen suunnittelu ja toteuttaminen on erityisen vaikeaa"},
+    :codeValue "01",
+    :created "2025-09-30T13:23:41.631Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01/members/",
+    :modified "2025-09-30T13:23:41.631Z",
+    :status "VALID",
+    :id "bc853016-ff7c-4901-bebf-d75f2c84c2f7",
+    :statusModified "2025-09-30T13:23:41.631Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "9c77fe6e-4863-435c-b4a0-b7f608fce2da",
+   :statusModified "2025-09-30T13:23:41.667Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/13",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/13",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi
+    "Sellaisten kaavamääräysten noudattamisen takia, jotka nostavat merkittävästi rakennuksen hiilijalanjälkeä"},
+   :codeValue "14",
+   :created "2025-09-30T13:23:41.675Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/14/members/",
+   :modified "2025-09-30T13:23:41.675Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Kokonaishiilijalanjäljen raja-arvo saa ylittyä enintään viisi prosenttia, jos raja-arvon alittavan uuden rakennuksen suunnittelu ja toteuttaminen on erityisen vaikeaa"},
+    :codeValue "01",
+    :created "2025-09-30T13:23:41.631Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01/members/",
+    :modified "2025-09-30T13:23:41.631Z",
+    :status "VALID",
+    :id "bc853016-ff7c-4901-bebf-d75f2c84c2f7",
+    :statusModified "2025-09-30T13:23:41.631Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "ce95b72c-6ec1-44c9-a296-5346d4aa3799",
+   :statusModified "2025-09-30T13:23:41.675Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/14",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/14",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi
+    "Tavanomaisesta rakentamisesta poikkeavien, pitkäikäisyyttä edistävien elinkaariominaisuuksien toteuttamisen takia"},
+   :codeValue "15",
+   :created "2025-09-30T13:23:41.683Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/15/members/",
+   :modified "2025-09-30T13:23:41.683Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Kokonaishiilijalanjäljen raja-arvo saa ylittyä enintään viisi prosenttia, jos raja-arvon alittavan uuden rakennuksen suunnittelu ja toteuttaminen on erityisen vaikeaa"},
+    :codeValue "01",
+    :created "2025-09-30T13:23:41.631Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01/members/",
+    :modified "2025-09-30T13:23:41.631Z",
+    :status "VALID",
+    :id "bc853016-ff7c-4901-bebf-d75f2c84c2f7",
+    :statusModified "2025-09-30T13:23:41.631Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "0d70bec0-6c8f-443b-9c34-76a24228fb19",
+   :statusModified "2025-09-30T13:23:41.683Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/15",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/15",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi
+    "Raja-arvo saa ylittyä seuraavassa erityistilanteessa sen verran, kuin kyseisen erityistilanteen takia aiheutuu välttämätöntä lisäystä hiilijalanjälkeen"},
+   :codeValue "02",
+   :created "2025-09-30T13:23:41.690Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/02/members/",
+   :modified "2025-09-30T13:23:41.690Z",
+   :status "VALID",
+   :id "2b22656b-52a8-427a-9329-d2b1a10b0230",
+   :statusModified "2025-09-30T13:23:41.690Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/02",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi
+    "Raja-arvon alittaminen on erityisen vaikeaa rakennuksen korkeuden vuoksi"},
+   :codeValue "21",
+   :created "2025-09-30T13:23:41.697Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/21/members/",
+   :modified "2025-09-30T13:23:41.697Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Raja-arvo saa ylittyä seuraavassa erityistilanteessa sen verran, kuin kyseisen erityistilanteen takia aiheutuu välttämätöntä lisäystä hiilijalanjälkeen"},
+    :codeValue "02",
+    :created "2025-09-30T13:23:41.690Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/02/members/",
+    :modified "2025-09-30T13:23:41.690Z",
+    :status "VALID",
+    :id "2b22656b-52a8-427a-9329-d2b1a10b0230",
+    :statusModified "2025-09-30T13:23:41.690Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/02",
+    :order 7,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "7a9447a3-b295-4c93-8955-131f44fccf48",
+   :statusModified "2025-09-30T13:23:41.697Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/21",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/21",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi
+    "Kantavien ja jäykistävien rakenteiden suunnittelu ja toteuttaminen siten, että raja-arvo alittuu, on erityisen vaikeaa poikkeuksellisen vaativan sijaintipaikan vuoksi"},
+   :codeValue "22",
+   :created "2025-09-30T13:23:41.705Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/22/members/",
+   :modified "2025-09-30T13:23:41.705Z",
+   :broaderCode
+   {:prefLabel
+    {:fi
+     "Raja-arvo saa ylittyä seuraavassa erityistilanteessa sen verran, kuin kyseisen erityistilanteen takia aiheutuu välttämätöntä lisäystä hiilijalanjälkeen"},
+    :codeValue "02",
+    :created "2025-09-30T13:23:41.690Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/02/members/",
+    :modified "2025-09-30T13:23:41.690Z",
+    :status "VALID",
+    :id "2b22656b-52a8-427a-9329-d2b1a10b0230",
+    :statusModified "2025-09-30T13:23:41.690Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/02",
+    :order 7,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "529e2127-faf0-4a0c-9b4f-da465accc93f",
+   :statusModified "2025-09-30T13:23:41.705Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/is-raja-arvoista-poikkeamisen-laji/codes/22",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/is-raja-arvoista-poikkeamisen-laji/code/22",
+   :hierarchyLevel 2}),
+ :modified "2025-11-10T10:16:34.917Z"}

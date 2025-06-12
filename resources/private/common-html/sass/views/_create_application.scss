@@ -1,0 +1,303 @@
+@use "sass:color";
+@use "../partials/base";
+@use "../partials/colors";
+@use "../partials/frameless";
+@use "../partials/lupicons";
+@use "../partials/mixins";
+@use "../partials/theme";
+@use "../partials/typography";
+@use "application";
+
+.ui-autocomplete-loading {
+  background: white url("/lp-static/img/ajax-loader-16.gif") right center no-repeat;
+}
+
+.create-application-search-box {
+  background: theme.$lp-light-grey;
+  padding: base.$marginL;
+  margin-bottom: base.$marginM;
+  min-height: base.$baseline*4;
+  p {
+    margin-bottom: base.$marginM;
+    padding: 0;
+    width: 80%;
+  }
+
+}
+
+.map-select-info {
+  background: colors.$white;
+  position: relative;
+  min-height: 580px - base.$marginM;
+  h2 {
+    font-size: base.$baseline * 0.75;
+    font-family: typography.$font-heading;
+    font-weight: normal;
+    margin-bottom: base.$marginS;
+    text-transform: uppercase;
+  }
+  p {
+    margin-bottom: 24px;
+    width: 100%;
+  }
+  button {
+    margin-bottom: 0px;
+    position: absolute;
+    bottom: base.$marginM;
+    width: 80%;
+    left: 12px;
+    span {
+      width: 100%;
+    }
+  }
+  input {
+    width: 90%;
+  }
+  .use-manual-entry {
+    color: colors.get-signal( "red" );
+    margin-bottom: 15px;
+  }
+  .warning-message {
+    color: colors.$negative;
+    margin-bottom: 15px;
+  }
+  .checkbox-wrapper {
+    border: none;
+  }
+}
+
+.create-application-map {
+  position: relative;
+  background: white;
+}
+
+.create-info-text {
+}
+
+.create-content {
+  width: 75%;
+  float: right;
+}
+
+
+
+.more-prev-app-info-needed-desc {
+  color: colors.get-signal( "red" );
+  margin-top: base.$marginL;
+  margin-bottom: 0;
+}
+
+
+
+
+.address-search {
+  width: frameless.$cols4;
+  display: inline-block;
+  //height: 25px;
+  vertical-align: middle;
+}
+
+.create-application-details {
+  width: 800px;
+  height: 200px;
+}
+
+.create-application-form {
+  display: inline-block;
+}
+
+.create-application-actions {
+  width: frameless.$cols4;
+  display: inline-block;
+  float: right;
+  vertical-align: bottom;
+}
+
+.btn-create-application {
+  line-height: 60px;
+}
+
+.label-container {
+  display: inline-block;
+  width: frameless.$cols2;
+}
+
+.top-marginM {
+  margin-top: base.$marginM;
+}
+.top-marginL {
+  margin-top: base.$marginL*2;
+}
+.bottom-marginM {
+  margin-bottom: base.$marginM !important;
+}
+
+.bottom-marginL {
+  margin-bottom: base.$marginL !important;
+}
+
+#popup-id_close {
+  @include mixins.spite-bg;
+  background-position: 0px -4100px;
+  top: 4px !important;
+  right: 4px !important;
+}
+#popup-id_contentDiv {
+  padding: 0;
+  width: 95% !important;
+  overflow: hidden;
+
+}
+#popup-id_GroupDiv {
+  padding: {
+    left: 16px;
+    top: 8px;
+    bottom: 8px;
+    right: 8px;
+  }
+}
+#popup-id {
+  background: white;
+  color: black;
+  background: rgba(255,255,255, 0.95)!important;
+  overflow: visible !important;
+  box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
+  border: 1px solid theme.$lp-dark-grey;
+  p {
+  //color: black;
+  }
+  &:before {
+    content: " ";
+    display: block;
+    position: absolute;
+    left: -51px;
+    top: 330px;
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 51px solid theme.$lp-dark-grey;
+    border-bottom: 25px solid transparent;
+  }
+  &:after {
+    content: " ";
+    display: block;
+    position: absolute;
+    left: -50px;
+    top: 330px;
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 50px solid rgba(255, 255, 255, 0.95);
+    border-bottom: 25px solid transparent;
+    z-index: 2;
+  }
+}
+
+.create-help.lupicon-circle-question {
+  vertical-align: top;
+  &:before {
+    vertical-align: top;
+    font-size: 2 * lupicons.$lupicon-size;
+  }
+}
+
+.copy-selection-wrapper {
+  margin-top: base.$marginS;
+  margin-bottom: base.$marginM;
+}
+
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid colors.$positive;
+  background-color: theme.$input-disabled-background-color;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
+
+  [class^="lupicon-"].right,
+  [class*="lupicon-"].right {
+    margin-right: 6px;
+    float: right;
+  }
+}
+
+.copy-auth-selection-text {
+  margin-bottom: base.$marginM;
+}
+
+.copy-phase-buttons {
+  margin-top: base.$marginL;
+}
+
+.copy-state-indication {
+  margin: 0 0 base.$marginM 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+
+  div {
+    height: 24px;
+    .active-phase {
+      color: white;
+      background-color: theme.$green-dark;
+      &:after {
+        border-left: 11px solid theme.$green-dark;
+      }
+    }
+
+    .completed-phase {
+      color: white;
+      background-color: theme.$gray-link;
+      &:after {
+        border-left: 11px solid theme.$gray-link;
+      }
+    }
+
+    span {
+      background-color: application.$app-gray-light;
+      color: color.adjust(theme.$lp-light-grey, $lightness: -40%);
+      position: relative;
+      padding: 4px 8px 4px 24px;
+      display: inline-block;
+      margin: 0px -4px 0 0;
+      border: none;
+      &:first-child {
+        padding: 4px 8px 4px 8px;
+      }
+      &:last-child:after {
+        border-left: none;
+      }
+
+      &:after {
+        display: inline-block;
+        position: absolute;
+        content: " ";
+        width: 0;
+        height: 0;
+        top: -1px;
+        right: -9px;
+        border-top: 17px solid transparent;
+        border-left: 11px solid application.$app-gray-light;
+        border-bottom: 17px solid transparent;
+        z-index: 1;
+      }
+    }
+  }
+}
+
+.property-formation-app-location-info {
+  margin-top: base.$marginL;
+  font-size: 20px;
+}
+
+form.previous-permit-form {
+  max-width: 50%;
+  div.previous-permit-form__entry,
+  div.help-box {
+    margin-bottom: base.$marginM;
+  }
+}

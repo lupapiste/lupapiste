@@ -1,0 +1,5 @@
+{:properties {:id          {:type "keyword"}
+              :created     {:type "date" :format "epoch_millis"}
+              :modified    {:type "date" :format "epoch_millis"}
+              :text-search {:type "text"}
+              :address     {:type "text"}}}

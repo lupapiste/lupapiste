@@ -1,0 +1,117 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Personnel lift", :fi "Henkilöhissi", :sv "Personhiss"},
+   :codeValue "01",
+   :created "2023-01-04T13:32:09.194Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/01/members/",
+   :modified "2024-11-20T14:46:02.667Z",
+   :status "VALID",
+   :id "2889fda8-7591-47f9-8d63-9f748dcf2908",
+   :statusModified "2023-01-04T13:32:09.194Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/hissi/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Vertical lift", :fi "Pystyhissi", :sv "Vertikalhiss"},
+   :codeValue "02",
+   :created "2023-01-04T13:32:25.473Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/02/members/",
+   :modified "2024-11-20T14:46:02.689Z",
+   :status "VALID",
+   :id "7d00669a-35d0-473a-b3bf-a960db769bcf",
+   :statusModified "2023-01-04T13:32:25.473Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/02",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/hissi/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Stair lift", :fi "Porrashissi", :sv "Trapphiss"},
+   :codeValue "03",
+   :created "2023-01-04T13:32:41.417Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/03/members/",
+   :modified "2024-11-20T14:46:02.709Z",
+   :status "VALID",
+   :id "69131fca-9e78-46b3-93c1-7c94840f9daa",
+   :statusModified "2023-01-04T13:32:41.417Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/03",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/hissi/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Cargo lift", :fi "Tavarahissi", :sv "Varuhiss"},
+   :codeValue "04",
+   :created "2023-01-04T13:32:57.241Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/04/members/",
+   :modified "2024-11-20T14:46:02.726Z",
+   :status "VALID",
+   :id "60d7e3a7-ed76-4ac9-a0dc-7fd50e010cc6",
+   :statusModified "2023-01-04T13:32:57.241Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/04",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/hissi/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-01-04T13:33:44.162Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/99/members/",
+   :modified "2024-11-20T14:46:02.742Z",
+   :status "VALID",
+   :id "14ce8a12-7b42-4caf-9c04-d4f55fcabe1e",
+   :statusModified "2023-01-04T13:33:44.162Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/hissi/codes/99",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/hissi/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:49:04.998Z"}

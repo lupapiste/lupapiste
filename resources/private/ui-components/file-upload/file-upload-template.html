@@ -1,0 +1,19 @@
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="file-upload-template">
+  <div>
+    <ul data-bind="foreach: upload.files" class="upload-files">
+      <li>
+        <span  data-bind="text: filename"></span>
+        <span class="upload-files__size" data-bind="size: size"></span>
+        <button class="tertiary"
+                data-bind="ltext: 'remove',
+                           visible: $parent.removeVisible,
+                           click: $parent.upload.removeFile,
+                           testId: 'remove-file-' + $index()"></button>
+      </li>
+    </ul>
+    <span data-bind="component: {name: 'upload-button', params: buttonOptions}"></span>
+    <!-- ko template: { nodes: $componentTemplateNodes} --><!-- /ko -->
+  </div>
+</script>

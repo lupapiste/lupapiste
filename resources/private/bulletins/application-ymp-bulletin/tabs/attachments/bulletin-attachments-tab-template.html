@@ -1,0 +1,11 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="bulletin-attachments-tab-template">
+      <h3 data-bind="ltext: 'application.tabAttachments'"></h3>
+
+        <!-- ko if: attachments().length > 0 -->
+        <div data-bind="template: {name: 'bulletin-attachments-table-template',
+                                   data: attachments}"></div>
+        <!-- /ko -->
+        <!-- ko if: attachments().length == 0 -->
+        <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="bulletin-attachments-empty"></i>
+        <!-- /ko -->
+</script>

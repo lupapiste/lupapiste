@@ -1,0 +1,90 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "Addition", :fi "Lisäys", :sv "Tillägg"},
+   :codeValue "01",
+   :created "2022-10-17T15:53:18.436Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/huoneistonmuutoksenlaji/codes/01/members/",
+   :modified "2023-12-04T11:51:37.117Z",
+   :status "VALID",
+   :id "56dcaf9d-d5ec-4156-975e-7f43cb719802",
+   :statusModified "2022-10-17T15:53:18.436Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/huoneistonmuutoksenlaji/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/huoneistonmuutoksenlaji/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Change", :fi "Muutos", :sv "Ändring"},
+   :codeValue "02",
+   :created "2022-10-17T15:53:33.031Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/huoneistonmuutoksenlaji/codes/02/members/",
+   :modified "2023-12-04T11:51:37.132Z",
+   :status "VALID",
+   :id "accf79ab-60f5-4c6c-8669-268ef2928c47",
+   :statusModified "2022-10-17T15:53:33.031Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/huoneistonmuutoksenlaji/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/huoneistonmuutoksenlaji/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Removal", :fi "Poisto", :sv "Borttagning"},
+   :codeValue "03",
+   :created "2022-10-17T15:53:45.361Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/huoneistonmuutoksenlaji/codes/03/members/",
+   :modified "2023-12-04T11:51:37.140Z",
+   :status "VALID",
+   :id "4039f4a5-8ab5-48ea-b94a-ac14aad0fbde",
+   :statusModified "2022-10-17T15:53:45.361Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/huoneistonmuutoksenlaji/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/huoneistonmuutoksenlaji/code/03",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:48:12.511Z"}

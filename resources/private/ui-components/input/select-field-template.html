@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="select-field-template">
+  <div class="field--vertical">
+    <label class="lux field--block"
+           data-bind="text: label, attr: {'for': id}"></label>
+    <select class="lux field--block"
+            data-bind="options: options,
+                       optionsText: optionsText,
+                       optionsValue: optionsValue,
+                       optionsCaption: optionsCaption,
+                       value: value,
+                       disable: disable,
+                       valueAllowUnset: valueAllowUnset,
+                       attr: {id: id, name: id}"></select>
+  </div>
+</script>

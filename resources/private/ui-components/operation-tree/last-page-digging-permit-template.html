@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="last-page-digging-permit-template">
+  <div>
+    <div class="gap--t1 gap--b1"
+         data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
+
+    <div class="last-page--create-buttons">
+      <icon-button params="click: createDiggingPermit,
+                           waiting: processing,
+                           testId: 'create-digging-permit',
+                           icon: 'circle-plus',
+                           ltext: 'application.createDiggingPermit'"></icon-button>
+    </div>
+
+  </div>
+</script>

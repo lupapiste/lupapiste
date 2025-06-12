@@ -1,0 +1,184 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Telecommunication cable",
+    :fi "Tietoliikennekaapeli",
+    :sv "Datakommunikationskabel"},
+   :codeValue "01",
+   :created "2023-01-03T15:55:59.386Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/01/members/",
+   :modified "2023-12-04T11:23:10.795Z",
+   :status "VALID",
+   :id "82afde03-fd01-4152-bd45-f9ffc6070e01",
+   :statusModified "2023-01-03T15:55:59.386Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Household water", :fi "Talousvesi", :sv "Hushållsvatten"},
+   :codeValue "02",
+   :created "2023-01-03T15:55:59.416Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/02/members/",
+   :modified "2023-12-04T11:23:18.185Z",
+   :status "VALID",
+   :id "2a79bf81-97a1-450c-afea-01e71ef4fced",
+   :statusModified "2023-01-03T15:55:59.416Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Wastewater", :fi "Jätevesi", :sv "Avloppsvatten"},
+   :codeValue "03",
+   :created "2023-01-03T15:55:59.423Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/03/members/",
+   :modified "2023-12-04T11:23:24.709Z",
+   :status "VALID",
+   :id "213557b1-1e7f-45a9-8f46-1b2ba0e406db",
+   :statusModified "2023-01-03T15:55:59.423Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Electricity", :fi "Sähkö", :sv "El"},
+   :codeValue "04",
+   :created "2023-01-03T15:55:59.431Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/04/members/",
+   :modified "2023-12-04T11:23:31.718Z",
+   :status "VALID",
+   :id "c85f2ec6-842c-4408-a0fd-fcf3275eef64",
+   :statusModified "2023-01-03T15:55:59.431Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "District heating", :fi "Kaukolämpö", :sv "Fjärrvärme"},
+   :codeValue "05",
+   :created "2023-01-03T15:55:59.438Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/05/members/",
+   :modified "2023-12-04T11:23:39.413Z",
+   :status "VALID",
+   :id "a7f7165b-f9c2-421f-b31a-478a51a8f83c",
+   :statusModified "2023-01-03T15:55:59.438Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Natural gas", :fi "Kaasu", :sv "Gas"},
+   :codeValue "06",
+   :created "2023-01-03T15:55:59.444Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/06/members/",
+   :modified "2023-12-04T11:23:46.273Z",
+   :status "VALID",
+   :id "ecabe5be-4443-4b2c-aafa-5b39200ae541",
+   :statusModified "2023-01-03T15:55:59.444Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Stormwater", :fi "Hulevesi", :sv "Dagvatten"},
+   :codeValue "07",
+   :created "2023-01-03T15:55:59.451Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/07/members/",
+   :modified "2023-12-04T11:23:53.018Z",
+   :status "VALID",
+   :id "ae00379d-38b8-4fbe-ba9f-50906ad7b454",
+   :statusModified "2023-01-03T15:55:59.451Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/07",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "District cooling", :fi "Kaukojäähdytys", :sv "Fjärrkyla"},
+   :codeValue "08",
+   :created "2023-01-03T15:55:59.457Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/08/members/",
+   :modified "2023-12-04T11:24:01.737Z",
+   :status "VALID",
+   :id "aa910cbc-ca73-45c1-b946-234c3a4cdac5",
+   :statusModified "2023-01-03T15:55:59.457Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/08",
+   :order 8,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/08",
+   :hierarchyLevel 1}
+  {:description
+   {:en "The term ‘sprinkler water’ is also used.",
+    :fi "Käytetään myös termiä sprinklervesi.",
+    :sv "Termen sprinklervatten används också."},
+   :prefLabel
+   {:en "Fire-fighting water",
+    :fi "Sammutusvesi",
+    :sv "Släckningsvatten"},
+   :codeValue "09",
+   :created "2023-01-03T15:55:59.463Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/09/members/",
+   :modified "2023-12-04T11:24:09.151Z",
+   :status "VALID",
+   :id "d6ddf60a-78a1-4d89-bf4b-949b73b4ff2f",
+   :statusModified "2023-01-03T15:55:59.463Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/verkliit/codes/09",
+   :order 9,
+   :uri "http://uri.suomi.fi/codelist/rytj/verkliit/code/09",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:53:33.819Z"}

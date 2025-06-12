@@ -1,0 +1,374 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "District heating",
+    :fi "Kauko- tai aluelämpö",
+    :sv "Fjärr- eller regionvärme"},
+   :codeValue "01",
+   :created "2023-01-04T10:01:22.871Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/01/members/",
+   :modified "2023-12-01T13:40:05.185Z",
+   :status "VALID",
+   :id "9b50bafb-4667-48f6-9e94-4b721ac1513a",
+   :statusModified "2023-01-04T10:01:22.871Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Light fuel oil",
+    :fi "Kevyt polttoöljy",
+    :sv "Lätt brännolja"},
+   :codeValue "02",
+   :created "2023-01-04T10:01:22.894Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/02/members/",
+   :modified "2023-12-01T13:40:05.202Z",
+   :status "VALID",
+   :id "95a6b982-7e16-41a0-a474-b339cf646075",
+   :statusModified "2023-01-04T10:01:22.894Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Heavy fuel oil",
+    :fi "Raskas polttoöljy",
+    :sv "Tung brännolja"},
+   :codeValue "03",
+   :created "2023-01-04T10:01:22.902Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/03/members/",
+   :modified "2023-12-01T13:40:05.209Z",
+   :status "VALID",
+   :id "ce91753c-2d6f-4822-89bf-1024541bc665",
+   :statusModified "2023-01-04T10:01:22.902Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Electricity", :fi "Sähkö", :sv "El"},
+   :codeValue "04",
+   :created "2023-01-04T10:01:22.910Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/04/members/",
+   :modified "2023-12-01T13:40:05.216Z",
+   :status "VALID",
+   :id "24120c0b-3090-46cc-824b-ddfb8777eca9",
+   :statusModified "2023-01-04T10:01:22.910Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/04",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Natural gas", :fi "Kaasu", :sv "Gas"},
+   :codeValue "05",
+   :created "2023-01-04T10:01:22.917Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/05/members/",
+   :modified "2023-12-01T13:40:05.223Z",
+   :status "VALID",
+   :id "7d702ce4-3a9c-43de-8e0a-e4a711b6899c",
+   :statusModified "2023-01-04T10:01:22.917Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/05",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Coal", :fi "Kivihiili", :sv "Stenkol"},
+   :codeValue "06",
+   :created "2023-01-04T10:01:22.925Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/06/members/",
+   :modified "2023-12-01T13:40:05.230Z",
+   :status "VALID",
+   :id "0a642ecd-ad2d-42f9-b960-720791ebe958",
+   :statusModified "2023-01-04T10:01:22.925Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/06",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Wood", :fi "Puu", :sv "Ved"},
+   :codeValue "07",
+   :created "2023-01-04T10:01:22.932Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/07/members/",
+   :modified "2023-12-01T13:40:05.237Z",
+   :status "VALID",
+   :id "3d7b9435-f066-4180-92d5-97cf2109b92a",
+   :statusModified "2023-01-04T10:01:22.932Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/07",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Peat", :fi "Turve", :sv "Torv"},
+   :codeValue "08",
+   :created "2023-01-04T10:01:22.939Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/08/members/",
+   :modified "2023-12-01T13:40:05.244Z",
+   :status "VALID",
+   :id "39df80b6-e22d-483e-8d56-e11353bdf71c",
+   :statusModified "2023-01-04T10:01:22.939Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/08",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/08",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Geothermal heating, etc.",
+    :fi "Maalämpö tms.",
+    :sv "Jordvärme mm."},
+   :codeValue "09",
+   :created "2023-01-04T10:01:22.946Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/09/members/",
+   :modified "2023-12-01T13:40:05.250Z",
+   :status "VALID",
+   :id "1b7664b5-6412-4c04-ba23-736d54760bc8",
+   :statusModified "2023-01-04T10:01:22.946Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/09",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/09",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Solar energy", :fi "Aurinkoenergia", :sv "Solenergi"},
+   :codeValue "10",
+   :created "2023-01-04T10:01:22.961Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/10/members/",
+   :modified "2023-12-01T13:40:05.257Z",
+   :status "VALID",
+   :id "a8db7b8d-5317-4827-b934-2961b103c91c",
+   :statusModified "2023-01-04T10:01:22.961Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/10",
+   :order 10,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/10",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Heat pump", :fi "Lämpöpumppu", :sv "Värmepump"},
+   :codeValue "11",
+   :created "2023-01-04T10:01:22.968Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11/members/",
+   :modified "2023-12-01T13:40:05.264Z",
+   :status "VALID",
+   :id "1505d350-d1fa-4b15-858e-a5122451a965",
+   :statusModified "2023-01-04T10:01:22.968Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11",
+   :order 11,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/11",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Geothermal heat pump",
+    :fi "Maalämpöpumppu",
+    :sv "Jordvärmepump"},
+   :codeValue "1101",
+   :created "2023-01-04T10:01:22.974Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1101/members/",
+   :modified "2023-12-01T13:40:05.271Z",
+   :broaderCode
+   {:prefLabel {:en "Heat pump", :fi "Lämpöpumppu", :sv "Värmepump"},
+    :codeValue "11",
+    :created "2023-01-04T10:01:22.968Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11/members/",
+    :modified "2023-12-01T13:40:05.264Z",
+    :status "VALID",
+    :id "1505d350-d1fa-4b15-858e-a5122451a965",
+    :statusModified "2023-01-04T10:01:22.968Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11",
+    :order 11,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/11",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "accb4279-7027-4058-8906-a1d9b0c15e24",
+   :statusModified "2023-01-04T10:01:22.974Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1101",
+   :order 12,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/1101",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Air source heat pump",
+    :fi "Ilmalämpöpumppu",
+    :sv "Luftvärmepump"},
+   :codeValue "1102",
+   :created "2023-01-04T10:01:22.981Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1102/members/",
+   :modified "2023-12-01T13:40:05.277Z",
+   :broaderCode
+   {:prefLabel {:en "Heat pump", :fi "Lämpöpumppu", :sv "Värmepump"},
+    :codeValue "11",
+    :created "2023-01-04T10:01:22.968Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11/members/",
+    :modified "2023-12-01T13:40:05.264Z",
+    :status "VALID",
+    :id "1505d350-d1fa-4b15-858e-a5122451a965",
+    :statusModified "2023-01-04T10:01:22.968Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11",
+    :order 11,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/11",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "2563ba0a-233b-4186-8e59-ea8f97ef15eb",
+   :statusModified "2023-01-04T10:01:22.981Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1102",
+   :order 13,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/1102",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Exhaust air heat pump",
+    :fi "Poistoilmalämpöpumppu",
+    :sv "Frånluftsvärmepump"},
+   :codeValue "1103",
+   :created "2023-01-04T10:01:22.987Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1103/members/",
+   :modified "2023-12-01T13:40:05.283Z",
+   :broaderCode
+   {:prefLabel {:en "Heat pump", :fi "Lämpöpumppu", :sv "Värmepump"},
+    :codeValue "11",
+    :created "2023-01-04T10:01:22.968Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11/members/",
+    :modified "2023-12-01T13:40:05.264Z",
+    :status "VALID",
+    :id "1505d350-d1fa-4b15-858e-a5122451a965",
+    :statusModified "2023-01-04T10:01:22.968Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11",
+    :order 11,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/11",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "43d6b974-7545-4e05-82c1-bef152554611",
+   :statusModified "2023-01-04T10:01:22.987Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1103",
+   :order 14,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/1103",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Air-to-water heat pump",
+    :fi "Ilma-vesilämpöpumppu",
+    :sv "Luft-vattenvärmepump"},
+   :codeValue "1104",
+   :created "2023-01-04T10:01:22.993Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1104/members/",
+   :modified "2023-12-01T13:40:05.290Z",
+   :broaderCode
+   {:prefLabel {:en "Heat pump", :fi "Lämpöpumppu", :sv "Värmepump"},
+    :codeValue "11",
+    :created "2023-01-04T10:01:22.968Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11/members/",
+    :modified "2023-12-01T13:40:05.264Z",
+    :status "VALID",
+    :id "1505d350-d1fa-4b15-858e-a5122451a965",
+    :statusModified "2023-01-04T10:01:22.968Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/11",
+    :order 11,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/11",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "2e53ddb4-1ac9-4340-82bb-b3d40ff4a850",
+   :statusModified "2023-01-04T10:01:22.993Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/1104",
+   :order 15,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/1104",
+   :hierarchyLevel 2}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-01-04T10:01:22.999Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/99/members/",
+   :modified "2023-12-01T13:40:05.296Z",
+   :status "VALID",
+   :id "80d79e02-94ae-468c-b785-420906e9987f",
+   :statusModified "2023-01-04T10:01:22.999Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitysenergianlahde/codes/99",
+   :order 16,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lammitysenergianlahde/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:54:47.270Z"}

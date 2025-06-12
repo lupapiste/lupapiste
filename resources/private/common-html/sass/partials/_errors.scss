@@ -1,0 +1,27 @@
+@use "base";
+@use "theme";
+
+.context-error {
+  color: theme.$red-dark;
+  border: 1px solid theme.$red-dark;
+  border-radius: 3px;
+  padding: base.$marginS;
+  margin: base.$marginM 0
+}
+
+.error-message {
+  display: block;
+  margin-left: 5px;
+  font-style: italic;
+  color: theme.$red-dark;
+}
+
+.integration-error-dialog div.content.integration-error {
+  i {
+    float: left;
+    margin-right: base.$marginS;
+  }
+  p.dialog-desc {
+    display: inline-block;
+  }
+}

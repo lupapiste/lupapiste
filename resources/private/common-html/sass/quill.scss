@@ -1,0 +1,188 @@
+// Class definitions both for Quill editor and Quill tags. When
+// editing tag classes, keep in mind that the same definitions must be
+// copied to `docstore/src/sass/common/_quill.scss` as well. Likewise,
+// this file must be self-contained and not dependent on the outside
+// definitions (styles, colors, ...).
+
+// Container for string data that does not contain Quill tags.
+div.quill.string {
+  white-space: pre-wrap;
+}
+
+p.quill,
+ol.quill,
+ul.quill,
+pre.quill,
+blockquote.quill,
+h1.quill,
+h2.quill,
+h3.quill,
+h4.quill,
+h5.quill,
+h6.quill {
+  margin: 0;
+  padding: 0;
+  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+
+.quill.ql-align-center {
+  text-align: center;
+}
+
+.quill.ql-align-justify {
+  text-align: justify;
+}
+
+.quill.ql-align-right {
+  text-align: right;
+}
+
+blockquote.quill {
+  border-left: 4px solid #ccc;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding-left: 16px;
+}
+
+code.quill,
+pre.quill {
+  background-color: #f0f0f0;
+  border-radius: 3px;
+}
+.quill.pre {
+  white-space: pre-wrap;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding: 5px 10px;
+}
+
+code.quill {
+  font-size: 85%;
+  padding: 2px 4px;
+}
+
+ol.quill,
+ul.quill {
+  padding-left: 1.5em;
+}
+
+li.quill {
+  list-style-type: none;
+}
+
+li.quill::before {
+  display: inline-block;
+  white-space: nowrap;
+  width: 1.2em;
+}
+
+li.quill.ul::before {
+  content: "\2022";
+}
+
+li.quill.ol {
+  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+  counter-increment: list-0;
+}
+
+li.quill.ol::before {
+  content: counter(list-0, decimal) ". ";
+}
+
+li.quill.ol.ql-indent-1 {
+  counter-increment: list-1;
+}
+li.quill.ol.ql-indent-1:before {
+  content: counter(list-1, lower-alpha) ". ";
+}
+li.quill.ol.ql-indent-1 {
+  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+li.quill.ol.ql-indent-2 {
+  counter-increment: list-2;
+}
+li.quill.ol.ql-indent-2:before {
+  content: counter(list-2, lower-roman) ". ";
+}
+li.quill.ol.ql-indent-2 {
+  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+li.quill.ol.ql-indent-3 {
+  counter-increment: list-3;
+}
+li.quill.ol.ql-indent-3:before {
+  content: counter(list-3, decimal) ". ";
+}
+li.quill.ol.ql-indent-3 {
+  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;
+}
+li.quill.ol.ql-indent-4 {
+  counter-increment: list-4;
+}
+li.quill.ol.ql-indent-4:before {
+  content: counter(list-4, lower-alpha) ". ";
+}
+li.quill.ol.ql-indent-4 {
+  counter-reset: list-5 list-6 list-7 list-8 list-9;
+}
+li.quill.ol.ql-indent-5 {
+  counter-increment: list-5;
+}
+li.quill.ol.ql-indent-5:before {
+  content: counter(list-5, lower-roman) ". ";
+}
+li.quill.ol.ql-indent-5 {
+  counter-reset: list-6 list-7 list-8 list-9;
+}
+li.quill.ol.ql-indent-6 {
+  counter-increment: list-6;
+}
+li.quill.ol.ql-indent-6:before {
+  content: counter(list-6, decimal) ". ";
+}
+li.quill.ol.ql-indent-6 {
+  counter-reset: list-7 list-8 list-9;
+}
+li.quill.ol.ql-indent-7 {
+  counter-increment: list-7;
+}
+li.quill.ol.ql-indent-7:before {
+  content: counter(list-7, lower-alpha) ". ";
+}
+li.quill.ol.ql-indent-7 {
+  counter-reset: list-8 list-9;
+}
+li.quill.ol.ql-indent-8 {
+  counter-increment: list-8;
+}
+li.quill.ol.ql-indent-8:before {
+  content: counter(list-8, lower-roman) ". ";
+}
+li.quill.ol.ql-indent-8 {
+  counter-reset: list-9;
+}
+li.quill.ol.ql-indent-9 {
+  counter-increment: list-9;
+}
+li.quill.ol.ql-indent-9:before {
+  content: counter(list-9, decimal) ". ";
+}
+
+@for $i from 1 to 10 {
+  $pad: $i * 3em;
+  .quill.ql-indent-#{$i} {
+    padding-left: $pad;
+  }
+  li.quill.ql-indent-#{$i} {
+    padding-left: $pad + 1.5em;
+  }
+
+}
+
+
+// Toolbar
+
+.ql-toolbar button {
+  min-width: unset;
+  min-height: unset;
+}

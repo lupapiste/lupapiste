@@ -1,0 +1,63 @@
+@use "base";
+@use "colors";
+
+#indicator {
+  .indicator-bar {
+    display: none;
+    position: fixed;
+    width: 100%;
+    z-index: 2011;
+    color: colors.$white;
+    font-size: 18px;
+    box-sizing: border-box;
+    margin-top: -6px;
+  }
+
+  .indicator-box {
+    min-width: base.$application-min-width;
+    padding: base.$marginM base.$marginL;
+    &.indicator-box--hand {
+      cursor: pointer;
+    }
+  }
+
+  a {
+    color: colors.$white;
+    font-weight: bold;
+  }
+
+  .indicator-bar.positive {
+    background-color: colors.$positive;
+   }
+
+   .indicator-bar.primary {
+    background-color: colors.$primary;
+  }
+
+  .indicator-bar.negative {
+    background-color: colors.$negative;
+  }
+  .indicator-bar.hidden {
+    visibility: hidden;
+  }
+
+  .indicator-info {
+    vertical-align: top;
+    display: table-cell;
+  }
+
+  .indicator-message {
+    vertical-align: top;
+    display: table-cell;
+    width: 100%;
+    padding: {
+      left: base.$marginL;
+      right: base.$marginL;
+    }
+  }
+
+  .indicator-close {
+    vertical-align: top;
+    display: table-cell;
+  }
+}

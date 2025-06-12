@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FeatureCollection xmlns="http://www.opengis.net/wfs"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd">
+  <featureMember xmlns="http://www.opengis.net/gml">
+    <ValmisRakennus
+      xmlns="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" p4:id="valmisrakennus.1"
+      xmlns:p4="http://www.opengis.net/gml">
+      <rakennustieto>
+        <Rakennus>
+          <yksilointitieto xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">ID11485</yksilointitieto>
+          <alkuHetki xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">2013-11-11T17:13:47.631875+02:00</alkuHetki>
+          <sijaintitieto>
+            <Sijainti>
+              <piste xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+                <Point srsDimension="2" srsName="EPSG:3067" axisLabels="x y"
+                  xmlns="http://www.opengis.net/gml">
+                  <pos>6699097.09677016 422301.989867227</pos>
+                </Point>
+              </piste>
+            </Sijainti>
+          </sijaintitieto>
+          <rakennuksenTiedot>
+            <rakennustunnus>
+              <valtakunnallinenNumero>1234567892</valtakunnallinenNumero>
+              <kiinttun>63845900130022</kiinttun>
+              <rakennusnro>001</rakennusnro>
+              <aanestysalue>007</aanestysalue>
+            </rakennustunnus>
+            <kayttotarkoitus>011 yhden asunnon talot</kayttotarkoitus>
+            <tilavuus>627</tilavuus>
+            <kokonaisala>168</kokonaisala>
+            <kellarinpinta-ala>4</kellarinpinta-ala>
+            <kerrosluku>1</kerrosluku>
+            <kerrosala>161</kerrosala>
+            <rakentamistapa>paikalla</rakentamistapa>
+            <kantavaRakennusaine>
+              <rakennusaine>puu</rakennusaine>
+            </kantavaRakennusaine>
+            <julkisivu>
+              <julkisivumateriaali>puu</julkisivumateriaali>
+            </julkisivu>
+            <verkostoliittymat>
+              <viemariKytkin>false</viemariKytkin>
+              <vesijohtoKytkin>true</vesijohtoKytkin>
+              <sahkoKytkin>true</sahkoKytkin>
+              <maakaasuKytkin>false</maakaasuKytkin>
+              <kaapeliKytkin>false</kaapeliKytkin>
+            </verkostoliittymat>
+            <energiatehokkuusluku>123</energiatehokkuusluku>
+            <energiatehokkuusluvunYksikko>kWh/m2</energiatehokkuusluvunYksikko>
+            <paloluokka>P3</paloluokka>
+            <lammitystapa>suora sähkö</lammitystapa>
+            <lammonlahde>
+              <polttoaine>sähkö</polttoaine>
+            </lammonlahde>
+            <varusteet>
+              <sahkoKytkin>true</sahkoKytkin>
+              <kaasuKytkin>false</kaasuKytkin>
+              <viemariKytkin>true</viemariKytkin>
+              <vesijohtoKytkin>true</vesijohtoKytkin>
+              <lamminvesiKytkin>true</lamminvesiKytkin>
+              <aurinkopaneeliKytkin>false</aurinkopaneeliKytkin>
+              <hissiKytkin>false</hissiKytkin>
+              <koneellinenilmastointiKytkin>false</koneellinenilmastointiKytkin>
+              <saunoja>0</saunoja>
+              <uima-altaita>0</uima-altaita>
+              <vaestonsuoja>0</vaestonsuoja>
+            </varusteet>
+            <asuinhuoneistot>
+              <valmisHuoneisto>
+                <osoite>
+                  <osoitenimi xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+                    <teksti>Krysp-testin tie</teksti>
+                  </osoitenimi>
+                  <osoitenumero xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">1</osoitenumero>
+                  <postinumero xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">06500</postinumero>
+                  <postitoimipaikannimi
+                    xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">PORVOO</postitoimipaikannimi>
+                </osoite>
+                <huoneluku>4</huoneluku>
+                <keittionTyyppi>keittio</keittionTyyppi>
+                <huoneistoala>141</huoneistoala>
+                <varusteet>
+                  <WCKytkin>true</WCKytkin>
+                  <ammeTaiSuihkuKytkin>true</ammeTaiSuihkuKytkin>
+                  <saunaKytkin>true</saunaKytkin>
+                  <parvekeTaiTerassiKytkin>false</parvekeTaiTerassiKytkin>
+                  <lamminvesiKytkin>true</lamminvesiKytkin>
+                </varusteet>
+                <huoneistonTyyppi>asuinhuoneisto</huoneistonTyyppi>
+                <huoneistotunnus>
+                  <huoneistonumero>000</huoneistonumero>
+                </huoneistotunnus>
+              </valmisHuoneisto>
+            </asuinhuoneistot>
+          </rakennuksenTiedot>
+          <rakentajatyyppi>liiketaloudellinen</rakentajatyyppi>
+          <omistaja>
+            <henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+              <nimi>
+                <etunimi>Antero</etunimi>
+                <sukunimi>Testaaja</sukunimi>
+              </nimi>
+              <osoite>
+                <osoitenimi>
+                  <teksti>Krysp-testin tie</teksti>
+                </osoitenimi>
+                <osoitenumero>1</osoitenumero>
+                <postinumero>06500</postinumero>
+                <postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+              </osoite>
+            </henkilo>
+            <turvakieltoKytkin xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">true</turvakieltoKytkin>
+          </omistaja>
+          <omistaja>
+            <henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+              <nimi>
+                <etunimi>Pauliina</etunimi>
+                <sukunimi>Testaaja</sukunimi>
+              </nimi>
+              <osoite>
+                <osoitenimi>
+                  <teksti>Krysp-testin tie</teksti>
+                </osoitenimi>
+                <osoitenumero>1</osoitenumero>
+                <postinumero>06500</postinumero>
+                <postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+              </osoite>
+            </henkilo>
+          </omistaja>
+        </Rakennus>
+      </rakennustieto>
+    </ValmisRakennus>
+  </featureMember>
+  <featureMember xmlns="http://www.opengis.net/gml">
+    <ValmisRakennus
+      xmlns="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" p4:id="valmisrakennus.2"
+      xmlns:p4="http://www.opengis.net/gml">
+      <rakennustieto>
+        <Rakennus>
+          <yksilointitieto xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">ID11486</yksilointitieto>
+          <alkuHetki xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">2013-11-11T17:13:47.67875+02:00</alkuHetki>
+          <sijaintitieto>
+            <Sijainti>
+              <piste xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+                <Point srsDimension="2" srsName="EPSG:3067" axisLabels="x y"
+                  xmlns="http://www.opengis.net/gml">
+                  <pos>6699107.3957771 422282.1505572</pos>
+                </Point>
+              </piste>
+            </Sijainti>
+          </sijaintitieto>
+          <rakennuksenTiedot>
+            <rakennustunnus>
+              <kiinttun>63845900130022</kiinttun>
+              <rakennusnro>002</rakennusnro>
+              <aanestysalue>007</aanestysalue>
+            </rakennustunnus>
+            <kayttotarkoitus>941 talousrakennukset</kayttotarkoitus>
+            <tilavuus>0</tilavuus>
+            <kokonaisala>70</kokonaisala>
+            <kellarinpinta-ala>0</kellarinpinta-ala>
+            <kerrosluku>1</kerrosluku>
+            <kerrosala>0</kerrosala>
+            <rakentamistapa>paikalla</rakentamistapa>
+            <kantavaRakennusaine>
+              <rakennusaine>puu</rakennusaine>
+            </kantavaRakennusaine>
+            <julkisivu>
+              <julkisivumateriaali>puu</julkisivumateriaali>
+            </julkisivu>
+            <verkostoliittymat>
+              <viemariKytkin>false</viemariKytkin>
+              <vesijohtoKytkin>false</vesijohtoKytkin>
+              <sahkoKytkin>true</sahkoKytkin>
+              <maakaasuKytkin>false</maakaasuKytkin>
+              <kaapeliKytkin>false</kaapeliKytkin>
+            </verkostoliittymat>
+            <lammitystapa>ei lämmitystä</lammitystapa>
+            <varusteet>
+              <sahkoKytkin>true</sahkoKytkin>
+              <kaasuKytkin>false</kaasuKytkin>
+              <viemariKytkin>false</viemariKytkin>
+              <vesijohtoKytkin>false</vesijohtoKytkin>
+              <lamminvesiKytkin>false</lamminvesiKytkin>
+              <aurinkopaneeliKytkin>false</aurinkopaneeliKytkin>
+              <hissiKytkin>false</hissiKytkin>
+              <koneellinenilmastointiKytkin>false</koneellinenilmastointiKytkin>
+              <saunoja>0</saunoja>
+              <uima-altaita>0</uima-altaita>
+              <vaestonsuoja>0</vaestonsuoja>
+            </varusteet>
+          </rakennuksenTiedot>
+          <rakentajatyyppi>muu</rakentajatyyppi>
+          <omistaja>
+            <kuntaRooliKoodi xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">Rakennuksen omistaja</kuntaRooliKoodi>
+            <VRKrooliKoodi xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">rakennuksen omistaja</VRKrooliKoodi>
+            <henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+              <nimi>
+                <etunimi>Antero</etunimi>
+                <sukunimi>Testaaja</sukunimi>
+              </nimi>
+
+              <osoite>
+                <osoitenimi>
+                  <teksti>Krysp-testin tie</teksti>
+                </osoitenimi>
+                <osoitenumero>1</osoitenumero>
+                <postinumero>06500</postinumero>
+                <postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+              </osoite>
+
+            </henkilo>
+            <omistajalaji><muu>, wut?</muu></omistajalaji>
+          </omistaja>
+          <omistaja>
+            <henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+              <nimi>
+                <etunimi>Paavo</etunimi>
+                <sukunimi>Testaaja</sukunimi>
+              </nimi>
+              <osoite>
+                <osoitenimi>
+                  <teksti>Krysp-testin tie 1</teksti>
+                </osoitenimi>
+                <postinumero>06500</postinumero>
+                <postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+              </osoite>
+              <sahkopostiosoite>paavo@example.com</sahkopostiosoite>
+              <puhelin>01</puhelin>
+              <puhelin>02</puhelin>
+            </henkilo>
+            <yritys xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+              <nimi>Testaajan Putki Oyj</nimi>
+              <liikeJaYhteisotunnus>123</liikeJaYhteisotunnus>
+              <kayntiosoite>
+                <osoitenimi>
+                  <teksti>Krysp-testin tie</teksti>
+                </osoitenimi>
+                <osoitenumero>1</osoitenumero>
+                <postinumero>06500</postinumero>
+                <postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+              </kayntiosoite>
+              <kotipaikka></kotipaikka>
+              <postiosoite>
+                <osoitenimi>
+                  <teksti>Krysp-testin tie</teksti>
+                </osoitenimi>
+                <osoitenumero>1</osoitenumero>
+                <osoitenumero2>2</osoitenumero2>
+                <jakokirjain>d</jakokirjain>
+                <jakokirjain2>e</jakokirjain2>
+                <porras>A</porras>
+                <huoneisto>1</huoneisto>
+                <postinumero>06500</postinumero>
+                <postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+                <jarjestysnumero>7</jarjestysnumero>
+              </postiosoite>
+              <puhelin>1</puhelin>
+              <puhelin>2</puhelin>
+              <www>http://www.example.com</www>
+              <sahkopostiosoite>antero@example.com</sahkopostiosoite>
+            </yritys>
+            <omistajalaji><omistajalaji>yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)</omistajalaji></omistajalaji>
+          </omistaja>
+        </Rakennus>
+      </rakennustieto>
+    </ValmisRakennus>
+  </featureMember>
+</FeatureCollection>

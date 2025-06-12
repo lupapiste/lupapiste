@@ -1,0 +1,163 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="new-notice-form-template">
+  <div class="notice-form-container">
+    <drop-zone></drop-zone>
+    <h3 data-bind="ltext: sprintf( 'notice-form.%s.title', formType ),
+                   testId: 'new-notice-form-title'"></h3>
+    <p data-bind="text: infoText,
+                  testId: 'new-notice-form-info'"></p>
+    <!-- ko if: _.size( foremen() ) -->
+    <div class="notice-form-foremen">
+      <h4 data-bind="ltext: 'notice-form.foremen.title'"></h4>
+      <!-- ko foreach: foremen -->
+      <div class="like-btn">
+        <span data-bind="text: $parent.foremanText( $data ),
+                         testId: 'new-notice-form-foreman-text-' + $index()">
+        </span>
+        <!-- ko ifnot: $data.status === 'ok' -->
+        <i class="negative lupicon-circle-attention"
+           aria-hidden="true"
+           data-bind="testId: 'new-notice-form-foreman-bad-' + $index()"></i>
+        <!-- /ko -->
+      </div>
+      <!-- /ko -->
+    </div>
+    <!-- ko ifnot: _.every( foremen(), {status: 'ok'} ) -->
+    <div class="like-btn foremen-warning">
+      <i class="negative lupicon-circle-attention"
+         aria-hidden="true"></i>
+      <span data-bind="ltext: 'notice-form.foremen.unapproved'"></span>
+    </div>
+    <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: _.size( buildings() ) -->
+    <label data-bind="ltext: 'notice-form.buildings',
+                      testId: 'new-notice-form-buildings'"></label>
+    <!-- ko foreach: buildings -->
+    <toggle params="text: $parent.buildingText( $data ),
+                    prefix: 'blockbox',
+                    disable: $parent.waiting,
+                    testId: 'new-notice-form-building-' + $index(),
+                    value: $data.selected"></toggle>
+    <div class="building-separator"></div>
+    <!-- /ko -->
+    <!-- /ko -->
+    <label class="mandatory"
+           for="notice-form-message"
+           data-bind="ltext: 'notice-form.message'"></label>
+    <textarea id="notice-form-message"
+              class="grid-style-input"
+              rows="4"
+              data-bind="textInput: message,
+                         disable: waiting,
+                         testId: 'new-notice-form-message',
+                         css: {required: !_.trim( message())}"></textarea>
+    <!-- ko if: showCustomer -->
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="value: customer.name,
+                             label: 'notice-form.customer.name',
+                             required: true,
+                             immediate: true,
+                             testId: 'new-notice-form-customer-name',
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: customer.email,
+                             label: 'email',
+                             warning: emailWarning,
+                             required: true,
+                             immediate: true,
+                             testId: 'new-notice-form-customer-email',
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: customer.phone,
+                             label: 'puhelin',
+                             warning: phoneWarning,
+                             required: true,
+                             immediate: true,
+                             testId: 'new-notice-form-customer-phone',
+                             cell: 'text'"></form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-2">
+          <toggle params="value: customer.payer.permitPayer,
+                          ltext: 'notice-form.payer.permit-payer',
+                          testId: 'new-notice-form-permit-payer',
+                          prefix: 'blockbox'"></toggle>
+        </div>
+      </div>
+      <!-- ko ifnot: customer.payer.permitPayer -->
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="value: customer.payer.name,
+                             label: 'notice-form.payer.name',
+                             required: true,
+                             immediate: true,
+                             testId: 'new-notice-form-payer-name',
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: customer.payer.identifier,
+                             label: 'notice-form.payer.identifier',
+                             warning: identifierWarning,
+                             required: true,
+                             testId: 'new-notice-form-payer-identifier',
+                             immediate: true,
+                             cell: 'text'"></form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="value: customer.payer.street,
+                             label: 'osoite.katu',
+                             required: true,
+                             immediate: true,
+                             testId: 'new-notice-form-payer-street',
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: customer.payer.zip,
+                             label: 'osoite.postinumero',
+                             warning: zipWarning,
+                             required: true,
+                             testId: 'new-notice-form-payer-zip',
+                             immediate: true,
+                             cell: 'text'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: customer.payer.city,
+                             label: 'osoite.postitoimipaikannimi',
+                             required: true,
+                             testId: 'new-notice-form-payer-city',
+                             immediate: true,
+                             cell: 'text'"></form-cell>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+    <!-- /ko -->
+    <file-upload params="files: files,
+                         allowMultiple: true,
+                         readOnly: waiting,
+                         testId: 'new-notice-form-upload',
+                         dropZone: 'div.notice-form-container'"></file-upload>
+    <div class="notice-form-buttons">
+      <icon-button params="ltext: 'ok',
+                           waiting: waiting,
+                           icon: 'check',
+                           enable: formFilled,
+                           testId: 'new-notice-form-ok',
+                           click: submitForm"></icon-button>
+      <icon-button params="ltext: 'cancel',
+                           disable: waiting,
+                           buttonClass: 'secondary',
+                           icon: 'remove',
+                           testId: 'new-notice-form-cancel',
+                           click: cancelForm"></icon-button>
+    </div>
+  </div>
+</script>

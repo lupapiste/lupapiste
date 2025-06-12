@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ppst:Popast xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ymv="http://www.kuntatietopalvelu.fi/gml/ymparisto/vesihuoltolaki" xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" xmlns:ymy="http://www.kuntatietopalvelu.fi/gml/ymparisto/ymparistoluvat" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:mkos="http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet" xmlns:kiito="http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus" xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta" xmlns:ymi="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset" xmlns:ppst="http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu" xmlns:ymm="http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.2.4/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd">
+  <ppst:toimituksenTiedot>
+    <yht:aineistonnimi>Sipoo KuntaGML</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Sipoo</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2023-09-14</yht:toimitusPvm>
+    <yht:kuntakoodi>753</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </ppst:toimituksenTiedot>
+  <ppst:Poikkeamisasia gml:id="poikkasia.24">
+    <ppst:kasittelynTilatieto>
+      <yht:Tilamuutos>
+        <yht:pvm>2023-08-11</yht:pvm>
+        <yht:tila>lupa hyväksytty</yht:tila>
+        <yht:kasittelija>
+          <yht:henkilo>
+            <yht:nimi>
+              <yht:sukunimi>Viranhaltija</yht:sukunimi>
+            </yht:nimi>
+          </yht:henkilo>
+        </yht:kasittelija>
+      </yht:Tilamuutos>
+    </ppst:kasittelynTilatieto>
+    <ppst:kasittelynTilatieto>
+      <yht:Tilamuutos>
+        <yht:pvm>2023-08-11</yht:pvm>
+        <yht:tila>päätöksestä valitettu, valitusprosessin tulosta ei ole</yht:tila>
+        <yht:kasittelija>
+          <yht:henkilo>
+            <yht:nimi>
+              <yht:sukunimi>Viranhaltija</yht:sukunimi>
+            </yht:nimi>
+          </yht:henkilo>
+        </yht:kasittelija>
+      </yht:Tilamuutos>
+    </ppst:kasittelynTilatieto>
+    <ppst:kasittelynTilatieto>
+      <yht:Tilamuutos>
+        <yht:pvm>2021-10-12</yht:pvm>
+        <yht:tila>vireillä</yht:tila>
+      </yht:Tilamuutos>
+    </ppst:kasittelynTilatieto>
+    <ppst:kuntakoodi>753</ppst:kuntakoodi>
+    <ppst:luvanTunnistetiedot>
+      <yht:LupaTunnus>
+        <yht:kuntalupatunnus>23-0235-POI</yht:kuntalupatunnus>
+        <yht:VRKLupatunnus>75300023-0235</yht:VRKLupatunnus>
+        <yht:saapumisPvm>2021-10-16</yht:saapumisPvm>
+      </yht:LupaTunnus>
+    </ppst:luvanTunnistetiedot>
+    <ppst:osapuolettieto>
+      <yht:Osapuolet>
+        <yht:osapuolitieto>
+          <yht:Osapuoli>
+            <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+            <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:etunimi>Poika</yht:etunimi>
+                <yht:sukunimi>Poikolainen</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti>Poikkeamanpolku 12 B1</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>00170</yht:postinumero>
+                <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>poika.poikolainen@example.net</yht:sahkopostiosoite>
+              <yht:puhelin>1122334455</yht:puhelin>
+              <yht:henkilotunnus>210447-8156</yht:henkilotunnus>
+            </yht:henkilo>
+            <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            <yht:postitetaanKytkin>false</yht:postitetaanKytkin>
+          </yht:Osapuoli>
+        </yht:osapuolitieto>
+        <yht:osapuolitieto>
+          <yht:Osapuoli>
+            <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:etunimi>Mammona</yht:etunimi>
+                <yht:sukunimi>Maksanen</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti>Rahatie 1000</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>00310</yht:postinumero>
+                <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>money@example.com</yht:sahkopostiosoite>
+              <yht:puhelin>99887766</yht:puhelin>
+              <yht:henkilotunnus>190373-094J</yht:henkilotunnus>
+            </yht:henkilo>
+            <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            <yht:laskuviite>Show me the money!</yht:laskuviite>
+          </yht:Osapuoli>
+        </yht:osapuolitieto>
+      </yht:Osapuolet>
+    </ppst:osapuolettieto>
+    <ppst:rakennuspaikkatieto>
+      <ppst:Rakennuspaikka gml:id="rpaikka.10046">
+        <yht:yksilointitieto>000000</yht:yksilointitieto>
+        <yht:alkuHetki>2021-10-12T00:00:00</yht:alkuHetki>
+        <yht:rakennuspaikanKiinteistotieto>
+          <yht:RakennuspaikanKiinteisto>
+            <yht:kiinteistotieto>
+              <yht:Kiinteisto>
+                <yht:tilannimi>CHATEAU SAMPLE</yht:tilannimi>
+                <yht:kiinteistotunnus>75341800010035</yht:kiinteistotunnus>
+              </yht:Kiinteisto>
+            </yht:kiinteistotieto>
+            <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+            <yht:hallintaperuste>oma</yht:hallintaperuste>
+          </yht:RakennuspaikanKiinteisto>
+        </yht:rakennuspaikanKiinteistotieto>
+        <yht:sijaintitieto>
+          <yht:Sijainti>
+            <yht:piste>
+              <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4258">
+                <gml:pos>25.4161095258 60.2477285875</gml:pos>
+              </gml:Point>
+            </yht:piste>
+          </yht:Sijainti>
+        </yht:sijaintitieto>
+        <yht:kaavanaste>yleis</yht:kaavanaste>
+        <yht:osoite>
+          <yht:kunta>753</yht:kunta>
+          <yht:osoitenimi>
+            <yht:teksti xml:lang="fi">Hubba</yht:teksti>
+            <yht:teksti xml:lang="sv">Bubba</yht:teksti>
+          </yht:osoitenimi>
+          <yht:osoitenumero>123</yht:osoitenumero>
+          <yht:postinumero>06780</yht:postinumero>
+          <yht:postitoimipaikannimi>Skogendahl</yht:postitoimipaikannimi>
+        </yht:osoite>
+        <yht:kaavatilanne>oikeusvaikutteinen yleiskaava</yht:kaavatilanne>
+      </ppst:Rakennuspaikka>
+    </ppst:rakennuspaikkatieto>
+    <ppst:referenssiPiste>
+      <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4258">
+        <gml:pos>25.4161095258 60.2477285875</gml:pos>
+      </gml:Point>
+    </ppst:referenssiPiste>
+    <ppst:lausuntotieto>
+      <ppst:Lausunto>
+        <yht:viranomainen>Sipoon Esimerkki - Sibbo Exempel</yht:viranomainen>
+        <yht:pyyntoPvm>2021-10-11</yht:pyyntoPvm>
+        <yht:lausuntotieto>
+          <yht:Lausunto>
+            <yht:viranomainen>Sipoon Esimerkki - Sibbo Exempel</yht:viranomainen>
+            <yht:lausunto>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.</yht:lausunto>
+            <yht:lausuntoPvm>2021-10-19</yht:lausuntoPvm>
+            <yht:puoltotieto>
+              <yht:Puolto>
+                <yht:puolto>lausunto</yht:puolto>
+              </yht:Puolto>
+            </yht:puoltotieto>
+          </yht:Lausunto>
+        </yht:lausuntotieto>
+      </ppst:Lausunto>
+    </ppst:lausuntotieto>
+    <ppst:paatostieto>
+      <yht:Paatos>
+        <yht:paivamaarat>
+          <yht:aloitettavaPvm>2023-09-02</yht:aloitettavaPvm>
+          <yht:lainvoimainenPvm>2023-09-03</yht:lainvoimainenPvm>
+          <yht:voimassaHetkiPvm>2025-09-02</yht:voimassaHetkiPvm>
+          <yht:antoPvm>2023-08-18</yht:antoPvm>
+          <yht:viimeinenValitusPvm>2023-08-31</yht:viimeinenValitusPvm>
+          <yht:julkipanoPvm>2023-08-17</yht:julkipanoPvm>
+        </yht:paivamaarat>
+        <yht:poytakirja>
+          <yht:paatos>Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci.</yht:paatos>
+          <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+          <yht:paatoksentekija>Viranhaltija</yht:paatoksentekija>
+          <yht:paatospvm>2023-08-15</yht:paatospvm>
+          <yht:pykala>456</yht:pykala>
+        </yht:poytakirja>
+      </yht:Paatos>
+    </ppst:paatostieto>
+    <ppst:lisatietotieto>
+      <ppst:Lisatieto>
+        <ppst:asioimiskieli>suomi</ppst:asioimiskieli>
+        <ppst:suoramarkkinointikieltoKytkin>true</ppst:suoramarkkinointikieltoKytkin>
+      </ppst:Lisatieto>
+    </ppst:lisatietotieto>
+    <ppst:asianTiedot>
+      <ppst:Asiantiedot>
+        <ppst:vahainenPoikkeaminen>Donec vitae orci sed dolor rutrum auctor. Fusce egestas elit eget lorem.</ppst:vahainenPoikkeaminen>
+        <ppst:poikkeamisasianKuvaus>Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.</ppst:poikkeamisasianKuvaus>
+      </ppst:Asiantiedot>
+    </ppst:asianTiedot>
+  </ppst:Poikkeamisasia>
+</ppst:Popast>

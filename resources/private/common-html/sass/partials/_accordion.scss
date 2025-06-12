@@ -1,0 +1,204 @@
+@use "base";
+@use "buttons";
+@use "colors";
+@use "lupicons";
+@use "mixins";
+@use "theme";
+
+.accordion {
+  width: 100%;
+  position: relative;
+  height: auto;
+  margin-bottom: base.$marginM;
+  box-sizing: border-box;
+
+  div.sticky {
+    width: 100%;
+    span.bar-text {
+      width: 100%;
+      text-transform: uppercase;
+    }
+    span.shortenedDescription {
+      max-width: 30em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    span.description {
+      padding-right: buttons.$icon-pad;
+      text-transform: none;
+    }
+    span.icons {
+      min-width: lupicons.$lupicon-size;
+      .approved, .rejected {
+        display: none;
+      }
+      .rejected {
+        // Buttons are not used to having complex
+        // contents.
+        padding-right: 0;
+      }
+    }
+    .identifier-component {
+      .form-indicator {
+        right: -100px;
+      }
+    }
+  }
+
+  .accordion-toggle > button, button.accordion-toggle {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: 0 !important;
+    span.bar-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: lupicons.$lupicon-size;
+      text-transform: uppercase;
+    }
+  }
+
+
+  div.sticky button.positive > span.icons > .approved {
+    display: table-cell;
+  }
+
+  div.sticky button.rejected > span.icons >  .rejected {
+    display: table-cell;
+  }
+
+  .accordion_content {
+    display: none;
+    padding: {
+      top: base.$marginS;
+      //bottom: $marginS;
+    }
+    position: relative;
+    border: 1px solid colors.$gray221;
+    border-top: none;
+    .accordion-content-part {
+      margin-left: base.$marginM;
+      margin-right: base.$marginM;
+      margin-bottom: base.$marginM;
+    }
+    .accordion-fields {
+      width: 100%;
+
+      h2 {
+        color: black;
+      }
+      .authority-accept-fields {
+        h2 {
+          background: theme.$lp-light-grey;
+        }
+      }
+      h3 {
+        margin-top: base.$marginM;
+      }
+      .form-group {
+        margin-top: base.$marginS;
+      }
+    }
+  }
+
+  .accordion_content.new_docgen {
+      display: block !important;
+  }
+
+  .accordion_content.expanded {
+    display: block;
+  }
+}
+
+div.accordion-assignments {
+  color: white;
+  margin: 0 auto;
+  min-height: theme.$grid-min-height;
+  .assignment-container {
+    margin-top: 1px;
+    padding: base.$marginS base.$marginS;
+    background-color: colors.$primary;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  .assignment {
+    width: 100%;
+    display: block;
+    > * {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 base.$marginS;
+    }
+    > .assignment-text {
+      width: 100%; // let text take all the space it can have as it's dynamic
+    }
+    > .assignment-header {
+      white-space: nowrap;
+      .creator {
+        &:before {
+         content: " (";
+        }
+      }
+      .receiver {
+        &:before {
+          content: "\2192"
+        }
+        &:after {
+          content: "):";
+        }
+      }
+    }
+    div.no-wrap-whitespace button:first-child {
+      margin-right: base.$marginS;
+    }
+    .editor {
+      display: table-row;
+    }
+  }
+}
+
+
+.accordion-fields > .button-group:last-child {
+  border-bottom: none;
+}
+
+.accordion-indicator {
+  z-index: 12000;
+  width: 112px;
+  min-height: 18px;
+  display: none;
+  padding: 0 base.$marginL 0 0;
+  margin-left: base.$marginM;
+
+  .icon {
+    display: none;
+    @include mixins.spite-bg;
+  }
+  &.accordion-input-saved {
+    .icon {
+      display: inline-block;
+      background-position: 4px -2499px;
+      border-right: none;
+    }
+  }
+  &.accordion-input-warn {
+    .icon {
+      display: inline-block;
+      background-position: 4px -3199px;
+      border-right: none;
+    }
+  }
+  &.accordion-input-err {
+    .icon {
+      display: inline-block;
+      background-position: 4px -2399px;
+      border-right: none;
+    }
+  }
+}
+
+.accordion-help {
+
+}

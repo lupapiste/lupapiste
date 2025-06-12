@@ -1,0 +1,176 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:definition
+   {:fi "Osa on suunnitteilla", :sv "Delen håller på att planeras"},
+   :prefLabel {:fi "Suunnitteilla", :sv "Under planering"},
+   :codeValue "1",
+   :created "2024-11-25T16:50:25.842Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/1/members/",
+   :modified "2024-11-25T16:50:25.842Z",
+   :status "VALID",
+   :id "58c4c9c0-e875-46ef-a5f7-231ecdc595c4",
+   :statusModified "2024-11-25T16:50:25.842Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/1",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/1",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi
+    "Osan rakentaminen on kesken, eikä se ole vielä käyttöönotettu",
+    :sv
+    "Byggandet av delen pågår och den har ännu inte tagits i bruk"},
+   :prefLabel {:fi "Rakenteilla", :sv "Under byggnad"},
+   :codeValue "2",
+   :created "2024-11-25T16:50:25.871Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/2/members/",
+   :modified "2024-11-25T16:50:25.871Z",
+   :status "VALID",
+   :id "32c0690f-7621-4c9c-b1a3-4df2704b3807",
+   :statusModified "2024-11-25T16:50:25.871Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/2",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/2",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi "Osa on toimintavalmis ja otettu käyttöön",
+    :sv "Delen är färdig och har tagits i bruk"},
+   :prefLabel {:fi "Käytössä", :sv "I användning"},
+   :codeValue "3",
+   :created "2024-11-25T16:50:25.888Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/3/members/",
+   :modified "2024-11-25T16:50:25.888Z",
+   :status "VALID",
+   :id "682763e2-8da4-417c-a55f-5acd2d292e9c",
+   :statusModified "2024-11-25T16:50:25.888Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/3",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/3",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi
+    "Osa on poissa käytöstä, mutta otettavissa uudelleen käyttöön.",
+    :sv "Delen är ur bruk, men kan tas i bruk på nytt."},
+   :prefLabel
+   {:fi "Tilapäisesti pois käytöstä", :sv "Tillfälligt ur bruk"},
+   :codeValue "4",
+   :created "2024-11-25T16:50:25.905Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/4/members/",
+   :modified "2024-11-25T16:50:25.905Z",
+   :status "VALID",
+   :id "55ab2f25-0381-46a9-97f3-29b9058bc499",
+   :statusModified "2024-11-25T16:50:25.905Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/4",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/4",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi
+    "Osa on poistettu käytöstä, ja sen mahdollinen otto uudelleen käyttöön vaatii rakenteellisia tai toiminnallisia muutostoimenpiteitä.",
+    :sv
+    "Delen har tagits ur bruk och för att den ska kunna tas i bruk på nytt krävs ändringar av konstruktionen eller funktionella ändringar."},
+   :prefLabel {:fi "Poistettu käytöstä", :sv "Tagen ur bruk"},
+   :codeValue "5",
+   :created "2024-11-25T16:50:25.921Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/5/members/",
+   :modified "2024-11-25T16:50:25.921Z",
+   :status "VALID",
+   :id "9228584a-e38a-4295-8e18-c34bf491709d",
+   :statusModified "2024-11-25T16:50:25.921Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/5",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/5",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi "Osa on poistettu järjestelmästä teknisestä syystä",
+    :sv "Delen har avförts från systemet av ett tekniskt skäl"},
+   :prefLabel {:fi "Poistettu", :sv "Avförd"},
+   :codeValue "6",
+   :created "2024-11-25T16:50:25.937Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/6/members/",
+   :modified "2024-11-25T16:50:25.937Z",
+   :status "VALID",
+   :id "cdf516ef-43cb-4d6a-8617-5557a14cba5a",
+   :statusModified "2024-11-25T16:50:25.937Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/6",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/6",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi "Osa on purettu rakennuksesta",
+    :sv "Byggnadsdelen har rivits"},
+   :prefLabel {:fi "Purettu", :sv "Riven"},
+   :codeValue "7",
+   :created "2024-11-25T16:50:25.953Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/7/members/",
+   :modified "2024-11-25T16:50:25.953Z",
+   :status "VALID",
+   :id "b3dd4573-ddcf-4e01-a7a9-aa5fcc2f12bd",
+   :statusModified "2024-11-25T16:50:25.953Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/rakennuksen-toim-osan-elinkaaren-vaihe/codes/7",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/rakennuksen-toim-osan-elinkaaren-vaihe/code/7",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:11:27.024Z"}

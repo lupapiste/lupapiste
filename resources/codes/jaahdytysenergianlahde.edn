@@ -1,0 +1,168 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:fi "Kompressori-kylmälaitos, ilmalauhdutteinen",
+    :sv "Kompressor-kylanläggning, luftkyld"},
+   :codeValue "01",
+   :created "2024-04-02T12:45:20.256Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/01/members/",
+   :modified "2024-06-20T09:06:49.238Z",
+   :status "VALID",
+   :id "6db5628f-11ce-4b29-9a2e-62d420c1856b",
+   :statusModified "2024-04-02T12:45:20.256Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Kompressori-kylmälaitos, vesilauhdutteinen",
+    :sv "Kompressor-kylanläggning, vattenkyld"},
+   :codeValue "02",
+   :created "2024-04-02T12:45:20.277Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/02/members/",
+   :modified "2024-06-20T09:06:49.249Z",
+   :status "VALID",
+   :id "1be5567f-2d17-454f-ac29-7fc869302efe",
+   :statusModified "2024-04-02T12:45:20.277Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Vapaajäähdytys, liuosjäähdytin",
+    :sv "Fristående kyla, vätskekylaggregat"},
+   :codeValue "03",
+   :created "2024-04-02T12:45:20.284Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/03/members/",
+   :modified "2024-06-20T09:06:49.259Z",
+   :status "VALID",
+   :id "78fae27c-839e-4b2c-bc37-b6ecb658f69a",
+   :statusModified "2024-04-02T12:45:20.284Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Vapaajäähdytys, jäähdytystorni",
+    :sv "Fristående kyla, kyltorn"},
+   :codeValue "04",
+   :created "2024-04-02T12:45:20.291Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/04/members/",
+   :modified "2024-06-20T09:06:49.297Z",
+   :status "VALID",
+   :id "415c9d2f-cf6d-4bdd-b54f-253765356b92",
+   :statusModified "2024-04-02T12:45:20.291Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Vapaajäähdytys, maaputkisto", :sv "Fristående kyla, markrör"},
+   :codeValue "05",
+   :created "2024-04-02T12:45:20.298Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/05/members/",
+   :modified "2024-06-20T09:06:49.309Z",
+   :status "VALID",
+   :id "ec32e1e9-3bbe-4ee0-8699-6f0325011612",
+   :statusModified "2024-04-02T12:45:20.298Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Split-laitteet", :sv "Split-aggregat"},
+   :codeValue "06",
+   :created "2024-04-02T12:45:20.305Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/06/members/",
+   :modified "2024-06-20T09:06:49.319Z",
+   :status "VALID",
+   :id "314e32f9-f88e-4968-8dba-e2881f6b1404",
+   :statusModified "2024-04-02T12:45:20.305Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Kaukojäähdytys, lämmönsiirrin",
+    :sv "Fjärrkyla, värmeväxlare"},
+   :codeValue "07",
+   :created "2024-04-02T12:45:20.311Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/07/members/",
+   :modified "2024-06-20T09:06:49.387Z",
+   :status "VALID",
+   :id "e84cd4e0-bd78-417f-88cb-56e399faf72b",
+   :statusModified "2024-04-02T12:45:20.311Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/07",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Absorptiojäähdytys", :sv "Absorptionskyla"},
+   :codeValue "08",
+   :created "2024-04-02T12:45:20.318Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/08/members/",
+   :modified "2024-06-20T09:06:49.397Z",
+   :status "VALID",
+   :id "b6da0baa-dd6a-488b-a90a-97daa07efb29",
+   :statusModified "2024-04-02T12:45:20.318Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytys/codes/08",
+   :order 8,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytys/code/08",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:51:18.154Z"}

@@ -1,0 +1,19 @@
+@use "../partials/base";
+@use "../partials/frameless";
+
+body.welcome {
+  @media (max-width:base.$breakpoint7){
+    width: frameless.$cols7;
+  }
+  @media (max-width:base.$breakpoint6){
+    width: frameless.$cols6;
+  }
+  @media (max-width:base.$breakpoint5){
+    width: 100%;
+  }
+}
+
+.welcome-register-section {
+  margin-top: base.$marginL;
+}
+

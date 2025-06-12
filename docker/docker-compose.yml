@@ -1,0 +1,68 @@
+services:
+  lupis-mongo:
+    image: lupis-mongo:6.0
+    command: ["--replSet", "rs0", "--port", "27017", "--keyFile", "/etc/dev-mongo-rs-keyfile", "--wiredTigerCacheSizeGB", "0.256"]
+    build: lupis-mongo
+    container_name: lupis-mongo
+    volumes:
+      - lupis-mongo-data:/data/db
+    ports:
+      - 127.0.0.1:27017:27017
+    mem_limit: 2048m
+    ulimits:
+      nofile: # defaults are 1024
+        soft: 90000
+        hard: 90000
+    restart: on-failure
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: lupapiste
+    healthcheck:
+      # Healthcheck is used to run the replica set initiate. For more info on the healthcheck hack, see:
+      # https://medium.com/workleap/the-only-local-mongodb-replica-set-with-docker-compose-guide-youll-ever-need-2f0b74dd8384
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }" | mongosh --port 27017 -u admin -p admin --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+
+  lupis-elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.2
+    container_name: lupis-elastic
+    environment:
+      - node.name=lupis-elastic
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - http.port=9210
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - lupis-elastic-data:/usr/share/elasticsearch/data
+    ports:
+      - 127.0.0.1:9210:9210
+
+  lupis-kibana:
+    image: docker.elastic.co/kibana/kibana:8.18.2
+    container_name: lupis-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://lupis-elastic:9210
+      - csp.strict=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 127.0.0.1:5611:5601
+    depends_on:
+      - lupis-elastic
+
+volumes:
+  lupis-elastic-data:
+    driver: local
+  lupis-mongo-data:
+    driver: local

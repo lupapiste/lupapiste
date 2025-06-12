@@ -1,0 +1,71 @@
+@use "base";
+@use "buttons";
+@use "colors";
+@use "lupicons";
+
+/* .rollup { */
+/*   width: 100%; */
+/*   display: block; */
+/* } */
+
+.rollup {
+    box-sizing: border-box;
+    .roll-up-header {
+        width: 100%;
+        height: buttons.$btn-height;
+        background-color: colors.$gray119;
+
+        .accordion-toggle-container {
+            float: left;
+        }
+    }
+}
+
+.rollup--closed > .rollup__open {
+  display: none;
+}
+
+.rollup--open > .rollup__closed {
+  display: none;
+}
+
+button.rollup-button {
+  width: 100%;
+  display: block;
+}
+
+.rollup-status {
+  width: 100%;
+  display: block;
+}
+
+.rollup-status__text {
+  display: table-cell;
+  width: 100%;
+}
+
+.rollup-status__extra-text {
+  padding-right: 4px;
+}
+
+.rollup-status__icon {
+  display: table-cell;
+  min-width: lupicons.$lupicon-size;
+}
+
+.rollup-accordion {
+  .rollup-accordion-content {
+    padding: {
+      top: base.$marginS;
+    }
+    position: relative;
+    border: 1px solid colors.$gray221;
+    border-top: none;
+    .rollup-accordion-content-part {
+      margin-left: base.$marginM;
+      margin-right: base.$marginM;
+      margin-bottom: base.$marginM;
+    }
+
+  }
+}

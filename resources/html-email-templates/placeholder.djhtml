@@ -1,0 +1,13 @@
+{% subject %}
+Lupapiste: PLACEHOLDER
+{% endsubject %}
+
+<h1 {% style-attr :h1 %}>Placeholder</h1>
+<p>
+  This is a placeholder for template <code {% style-attr :code %}>{{filename}}</code>.
+</p>
+<p>
+  You should never see this in production.
+</p>
+<br/>
+<br/>

@@ -1,0 +1,30 @@
+{% subject %}
+Lupapiste: Tervetuloa Rakentamisen mittari -palvelun käyttäjäksi
+
+{% endsubject %}
+<h2 {% style-attr :h2 %}>{% greet Hei %}</h2>
+<p>
+Sinut on kutsuttu Lupapisteeseen Rakentamisen mittari -lisäpalvelun käyttäjäksi organisaatioon {{organization}}.
+</p>
+
+{% if reset-link %}
+  <p>
+    <p>
+      Käyttäjätunnuksena toimii sähköpostiosoitteesi.
+    </p>
+    <p>
+      Jatka klikkaamalla alla olevaa linkkiä. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+    </p>
+    <a href="{{reset-link}}">{{reset-link}}</a>
+  </p>
+{% endif %}
+<p>
+  Terveisin,
+  <br><br>
+  <a href="{{lupapiste-url}}">Lupapiste</a>
+</p>
+<br><br>
+<p>
+  <i>Tämä on automaattinen sähköposti - älä vastaa tähän viestiin.</i>
+</p>
+<br><br>

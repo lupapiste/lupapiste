@@ -1,0 +1,25 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="icon-button-template">
+<!-- ko if: isVisible -->
+<button data-bind="attr: attr,
+                   disable: isDisabled,
+                   click: click,
+                   ariaText: ariaLabel,
+                   focusNext: focusNext,
+                   focusPrevious: focusPrevious,
+                   testId: testId">
+  <!-- ko if:  !right && iconClass() -->
+  <i data-bind="attr: {'class': iconClass}"
+     aria-hidden="true"></i>
+  <!-- /ko -->
+  <!-- ko if: showText -->
+  <span data-bind="text: buttonText"
+        aria-hidden="true"></span>
+  <!-- /ko -->
+  <!-- ko if:  right && iconClass() -->
+  <i data-bind="attr: {'class': iconClass}"
+     aria-hidden="true"></i>
+  <!-- /ko -->
+</button>
+<!-- /ko -->
+</script>

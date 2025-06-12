@@ -1,0 +1,386 @@
+(ns lupapalvelu.invoices.integration.sap-sbo.v2
+   "V2 refers to the newer `S/4HANA` version of the API, which will replace V1."
+  (:require [lupapalvelu.invoices.integration.generate-impl :as impl]
+            [lupapalvelu.invoices.integration.sap-sbo.common :as sap-common]
+            [lupapalvelu.xml.util :as xml-util]
+            [schema.core :as sc])
+  (:import [jakarta.xml.bind JAXBContext]
+           [lupapalvelu.sap_sbo.v2 ObjectFactory
+                                   SBOSalesOrderContainerType
+                                   SBOSalesOrderType
+                                   SBOSalesOrderType$BillingParty1
+                                   SBOSalesOrderType$BillingParty2
+                                   SBOSalesOrderType$LineItem
+                                   SBOSalesOrderType$OrderParty
+                                   SBOSalesOrderType$PayerParty
+                                   SBOSalesOrderType$ShipToParty]))
+
+(set! *warn-on-reflection* true)
+
+(def ^ObjectFactory factory (ObjectFactory.))
+
+(def jaxb-context (JAXBContext/newInstance ^Class/1 (into-array [SBOSalesOrderContainerType])))
+
+(def root-schema-path "V2 schema path'" "invoices/sap_sbo/MainSchema.xsd")
+
+(def root-schema "V2 schema instance'" (xml-util/load-schema root-schema-path))
+
+;;; Empty XML entities
+
+;; The schema specifies that all the fields are mandatory, but doesn't
+;; actually require that they contain anything.
+
+(def empty-order-party (-> (SBOSalesOrderType$OrderParty/builder)
+                           (.withCustomerID "")
+                           (.withCustomerOVT "")
+                           (.withCustomerYID "")
+                           (.withInfoAddress1 "")
+                           (.withInfoAddress2 "")
+                           (.withInfoCity "")
+                           (.withInfoCustomerID "")
+                           (.withInfoCustomerOVT "")
+                           (.withInfoCustomerYID "")
+                           (.withInfoName1 "")
+                           (.withInfoName2 "")
+                           (.withInfoName3 "")
+                           (.withInfoName4 "")
+                           (.withInfoPOCity "")
+                           (.withInfoPOCode "")
+                           (.withInfoPOPostalcode "")
+                           (.withInfoPostalcode "")
+                           (.withPriorityAddress1 "")
+                           (.withPriorityAddress2 "")
+                           (.withPriorityCity "")
+                           (.withPriorityName1 "")
+                           (.withPriorityName2 "")
+                           (.withPriorityName3 "")
+                           (.withPriorityName4 "")
+                           (.withPriorityPOCity "")
+                           (.withPriorityPOCode "")
+                           (.withPriorityPOPostalcode "")
+                           (.withPriorityPostalcode "")
+                           (.withSAPCustomerID "")
+                           (.withTemporaryAddress1 "")
+                           (.withTemporaryAddress2 "")
+                           (.withTemporaryCity "")
+                           (.withTemporaryPOCity "")
+                           (.withTemporaryPOCode "")
+                           (.withTemporaryPOPostalcode "")
+                           (.withTemporaryPostalcode "")
+                           (.build)))
+
+(def empty-billing-party-1 (-> (SBOSalesOrderType$BillingParty1/builder)
+                               (.withCustomerID "")
+                               (.withCustomerOVT "")
+                               (.withCustomerYID "")
+                               (.withInfoAddress1 "")
+                               (.withInfoAddress2 "")
+                               (.withInfoCity "")
+                               (.withInfoCustomerID "")
+                               (.withInfoCustomerOVT "")
+                               (.withInfoCustomerYID "")
+                               (.withInfoName1 "")
+                               (.withInfoName2 "")
+                               (.withInfoName3 "")
+                               (.withInfoName4 "")
+                               (.withInfoPOCity "")
+                               (.withInfoPOCode "")
+                               (.withInfoPOPostalcode "")
+                               (.withInfoPostalcode "")
+                               (.withPriorityAddress1 "")
+                               (.withPriorityAddress2 "")
+                               (.withPriorityCity "")
+                               (.withPriorityName1 "")
+                               (.withPriorityName2 "")
+                               (.withPriorityName3 "")
+                               (.withPriorityName4 "")
+                               (.withPriorityPOCity "")
+                               (.withPriorityPOCode "")
+                               (.withPriorityPOPostalcode "")
+                               (.withPriorityPostalcode "")
+                               (.withSAPCustomerID "")
+                               (.withTemporaryAddress1 "")
+                               (.withTemporaryAddress2 "")
+                               (.withTemporaryCity "")
+                               (.withTemporaryPOCity "")
+                               (.withTemporaryPOCode "")
+                               (.withTemporaryPOPostalcode "")
+                               (.withTemporaryPostalcode "")
+                               .build))
+
+(def empty-billing-party-2 (-> (SBOSalesOrderType$BillingParty2/builder)
+                               (.withCustomerID "")
+                               (.withCustomerOVT "")
+                               (.withCustomerYID "")
+                               (.withInfoAddress1 "")
+                               (.withInfoAddress2 "")
+                               (.withInfoCity "")
+                               (.withInfoCustomerID "")
+                               (.withInfoCustomerOVT "")
+                               (.withInfoCustomerYID "")
+                               (.withInfoName1 "")
+                               (.withInfoName2 "")
+                               (.withInfoName3 "")
+                               (.withInfoName4 "")
+                               (.withInfoPOCity "")
+                               (.withInfoPOCode "")
+                               (.withInfoPOPostalcode "")
+                               (.withInfoPostalcode "")
+                               (.withPriorityAddress1 "")
+                               (.withPriorityAddress2 "")
+                               (.withPriorityCity "")
+                               (.withPriorityName1 "")
+                               (.withPriorityName2 "")
+                               (.withPriorityName3 "")
+                               (.withPriorityName4 "")
+                               (.withPriorityPOCity "")
+                               (.withPriorityPOCode "")
+                               (.withPriorityPOPostalcode "")
+                               (.withPriorityPostalcode "")
+                               (.withSAPCustomerID "")
+                               (.withTemporaryAddress1 "")
+                               (.withTemporaryAddress2 "")
+                               (.withTemporaryCity "")
+                               (.withTemporaryPOCity "")
+                               (.withTemporaryPOCode "")
+                               (.withTemporaryPOPostalcode "")
+                               (.withTemporaryPostalcode "")
+                               .build))
+
+(def empty-payer-party (-> (SBOSalesOrderType$PayerParty/builder)
+                           (.withCustomerID "")
+                           (.withCustomerOVT "")
+                           (.withCustomerYID "")
+                           (.withInfoAddress1 "")
+                           (.withInfoAddress2 "")
+                           (.withInfoCity "")
+                           (.withInfoCustomerID "")
+                           (.withInfoCustomerOVT "")
+                           (.withInfoCustomerYID "")
+                           (.withInfoName1 "")
+                           (.withInfoName2 "")
+                           (.withInfoName3 "")
+                           (.withInfoName4 "")
+                           (.withInfoPOCity "")
+                           (.withInfoPOCode "")
+                           (.withInfoPOPostalcode "")
+                           (.withInfoPostalcode "")
+                           (.withPriorityAddress1 "")
+                           (.withPriorityAddress2 "")
+                           (.withPriorityCity "")
+                           (.withPriorityName1 "")
+                           (.withPriorityName2 "")
+                           (.withPriorityName3 "")
+                           (.withPriorityName4 "")
+                           (.withPriorityPOCity "")
+                           (.withPriorityPOCode "")
+                           (.withPriorityPOPostalcode "")
+                           (.withPriorityPostalcode "")
+                           (.withSAPCustomerID "")
+                           (.withTemporaryAddress1 "")
+                           (.withTemporaryAddress2 "")
+                           (.withTemporaryCity "")
+                           (.withTemporaryPOCity "")
+                           (.withTemporaryPOCode "")
+                           (.withTemporaryPOPostalcode "")
+                           (.withTemporaryPostalcode "")
+                           .build))
+
+(def empty-ship-to-party (-> (SBOSalesOrderType$ShipToParty/builder)
+                             (.withCustomerID "")
+                             (.withCustomerOVT "")
+                             (.withCustomerYID "")
+                             (.withInfoAddress1 "")
+                             (.withInfoAddress2 "")
+                             (.withInfoCity "")
+                             (.withInfoCustomerID "")
+                             (.withInfoCustomerOVT "")
+                             (.withInfoCustomerYID "")
+                             (.withInfoName1 "")
+                             (.withInfoName2 "")
+                             (.withInfoName3 "")
+                             (.withInfoName4 "")
+                             (.withInfoPOCity "")
+                             (.withInfoPOCode "")
+                             (.withInfoPOPostalcode "")
+                             (.withInfoPostalcode "")
+                             (.withPriorityAddress1 "")
+                             (.withPriorityAddress2 "")
+                             (.withPriorityCity "")
+                             (.withPriorityName1 "")
+                             (.withPriorityName2 "")
+                             (.withPriorityName3 "")
+                             (.withPriorityName4 "")
+                             (.withPriorityPOCity "")
+                             (.withPriorityPOCode "")
+                             (.withPriorityPOPostalcode "")
+                             (.withPriorityPostalcode "")
+                             (.withSAPCustomerID "")
+                             (.withTemporaryAddress1 "")
+                             (.withTemporaryAddress2 "")
+                             (.withTemporaryCity "")
+                             (.withTemporaryPOCity "")
+                             (.withTemporaryPOCode "")
+                             (.withTemporaryPOPostalcode "")
+                             (.withTemporaryPostalcode "")
+                             .build))
+
+(def empty-line-item (-> (SBOSalesOrderType$LineItem/builder)
+                         (.withBuilding "")
+                         (.withBusinessEntity "")
+                         (.withFunctionalArea "")
+                         (.withGroupingFactor "")
+                         (.withLineTextL1 "") ; LineTextL1-6 replaces LineText
+                         (.withLineTextL2 "")
+                         (.withLineTextL3 "")
+                         (.withLineTextL4 "")
+                         (.withLineTextL5 "")
+                         (.withLineTextL6 "")
+                         (.withMaterial "")
+                         (.withMaterialDescription "")
+                         (.withNetPrice "")
+                         (.withOrderItemNumber "")
+                         (.withProfitCenter "")
+                         (.withProperty "")
+                         (.withQuantity "")
+                         (.withRentalObject "")
+                         (.withTaxCode "") ; max 2
+                         (.withUnit "") ; max 3
+                         (.withWBSElement "")
+                         .build))
+
+(def empty-items [empty-line-item])
+
+(def ^SBOSalesOrderType empty-sales-order
+  (-> (SBOSalesOrderType/builder)
+      (.withAlreadyPrintedFlag "")
+      (.withBillTextL1 "") ; BillTextL1-6 replaces BillText
+      (.withBillTextL2 "")
+      (.withBillTextL3 "")
+      (.withBillTextL4 "")
+      (.withBillTextL5 "")
+      (.withBillTextL6 "")
+      (.withBillingBlock "") ; Laskulukitus, optional, 4 chars
+      (.withBillingDate "") ; Laskun päivämäärä, optional, YYYYmmdd
+      (.withBillingParty1 empty-billing-party-1)
+      (.withBillingParty2 empty-billing-party-2)
+      (.withContractNumber "")
+      (.withDistributionChannel "") ; Jakelutie, required, 2 chars
+      (.withDivision "") ; Sektori, required, 2 chars
+      (.withHiddenTextL1 "") ; HiddenTextL1-6 replaces BillText
+      (.withHiddenTextL2 "")
+      (.withHiddenTextL3 "")
+      (.withHiddenTextL4 "")
+      (.withHiddenTextL5 "")
+      (.withHiddenTextL6 "")
+      (.withLineItem ^Iterable empty-items)
+      (.withOrderParty empty-order-party)
+      (.withOrderReason "") ; Tilaussyy, optional, 3 chars
+      (.withOrderType "") ; Tilauslaji, required, max 4
+      (.withOriginalOrder "") ; Hyvitettävän laskun numero, optional, 10 chars
+      (.withPMNTTERM "") ; Maksuehto, optional, 4 chars
+      (.withPONumber "") ; Ostotilausnumero, optional, 35 chars
+      (.withPayerParty empty-payer-party)
+      (.withPaymentReference "")
+      (.withPricingDate "") ; Hinnoittelu päivämäärä, optional, YYYYmmdd
+      (.withReference "") ; Laskunumero, optional, 10 chars
+      (.withReferenceText "") ; Viitteemme teksti, optional, 20 chars
+      (.withSalesDistrict "") ; Myyntipiiri, optional, 6 chars
+      (.withSalesGroup "") ; Myyntiryhmä, optional, 3 chars
+      (.withSalesOffice "") ; Myyntitoimisto, required, 4 chars
+      (.withSalesOrg "") ; Myyntiorganisaatio, virastotunnus, required, 4 chars
+      (.withSenderId "") ; Lähettäjätunnus, required, max 5 chars
+      (.withShipToParty empty-ship-to-party)
+      .build))
+
+;;; SAP XML builders
+
+(sc/defn make-order-party
+  [{:keys [city customer-id customer-ovt customer-yid
+           postal-code priority-addresses priority-names
+           sap-customer-id]} :- sap-common/OrderParty]
+  (-> (SBOSalesOrderType$OrderParty/copyOf empty-order-party)
+      (.withCustomerID (or customer-id ""))
+      (.withCustomerOVT (or customer-ovt ""))
+      (.withCustomerYID (or customer-yid ""))
+      (.withPriorityAddress1 (get priority-addresses 0 ""))
+      (.withPriorityAddress2 (get priority-addresses 1 ""))
+      (.withPriorityCity (or city ""))
+      (.withPriorityName1 (get priority-names 0 ""))
+      (.withPriorityName2 (get priority-names 1 ""))
+      (.withPriorityName3 (get priority-names 2 ""))
+      (.withPriorityName4 (get priority-names 3 ""))
+      (.withPriorityPostalcode (or postal-code ""))
+      (.withSAPCustomerID (or sap-customer-id ""))
+      (.build)))
+
+(sc/defn make-line-item
+  [{:keys [material material-description price quantity unit wbs-element]} :- sap-common/LineItem]
+  (-> (SBOSalesOrderType$LineItem/copyOf empty-line-item)
+      (.withMaterial material)
+      (.withMaterialDescription (or material-description ""))
+      (.withNetPrice price)
+      (.withQuantity quantity)
+      (.withUnit (or unit ""))
+      (.withWBSElement wbs-element)
+      .build))
+
+(sc/defn make-sales-order
+  [{:keys [bill-text distribution-channel division
+           line-items order-party order-type reference po-number
+           sales-office sales-org sender-id]} :- sap-common/SalesOrder]
+  (-> (SBOSalesOrderType/copyOf empty-sales-order)
+      (.withBillTextL1 (or bill-text ""))
+      (.withBillingParty1 empty-billing-party-1)
+      (.withBillingParty2 empty-billing-party-2)
+      (.withDistributionChannel distribution-channel)
+      (.withDivision division)
+      (.withLineItem ^Iterable (mapv make-line-item line-items))
+      (.withOrderParty (make-order-party order-party))
+      (.withOrderType order-type)
+      (.withPayerParty empty-payer-party)
+      (.withPONumber (or po-number ""))
+      (.withReference reference)
+      (.withSalesOffice sales-office)
+      (.withSalesOrg sales-org)
+      (.withSenderId sender-id)
+      (.withShipToParty empty-ship-to-party)
+      .build))
+
+(sc/defn make-sales-order-container
+  [orders :- sap-common/SalesOrderContainer]
+  (.createSBOSalesOrderContainer
+    factory
+    (-> (SBOSalesOrderContainerType/builder)
+        (.addSBOSalesOrder ^Iterable (mapv make-sales-order orders))
+        .build)))
+
+(defn doc->xml
+  ([document]
+   (doc->xml document {}))
+  ([document options]
+   (xml-util/->xml (merge
+                     {:document      document
+                      :jaxb-context  jaxb-context
+                      :pretty-print? false
+                      :schema        root-schema}
+                     options))))
+
+(defn ->xml
+  ([config invoices lang]
+   (->xml config invoices lang true))
+  ([config invoices lang pretty-print?]
+   (let [result (sap-common/make-sales-orders-data config invoices lang)]
+     (if (:error result)
+       result
+       (-> result
+           :sales-orders
+           make-sales-order-container
+           (doc->xml {:pretty-print? pretty-print?}))))))
+
+(defmethod impl/generate-invoice-transfer-batch "sap-sbo-v2"
+  [{:keys [cfg created lang invoices pretty-print?] :or {lang :fi}}]
+  (let [result (->xml cfg invoices lang pretty-print?)]
+    (if (string? result)
+      (sap-common/build-response cfg created result)
+      result)))

@@ -1,0 +1,85 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:definition
+   {:fi
+    "rakennuksen tila, joka on kokonaan tai pääasiallisesti maanpinnan alapuolella"},
+   :prefLabel {:en "Basement", :sv "Källare", :fi "Kellari"},
+   :codeValue "01",
+   :created "2024-11-20T13:33:05.784Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sijaintikerroksenTarkenne/codes/01/members/",
+   :modified "2024-11-20T13:33:19.192Z",
+   :status "VALID",
+   :id "7fcd9501-251a-4110-952b-12588467e342",
+   :statusModified "2024-11-20T13:33:05.784Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sijaintikerroksenTarkenne/codes/01",
+   :conceptUriInVocabularies
+   "http://uri.suomi.fi/terminology/rakymp/c605",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/sijaintikerroksenTarkenne/code/01",
+   :hierarchyLevel 1}
+  {:definition
+   {:fi
+    "rakennuksen tila, joka sijaitsee rakennuksen ylimmän kerroksen yläpuolella ja pääosin julkisivun ja vesikaton leikkauslinjan määrittämän tason yläpuolella ja jossa pääsee kulkemaan"},
+   :prefLabel {:en "Attic", :sv "Vind", :fi "Ullakko"},
+   :codeValue "02",
+   :created "2024-11-20T13:34:37.496Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sijaintikerroksenTarkenne/codes/02/members/",
+   :modified "2024-11-20T13:34:37.496Z",
+   :status "VALID",
+   :id "df30f5a8-065f-4887-b8d6-d5251d18fa3f",
+   :statusModified "2024-11-20T13:34:37.496Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sijaintikerroksenTarkenne/codes/02",
+   :conceptUriInVocabularies
+   "http://uri.suomi.fi/terminology/rakymp/c607",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/sijaintikerroksenTarkenne/code/02",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:43:48.505Z"}

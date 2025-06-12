@@ -1,0 +1,697 @@
+;; Ryhti-Lupapiste data model diff
+;; chapter       where the entity is defined in "Rakentamislupa ja rakennuskohde 2025"
+;; ryhti-fi      name of entity in Ryhti (Finnish)
+;; ryhti-en      name of entity in Ryhti (English)
+;; lupis-loc     name of entity as localized in Lupapiste (Finnish)
+;; lupis-kw      name of entity in Lupapiste code (Finglish)
+;; ryhti-uuid    truthy when the entity has a UUID in Ryhti, is kw when named
+;; lupis-id      truthy when the entity has an ID of some kind in Lupapiste, is kw when shared
+;; notes         freeform notes about the entity
+;; group         keyword for grouping entities related to each other
+;; ignored?      true if the entity is not relevant for Lupapiste
+
+;; REPL call for generating the ryhti-diff.md:
+;;(let [{:keys [entities groups]} (edn/decode (slurp "docs/datamodel/ryhti-diff.edn"))
+;;      loc-group                 #(get-in groups [% :loc])
+;;      loc-id                    #(cond
+;;                                   (keyword? %) (name %)
+;;                                   %            "Kyllä"
+;;                                   :else        "Ei")
+;;      loc-ids                   #(format "\n    - Ryhti ID: %s\n    - Lupapiste ID: %s"
+;;                                   (loc-id %1)
+;;                                   (loc-id %2))
+;;      loc-terms                 #(if (and %1 %2)
+;;                                   (format "\n    - Lupapisteen termi: %s%s"
+;;                                     (or %1 "-")
+;;                                     (if %2 (str " (" (name %2) ")") ""))
+;;                                   "")
+;;      loc-notes                 #(or (some->> (seq %)
+;;                                       (mapv (partial str "      - "))
+;;                                       (ss/join "\n")
+;;                                       (str "\n    - Huomioita\n"))
+;;                                   "")
+;;      loc-ryhti-entity          (fn [{:keys [chapter ryhti-fi ryhti-uuid lupis-id lupis-kw lupis-loc notes]}]
+;;                                  (str chapter " " ryhti-fi
+;;                                    (loc-ids ryhti-uuid lupis-id)
+;;                                    (loc-terms lupis-loc lupis-kw)
+;;                                    (loc-notes notes)))]
+;;  (->> entities
+;;    (remove :ignored?)
+;;    (group-by :group)
+;;    (sort-by #(get-in groups [(first %) :order]))
+;;    (mapv (fn [[k vals]]
+;;            (format "%s%s%s"
+;;              (str "### " (loc-group k))
+;;              (or (some->> (get-in groups [k :depends-on])
+;;                    seq
+;;                    (mapv loc-group)
+;;                    (ss/join "\n  - ")
+;;                    (str "\n- Riippuvuudet\n  - "))
+;;                "\n- Ei riippuvuuksia")
+;;              (->> vals
+;;                (reduce #(str %1 "\n  - " (loc-ryhti-entity %2)) "")
+;;                ss/join
+;;                (str "\n- Ryhti-osiot")))))
+;;    (ss/join "\n\n")
+;;    println))
+
+{:groups   {:application                {:loc    "Hanke"
+                                         :order  -1
+                                         :ticket "LPK-7432"}
+            :address                    {:loc    "Osoite"
+                                         :order  0
+                                         :ticket "LPK-7433"}
+            :verdict                    {:loc        "Päätös"
+                                         :depends-on [:statute :regulation]
+                                         :order      1
+                                         :ticket "LPK-7434"}
+            :review                     {:loc        "Katselmus"
+                                         :depends-on [:verdict]
+                                         :order      1
+                                         :ticket     "LPK-7435"}
+            :location                   {:loc        "Sijainti"
+                                         :depends-on [:building :structure]
+                                         :order      1
+                                         :ticket     "LPK-7437"}
+            :operation                  {:loc    "Toimenpide"
+                                         :order  1
+                                         :ticket "LPK-7438"}
+            :structure                  {:loc    "Rakennelma"
+                                         :order  0
+                                         :ticket "LPK-7439"}
+            :structure.section          {:loc        "Rakennelman osa"
+                                         :depends-on [:structure]
+                                         :order      1
+                                         :ticket     "LPK-7440"}
+            :building                   {:loc    "Rakennus"
+                                         :order  0
+                                         :ticket "LPK-7121"}
+            :building.section           {:loc        "Rakennuksen osa"
+                                         :depends-on [:building]
+                                         :order      1
+                                         :ticket     "LPK-7441"}
+            :building.section.usage     {:loc        "Rakennuksen osan käyttötiedot"
+                                         :depends-on [:building.section]
+                                         :order      2
+                                         :ticket     "LPK-7442"}
+            :building.section.technical {:loc        "Osan tekniset tiedot"
+                                         :depends-on [:building.section :structure.section]
+                                         :order      2
+                                         :ticket     "LPK-7443"}
+            :building.section.energy    {:loc        "Osan energiatiedot"
+                                         :depends-on [:building.section :structure.section]
+                                         :order      2
+                                         :ticket     "LPK-7444"}
+            :building.section.apartment {:loc        "Rakennuksen osan huoneisto"
+                                         :depends-on [:building.section]
+                                         :order      2
+                                         :ticket     "LPK-7445"}
+            :building.section.shelter   {:loc        "Rakennuksen osan väestönsuoja"
+                                         :depends-on [:building.section]
+                                         :order      2
+                                         :ticket     "LPK-7446"}
+            :building.section.material  {:loc        "Osan materiaalitiedot"
+                                         :depends-on [:building.section :structure.section]
+                                         :order      2
+                                         :ticket     "LPK-7447"}
+            :building.section.exterior  {:loc        "Osan ulkokuoritiedot"
+                                         :depends-on [:building.section :structure.section]
+                                         :order      2
+                                         :ticket     "LPK-7609"}
+            :building.section.interior  {:loc        "Osan sisätiedot"
+                                         :depends-on [:building.section]
+                                         :order      2
+                                         :ticket     "LPK-7637"}
+            :party                      {:loc    "Osapuoli"
+                                         :order  0
+                                         :ticket "LPK-7448"}
+
+            :party.responsibilities     {:loc        "Vastuuosapuolet"
+                                         :depends-on [:party]
+                                         :order      1
+                                         :ticket     "LPK-7448"}
+            :attachment                 {:loc        "Liite"
+                                         :depends-on [:building.section :structure.section]
+                                         :order      2
+                                         :ticket     "LPK-7449"}
+            :owner                      {:loc        "Rakennuksen omistaja"
+                                         :depends-on [:building :structure :address]
+                                         :order      1
+                                         :ticket     "LPK-7450"}
+            :property                   {:loc    "Kiinteistö"
+                                         :order  0
+                                         :ticket "LPK-7532"}
+            :deviation                  {:loc    "Poikkeamislupa"
+                                         :order  1
+                                         :ticket "LPK-7531"}
+            :statute                    {:loc    "Säädösviite"
+                                         :order  0
+                                         :ticket "LPK-7557"}
+            :regulation                 {:loc    "Lupaehto"
+                                         :order  0
+                                         :ticket "LPK-7556"}
+            :specific-area              {:loc    "Erityisalue"
+                                         :order  0
+                                         :ticket "LPK-7559"}
+            :building-site              {:loc        "Rakennuspaikka"
+                                         :order      1
+                                         :depends-on [:application]}
+            :bim                        {:loc        "BIM"
+                                         :order      1
+                                         :depends-on [:attachment]}
+            }
+ :entities [{:chapter    "5.2."
+             :ryhti-fi   "RakentamislupaAsia"
+             :ryhti-en   "buildingPermitIssue"
+             :lupis-loc  "Hanke"
+             :lupis-kw   :application
+             :ryhti-uuid :PLT
+             :lupis-id   :application-id
+             :group      :application
+             :notes      ["Huom. myös MaisematyöLupaAsia, purkamisLupaAsia, ja poikkeamislupaAsia"]}
+            {:chapter    "5.3."
+             :ryhti-fi   "RakennuskohdeAsia"
+             :ryhti-en   "buildingObjectIssue"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :operation}
+            {:chapter  "5.4."
+             :ryhti-fi "DVV:N lupa-Asia"
+             :ryhti-en "dvvPermitIssue"
+             :notes    ["Only used for importing old apps from DVV"]
+             :ignored? true}
+            {:chapter    "5.5."
+             :ryhti-fi   "Rakentamislupahakemus"
+             :ryhti-en   "buildingPermitApplication"
+             :lupis-kw   :R
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :application}
+            {:chapter    "5.6."
+             :ryhti-fi   "Rakentamislupapäätös"
+             :ryhti-en   "Decision"
+             :lupis-loc  "Päätös"
+             :lupis-kw   :verdict
+             :ryhti-uuid true
+             :lupis-id   :verdict-id
+             :group      :verdict}
+            {:chapter    "5.7."
+             :ryhti-fi   "Lupamääräys"
+             :ryhti-en   "permitRegulation"
+             :lupis-loc  "Lupamääräys"
+             :lupis-kw   :maaraykset
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :regulation}
+            {:chapter    "5.8."
+             :ryhti-fi   "Säädösviite"
+             :ryhti-en   "guidingStatute"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :statute}
+            {:chapter    "5.9."
+             :ryhti-fi   "MääräyksestäPoikkeaminen"
+             :ryhti-en   "acceptedDeviation (päätöksellä) tai callForDeviation (hakemuksella)"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Huom. DeviationPermitDecision liityntäkatalogissa"]
+             :group      :deviation}
+            {:chapter    "5.10."
+             :ryhti-fi   "Jatkoaikapäätös"
+             :ryhti-en   "extensionDecision"
+             :lupis-loc  "Päätös"
+             :lupis-kw   :verdict
+             :ryhti-uuid true
+             :lupis-id   :verdict-id
+             :group      :verdict}
+            {:chapter    "5.11."
+             :ryhti-fi   "Muutospäätös"
+             :ryhti-en   "changePermit"
+             :lupis-loc  "Muutoslupa"
+             :lupis-kw   :changePermit
+             :ryhti-uuid true
+             :lupis-id   :verdict-id
+             :notes      ["Jostain syystä nimellä permit vaikka on decision"]
+             :group      :verdict}
+            {:chapter    "5.12."
+             :ryhti-fi   "Osoite"
+             :ryhti-en   "Address"
+             :lupis-loc  "Osoite"
+             :lupis-kw   :address
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :address}
+            {:chapter    "5.13."
+             :ryhti-fi   "Rakennuspaikka"
+             :ryhti-en   "buildingSite"
+             :lupis-loc  "Rakennuspaikka"
+             :lupis-kw   :rakennuspaikka
+             :ryhti-uuid true
+             :lupis-id   :document-id
+             :notes      ["Osa hanketta mutta erotettu koska Jira ei kestänyt liian isoa kuvausta"]
+             :group      :building-site}
+            {:chapter    "5.14."
+             :ryhti-fi   "Rakentamistoimenpide"
+             :ryhti-en   "constructionAction"
+             :lupis-loc  "Toimenpide"
+             :lupis-kw   :operation
+             :ryhti-uuid true
+             :lupis-id   true
+             :group      :operation}
+            {:chapter    "5.15."
+             :ryhti-fi   "Rakentamishanke"
+             :ryhti-en   "constructionProject"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :application}
+            {:chapter    "5.16."
+             :ryhti-fi   "Suunnittelija"
+             :ryhti-en   "Planner"
+             :lupis-loc  "Suunnittelija"
+             :lupis-kw   :designer
+             :ryhti-uuid true
+             :lupis-id   :document-id
+             :group      :party.responsibilities}
+            {:chapter    "5.17."
+             :ryhti-fi   "Työnjohtaja"
+             :ryhti-en   "Foreman"
+             :lupis-loc  "Työnjohtaja"
+             :lupis-kw   :foreman
+             :ryhti-uuid true
+             :lupis-id   :document-id
+             :group      :party.responsibilities
+             :notes      ["Huom. Rakennelmaviite eli ForemanStructureReference liityntäkatalogissa"]}
+            {:chapter    "5.18."
+             :ryhti-fi   "Katselmus"
+             :ryhti-en   "Inspection"
+             :lupis-loc  "Katselmus"
+             :lupis-kw   :review
+             :ryhti-uuid true
+             :lupis-id   :task-id
+             :group      :review}
+            {:chapter    "5.19."
+             :ryhti-fi   "HankkeeseenRyhtyvä"
+             :ryhti-en   "engagingParty"
+             :lupis-loc  "Hakija (hankkeeseen ryhtyvä)"
+             :lupis-kw   :applicant
+             :ryhti-uuid true
+             :lupis-id   :document-id
+             :group      :party}
+            {:chapter    "5.20."
+             :ryhti-fi   "RakennuskohteenMuutos"
+             :ryhti-en   "changeInBuildingObject"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :operation}
+            {:chapter    "5.21."
+             :ryhti-fi   "Rakennus"
+             :ryhti-en   "Building (hankerakennus) tai finishedBuilding (valmis rakennus)"
+             :lupis-loc  "Rakennus"
+             :lupis-kw   :building
+             :ryhti-uuid :PRT
+             :lupis-id   false
+             :group      :building}
+            {:chapter    "5.22."
+             :ryhti-fi   "HallinnollinenSijaintiYksikkö"
+             :ryhti-en   "administrativeLocationUnit (voimassa oleva) tai decisionAdministrativeLocationUnit (päätöksen aikainen)"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :location}
+            {:chapter    "5.23."
+             :ryhti-fi   "RakennuksenOsa"
+             :ryhti-en   "buildingSection"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section}
+            {:chapter    "5.24."
+             :ryhti-fi   "Materiaalitiedot"
+             :ryhti-en   "materialData"
+             :ryhti-uuid false
+             :lupis-id   false
+             :group      :building.section.material}
+            {:chapter    "5.25."
+             :ryhti-fi   "KantavienRakenteidenRakennusaine"
+             :ryhti-en   "buildingMaterialOfLoadBearingStructures"
+             :lupis-loc  "Kantavien rakenteiden pääasiallinen rakennusmateriaali"
+             :lupis-kw   :kantavaRakennusaine
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen lomakkeella"]
+             :group      :building.section.material}
+            {:chapter    "5.26."
+             :ryhti-fi   "Julkisivumateriaali"
+             :ryhti-en   "facadeMaterial"
+             :lupis-loc  "Julkisivumateriaali"
+             :lupis-kw   :julkisivu
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen lomakkeella"]
+             :group      :building.section.material}
+            {:chapter    "5.27."
+             :ryhti-fi   "Energiatiedot"
+             :ryhti-en   "energyData"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen lomakkeella"
+                          "Energialuokka, sähköenergian lähde jne."]
+             :group      :building.section.energy}
+            {:chapter    "5.28."
+             :ryhti-fi   "Lämmitystapa"
+             :ryhti-en   "heatingMethod"
+             :lupis-loc  "Lämmitystapa"
+             :lupis-kw   :lammitystapa
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen lomakkeella"]
+             :group      :building.section.energy}
+            {:chapter    "5.29."
+             :ryhti-fi   "LämmitysenergianLähde"
+             :ryhti-en   "heatingEnergySource"
+             :lupis-loc  "Lämmön lähde"
+             :lupis-kw   :lammonlahde
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen lomakkeella"]
+             :group      :building.section.energy}
+            {:chapter    "5.30."
+             :ryhti-fi   "Jäähdytystapa"
+             :ryhti-en   "coolingMethod"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section.energy}
+            {:chapter    "5.31."
+             :ryhti-fi   "JäähdytysenergianLähde"
+             :ryhti-en   "coolingEnergySource"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section.energy}
+            {:chapter  "5.32."
+             :ryhti-fi "SähköenergianLähde"
+             :ryhti-en "electricalEnergySource"
+             :lupis-id false
+             :notes    ["Rakennuksen lomakkeella"
+                        "Lupiksessa lista eri kytkennöistä"]
+             :group    :building.section.energy}
+            {:chapter    "5.33."
+             :ryhti-fi   "Energiankulutus"
+             :ryhti-en   "calculatoryDeliveredEnergyUsage"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section.energy}
+            {:chapter    "5.34."
+             :ryhti-fi   "SisätilojenTiedot"
+             :ryhti-en   "interiorData"
+             :ryhti-uuid false
+             :lupis-id   false
+             :notes      ["Rakennuksen huoneistoala ja kellariala omana yksikkönään"]
+             :group      :building.section.interior}
+            {:chapter    "5.35."
+             :ryhti-fi   "UlkokuorenTiedot"
+             :ryhti-en   "exteriorData"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen tai rakennelman osan kerrosluku, korkeus, tilavuus, kokonaisala, jne. omana yksikkönään"]
+             :group      :building.section.exterior}
+            {:chapter    "5.36."
+             :ryhti-fi   "TalotekniikkaTiedot"
+             :ryhti-en   "buildingServicesEngineeringData"
+             :ryhti-uuid false
+             :lupis-id   false
+             :group      :building.section.technical}
+            {:chapter    "5.37."
+             :ryhti-fi   "Ilmanvaihtotapa"
+             :ryhti-en   "ventilationMethod"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section.technical}
+            {:chapter    "5.38."
+             :ryhti-fi   "Verkostoliittymä"
+             :ryhti-en   "networkConnection"
+             :lupis-loc  "Kytkin"
+             :lupis-kw   :kytkin
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Varuste on sekä ryhdissä että lupiksessa eri asia kuin tämä"]
+             :group      :building.section.technical}
+            {:chapter    "5.39."
+             :ryhti-fi   "RakennuksenKäyttötiedot"
+             :ryhti-en   "usageData"
+             :ryhti-uuid false
+             :lupis-id   false
+             :group      :building.section.usage}
+            {:chapter    "5.40."
+             :ryhti-fi   "RakennuksenKäyttötarkoitus"
+             :ryhti-en   "purpose"
+             :lupis-loc  "Pääasiallinen käyttötarkoitus"
+             :lupis-kw   :kayttotarkoitus
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Sana purpose tarkoittaa Lupiksessa kaavan käyttötarkoitusta"]
+             :group      :building.section.usage}
+            {:chapter    "5.41."
+             :ryhti-fi   "RakennuksenVaruste"
+             :ryhti-en   "equipment"
+             :lupis-loc  "Varuste"
+             :lupis-kw   :varusteet
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Liittymä/kytkin on sekä ryhdissä että lupiksessa eri asia kuin tämä"]
+             :group      :building.section.technical}
+            {:chapter    "5.42."
+             :ryhti-fi   "Sisäänkäynti"
+             :ryhti-en   "entrance"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section.interior}
+            {:chapter    "5.43."
+             :ryhti-fi   "Hissi"
+             :ryhti-en   "elevator"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Huom. hissi on tämän lisäksi rakennuksen varuste; tämä on hissikuilu"]
+             :group      :building.section.interior}
+            {:chapter    "5.44."
+             :ryhti-fi   "Väestönsuoja"
+             :ryhti-en   "civilDefenceShelter"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Lupiksessa varuste"]
+             :group      :building.section.shelter}
+            {:chapter    "5.45."
+             :ryhti-fi   "VäestönsuojanMuutRakennukset"
+             :ryhti-en   "civilDefenceShelterOtherBuildings"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :building.section.shelter}
+            {:chapter    "5.46."
+             :ryhti-fi   "Kokoontumistila"
+             :ryhti-en   "assemblyFacility"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Rakennuksen lomakkeella"]
+             :group      :building.section.shelter}
+            {:chapter    "5.47."
+             :ryhti-fi   "Rakennelma"
+             :ryhti-en   "structure"
+             :lupis-loc  "Rakennelma"
+             :lupis-kw   :rakennelma
+             :ryhti-uuid :PRKT
+             :lupis-id   false
+             :group      :structure}
+            {:chapter    "5.48."
+             :ryhti-fi   "RakennelmanOsa"
+             :ryhti-en   "structureSection"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :structure.section}
+            {:chapter    "5.49."
+             :ryhti-fi   "Huoneisto"
+             :ryhti-en   "apartment"
+             :lupis-loc  "Huoneisto"
+             :lupis-kw   :huoneistot
+             :ryhti-uuid :PHT
+             :lupis-id   false
+             :group      :building.section.apartment}
+            {:chapter    "5.50."
+             :ryhti-fi   "HuoneistonVaruste"
+             :ryhti-en   "apartmentEquipment"
+             :lupis-loc  "Kytkin"
+             :lupis-kw   :kytkin
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Huom. ero rakennuksen _varusteen_ ja huoneiston _kytkimen_ välillä lupiksessa"]
+             :group      :building.section.apartment}
+            {:chapter    "5.51."
+             :ryhti-fi   "OsoiterakenteenMukainenHuoneistoTunnus"
+             :ryhti-en   "addressApartmentIdentifier"
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Lupiksessa huoneistolomakkeella"]
+             :group      :building.section.apartment}
+            {:chapter    "5.52."
+             :ryhti-fi   "Rakennustietomalli"
+             :ryhti-en   "buildingInformationMoel"
+             :lupis-loc  "BIM tietomalli"
+             :lupis-kw   :ifc
+             :ryhti-uuid true
+             :lupis-id   :linked-file-metadata-id
+             :group      :bim}
+            {:chapter    "5.53."
+             :ryhti-fi   "Rakennussuunnitelma"
+             :ryhti-en   "constructionDesign"
+             :ryhti-uuid true
+             :lupis-id   :attachment-id
+             :notes      ["Liitetyyppi jolla yksi lisäkenttä"]
+             :group      :attachment}
+            {:chapter    "5.54."
+             :ryhti-fi   "Erityissuunnitelma"
+             :ryhti-en   "specialDesign"
+             :lupis-loc  "Erityissuunnitelma"
+             :lupis-kw   :erityissuunnitelma
+             :ryhti-uuid true
+             :lupis-id   :attachment-id
+             :notes      ["Liitetyyppi jolla yksi lisäkenttä"]
+             :group      :attachment}
+            {:chapter    "5.55."
+             :ryhti-fi   "Rakennusvalvonnan liiteasiakirja"
+             :ryhti-en   "BuildingAttachmentDocument"
+             :lupis-loc  "Liite"
+             :lupis-kw   :attachment
+             :ryhti-uuid true
+             :lupis-id   :attachment-id
+             :notes      ["Liitteen lajit todennäköisesti muuttuneet"]
+             :group      :attachment}
+            {:chapter    "5.56."
+             :ryhti-fi   "RakennuskohteenSijaintitiedot"
+             :ryhti-en   "location"
+             :lupis-loc  "Sijainti"
+             :lupis-kw   :location
+             :ryhti-uuid true
+             :lupis-id   false
+             :notes      ["Lupiksessa vain pistesijainti"
+                          "Liittyy sekä Rakennukseen että Rakennelmaan"]
+             :group      :location}
+            {:chapter    "5.57."
+             :ryhti-fi   "RakennuskohteenOmistaja"
+             :ryhti-en   "BuildingObjectOwner"
+             :lupis-loc  "Omistaja"
+             :lupis-kw   :omistaja
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :owner}
+            {:chapter    "5.58."
+             :ryhti-fi   "Toimija"
+             :ryhti-en   "Operator"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :party}
+            {:chapter    "5.59."
+             :ryhti-fi   "Yhteysosoite"
+             :ryhti-en   "contactAddress"
+             :lupis-loc  "Yhteysosoite"
+             :lupis-kw   :contact
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :address}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Poikkeamisen kohde"
+             :ryhti-en   "deviationObject"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :deviation}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Poikkeamislupahakemus"
+             :ryhti-en   "deviationPermitApplication"
+             :lupis-kw   :P
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :deviation}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "PoikkeamislupaAsia"
+             :ryhti-en   "deviationPermitIssue"
+             :lupis-loc  "Hanke"
+             :lupis-kw   :application
+             :ryhti-uuid :PLT
+             :lupis-id   :application-id
+             :group      :deviation}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Maisematyölupahakemus"
+             :ryhti-en   "landscapeWorkPermitApplication"
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :application
+             :notes      ["Huom. on lupapisteessä toimenpide; ei lupatyyppi kuten muut PermitApplicationit"]}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "ErityistäToimintaaVartenRakennettavaAlue"
+             :ryhti-en   "areaToBeBuiltForSpecificActivities"
+             :lupis-loc  "Erityistä toimintaa varten rakennettava alue"
+             :lupis-kw   :erityista-toimintaa-alue
+             :ryhti-uuid true
+             :lupis-id   false
+             :group      :specific-area}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Maisemalupapäätös"
+             :ryhti-en   "landscapeWorkPermitDecision"
+             :lupis-kw   :verdict
+             :lupis-loc  "Päätös"
+             :ryhti-uuid true
+             :lupis-id   :verdict-id
+             :group      :verdict}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "PurkamislupaHakemus"
+             :ryhti-en   "DemolitionPermitApplication"
+             :ryhti-uuid true
+             :lupis-id   :application-id
+             :group      :application}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Kiinteistö"
+             :ryhti-en   "Property"
+             :lupis-loc  "Kiinteistö"
+             :lupis-kw   :property
+             :ryhti-uuid false
+             :lupis-id   false
+             :group      :property}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Määräala"
+             :ryhti-en   "unseparatedParcel"
+             :lupis-loc  "Kiinteistön määräala"
+             :lupis-kw   :maaraAla
+             :ryhti-uuid false
+             :lupis-id   false
+             :group      :property}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "MaisematyöLupaAsia"
+             :ryhti-en   "LandscapeWorkPermitIssue"
+             :lupis-loc  "Hanke"
+             :lupis-kw   :application
+             :ryhti-uuid :PLT
+             :lupis-id   :application-id
+             :group      :application
+             :notes      ["Tämä on lupapisteessä tällä hetkellä toimenpide eikä hanketyyppi, toisin kuin P ja R asiat"]}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "PurkamislupaAsia"
+             :ryhti-en   "DemolitionPermitIssue"
+             :lupis-loc  "Hanke"
+             :lupis-kw   :application
+             :ryhti-uuid :PLT
+             :lupis-id   :application-id
+             :group      :application
+             :notes      ["Tämä on lupapisteessä tällä hetkellä toimenpide eikä hanketyyppi, toisin kuin P ja R asiat"]}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "PurkamisLupaPäätös"
+             :ryhti-en   "demolitionPermitDecision"
+             :lupis-kw   :verdict
+             :lupis-loc  "Päätös"
+             :ryhti-uuid true
+             :lupis-id   :verdict-id
+             :group      :verdict}
+            {:chapter    "Liityntäkatalogi"
+             :ryhti-fi   "Poikkeamislupapäätös"
+             :ryhti-en   "deviationPermitDecision"
+             :lupis-kw   :verdict
+             :lupis-loc  "Päätös"
+             :ryhti-uuid true
+             :lupis-id   :verdict-id
+             :group      :verdict}
+            ]}
+

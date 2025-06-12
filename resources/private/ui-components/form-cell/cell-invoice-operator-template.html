@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="cell-invoice-operator-template">
+  <select class="dropdown"
+          data-bind="attr: attributes,
+                     testId: testId,
+                     options: operators,
+                     optionsText: 'name',
+                     optionsValue: 'code',
+                     optionsAfterRender: setOptionDisable,
+                     value: value"></select>
+</script>

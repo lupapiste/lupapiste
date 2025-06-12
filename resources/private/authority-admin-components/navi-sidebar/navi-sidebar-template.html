@@ -1,0 +1,38 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="navi-sidebar-template">
+  <div class="navi-sidebar"
+       data-bind="css: {'navi-sidebar--menu': showMenu,
+                  'navi-sidebar--icon': iconsOnly},
+                  click: _.noop,
+                  clickBubble: false">
+    <div class="stacked">
+      <!-- ko foreach: menu -->
+      <!-- ko if: _.isUndefined( $data.showIf ) || $data.showIf() -->
+      <button class="sidebar-button"
+              data-bind="disable: $parent.isCurrentPage( page ),
+                         click: $parent.openPage,
+                         css: $parent.buttonCss(),
+                         testId: 'sidebar-' + page,
+                         feature: $data.feature">
+        <i data-bind="css: icon,
+                      ltitle: $parent.buttonTitle( $data )"></i>
+        <!-- ko ifnot: $parent.iconsOnly -->
+        <span data-bind="ltext: loc"></span>
+        <!-- /ko -->
+      </button>
+      <!-- /ko -->
+      <!-- /ko -->
+      <!-- ko ifnot: showMenu -->
+      <button class="sidebar-button-light"
+              data-bind="toggleClick: iconsOnly,
+                         css: buttonCss()">
+        <i data-bind="css: {'lupicon-chevron-small-left': !iconsOnly(),
+                      'lupicon-chevron-right': iconsOnly}"></i>
+        <!-- ko ifnot: iconsOnly -->
+        <span data-bind="ltext: 'navi-sidebar.minify'" ></span>
+        <!-- /ko -->
+      </button>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>

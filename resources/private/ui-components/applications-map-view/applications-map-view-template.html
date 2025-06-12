@@ -1,0 +1,30 @@
+<script class="ko-template" type="text/x-jquery-html"
+        id="applications-map-view-template">
+  <div class="applications-map-view">
+    <!-- ko if: selectedStates -->
+    <div class="pad--2 bg--white">
+      <h4 data-bind="ltext: 'a11y.filter.by-state.tab-text'"></h4>
+      <ul class="gap--h4" data-bind="foreach: selectedStates">
+        <li data-bind="text: $data"></li>
+      </ul>
+    </div>
+    <!-- /ko -->
+    <!-- ko ifnot: selectedStates -->
+    <applications-map-toggles params="selected: applicationType,
+                                      viewMode: viewMode">
+    </applications-map-toggles>
+    <!-- /ko -->
+
+    <div class="map-view-panel">
+      <div class="map-view-results"
+           data-bind="text: resultText,
+                      css: {'map-view-results--searching': searching}"></div>
+      <div class="applications-map-container"
+           data-bind="template: {afterRender: _.wrap( true, rendered )}">
+        <div id="applications-marker-map"
+               data-bind="event: {wheel: wheeling},
+                          css: {'map--focused': hasFocus}"></div>
+      </div>
+    </div>
+  </div>
+</script>

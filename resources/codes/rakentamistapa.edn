@@ -1,0 +1,77 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:description
+   {:fi
+    "Elementtirakenteiseksi rakennukseksi katsotaan rakennukset, joista yli puolet on tehdasvalmisteista tai joiden kantavista rakenteista tietyt osat esim. ulkoseinät seinät ovat tehdasvalmisteisia. "},
+   :prefLabel {:fi "Elementti", :sv "Element"},
+   :codeValue "01",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_runkotapa/codes/01/members/",
+   :modified "2018-01-01T00:00:00.000Z",
+   :status "VALID",
+   :id "5eb7c7d6-1daa-466a-8934-ecd6a41b0b48",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_runkotapa/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_runkotapa/code/01",
+   :hierarchyLevel 1}
+  {:description
+   {:fi
+    "Paikalla tehdyiksi rakennuksiksi katsotaan rakennukset, joiden kantavat rakenteet rakennetaan rakennuspaikalla. Paikalla tehdyssä rakennuksessa voivat enintään hormit porrassyöksyt, parvekkeet ja kylpyhuoneet olla tehdasvalmisteisia. "},
+   :prefLabel {:fi "Paikalla tehty", :sv "Uppförd på platsen"},
+   :codeValue "02",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_runkotapa/codes/02/members/",
+   :modified "2018-01-01T00:00:00.000Z",
+   :status "VALID",
+   :id "2046aa56-1343-4ec9-99bd-beb95b21aa79",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_runkotapa/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_runkotapa/code/02",
+   :hierarchyLevel 1}),
+ :modified "2023-12-04T06:23:14.365Z"}

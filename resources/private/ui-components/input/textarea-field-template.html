@@ -1,0 +1,15 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="textarea-field-template">
+  <div class="col--vertical">
+    <label class="lux"
+           data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
+    <textarea class="lux"
+              data-bind="textInput: value, attr: {placeholder: placeholder,
+                         id: id,
+                         name: id,
+                         'data-test-id': id,
+                         maxlength: maxlength},
+                         hasFocus: isSelected,
+                         css: {required: required && !value()},
+                         disable: disable"></textarea>
+  </div>
+</script>

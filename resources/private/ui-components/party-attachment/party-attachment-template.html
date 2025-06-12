@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="party-attachment-template">
+  <div class="party-attachment-input">
+    <div data-bind="visible: pending()" class="text-sm party-attachment-input__value">
+      <i class="lupicon-refresh icon-spin text-sm" title=""></i>
+      <span class="ml-2" data-bind="ltext: 'progress.add.one'"></span>
+    </div>
+    <div data-bind="visible: !pending() && currentAttachment()" class="osapuoli-attachment-input__value">
+      <div data-bind="text: currentAttachment() && currentAttachment().latestVersion && currentAttachment().latestVersion.filename">-</div>
+      <button class="secondary" data-bind="click: removeAttachment, visible: !readOnly, ltext: 'attachment.delete'"></button>
+    </div>
+    <div data-bind="visible: !pending() && !currentAttachment() && !readOnly">
+      <upload-zone params="upload: upload, singleFile: true"></upload-zone>
+    </div>
+  </div>
+</script>

@@ -1,0 +1,1049 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:definition
+   {:fi
+    "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+    :sv
+    "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+   :prefLabel
+   {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+   :codeValue "01",
+   :created "2024-11-20T16:59:48.251Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+   :modified "2024-11-20T16:59:48.251Z",
+   :status "VALID",
+   :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+   :statusModified "2024-11-20T16:59:48.251Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+   :conceptUriInVocabularies
+   "http://uri.suomi.fi/terminology/luvat/c84",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Commencement notification",
+    :fi "Aloittamisilmoitus",
+    :sv "Anmälan om inledande"},
+   :codeValue "0101",
+   :created "2024-11-20T16:59:48.275Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0101/members/",
+   :modified "2024-11-20T16:59:48.275Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "f54481bc-e3bb-47a9-991b-c9280e560bf5",
+   :statusModified "2024-11-20T16:59:48.275Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0101",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0101",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Start-up meeting", :fi "Aloituskokous", :sv "Inledande möte"},
+   :codeValue "0102",
+   :created "2024-11-20T16:59:48.292Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0102/members/",
+   :modified "2024-11-20T16:59:48.292Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "4cc9f65f-706d-4d40-ac6c-045c365d6e00",
+   :statusModified "2024-11-20T16:59:48.292Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0102",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0102",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Ground inspection",
+    :fi "Pohjakatselmus",
+    :sv "Grundbottensyn"},
+   :codeValue "0103",
+   :created "2024-11-20T16:59:48.308Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0103/members/",
+   :modified "2024-11-20T16:59:48.308Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "abf35281-e569-47dc-b5c9-6fe806bfb734",
+   :statusModified "2024-11-20T16:59:48.308Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0103",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0103",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Location inspection",
+    :fi "Sijaintikatselmus",
+    :sv "Placeringssyn"},
+   :codeValue "0104",
+   :created "2024-11-20T16:59:48.318Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0104/members/",
+   :modified "2024-11-20T16:59:48.318Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "aa8efaa3-7ea7-47e4-aa46-443c556021c6",
+   :statusModified "2024-11-20T16:59:48.318Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0104",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0104",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Structural inspection",
+    :fi "Rakennekatselmus",
+    :sv "Konstruktionssyn"},
+   :codeValue "0105",
+   :created "2024-11-20T16:59:48.327Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0105/members/",
+   :modified "2024-11-20T16:59:48.327Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "0b4c3f9c-fa07-4e7f-bb51-1be0460adedc",
+   :statusModified "2024-11-20T16:59:48.327Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0105",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0105",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Heating equipment inspection",
+    :fi "Lämpölaitteiden katselmus",
+    :sv "Besiktning av värmeaggregat"},
+   :codeValue "0106",
+   :created "2024-11-20T16:59:48.336Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0106/members/",
+   :modified "2024-11-20T16:59:48.336Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "af82141d-2f68-4ea7-a0ad-7ecb4b5581ab",
+   :statusModified "2024-11-20T16:59:48.336Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0106",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0106",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Water equipment inspection",
+    :fi "Vesilaitteiden katselmus",
+    :sv "Besiktning av vattenanordningar"},
+   :codeValue "0107",
+   :created "2024-11-20T16:59:48.345Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0107/members/",
+   :modified "2024-11-20T16:59:48.345Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "a9b66483-d5e5-4a5b-a383-1e67510adbd2",
+   :statusModified "2024-11-20T16:59:48.345Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0107",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0107",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Ventilation equipment inspection",
+    :fi "Ilmanvaihtolaitteiden katselmus",
+    :sv "Besiktning av ventilationsanordningar"},
+   :codeValue "0108",
+   :created "2024-11-20T16:59:48.353Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0108/members/",
+   :modified "2024-11-20T16:59:48.353Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "1e1c7d28-6260-4f13-b587-27ee6cff001b",
+   :statusModified "2024-11-20T16:59:48.353Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0108",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0108",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Partial final inspection",
+    :fi "Osittainen loppukatselmus",
+    :sv "Partiell slutsyn"},
+   :codeValue "0109",
+   :created "2024-11-20T16:59:48.362Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0109/members/",
+   :modified "2024-11-20T16:59:48.362Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "23ec80e6-c02d-48e8-9f7f-2c9b779d8817",
+   :statusModified "2024-11-20T16:59:48.362Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0109",
+   :order 10,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0109",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Final inspection", :fi "Loppukatselmus", :sv "Slutsyn"},
+   :codeValue "0110",
+   :created "2024-11-20T16:59:48.370Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0110/members/",
+   :modified "2024-11-20T16:59:48.370Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "ennalta suunniteltu tapahtuma tai tapahtumien muodostama kokonaisuus, jossa arvioidaan toiminnan tarkoituksenmukaisuutta ja toteutumista suhteessa suunnitelmiin sekä kartoitetaan mahdollisia kehitystarpeita",
+     :sv
+     "på förhand planerad händelse eller helhet av händelser, där man bedömer om verksamheten är ändamålsenlig och dess genomförande i relation till planerna samt kartlägger eventuella utvecklingsbehov"},
+    :prefLabel
+    {:en "Inspections", :fi "Katselmukset", :sv "Syneförrättningar"},
+    :codeValue "01",
+    :created "2024-11-20T16:59:48.251Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01/members/",
+    :modified "2024-11-20T16:59:48.251Z",
+    :status "VALID",
+    :id "be8351ea-3ffe-4232-8b8f-0df83adc3c13",
+    :statusModified "2024-11-20T16:59:48.251Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/01",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/luvat/c84",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "848f8f0b-231b-4d0d-be42-5655a4015dd7",
+   :statusModified "2024-11-20T16:59:48.370Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0110",
+   :order 11,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0110",
+   :hierarchyLevel 2}
+  {:definition
+   {:fi
+    "asemakaavassa ja rakennusluvassa annettu määräys toteutettavien autopaikkojen määrästä asuin- ja muiden rakennusten rakentamisen yhteydessä",
+    :sv
+    "bestämmelse i detaljplan och bygglov om antalet bilplatser som ska anläggas i samband med byggandet av bostadshus och andra byggnader"},
+   :prefLabel
+   {:en "Parking spaces", :fi "Autopaikat", :sv "Bilplatser"},
+   :codeValue "02",
+   :created "2024-11-20T16:59:48.379Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/02/members/",
+   :modified "2024-11-20T16:59:48.379Z",
+   :status "VALID",
+   :id "9c437235-593f-4573-a495-f8f432730b82",
+   :statusModified "2024-11-20T16:59:48.379Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/02",
+   :conceptUriInVocabularies
+   "http://uri.suomi.fi/terminology/rakymp/c77",
+   :order 12,
+   :uri "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "On the property", :fi "Kiinteistöllä", :sv "På fastigheten"},
+   :codeValue "0201",
+   :created "2024-11-20T16:59:48.389Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0201/members/",
+   :modified "2024-11-20T16:59:48.389Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "asemakaavassa ja rakennusluvassa annettu määräys toteutettavien autopaikkojen määrästä asuin- ja muiden rakennusten rakentamisen yhteydessä",
+     :sv
+     "bestämmelse i detaljplan och bygglov om antalet bilplatser som ska anläggas i samband med byggandet av bostadshus och andra byggnader"},
+    :prefLabel
+    {:en "Parking spaces", :fi "Autopaikat", :sv "Bilplatser"},
+    :codeValue "02",
+    :created "2024-11-20T16:59:48.379Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/02/members/",
+    :modified "2024-11-20T16:59:48.379Z",
+    :status "VALID",
+    :id "9c437235-593f-4573-a495-f8f432730b82",
+    :statusModified "2024-11-20T16:59:48.379Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/02",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/rakymp/c77",
+    :order 12,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "2b34dfc1-2a9a-4fc3-9822-e4d69a034b84",
+   :statusModified "2024-11-20T16:59:48.389Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0201",
+   :order 13,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0201",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Outside the property",
+    :fi "Kiinteistön ulkopuolella",
+    :sv "Utanför fastigheten"},
+   :codeValue "0202",
+   :created "2024-11-20T16:59:48.398Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0202/members/",
+   :modified "2024-11-20T16:59:48.398Z",
+   :broaderCode
+   {:definition
+    {:fi
+     "asemakaavassa ja rakennusluvassa annettu määräys toteutettavien autopaikkojen määrästä asuin- ja muiden rakennusten rakentamisen yhteydessä",
+     :sv
+     "bestämmelse i detaljplan och bygglov om antalet bilplatser som ska anläggas i samband med byggandet av bostadshus och andra byggnader"},
+    :prefLabel
+    {:en "Parking spaces", :fi "Autopaikat", :sv "Bilplatser"},
+    :codeValue "02",
+    :created "2024-11-20T16:59:48.379Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/02/members/",
+    :modified "2024-11-20T16:59:48.379Z",
+    :status "VALID",
+    :id "9c437235-593f-4573-a495-f8f432730b82",
+    :statusModified "2024-11-20T16:59:48.379Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/02",
+    :conceptUriInVocabularies
+    "http://uri.suomi.fi/terminology/rakymp/c77",
+    :order 12,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "1ae2d1f7-3e64-45a8-bc88-ca948dae266a",
+   :statusModified "2024-11-20T16:59:48.398Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0202",
+   :order 14,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0202",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Civil defence shelters",
+    :fi "Väestönsuojat",
+    :sv "Skyddsrum"},
+   :codeValue "03",
+   :created "2024-11-20T16:59:48.413Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/03/members/",
+   :modified "2024-11-20T16:59:48.413Z",
+   :status "VALID",
+   :id "6d239432-e6a9-467a-b042-f2c369f8edb6",
+   :statusModified "2024-11-20T16:59:48.413Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/03",
+   :order 15,
+   :uri "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "On the property", :fi "Kiinteistöllä", :sv "På fastigheten"},
+   :codeValue "0301",
+   :created "2024-11-20T16:59:48.421Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0301/members/",
+   :modified "2024-11-20T16:59:48.421Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Civil defence shelters",
+     :fi "Väestönsuojat",
+     :sv "Skyddsrum"},
+    :codeValue "03",
+    :created "2024-11-20T16:59:48.413Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/03/members/",
+    :modified "2024-11-20T16:59:48.413Z",
+    :status "VALID",
+    :id "6d239432-e6a9-467a-b042-f2c369f8edb6",
+    :statusModified "2024-11-20T16:59:48.413Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/03",
+    :order 15,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/03",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "9a5386e6-73ab-4e2d-818f-58357feb6a5b",
+   :statusModified "2024-11-20T16:59:48.421Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0301",
+   :order 16,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0301",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Outside the property",
+    :fi "Kiinteistön ulkopuolella",
+    :sv "Utanför fastigheten"},
+   :codeValue "0302",
+   :created "2024-11-20T16:59:48.430Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0302/members/",
+   :modified "2024-11-20T16:59:48.430Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Civil defence shelters",
+     :fi "Väestönsuojat",
+     :sv "Skyddsrum"},
+    :codeValue "03",
+    :created "2024-11-20T16:59:48.413Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/03/members/",
+    :modified "2024-11-20T16:59:48.413Z",
+    :status "VALID",
+    :id "6d239432-e6a9-467a-b042-f2c369f8edb6",
+    :statusModified "2024-11-20T16:59:48.413Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/03",
+    :order 15,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/03",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "f8fd14d5-ff33-49cc-857e-2ebfab5a1a2d",
+   :statusModified "2024-11-20T16:59:48.430Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0302",
+   :order 17,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0302",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Specialised plans",
+    :fi "Erityissuunnitelmat",
+    :sv "Specialplaner"},
+   :codeValue "04",
+   :created "2024-11-20T16:59:48.438Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+   :modified "2024-11-20T16:59:48.438Z",
+   :status "VALID",
+   :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+   :statusModified "2024-11-20T16:59:48.438Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+   :order 18,
+   :uri "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Rakennussuunnitelma"},
+   :codeValue "0401",
+   :created "2024-11-20T16:59:48.447Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0401/members/",
+   :modified "2024-11-20T16:59:48.447Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "2cac03ec-72fa-4163-85c1-71de54cea6f1",
+   :statusModified "2024-11-20T16:59:48.447Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0401",
+   :order 19,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0401",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Kantavien rakenteiden suunnitelma"},
+   :codeValue "0402",
+   :created "2024-11-20T16:59:48.453Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0402/members/",
+   :modified "2024-11-20T16:59:48.453Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "108c22f1-90af-4bfe-b7cd-6b4f3c224531",
+   :statusModified "2024-11-20T16:59:48.453Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0402",
+   :order 20,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0402",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi "Pohjarakenteiden ja kalliorakenteiden suunnitelma"},
+   :codeValue "0403",
+   :created "2024-11-20T16:59:48.460Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0403/members/",
+   :modified "2024-11-20T16:59:48.460Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "1873c88c-ee3f-46cb-925a-edfe1757821d",
+   :statusModified "2024-11-20T16:59:48.460Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0403",
+   :order 21,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0403",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Ilmanvaihdon suunnitelma"},
+   :codeValue "0404",
+   :created "2024-11-20T16:59:48.467Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0404/members/",
+   :modified "2024-11-20T16:59:48.467Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "44eee554-e2c8-4540-aafe-69954814a425",
+   :statusModified "2024-11-20T16:59:48.467Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0404",
+   :order 22,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0404",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:fi "Kiinteistön vesi- ja viemärilaitteiston suunnitelma"},
+   :codeValue "0405",
+   :created "2024-11-20T16:59:48.473Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0405/members/",
+   :modified "2024-11-20T16:59:48.473Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "17b543d9-02e3-41f2-8f60-29cf34a328e7",
+   :statusModified "2024-11-20T16:59:48.473Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0405",
+   :order 23,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0405",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Rakennusfysikaalinen suunnitelma"},
+   :codeValue "0406",
+   :created "2024-11-20T16:59:48.480Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0406/members/",
+   :modified "2024-11-20T16:59:48.480Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "d62f204d-a00e-43c0-9b40-43b760b75a67",
+   :statusModified "2024-11-20T16:59:48.480Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0406",
+   :order 24,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0406",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Kosteusvaurion korjaustyön suunnitelma"},
+   :codeValue "0407",
+   :created "2024-11-20T16:59:48.486Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0407/members/",
+   :modified "2024-11-20T16:59:48.486Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "185b696b-581f-4086-a295-3839d1c035d7",
+   :statusModified "2024-11-20T16:59:48.486Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0407",
+   :order 25,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0407",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Akustiikan suunnitelma"},
+   :codeValue "0408",
+   :created "2024-11-20T16:59:48.493Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0408/members/",
+   :modified "2024-11-20T16:59:48.493Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "fe5d216e-4178-48f6-840d-038026efa723",
+   :statusModified "2024-11-20T16:59:48.493Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0408",
+   :order 26,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0408",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Maisemarakentamisen suunnitelma"},
+   :codeValue "0409",
+   :created "2024-11-20T16:59:48.500Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0409/members/",
+   :modified "2024-11-20T16:59:48.500Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "f96cacc8-6c5a-46b8-b740-2f63945cc075",
+   :statusModified "2024-11-20T16:59:48.500Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0409",
+   :order 27,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0409",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Muu suunnitelma"},
+   :codeValue "0499",
+   :created "2024-11-20T16:59:48.506Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0499/members/",
+   :modified "2024-11-20T16:59:48.506Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Specialised plans",
+     :fi "Erityissuunnitelmat",
+     :sv "Specialplaner"},
+    :codeValue "04",
+    :created "2024-11-20T16:59:48.438Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04/members/",
+    :modified "2024-11-20T16:59:48.438Z",
+    :status "VALID",
+    :id "f8589275-708d-4040-b9a9-5cdab68d7b59",
+    :statusModified "2024-11-20T16:59:48.438Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/04",
+    :order 18,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "426ffaa8-fe9d-42c3-95ae-b78a000d5dbb",
+   :statusModified "2024-11-20T16:59:48.506Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/0499",
+   :order 28,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/0499",
+   :hierarchyLevel 2}
+  {:prefLabel {:fi "Muu lupamääräys"},
+   :codeValue "99",
+   :created "2024-11-21T16:49:11.388Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/99/members/",
+   :modified "2024-11-21T16:49:11.388Z",
+   :status "VALID",
+   :id "40dde53e-4f8d-4ff4-8a68-b4d4f55d9d26",
+   :statusModified "2024-11-21T16:49:11.388Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lupamaarayksenlaji/codes/99",
+   :order 29,
+   :uri "http://uri.suomi.fi/codelist/rytj/lupamaarayksenlaji/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:55:02.706Z"}

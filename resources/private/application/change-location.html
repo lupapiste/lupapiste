@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="change-location" style="visibility: visible; display: block;">
+      <div role="dialog" id="dialog-change-location" class="window autosized" >
+        <div data-bind="with: changeLocationModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'edit'"></p>
+            <p>
+              <button class="tertiary close"
+                      id="dialog-change-location-close"
+                      data-bind="ariaLtext: 'close',
+                                 focusPrevious: '#dialog-change-location-cancel'">
+                <i aria-hidden="true"
+                   class="lupicon-remove"></i>
+              </button>
+            </p>
+          </div>
+
+          <div class="dialog-content with-map">
+            <div class="change-location-help"
+               data-bind="ltext: 'change-location-help'"></div>
+            <div class="map-container">
+              <div id="change-location-map" class="map map-large" style="width: 600px; height: 400px;"></div>
+            </div>
+
+            <div>
+                <form data-bind="submit: saveNewLocation">
+                    <div class="with-map-top">
+                        <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
+                        <input data-bind="textInput: propertyId,
+                                          readonly: !lupapisteApp.models.currentUser.isAuthority()"
+                               data-test-id="application-new-propertyid"
+                               id="dialog-change-location-property-id"
+                               type="text" maxlength="20"
+                               class="lux lux--wide gap--b1" />
+
+                        <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+                        <input data-bind="textInput: address" data-test-id="application-new-address" type="text" maxlength="100"
+                               class="lux lux--wide gap--b1"
+                               autofocus="autofocus"/>
+
+                        <!-- ko if: isArchiveProject() -->
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="refreshBuildings" data-bind="checked: refreshBuildings">
+                            <label id="refreshBuildings-label" for="refreshBuildings" class="checkbox-label" data-bind="ltext: 'newRequest.refreshBuildings'"></label>
+                        </div>
+                        <!-- /ko -->
+
+                        <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
+                    </div>
+                    <div class="with-map-bottom">
+                        <button type="submit" data-bind="click: saveNewLocation,
+                                                         enable: ok,
+                                                         disable: processing,
+                                                         css: {waiting: pending}"
+                                class="positive no-icon-pad btn-dialog"
+                                data-test-id="change-location-save">
+                            <span data-bind="ltext: 'save'"></span>
+
+                            <i class="wait spin lupicon-refresh"></i>
+                        </button>
+
+                        <button
+                          data-bind="ltext: 'cancel',
+                                     focusNext: '#dialog-change-location-close'"
+                           id="dialog-change-location-cancel"
+                           class="secondary btn-dialog close"></button>
+                    </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,563 @@
+{:properties {"IfcMapConversion" [{"Eastings"         395.2331000000003,
+                                   "Northings"        6706.018599999999,
+                                   "OrthogonalHeight" 7.038636340439551E-15,
+                                   "Scale"            0.001,
+                                   "XAxisAbscissa"    1.0,
+                                   "XAxisOrdinate"    6.123233995736766E-17}],
+
+              "IfcBuilding" [{"FI_Kohde"
+                              {"Omistajalaji"                             "Asunto oy tai asunto-osuuskunta",
+                               "TavoitteellinenKäyttöikä"                 100,
+                               "Katuosoite"                               "Myllytie 7",
+                               "Paloluokka"                               "P2",
+                               "RakennuksenVarusteVesijohto"              true,
+                               "Nimi"                                     "Housing Timber",
+                               "RakennuksenVarusteLämminVesi"             true,
+                               "RakennuksenVarusteKaasu"                  false,
+                               "RakennuksenVarusteUima-allas"             false,
+                               "JulkisivumateriaaliPuu"                   true,
+                               "Energiatehokkuusluokka"                   "A",
+                               "Rakentamistapa"                           "Elementti",
+                               "Perusparannus"                            false,
+                               "RakennuksenVarusteSauna"                  true,
+                               "PääasiallinenKäyttötarkoitus"             "Asuinrakennukset",
+                               "JulkisivumateriaaliMetallilevy"           false,
+                               "Rakentamistoimenpide"                     "Uusi rakennus tai rakennelma",
+                               "KokoontumistilojenHenkilömäärä"           20,
+                               "Postitoimipaikka"                         "Järvenpää",
+                               "id"                                       2877567,
+                               "TietomallinLaji"                          "Suunnitelmamalli",
+                               "JulkisivumateriaaliBetoni"                false,
+                               "LiiketaloudellinenRakentaminen"           true,
+                               "Muutosala"                                0,
+                               "Suunnittelutoimisto"                      "Arkkitehtitoimisto Huvila Oy",
+                               "RakenteidenRakennusainePuu"               true,
+                               "Väliaikainen"                             false,
+                               "KulttuurihistoriallinenMerkittävyys"
+                               "Merkittävyyttä ei ole arvioitu",
+                               "RakennuksenVarusteSähkö"                  true,
+                               "RakennuksenSuhdeMaanpintaan"              "Olennaisesti kokonaan pinnan yllä",
+                               "JulkisivumateriaaliTiili"                 false,
+                               "JulkisivumateriaaliKivi"                  false,
+                               "Postinumero"                              "04410",
+                               "RakennuksenVarusteKoneellinenIlmastointi" true,
+                               "PolkupyöräpaikkojenMäärä"                 34,
+                               "RakennuksenKerrosluku"                    4,
+                               "RakennuksenTilavuus"                      4022,
+                               "RakennuksenKorkeus"                       66.55,
+                               "RakennuksenVarusteJätevesiviemäri"        true,
+                               "VastaavaSuunnittelija"                    "Katja Maununaho",
+                               "RakennuksenVarusteHissi"                  true,
+                               "RakenteidenRakennusaineTiili"             false,
+                               "RakenteidenRakennusaineBetoni"            false,
+                               "EnergiatehokkuusluokanAlaindeksi"         "2018",
+                               "JulkisivumateriaaliLasi"                  false,
+                               "RakennuksenVarusteAurinkopaneeli"         true,
+                               "RakenteidenRakennusaineTeräs"             false,
+                               "JulkisivumateriaaliMuu"                   false,
+                               "RakenteidenRakennusaineMuu"               false},
+                              "FI_Talotekniikka"
+                              {"LämmitysenergianlähdeRaskasPolttoöljy"      false,
+                               "OlemassaOlevaValokuituverkko"               false,
+                               "LämmitysenergianlähdeMaalämpö"              true,
+                               "VerkostoliittymäKaukojäähdytys"             false,
+                               "Jäähdytystapa"                              "Ei kiinteää jäähdytyslaitetta",
+                               "LämmitysenergianlähdeKevytPolttoöljy"       false,
+                               "VerkostoliittymäJätevesi"                   true,
+                               "LämmitysenergianlähdeMuu"                   false,
+                               "LämmitysenergianlähdeTurve"                 false,
+                               "LämmitysenergianlähdePuu"                   false,
+                               "LämmitystapaIlmalämpöpumppu"                false,
+                               "LämmitystapaEiKiinteääLämmityslaitetta"     false,
+                               "LämmitysenergianlähdePoistoilmalämpöpumppu" false,
+                               "id"                                         2877608,
+                               "Antenniverkko"                              false,
+                               "LämmitystapaUuni-takka-kamiinalämmitys"     false,
+                               "OptinenKaapelointi"                         true,
+                               "VerkostoliittymäTietoliikennekaapeli"       true,
+                               "VerkostoliittymäTalousvesi"                 true,
+                               "LämmitystapaIlmakeskuslämmitys"             false,
+                               "TalousvedenLaji"                            "Verkostoliittymä",
+                               "Ilmanvaihtotapa"                            "Koneellinen tulo- ja poistoilmanvaihto",
+                               "LämmitysenergianlähdeAurinkoenergia"        false,
+                               "LämmitystapaMuu"                            false,
+                               "Parikaapelointi"                            false,
+                               "LämmitysenergianlähdeIlma-vesilämpöpumppu"  false,
+                               "LämmitystapaAurinkolämmitys"                false,
+                               "JätevesienKäsittelytapa"                    "Verkostoliittymä",
+                               "VerkostoliittymäSammutusvesi"               true,
+                               "VerkostoliittymäKaasu"                      false,
+                               "LämmitystapaSähkölämmitys"                  false,
+                               "LämmitysenergianlähdeKivihiili"             false,
+                               "VerkostoliittymäKaukolämpö"                 false,
+                               "LämmitysenergianlähdeSähkö"                 false,
+                               "LämmitysenergianlähdeMaalämpöpumppu"        false,
+                               "LämmitystapaVesikeskuslämmitys"             true,
+                               "LämmitysenergianlähdeIlmalämpöpumppu"       false,
+                               "VerkostoliittymäSähkö"                      true,
+                               "VerkostoliittymäHulevesi"                   true,
+                               "LämmitysenergianlähdeKaukolämpö"            false,
+                               "LämmitysenergianlähdeKaasu"                 false}}],
+
+              "IfcSite" [{"FI_Kiinteistö"
+                          {"Katuosoite"                     "Myllytie 7",
+                           "LatauspisteidenPutkitus"        false,
+                           "Kaavatilanne"                   "Asemakaava",
+                           "LatauspisteidenMuutJohtoreitit" false,
+                           "Postitoimipaikka"               "Järvenpää",
+                           "id"                             71,
+                           "Postinumero"                    "04410",
+                           "LatauspisteidenEsikaapelointi"  false,
+                           "Hallintaperuste"                "Oma",
+                           "Korkojärjestelmä"               "N2000",
+                           "LatauspisteidenMäärä"           0,
+                           "Kiinteistötunnus"               "186-6-635-7",
+                           "KiinteistönNimi"                "BIM4LCA"}}],
+
+              "IfcSpatialZone" [{"FI_Huoneisto"    {"Käyttötarkoitus"   "Asuinhuoneisto",
+                                                    "Porraskirjain"     "A",
+                                                    "Numero"            1,
+                                                    "id"                577,
+                                                    "Huoneluku"         3,
+                                                    "VarusteWC"         true,
+                                                    "VarusteSauna"      false,
+                                                    "VarusteParveke"    true,
+                                                    "Keittiötyyppi"     "Keittiö",
+                                                    "VarusteLämminVesi" true,
+                                                    "VarusteSuihku"     true,
+                                                    "MuutoksenLaji"     "Lisäys"},
+                                 "FI_Laajuustieto" {"id" 565, "Huoneistoala" 85.43645438474877}}
+                                {"FI_Huoneisto"    {"Käyttötarkoitus"   "Asuinhuoneisto",
+                                                    "Porraskirjain"     "A",
+                                                    "Numero"            2,
+                                                    "id"                647,
+                                                    "Huoneluku"         4,
+                                                    "VarusteWC"         true,
+                                                    "VarusteSauna"      true,
+                                                    "VarusteParveke"    true,
+                                                    "Keittiötyyppi"     "Keittiö",
+                                                    "VarusteLämminVesi" true,
+                                                    "VarusteSuihku"     true,
+                                                    "MuutoksenLaji"     "Lisäys"},
+                                 "FI_Laajuustieto" {"id" 639, "Huoneistoala" 102.01800108265114}}
+                                {"FI_Huoneisto"    {"Käyttötarkoitus"   "Asuinhuoneisto",
+                                                    "Porraskirjain"     "A",
+                                                    "Numero"            3,
+                                                    "id"                4152,
+                                                    "Huoneluku"         3,
+                                                    "VarusteWC"         true,
+                                                    "VarusteSauna"      false,
+                                                    "VarusteParveke"    true,
+                                                    "Keittiötyyppi"     "Keittiö",
+                                                    "VarusteLämminVesi" true,
+                                                    "VarusteSuihku"     true,
+                                                    "MuutoksenLaji"     "Lisäys"},
+                                 "FI_Laajuustieto" {"id" 4146, "Huoneistoala" 85.43644612114299}}
+                                {"FI_Huoneisto"    {"Käyttötarkoitus"   "Asuinhuoneisto",
+                                                    "Porraskirjain"     "A",
+                                                    "Numero"            4,
+                                                    "id"                4220,
+                                                    "Huoneluku"         4,
+                                                    "VarusteWC"         true,
+                                                    "VarusteSauna"      true,
+                                                    "VarusteParveke"    true,
+                                                    "Keittiötyyppi"     "Keittiö",
+                                                    "VarusteLämminVesi" true,
+                                                    "VarusteSuihku"     true,
+                                                    "MuutoksenLaji"     "Lisäys"},
+                                 "FI_Laajuustieto" {"id" 4214, "Huoneistoala" 102.01815259981507}}
+                                {"FI_Huoneisto"    {"Käyttötarkoitus"   "Asuinhuoneisto",
+                                                    "Porraskirjain"     "A",
+                                                    "Numero"            5,
+                                                    "id"                4274,
+                                                    "Huoneluku"         3,
+                                                    "VarusteWC"         true,
+                                                    "VarusteSauna"      false,
+                                                    "VarusteParveke"    true,
+                                                    "Keittiötyyppi"     "Keittiö",
+                                                    "VarusteLämminVesi" true,
+                                                    "VarusteSuihku"     true,
+                                                    "MuutoksenLaji"     "Lisäys"},
+                                 "FI_Laajuustieto" {"id" 4268, "Huoneistoala" 85.43644612114299}}
+                                {"FI_Huoneisto"    {"Käyttötarkoitus"   "Asuinhuoneisto",
+                                                    "Porraskirjain"     "A",
+                                                    "Numero"            6,
+                                                    "id"                4342,
+                                                    "Huoneluku"         4,
+                                                    "VarusteWC"         true,
+                                                    "VarusteSauna"      true,
+                                                    "VarusteParveke"    true,
+                                                    "Keittiötyyppi"     "Keittiö",
+                                                    "VarusteLämminVesi" true,
+                                                    "VarusteSuihku"     true,
+                                                    "MuutoksenLaji"     "Lisäys"},
+                                 "FI_Laajuustieto" {"id" 4336, "Huoneistoala" 102.01815259981507}}
+                                {"FI_Huoneisto" {"Käyttötarkoitus" "Toimitila",
+                                                 "Porraskirjain"   "B",
+                                                 "Numero"          7,
+                                                 "Huoneluku"       1,
+                                                 "MuutoksenLaji"   "Lisäys",
+                                                 "id"              5369}}],
+
+              "IfcTransportElement" [{"ePset_TransportElementElevator" {"DoorOpeningWidth" 900.0,
+                                                                        "ElevatorType"     "Henkilöhissi",
+                                                                        "id"               2842231},
+                                      "Pset_TransportElementElevator"  {"FireFightingLift" false,
+                                                                        "ClearDepth"       1400.0,
+                                                                        "ClearWidth"       1100.0,
+                                                                        "id"               2842228},
+                                      "Pset_TransportElementCommon"    {"CapacityPeople" 8,
+                                                                        "CapacityWeight" 600.0,
+                                                                        "id"             2842212,
+                                                                        "Reference"      "HENH-1"},
+                                      "Name"                           "Henkilöhissi:HENH-1:2590834"}],
+
+              "IfcSpace" [{"FI_Laajuustieto" {"id" 3831, "Kokonaisala" 240.39910843209458}}
+                          {"FI_Laajuustieto" {"id" 3868, "Kokonaisala" 240.39910827847913}}
+                          {"FI_Laajuustieto" {"id" 3905, "Kokonaisala" 240.39910827847913}}
+                          {"FI_Laajuustieto" {"id" 3945, "Kokonaisala" 258.9572321691605}}
+                          {"FI_Laajuustieto" {"id" 3984, "Rakennusoikeudellinen kerrosala" 246.65054415693012}}
+                          {"FI_Laajuustieto" {"id" 4021, "Rakennusoikeudellinen kerrosala" 231.35249874649347}}
+                          {"FI_Laajuustieto" {"id" 4058, "Rakennusoikeudellinen kerrosala" 231.35253419547192}}
+                          {"FI_Laajuustieto" {"id" 4095, "Rakennusoikeudellinen kerrosala" 231.35253419547192}}
+                          {"FI_Laajuustieto" {"id" 4985, "Kerrosala" 256.1922808101123}}
+                          {"FI_Laajuustieto" {"id" 5022, "Kerrosala" 240.39923083016294}}
+                          {"FI_Laajuustieto" {"id" 5059, "Kerrosala" 240.39923083016294}}
+                          {"FI_Laajuustieto" {"id" 5096, "Kerrosala" 240.39923083016294}}
+                          {"FI_Laajuustieto" {"id" 5178, "Lämmitetty nettoala" 229.5228739171165}}
+                          {"FI_Laajuustieto" {"id" 5220, "Lämmitetty nettoala" 178.34172974106943}}
+                          {"FI_Laajuustieto" {"id" 5261, "Lämmitetty nettoala" 215.1132320996068}}
+                          {"FI_Laajuustieto" {"id" 5299, "Lämmitetty nettoala" 215.1132320996068}}
+                          {"FI_Laajuustieto" {"id" 5337, "Lämmitetty nettoala" 215.11323209960668}}
+                          {"FI_Laajuustieto" {"id" 5390, "Kokonaisala" 4.459345920000005}}
+                          {"FI_Laajuustieto" {"id" 5429, "Kokonaisala" 258.9572321691605}}
+                          {"FI_Laajuustieto" {"id" 5468, "Kokonaisala" 256.1922808101123}}
+                          {"FI_Laajuustieto" {"id" 5504, "Kokonaisala" 240.39910843209458}}
+                          {"FI_Laajuustieto" {"id" 5540, "Kokonaisala" 240.39910843209458}}
+                          {"FI_Laajuustieto" {"id" 5576, "Kokonaisala" 240.39910843209458}}
+                          {"FI_Laajuustieto" {"id" 5615, "Kellariala" 258.9822168480079}}
+                          {"FI_Laajuustieto" {"id" 5652, "Ullakkoala" 240.39910843209458}}],
+
+              "IfcDoor" [{"Pset_DoorCommon"      {"ThermalTransmittance" "1",
+                                                  "id"                   8188,
+                                                  "IsExternal"           true,
+                                                  "Reference"            "TLUO-2.10+4x21"},
+                          "cPset_DoorRegulatory" {"EntranceType" "Pääsisäänkäynti porrashuoneeseen", "id" 8192},
+                          "Name"                 "Teräslasiulko-ovi passiiviovella:TLUO-2.10+4x21:1402305"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         31428,
+                                             "IsExternal" false,
+                                             "Reference"  "O-4.Yhteistila"},
+                          "Name"            "Puurakenteinen ovi:O-4.Yhteistila:1402389"}
+                         {"Pset_DoorCommon"      {"ThermalTransmittance" "1",
+                                                  "id"                   32018,
+                                                  "IsExternal"           true,
+                                                  "Reference"            "TLUO-2.10+4x21"},
+                          "cPset_DoorRegulatory" {"EntranceType" "Pääsisäänkäynti porrashuoneeseen", "id" 32022},
+                          "Name"                 "Teräslasiulko-ovi passiiviovella:TLUO-2.10+4x21:1419803"}
+                         {"Pset_DoorCommon"      {"ThermalTransmittance" "1",
+                                                  "id"                   32134,
+                                                  "IsExternal"           true,
+                                                  "Reference"            "TLUO-2.10+4x21"},
+                          "cPset_DoorRegulatory" {"EntranceType" "Muu sisäänkäynti", "id" 32138},
+                          "Name"                 "Teräslasiulko-ovi passiiviovella:TLUO-2.10+4x21:1421603"}
+                         {"Pset_DoorCommon" {"FireRating" "EI60",
+                                             "id"         91156,
+                                             "IsExternal" false,
+                                             "Reference"  "MO-1.EI60"},
+                          "Name"            "Metalliovi:MO-1.EI60:1428073"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         149373,
+                                             "IsExternal" false,
+                                             "Reference"  "MO-1.10x21"},
+                          "Name"            "Metalliovi:MO-1.10x21:1429543"}
+                         {"Pset_DoorCommon"      {"IsExternal" true, "Reference" "MUO-1.10x21", "id" 207865},
+                          "cPset_DoorRegulatory" {"FireFightingAccess" true,
+                                                  "EntranceType"       "Muu sisäänkäynti",
+                                                  "id"                 207869},
+                          "Name"                 "Metallirakenteinen ulko-ovi:MUO-1.10x21:1431704"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         266084,
+                                             "IsExternal" false,
+                                             "Reference"  "MO-1.10x21"},
+                          "Name"            "Metalliovi:MO-1.10x21:1434440"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 289416},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1434582"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         347820,
+                                             "IsExternal" false,
+                                             "Reference"  "MO-1.10x21"},
+                          "Name"            "Metalliovi:MO-1.10x21:1435863"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         371123},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1435935"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "KLO-1", "id" 379251},
+                          "Name"            "Saunan kokolasiovi:KLO-1:1436023"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 404261},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1445933"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 427481},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1445934"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "KLO-1", "id" 436482},
+                          "Name"            "Saunan kokolasiovi:KLO-1:1496167"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         459702},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1496168"}
+                         {"Pset_DoorCommon" {"FireRating"     "EI30",
+                                             "AcousticRating" "39",
+                                             "id"             610500,
+                                             "IsExternal"     false,
+                                             "Reference"      "O-3.Kerrostaso_ovi"},
+                          "Name"            "Puurakenteinen ovi:O-3.Kerrostaso_ovi:1499010"}
+                         {"Pset_DoorCommon" {"FireRating"     "EI30",
+                                             "AcousticRating" "39",
+                                             "id"             633730,
+                                             "IsExternal"     false,
+                                             "Reference"      "O-3.Kerrostaso_ovi"},
+                          "Name"            "Puurakenteinen ovi:O-3.Kerrostaso_ovi:1499119"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 657638},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1499173"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 681544},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1500682"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 681569},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1500707"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 681708},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1502703"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         683539,
+                                             "IsExternal" false,
+                                             "Reference"  "TLO-1.10+4x21"},
+                          "Name"            "Teräslasiovi passiiviovella:TLO-1.10+4x21:1507966"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         741809,
+                                             "IsExternal" false,
+                                             "Reference"  "MO-1.10x21"},
+                          "Name"            "Metalliovi:MO-1.10x21:1509847"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   935122,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1v"},
+                          "Name"            "Lasiliukuseinät:LLIUO-1v:1526131"}
+                         {"Pset_DoorCommon"      {"ThermalTransmittance" 1.0,
+                                                  "id"                   974352,
+                                                  "IsExternal"           true,
+                                                  "Reference"            "UO-1.12+12x23"},
+                          "cPset_DoorRegulatory" {"EntranceType" "Muu sisäänkäynti", "id" 974356},
+                          "Name"                 "Autotallinovi:UO-1.12+12x23:1544057"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" 1.0,
+                                             "id"                   974388,
+                                             "IsExternal"           true,
+                                             "Reference"            "UO-1.12+12x23"},
+                          "cPset_DoorRegulatory"
+                          {"EntranceType" "Muu sisäänkäynti", "id" 974392},
+                          "Name"            "Autotallinovi:UO-1.12+12x23:1544164"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         999981},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1546448"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 1440896},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1550795"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 1440921},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1550796"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "KLO-1", "id" 1441592},
+                          "Name"            "Saunan kokolasiovi:KLO-1:1550889"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         1441615},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1550890"}
+                         {"Pset_DoorCommon" {"FireRating"     "EI30",
+                                             "AcousticRating" "39",
+                                             "id"             1442004,
+                                             "IsExternal"     false,
+                                             "Reference"      "O-3.Kerrostaso_ovi"},
+                          "Name"            "Puurakenteinen ovi:O-3.Kerrostaso_ovi:1550968"}
+                         {"Pset_DoorCommon" {"FireRating"     "EI30",
+                                             "AcousticRating" "39",
+                                             "id"             1442031,
+                                             "IsExternal"     false,
+                                             "Reference"      "O-3.Kerrostaso_ovi"},
+                          "Name"            "Puurakenteinen ovi:O-3.Kerrostaso_ovi:1550969"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1442186},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1550971"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1442341},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1550974"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1442364},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1550975"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1442387},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1550994"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         1443458},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1551374"}
+                         {"Pset_DoorCommon" {"AcousticRating" "30",
+                                             "id"             1446479,
+                                             "IsExternal"     true,
+                                             "Reference"      "TLUO-1.10x21"},
+                          "cPset_DoorRegulatory"
+                          {"EntranceType" "Muu sisäänkäynti", "id" 1446483},
+                          "Name"            "Teräslasiulko-ovi:TLUO-1.10x21:1555223"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 1448006},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1566564"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 1448031},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:1566565"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "KLO-1", "id" 1448795},
+                          "Name"            "Saunan kokolasiovi:KLO-1:1566643"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         1448818},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1566644"}
+                         {"Pset_DoorCommon" {"FireRating"     "EI30",
+                                             "AcousticRating" "39",
+                                             "id"             1449207,
+                                             "IsExternal"     false,
+                                             "Reference"      "O-3.Kerrostaso_ovi"},
+                          "Name"            "Puurakenteinen ovi:O-3.Kerrostaso_ovi:1566718"}
+                         {"Pset_DoorCommon" {"FireRating"     "EI30",
+                                             "AcousticRating" "39",
+                                             "id"             1449234,
+                                             "IsExternal"     false,
+                                             "Reference"      "O-3.Kerrostaso_ovi"},
+                          "Name"            "Puurakenteinen ovi:O-3.Kerrostaso_ovi:1566719"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1449389},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1566721"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1449544},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1566724"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1449567},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1566725"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.9x21", "id" 1449706},
+                          "Name"            "Puurakenteinen ovi:O-1.9x21:1566740"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         1450809},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1567089"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   1643506,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1o"},
+                          "cPset_DoorRegulatory"
+                          {"EntranceType" "Muu sisäänkäynti", "id" 1643510},
+                          "Name"            "Lasiliukuseinät:LLIUO-1o:1666619"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         1645575},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:1685971"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.7x21_Märkätila",
+                                             "id"         2162167},
+                          "Name"            "Puurakenteinen ovi:O-2.7x21_Märkätila:1796305"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.7x21_Märkätila",
+                                             "id"         2162310},
+                          "Name"            "Puurakenteinen ovi:O-2.7x21_Märkätila:1797040"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.7x21_Märkätila",
+                                             "id"         2162333},
+                          "Name"            "Puurakenteinen ovi:O-2.7x21_Märkätila:1797344"}
+                         {"Pset_DoorCommon" {"FireRating"           "EI30",
+                                             "ThermalTransmittance" "1",
+                                             "id"                   2257349,
+                                             "IsExternal"           false,
+                                             "Reference"            "HL-1"},
+                          "Name"            "Tikasluukku:HL-1:1893913"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" 4.0,
+                                             "id"                   2288755,
+                                             "IsExternal"           false,
+                                             "Reference"            "MO-2.9+9x21"},
+                          "Name"            "Metallipariovi:MO-2.9+9x21:1953620"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2357722,
+                                             "IsExternal" false,
+                                             "Reference"  "MO-1.10x21"},
+                          "Name"            "Metalliovi:MO-1.10x21:1963058"}
+                         {"Pset_DoorCommon" {"IsExternal" false,
+                                             "Reference"  "O-2.10x21_Märkätila",
+                                             "id"         2389072},
+                          "Name"            "Puurakenteinen ovi:O-2.10x21_Märkätila:2014506"}
+                         {"Pset_DoorCommon" {"IsExternal" true, "Reference" "MUO-2.tekn", "id" 2455054},
+                          "cPset_DoorRegulatory"
+                          {"EntranceType" "Muu sisäänkäynti", "id" 2455058},
+                          "Name"            "Metallirakenteinen ulko-ovi:MUO-2.tekn:2189304"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "HL-2", "id" 2486626},
+                          "Name"            "Huoltoluukku:HL-2:2291129"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "HL-2", "id" 2486897},
+                          "Name"            "Huoltoluukku:HL-2:2291217"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   2674882,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1v"},
+                          "Name"            "Lasiliukuseinät:LLIUO-1v:2304237"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   2674920,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1v"},
+                          "Name"            "Lasiliukuseinät:LLIUO-1v:2304587"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   2674949,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1v"},
+                          "Name"            "Lasiliukuseinät:LLIUO-1v:2304639"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   2674978,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1v"},
+                          "Name"            "Lasiliukuseinät:LLIUO-1v:2304652"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   2675007,
+                                             "IsExternal"           true,
+                                             "Reference"            "LLIUO-1v"},
+                          "Name"            "Lasiliukuseinät:LLIUO-1v:2304653"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "O-1.10x21", "id" 2675376},
+                          "Name"            "Puurakenteinen ovi:O-1.10x21:2320227"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "MO-3.Hissi", "id" 2687064},
+                          "Name"            "Hissin ovi:MO-3.Hissi:2529138"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "MO-3.Hissi", "id" 2687089},
+                          "Name"            "Hissin ovi:MO-3.Hissi:2530364"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "MO-3.Hissi", "id" 2687112},
+                          "Name"            "Hissin ovi:MO-3.Hissi:2530406"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "MO-3.Hissi", "id" 2687135},
+                          "Name"            "Hissin ovi:MO-3.Hissi:2530456"}
+                         {"Pset_DoorCommon" {"IsExternal" false, "Reference" "MO-3.Hissi", "id" 2687213},
+                          "Name"            "Hissin ovi:MO-3.Hissi:2530603"}
+                         {"Pset_DoorCommon" {"ThermalTransmittance" "1",
+                                             "id"                   2687361,
+                                             "IsExternal"           true,
+                                             "Reference"            "TLUO-2.10+4x21"},
+                          "cPset_DoorRegulatory"
+                          {"EntranceType" "Sisäänkäynti huoneistoon", "id" 2687365},
+                          "Name"            "Teräslasiulko-ovi passiiviovella:TLUO-2.10+4x21:2534944"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2710601,
+                                             "IsExternal" false,
+                                             "Reference"  "O-5.Toimitila"},
+                          "Name"            "Puurakenteinen ovi:O-5.Toimitila:2535374"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2784967,
+                                             "IsExternal" false,
+                                             "Reference"  "VERO-1"},
+                          "Name"            "Metalliovi:VERO-1:2583289"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2784996,
+                                             "IsExternal" false,
+                                             "Reference"  "VERO-1"},
+                          "Name"            "Metalliovi:VERO-1:2583655"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2842073,
+                                             "IsExternal" false,
+                                             "Reference"  "VERO-1"},
+                          "Name"            "Metalliovi:VERO-1:2583703"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2842102,
+                                             "IsExternal" false,
+                                             "Reference"  "VERO-1"},
+                          "Name"            "Metalliovi:VERO-1:2583825"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2842127,
+                                             "IsExternal" false,
+                                             "Reference"  "VERO-1"},
+                          "Name"            "Metalliovi:VERO-1:2583833"}
+                         {"Pset_DoorCommon" {"FireRating" "EI30",
+                                             "id"         2842152,
+                                             "IsExternal" false,
+                                             "Reference"  "VERO-1"},
+                          "Name"            "Metalliovi:VERO-1:2583841"}]}}

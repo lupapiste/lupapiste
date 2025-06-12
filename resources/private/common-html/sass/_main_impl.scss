@@ -1,0 +1,269 @@
+/*!
+ * ajk's Hot New Template
+ * Made by ajk (ajk.fi)
+ */
+
+@use "sass:color";
+@use "partials/_frameless";
+
+// Style wide settings
+
+@use "partials/_mixins";
+
+/* RESET
+----------------------------------------------------------------------------- */
+@use "partials/_reset";
+
+/*------------------------------------*\
+    ELEMENTS
+\*------------------------------------*/
+
+/* BASE
+----------------------------------------------------------------------------- */
+@use "partials/_base";
+
+/* RUDIMENTARY RESPONSIVENESS SUPPORT
+----------------------------------------------------------------------------- */
+@use "partials/_responsive";
+
+
+/* THEME (colors and others)
+----------------------------------------------------------------------------- */
+@use "partials/_colors";
+@use "partials/_svg";
+@use "partials/_theme";
+
+/* TYPOGRAPHY
+----------------------------------------------------------------------------- */
+@use "partials/_typography";
+
+/* ABSTRACTIONS (OOCSS style)
+----------------------------------------------------------------------------- */
+@use "partials/_abstractions";
+
+/* LINKS */
+@use "partials/_links";
+
+/*------------------------------------*\
+    OBJECTS
+\*------------------------------------*/
+
+/* ICONS & ANIMATIONS
+----------------------------------------------------------------------------- */
+@use "partials/_icons";
+@use "partials/_lupicons";
+
+/* NAV
+----------------------------------------------------------------------------- */
+@use "partials/_header";
+@use "partials/_sidebar";
+@use "partials/_footer";
+
+/*------------------------------------*\
+    COMPONENTS
+\*------------------------------------*/
+
+@use "partials/_grid";
+@use "partials/_bubble";
+@use "partials/_buttons";
+@use "partials/_inputs";
+@use "partials/_forms";
+@use "partials/_tables";
+@use "partials/_tabs";
+@use "partials/_conversation";
+@use "partials/_collapse";
+@use "partials/_modal";
+@use "partials/_map";
+@use "partials/_errors";
+@use "partials/_help";
+@use "partials/_autocomplete";
+@use "partials/_operation-tree";
+@use "partials/_accordion";
+@use "partials/_assignment";
+@use "partials/_datepicker";
+@use "partials/_screenmessage";
+@use "partials/_selectm";
+@use "partials/_user_notification";
+@use "partials/_tags_editor";
+@use "partials/_metadata-editor";
+@use "partials/_archival-summary";
+@use "partials/_applications_search";
+@use "partials/_indicator";
+@use "partials/_indicator-icon";
+@use "partials/_guests";
+@use "partials/_case-file";
+@use "partials/_rollup";
+@use "partials/_stamp_editor";
+@use "partials/_pate";
+@use "partials/_printing_order";
+@use "partials/_ribbons";
+@use "partials/_allu";
+@use "partials/_notice-forms";
+@use "partials/_location";
+@use "partials/_change_permit";
+@use "partials/_login";
+@use "partials/_tooltip";
+@use "partials/context-menu";
+@use "partials/model";
+
+/* VIEWS
+------------------------------------------------------------------------------*/
+@use "views/_welcome";
+@use "views/_applications";
+@use "views/_application";
+@use "views/_create_application";
+@use "views/_attachment";
+@use "views/_statement";
+@use "views/_mypage";
+@use "views/_admin";
+@use "views/_authority_admin";
+@use "views/_neighbor";
+@use "views/_register";
+@use "views/_login_frame";
+@use "views/_verdict";
+@use "views/_side_panel";
+@use "views/_company";
+@use "views/_attachment_multiselect";
+@use "views/_openlayers2";
+@use "views/_attachments";
+@use "views/_inspection_summary";
+@use "views/_oauth";
+@use "views/_invoices";
+@use "views/_price_catalogue";
+@use "views/_building_extra_attributes";
+@use "views/_filebank";
+@use "views/_bim";
+@use "views/_partial_review";
+
+// Bulletins depend on application
+@use "partials/_bulletins";
+@use "partials/_bulletin-comments";
+
+/*------------------------------------*\
+    OTHER
+\*------------------------------------*/
+
+/* ALL THE REST
+----------------------------------------------------------------------------- */
+@use "partials/_other";
+@use "partials/_todo";
+
+/*
+  Lupapalvelu CSS:
+*/
+
+.page {
+  display: none;
+  margin-top: header.$header-height + 2px; // header-dropdown mixin has padding top+bottom 1px
+}
+
+// missing key in localization
+.ltext-error {
+  color: color.adjust(orange,$lightness: 25%) !important;
+  font-weight:bold !important;
+  text-shadow: 0px 1px 0 black !important;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.inline {
+  display: inline;
+}
+
+.template {
+  display: none;
+}
+
+#main-nav-bar {
+  display:  none;
+}
+
+.inert-table tbody tr:hover td,
+.inert-table tbody tr:hover th {
+  background-color: #ffffff;
+}
+
+#application table input {
+  margin: 0px;
+}
+
+.droparea {
+  width: 150px;
+  height: 100px;
+  border: 5px #858585 dotted;
+  color: #858585;
+  border-radius: 15px;
+  vertical-align: middle;
+  text-align: center;
+  display: table-cell;
+}
+
+.droparea-hover {
+  border-color: #101010;
+  color: #101010;
+}
+
+/* basic styles*/
+
+
+.strong,
+b:where(:not(.nobase, .nobase *)),
+dt:where(:not(.nobase, .nobase *)) {
+  font-weight: bold;
+}
+
+/* map zoomer fix */
+div.pzbDiv {
+    right: 8px;
+    top: 10px;
+}
+
+.dev-debug {
+  z-index: 3000;
+  width: 170px;
+  position: fixed !important;
+  right: 8px;
+  bottom: 8px;
+  background-color: white;
+  padding: 8px;
+  border: 1px solid black;
+  box-shadow: 3px 4px 7px;
+  font-size: 0.8em;
+  color: theme.$primary-text;
+}
+
+footer .dev-debug p {
+  color: theme.$primary-text;
+  margin-bottom: 4px;
+  a {
+    display: block;
+  }
+}
+
+#ui-datepicker-div {
+  display: none;
+}
+
+/* find address and poi list: */
+.create-find {
+  font-size: 14px;
+  .type {
+    color: #555;
+    font-style: italic;
+    &:before { content: " ("; }
+    &:after { content: ")"; }
+  }
+  .number {
+    &:before { content: " "; }
+  }
+  .municipality {
+    color: #555;
+    &:before { content: ", "; }
+  }
+}

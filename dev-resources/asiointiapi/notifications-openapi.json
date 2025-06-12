@@ -1,0 +1,289 @@
+{
+  "info" : {
+    "description" : "Description of the AsiointiAPI notification types.",
+    "title" : "asiointi-notifications-api",
+    "version" : "0.0.1"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/asiointi-notifications/api/notify" : {
+      "post" : {
+        "requestBody" : {
+          "content" : {
+            "application/edn" : {
+              "schema" : {
+                "oneOf" : [ {
+                  "additionalProperties" : false,
+                  "description" : "Application state change",
+                  "properties" : {
+                    "application-id" : {
+                      "description" : "The Lupapiste application ID for the source application",
+                      "example" : "LP-123-2026-00001",
+                      "type" : "string"
+                    },
+                    "control-case" : {
+                      "enum" : [ "building", "demolition", "deviation", "landscape-work" ],
+                      "type" : "string"
+                    },
+                    "created-at" : {
+                      "description" : "Timestamp when the notification was originally created",
+                      "type" : "string"
+                    },
+                    "extra-data" : {
+                      "additionalProperties" : false,
+                      "properties" : {
+                        "new-state" : {
+                          "description" : "The application state after the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "constructionStarted",
+                          "type" : "string"
+                        },
+                        "old-state" : {
+                          "description" : "The application state before the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "verdictGiven",
+                          "type" : "string"
+                        }
+                      },
+                      "required" : [ "old-state", "new-state" ],
+                      "type" : "object"
+                    },
+                    "notification-id" : {
+                      "type" : "string"
+                    },
+                    "notification-type" : {
+                      "enum" : [ "application-state-change" ],
+                      "type" : "string"
+                    },
+                    "organization-id" : {
+                      "description" : "The parent organization of the source application",
+                      "example" : "123-R",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "permanent-permit-id" : {
+                      "description" : "The permanent permit ID for the source application",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "registration-id" : {
+                      "description" : "The ID for the source registration",
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [ "notification-id", "registration-id", "created-at", "organization-id", "permanent-permit-id", "control-case", "application-id", "notification-type", "extra-data" ],
+                  "type" : "object"
+                } ]
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "oneOf" : [ {
+                  "additionalProperties" : false,
+                  "description" : "Application state change",
+                  "properties" : {
+                    "application-id" : {
+                      "description" : "The Lupapiste application ID for the source application",
+                      "example" : "LP-123-2026-00001",
+                      "type" : "string"
+                    },
+                    "control-case" : {
+                      "enum" : [ "building", "demolition", "deviation", "landscape-work" ],
+                      "type" : "string"
+                    },
+                    "created-at" : {
+                      "description" : "Timestamp when the notification was originally created",
+                      "type" : "string"
+                    },
+                    "extra-data" : {
+                      "additionalProperties" : false,
+                      "properties" : {
+                        "new-state" : {
+                          "description" : "The application state after the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "constructionStarted",
+                          "type" : "string"
+                        },
+                        "old-state" : {
+                          "description" : "The application state before the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "verdictGiven",
+                          "type" : "string"
+                        }
+                      },
+                      "required" : [ "old-state", "new-state" ],
+                      "type" : "object"
+                    },
+                    "notification-id" : {
+                      "type" : "string"
+                    },
+                    "notification-type" : {
+                      "enum" : [ "application-state-change" ],
+                      "type" : "string"
+                    },
+                    "organization-id" : {
+                      "description" : "The parent organization of the source application",
+                      "example" : "123-R",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "permanent-permit-id" : {
+                      "description" : "The permanent permit ID for the source application",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "registration-id" : {
+                      "description" : "The ID for the source registration",
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [ "notification-id", "registration-id", "created-at", "organization-id", "permanent-permit-id", "control-case", "application-id", "notification-type", "extra-data" ],
+                  "type" : "object"
+                } ]
+              }
+            },
+            "application/transit+json" : {
+              "schema" : {
+                "oneOf" : [ {
+                  "additionalProperties" : false,
+                  "description" : "Application state change",
+                  "properties" : {
+                    "application-id" : {
+                      "description" : "The Lupapiste application ID for the source application",
+                      "example" : "LP-123-2026-00001",
+                      "type" : "string"
+                    },
+                    "control-case" : {
+                      "enum" : [ "building", "demolition", "deviation", "landscape-work" ],
+                      "type" : "string"
+                    },
+                    "created-at" : {
+                      "description" : "Timestamp when the notification was originally created",
+                      "type" : "string"
+                    },
+                    "extra-data" : {
+                      "additionalProperties" : false,
+                      "properties" : {
+                        "new-state" : {
+                          "description" : "The application state after the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "constructionStarted",
+                          "type" : "string"
+                        },
+                        "old-state" : {
+                          "description" : "The application state before the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "verdictGiven",
+                          "type" : "string"
+                        }
+                      },
+                      "required" : [ "old-state", "new-state" ],
+                      "type" : "object"
+                    },
+                    "notification-id" : {
+                      "type" : "string"
+                    },
+                    "notification-type" : {
+                      "enum" : [ "application-state-change" ],
+                      "type" : "string"
+                    },
+                    "organization-id" : {
+                      "description" : "The parent organization of the source application",
+                      "example" : "123-R",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "permanent-permit-id" : {
+                      "description" : "The permanent permit ID for the source application",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "registration-id" : {
+                      "description" : "The ID for the source registration",
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [ "notification-id", "registration-id", "created-at", "organization-id", "permanent-permit-id", "control-case", "application-id", "notification-type", "extra-data" ],
+                  "type" : "object"
+                } ]
+              }
+            },
+            "application/transit+msgpack" : {
+              "schema" : {
+                "oneOf" : [ {
+                  "additionalProperties" : false,
+                  "description" : "Application state change",
+                  "properties" : {
+                    "application-id" : {
+                      "description" : "The Lupapiste application ID for the source application",
+                      "example" : "LP-123-2026-00001",
+                      "type" : "string"
+                    },
+                    "control-case" : {
+                      "enum" : [ "building", "demolition", "deviation", "landscape-work" ],
+                      "type" : "string"
+                    },
+                    "created-at" : {
+                      "description" : "Timestamp when the notification was originally created",
+                      "type" : "string"
+                    },
+                    "extra-data" : {
+                      "additionalProperties" : false,
+                      "properties" : {
+                        "new-state" : {
+                          "description" : "The application state after the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "constructionStarted",
+                          "type" : "string"
+                        },
+                        "old-state" : {
+                          "description" : "The application state before the state change",
+                          "enum" : [ "open", "closed", "foremanVerdictGiven", "ready", "constructionStarted", "agreementPrepared", "appealed", "complementNeeded", "extinct", "hearing", "inUse", "final", "finished", "sent", "submitted", "canceled", "agreementSigned", "draft", "acknowledged", "answered", "info", "proposal", "proposalApproved", "verdictGiven", "onHold" ],
+                          "example" : "verdictGiven",
+                          "type" : "string"
+                        }
+                      },
+                      "required" : [ "old-state", "new-state" ],
+                      "type" : "object"
+                    },
+                    "notification-id" : {
+                      "type" : "string"
+                    },
+                    "notification-type" : {
+                      "enum" : [ "application-state-change" ],
+                      "type" : "string"
+                    },
+                    "organization-id" : {
+                      "description" : "The parent organization of the source application",
+                      "example" : "123-R",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "permanent-permit-id" : {
+                      "description" : "The permanent permit ID for the source application",
+                      "minLength" : 1,
+                      "type" : "string"
+                    },
+                    "registration-id" : {
+                      "description" : "The ID for the source registration",
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [ "notification-id", "registration-id", "created-at", "organization-id", "permanent-permit-id", "control-case", "application-id", "notification-type", "extra-data" ],
+                  "type" : "object"
+                } ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "The notification was accepted"
+          }
+        },
+        "summary" : "Submit a notification"
+      }
+    }
+  },
+  "x-id" : [ "asiointi-notifications-api" ]
+}

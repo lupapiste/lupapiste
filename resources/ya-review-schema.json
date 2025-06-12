@@ -1,0 +1,48 @@
+{"$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "properties": {
+   "katselmuksen_laji": {"type": "string",
+                         "enum": ["ALOITUSKATSELMUS",
+                                  "LOPPUKATSELMUS",
+                                  "MUU_VALVONTAKAYNTI"]},
+   "pitopaiva": {"type": "string",
+                 "format": "date"},
+   "pitaja": {"type": "string"},
+   "huomautettavaa": {"type": ["string", "null"]},
+   "maaraaika": {"type": ["string", "null"],
+                 "format": "date"},
+   "toteaja": {"type": ["string", "null"]},
+   "toteamishetki": {"type": ["string", "null"],
+                     "format": "date"},
+   "lasnaolijat": {"type": ["string", "null"]},
+   "poikkeamat": {"type": ["string", "null"]},
+   "liitetiedostot": {"type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "request_part": {"type": "string"},
+                          "tyyppi": {"type": "string",
+                                     "enum": ["KATSELMUKSEN_LIITE",
+                                              "KATSELMUKSEN_POYTAKIRJA",
+                                              "MUU",
+                                              "VALOKUVA"]},
+                          "kuvaus": {"type": ["string", "null"]}
+                        },
+                        "required": ["request_part",
+                                     "tyyppi",
+                                     "kuvaus"],
+                        "additionalProperties": false
+                      }}
+},
+ "required": ["katselmuksen_laji",
+              "pitopaiva",
+              "pitaja",
+              "huomautettavaa",
+              "maaraaika",
+              "toteaja",
+              "toteamishetki",
+              "lasnaolijat",
+              "poikkeamat",
+              "liitetiedostot"],
+ "additionalProperties": false
+}

@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd http://www.tekla.com/schemas/kuntagml https://iedemo.tekla.com/teklaogcweb/WFS.ashx?SERVICE=WFS&amp;REQUEST=DescribeFeatureType&amp;typeName=rakval:RakennusvalvontaAsia ">
+ <gml:boundedBy>
+  <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
+   <gml:coordinates>23461151.304,6701827.550 23461202.492,6701888.108</gml:coordinates>
+  </gml:Box>
+ </gml:boundedBy><gml:featureMember>
+  <rakval:RakennusvalvontaAsia>
+    <rakval:kasittelynTilatieto>
+      <yht:Tilamuutos>
+        <yht:pvm>2015-11-29</yht:pvm>
+        <yht:tila>lupa hyväksytty</yht:tila>
+        <yht:kasittelija>
+          <yht:henkilo>
+            <yht:nimi>
+              <yht:sukunimi>Veijo Viranomainen</yht:sukunimi>
+            </yht:nimi>
+          </yht:henkilo>
+        </yht:kasittelija>
+      </yht:Tilamuutos>
+    </rakval:kasittelynTilatieto>
+    <rakval:luvanTunnisteTiedot>
+      <yht:LupaTunnus>
+        <yht:kuntalupatunnus>853-2015-30</yht:kuntalupatunnus>
+        <yht:muuTunnustieto>
+          <yht:MuuTunnus>
+            <yht:tunnus>${application-id}</yht:tunnus>
+            <yht:sovellus>foreman_application_itest</yht:sovellus>
+          </yht:MuuTunnus>
+        </yht:muuTunnustieto>
+        <yht:muuTunnustieto>
+          <yht:MuuTunnus>
+            <yht:tunnus>LP-205-2015-00047</yht:tunnus>
+            <yht:sovellus>Lupapistetunnus</yht:sovellus>
+          </yht:MuuTunnus>
+        </yht:muuTunnustieto>
+        <yht:muuTunnustieto>
+          <yht:MuuTunnus>
+            <yht:tunnus>LP-753-2015-00002</yht:tunnus>
+            <yht:sovellus>Lupapistetunnus</yht:sovellus>
+          </yht:MuuTunnus>
+        </yht:muuTunnustieto>
+        <yht:saapumisPvm>2015-11-30</yht:saapumisPvm>
+      </yht:LupaTunnus>
+    </rakval:luvanTunnisteTiedot>
+    <rakval:osapuolettieto>
+      <yht:Osapuolet>
+        <yht:osapuolitieto>
+          <yht:Osapuoli>
+            <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+            <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:etunimi>Veijo</yht:etunimi>
+                <yht:sukunimi>Viranomainen</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="und">Metsänpojankuja 1</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>03220</yht:postinumero>
+                <yht:postitoimipaikannimi>Espoo</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>Veijo.Viranomainen@example.com</yht:sahkopostiosoite>
+              <yht:puhelin>0123456789</yht:puhelin>
+            </yht:henkilo>
+            <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+          </yht:Osapuoli>
+        </yht:osapuolitieto>
+        <yht:suunnittelijatieto>
+          <yht:Suunnittelija>
+            <yht:suunnittelijaRoolikoodi>100</yht:suunnittelijaRoolikoodi>
+            <yht:VRKrooliKoodi>100</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Viranomainen Veijo</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="und">asdsadsda</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>12345</yht:postinumero>
+                <yht:postitoimipaikannimi>12345 [UNKNOWN POST]</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>Veijo.Viranomainen@example.com</yht:sahkopostiosoite>
+              <yht:puhelin>0123456789</yht:puhelin>
+            </yht:henkilo>
+            <yht:valmistumisvuosi>1994</yht:valmistumisvuosi>
+            <yht:liitetieto>
+              <yht:Liite>
+                <yht:kuvaus />
+                <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              </yht:Liite>
+            </yht:liitetieto>
+            <yht:vaadittuPatevyysluokka>A</yht:vaadittuPatevyysluokka>
+          </yht:Suunnittelija>
+        </yht:suunnittelijatieto>
+        <yht:tyonjohtajatieto>
+          <yht:Tyonjohtaja>
+            <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+            <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Viranomainen Veijo</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="und">Metsänpojankuja 1</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>03220</yht:postinumero>
+                <yht:postitoimipaikannimi>TERVALAMPI</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>Veijo.Viranomainen@example.com</yht:sahkopostiosoite>
+              <yht:puhelin>0123456789</yht:puhelin>
+            </yht:henkilo>
+            <yht:vaadittuPatevyysluokka>A</yht:vaadittuPatevyysluokka>
+            <yht:koulutus>arkkitehti</yht:koulutus>
+            <yht:valmistumisvuosi>1994</yht:valmistumisvuosi>
+            <yht:liitetieto>
+              <yht:Liite>
+                <yht:kuvaus />
+                <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              </yht:Liite>
+            </yht:liitetieto>
+            <yht:alkamisPvm>2015-11-29</yht:alkamisPvm>
+            <yht:hakemuksenSaapumisPvm>2015-11-30</yht:hakemuksenSaapumisPvm>
+            <yht:sijaistettavaHlo />
+            <yht:paatosPvm>2015-11-29</yht:paatosPvm>
+            <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+            <yht:paatoksentekija>Pena</yht:paatoksentekija>
+            <yht:pykala>2</yht:pykala>
+            <yht:tyonjohtajaPaatosLiitetieto>
+              <yht:Liite>
+                <yht:kuvaus>kuvaus 1</yht:kuvaus>
+                <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-verdict.pdf</yht:linkkiliitteeseen>
+              </yht:Liite>
+            </yht:tyonjohtajaPaatosLiitetieto>
+          </yht:Tyonjohtaja>
+        </yht:tyonjohtajatieto>
+      </yht:Osapuolet>
+    </rakval:osapuolettieto>
+    <rakval:rakennuspaikkatieto>
+      <rakval:Rakennuspaikka>
+        <yht:yksilointitieto>172469120</yht:yksilointitieto>
+        <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+        <yht:rakennuspaikanKiinteistotieto>
+          <yht:RakennuspaikanKiinteisto>
+            <yht:kiinteistotieto>
+              <yht:Kiinteisto>
+                <yht:kiinteistotunnus>20501800190006</yht:kiinteistotunnus>
+              </yht:Kiinteisto>
+            </yht:kiinteistotieto>
+            <yht:hallintaperuste>oma</yht:hallintaperuste>
+          </yht:RakennuspaikanKiinteisto>
+        </yht:rakennuspaikanKiinteistotieto>
+        <yht:sijaintitieto>
+          <yht:Sijainti>
+            <yht:alue>
+              <gml:Polygon srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
+                <gml:outerBoundaryIs>
+                  <gml:LinearRing>
+                    <gml:coordinates>23461151.304,6701840.773 23461175.896,6701888.108 23461202.492,6701874.458 23461178.123,6701827.550 23461151.304,6701840.773</gml:coordinates>
+                  </gml:LinearRing>
+                </gml:outerBoundaryIs>
+              </gml:Polygon>
+            </yht:alue>
+          </yht:Sijainti>
+        </yht:sijaintitieto>
+        <yht:kaavanaste>ei kaavaa</yht:kaavanaste>
+        <yht:rakennusoikeudellinenKerrosala>110.000</yht:rakennusoikeudellinenKerrosala>
+        <yht:rakennusoikeusYhteensa>-213.000</yht:rakennusoikeusYhteensa>
+        <yht:osoite>
+          <yht:osoitenimi>
+            <yht:teksti xml:lang="und">Kaurakatu 21</yht:teksti>
+          </yht:osoitenimi>
+          <yht:postinumero>20740</yht:postinumero>
+          <yht:postitoimipaikannimi>TURKU</yht:postitoimipaikannimi>
+        </yht:osoite>
+      </rakval:Rakennuspaikka>
+    </rakval:rakennuspaikkatieto>
+    <rakval:toimenpidetieto>
+      <rakval:Toimenpide>
+        <rakval:uudelleenrakentaminen>
+          <rakval:kuvaus>Asuinpientalon raken</rakval:kuvaus>
+          <rakval:perusparannusKytkin>false</rakval:perusparannusKytkin>
+        </rakval:uudelleenrakentaminen>
+        <rakval:rakennustieto>
+          <rakval:Rakennus>
+            <yht:yksilointitieto>172469121</yht:yksilointitieto>
+            <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+            <rakval:sijaintitieto>
+              <rakval:Sijainti>
+                <yht:tyhja />
+              </rakval:Sijainti>
+            </rakval:sijaintitieto>
+            <rakval:rakennuksenTiedot>
+              <rakval:rakennustunnus>
+                <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                <rakval:muuTunnustieto>
+                  <rakval:MuuTunnus>
+                    <yht:tunnus>LP-205-2015-00047</yht:tunnus>
+                    <yht:sovellus />
+                  </rakval:MuuTunnus>
+                </rakval:muuTunnustieto>
+                <rakval:rakennuksenSelite>Asuinpientalon raken</rakval:rakennuksenSelite>
+              </rakval:rakennustunnus>
+              <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
+              <rakval:tilavuus>500</rakval:tilavuus>
+              <rakval:kokonaisala>120</rakval:kokonaisala>
+              <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+              <rakval:kerrosluku>2</rakval:kerrosluku>
+              <rakval:kerrosala>105</rakval:kerrosala>
+              <rakval:rakennusoikeudellinenKerrosala>110.0</rakval:rakennusoikeudellinenKerrosala>
+              <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+              <rakval:kantavaRakennusaine>
+                <rakval:rakennusaine>betoni</rakval:rakennusaine>
+              </rakval:kantavaRakennusaine>
+              <rakval:julkisivu>
+                <rakval:julkisivumateriaali>betoni</rakval:julkisivumateriaali>
+              </rakval:julkisivu>
+              <rakval:verkostoliittymat>
+                <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                <rakval:kaapeliKytkin>true</rakval:kaapeliKytkin>
+              </rakval:verkostoliittymat>
+              <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+              <rakval:lammonlahde>
+                <rakval:polttoaine>kauko tai aluelämpö</rakval:polttoaine>
+              </rakval:lammonlahde>
+              <rakval:varusteet>
+                <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                <rakval:koneellinenilmastointiKytkin>true</rakval:koneellinenilmastointiKytkin>
+                <rakval:saunoja>0</rakval:saunoja>
+                <rakval:uima-altaita>0</rakval:uima-altaita>
+                <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+              </rakval:varusteet>
+              <rakval:asuinhuoneistot>
+                <rakval:huoneisto>
+                  <rakval:muutostapa>lisäys</rakval:muutostapa>
+                  <rakval:huoneluku>0</rakval:huoneluku>
+                  <rakval:keittionTyyppi>ei tiedossa</rakval:keittionTyyppi>
+                  <rakval:huoneistoala>0.0</rakval:huoneistoala>
+                  <rakval:varusteet>
+                    <rakval:WCKytkin>false</rakval:WCKytkin>
+                    <rakval:ammeTaiSuihkuKytkin>false</rakval:ammeTaiSuihkuKytkin>
+                    <rakval:saunaKytkin>false</rakval:saunaKytkin>
+                    <rakval:parvekeTaiTerassiKytkin>false</rakval:parvekeTaiTerassiKytkin>
+                    <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                  </rakval:varusteet>
+                  <rakval:huoneistonTyyppi>asuinhuoneisto</rakval:huoneistonTyyppi>
+                  <rakval:huoneistotunnus>
+                    <rakval:huoneistonumero>000</rakval:huoneistonumero>
+                  </rakval:huoneistotunnus>
+                </rakval:huoneisto>
+                <rakval:asuntojenPintaala>0.000</rakval:asuntojenPintaala>
+                <rakval:asuntojenLkm>1</rakval:asuntojenLkm>
+              </rakval:asuinhuoneistot>
+              <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+            </rakval:rakennuksenTiedot>
+            <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
+            <rakval:omistajatieto>
+              <rakval:Omistaja>
+                <yht:kuntaRooliKoodi>Rakennuksen omistaja</yht:kuntaRooliKoodi>
+                <yht:VRKrooliKoodi>rakennuksen omistaja</yht:VRKrooliKoodi>
+                <yht:henkilo>
+                  <yht:nimi>
+                    <yht:etunimi>Veijo</yht:etunimi>
+                    <yht:sukunimi>Viranomainen</yht:sukunimi>
+                  </yht:nimi>
+                  <yht:osoite>
+                    <yht:osoitenimi>
+                      <yht:teksti xml:lang="und">Metsänpojankuja 1</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>12345</yht:postinumero>
+                    <yht:postitoimipaikannimi>Espoo</yht:postitoimipaikannimi>
+                  </yht:osoite>
+                  <yht:sahkopostiosoite>Veijo.Viranomainen@example.com</yht:sahkopostiosoite>
+                  <yht:puhelin>0123456789</yht:puhelin>
+                </yht:henkilo>
+                <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                <rakval:omistajalaji>
+                  <rakval:omistajalaji>muu yksityinen henkilö tai perikunta</rakval:omistajalaji>
+                </rakval:omistajalaji>
+              </rakval:Omistaja>
+            </rakval:omistajatieto>
+          </rakval:Rakennus>
+        </rakval:rakennustieto>
+      </rakval:Toimenpide>
+    </rakval:toimenpidetieto>
+    <rakval:toimenpidetieto>
+      <rakval:Toimenpide>
+        <rakval:kaupunkikuvaToimenpide>
+          <rakval:kuvaus>muu</rakval:kuvaus>
+        </rakval:kaupunkikuvaToimenpide>
+        <rakval:rakennustieto>
+          <rakval:Rakennus>
+            <yht:yksilointitieto>172469125</yht:yksilointitieto>
+            <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+            <rakval:sijaintitieto>
+              <rakval:Sijainti>
+                <yht:tyhja />
+              </rakval:Sijainti>
+            </rakval:sijaintitieto>
+            <rakval:rakennuksenTiedot>
+              <rakval:rakennustunnus>
+                <rakval:jarjestysnumero>2</rakval:jarjestysnumero>
+                <rakval:muuTunnustieto>
+                  <rakval:MuuTunnus>
+                    <yht:tunnus>LP-205-2015-00047</yht:tunnus>
+                    <yht:sovellus />
+                  </rakval:MuuTunnus>
+                </rakval:muuTunnustieto>
+              </rakval:rakennustunnus>
+              <rakval:kayttotarkoitus>ei tiedossa</rakval:kayttotarkoitus>
+              <rakval:tilavuus>0</rakval:tilavuus>
+              <rakval:kokonaisala>0</rakval:kokonaisala>
+              <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+              <rakval:kerrosluku>0</rakval:kerrosluku>
+              <rakval:kerrosala>15</rakval:kerrosala>
+              <rakval:rakentamistapa>ei tiedossa</rakval:rakentamistapa>
+              <rakval:kantavaRakennusaine>
+                <rakval:rakennusaine>ei tiedossa</rakval:rakennusaine>
+              </rakval:kantavaRakennusaine>
+              <rakval:julkisivu>
+                <rakval:julkisivumateriaali>ei tiedossa</rakval:julkisivumateriaali>
+              </rakval:julkisivu>
+              <rakval:verkostoliittymat>
+                <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+              </rakval:verkostoliittymat>
+              <rakval:lammitystapa>ei tiedossa</rakval:lammitystapa>
+              <rakval:lammonlahde>
+                <rakval:polttoaine>ei tiedossa</rakval:polttoaine>
+              </rakval:lammonlahde>
+              <rakval:varusteet>
+                <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                <rakval:saunoja>0</rakval:saunoja>
+                <rakval:uima-altaita>0</rakval:uima-altaita>
+                <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+              </rakval:varusteet>
+              <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+            </rakval:rakennuksenTiedot>
+            <rakval:rakentajatyyppi>ei tiedossa</rakval:rakentajatyyppi>
+          </rakval:Rakennus>
+        </rakval:rakennustieto>
+      </rakval:Toimenpide>
+    </rakval:toimenpidetieto>
+    <rakval:katselmustieto>
+      <rakval:Katselmus>
+        <rakval:katselmuksenLaji>33</rakval:katselmuksenLaji>
+        <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+        <rakval:huomautukset>
+          <rakval:huomautus>
+            <rakval:kuvaus>Samalla myönnetään lupa suorittaa rakennustyöt ennen kuin päätös on saanut lainvoiman ehdolla, että rakennusvalvontatoimistolle esitetään ennen töiden aloittamista hyväksyttävä vakuus.</rakval:kuvaus>
+          </rakval:huomautus>
+        </rakval:huomautukset>
+        <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+        <rakval:lasnaolijat />
+      </rakval:Katselmus>
+    </rakval:katselmustieto>
+    <rakval:katselmustieto>
+      <rakval:Katselmus>
+        <rakval:katselmuksenLaji>33</rakval:katselmuksenLaji>
+        <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+        <rakval:huomautukset>
+          <rakval:huomautus>
+            <rakval:kuvaus>Rakennustöitä ei saa aloittaa ennen kuin poikkeamispäätös/suunnittelutarveratkaisupäätös on saanut lainvoiman.</rakval:kuvaus>
+          </rakval:huomautus>
+        </rakval:huomautukset>
+        <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+        <rakval:lasnaolijat />
+      </rakval:Katselmus>
+    </rakval:katselmustieto>
+    <rakval:paatostieto>
+      <yht:Paatos>
+        <yht:lupamaaraykset>
+          <yht:kerrosala>120.000</yht:kerrosala>
+          <yht:kokonaisala>120.000</yht:kokonaisala>
+          <yht:rakennusoikeudellinenKerrosala>110.000</yht:rakennusoikeudellinenKerrosala>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>aloituskokous</yht:katselmuksenLaji>
+              <yht:tarkastuksenTaiKatselmuksenNimi>Aloituskokous</yht:tarkastuksenTaiKatselmuksenNimi>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:vaaditutKatselmukset>
+            <yht:Katselmus>
+              <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+              <yht:tarkastuksenTaiKatselmuksenNimi>Loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+            </yht:Katselmus>
+          </yht:vaaditutKatselmukset>
+          <yht:maaraystieto>
+            <yht:Maarays>
+              <yht:sisalto>Samalla myönnetään lupa suorittaa rakennustyöt ennen kuin päätös on saanut lainvoiman.</yht:sisalto>
+            </yht:Maarays>
+          </yht:maaraystieto>
+          <yht:maaraystieto>
+            <yht:Maarays>
+              <yht:sisalto>Samalla myönnetään lupa suorittaa rakennustyöt ennen kuin päätös on saanut lainvoiman ehdolla, että rakennusvalvontatoimistolle esitetään ennen töiden aloittamista hyväksyttävä vakuus.</yht:sisalto>
+            </yht:Maarays>
+          </yht:maaraystieto>
+          <yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelma>Rakennesuunnitelmat
+Lujuuslaskelmat</yht:vaadittuErityissuunnitelma>
+          </yht:vaadittuErityissuunnitelmatieto>
+          <yht:vaadittuTyonjohtajatieto>
+            <yht:VaadittuTyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+            </yht:VaadittuTyonjohtaja>
+          </yht:vaadittuTyonjohtajatieto>
+          <yht:vaadittuTyonjohtajatieto>
+            <yht:VaadittuTyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>KVV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+            </yht:VaadittuTyonjohtaja>
+          </yht:vaadittuTyonjohtajatieto>
+        </yht:lupamaaraykset>
+        <yht:paivamaarat>
+          <yht:lainvoimainenPvm>2015-12-30</yht:lainvoimainenPvm>
+          <yht:voimassaHetkiPvm>2020-12-30</yht:voimassaHetkiPvm>
+          <yht:antoPvm>2015-11-29</yht:antoPvm>
+        </yht:paivamaarat>
+        <yht:poytakirja>
+          <yht:paatos>Päätösteksti: Päätöstekstiä.
+Päätösehdotuksen lisäteksti: </yht:paatos>
+          <yht:paatoskoodi>hyväksytty</yht:paatoskoodi>
+          <yht:paatoksentekija>Rakennuslautakunta</yht:paatoksentekija>
+          <yht:paatospvm>2015-11-29</yht:paatospvm>
+          <yht:pykala>5</yht:pykala>
+        </yht:poytakirja>
+      </yht:Paatos>
+    </rakval:paatostieto>
+    <rakval:lisatiedot>
+      <rakval:Lisatiedot>
+        <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        <rakval:rakentamisentiedot>
+          <rakval:uusiaAsuntojaLkm>1</rakval:uusiaAsuntojaLkm>
+          <rakval:uusiaRakennuksiaLkm>1</rakval:uusiaRakennuksiaLkm>
+          <rakval:tilavuus>500</rakval:tilavuus>
+        </rakval:rakentamisentiedot>
+        <rakval:suunnittelijanVaativuustaso>
+          <yht:suunnittelijaRoolikoodi>100</yht:suunnittelijaRoolikoodi>
+          <yht:VRKrooliKoodi>100</yht:VRKrooliKoodi>
+          <yht:henkilo>
+            <yht:nimi>
+              <yht:sukunimi>Viranomainen Veijo</yht:sukunimi>
+            </yht:nimi>
+            <yht:osoite>
+              <yht:osoitenimi>
+                <yht:teksti xml:lang="und">asdsadsda</yht:teksti>
+              </yht:osoitenimi>
+              <yht:postinumero>12345</yht:postinumero>
+              <yht:postitoimipaikannimi>12345 [UNKNOWN POST]</yht:postitoimipaikannimi>
+            </yht:osoite>
+            <yht:sahkopostiosoite>Veijo.Viranomainen@example.com</yht:sahkopostiosoite>
+            <yht:puhelin>0123456789</yht:puhelin>
+          </yht:henkilo>
+          <yht:valmistumisvuosi>1994</yht:valmistumisvuosi>
+          <yht:liitetieto>
+            <yht:Liite>
+              <yht:kuvaus />
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+            </yht:Liite>
+          </yht:liitetieto>
+          <yht:vaadittuPatevyysluokka>A</yht:vaadittuPatevyysluokka>
+        </rakval:suunnittelijanVaativuustaso>
+        <rakval:tyonjohtajanVaativuustaso>
+          <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+          <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+          <yht:henkilo>
+            <yht:nimi>
+              <yht:sukunimi>Viranomainen Veijo</yht:sukunimi>
+            </yht:nimi>
+            <yht:osoite>
+              <yht:osoitenimi>
+                <yht:teksti xml:lang="und">Metsänpojankuja 1</yht:teksti>
+              </yht:osoitenimi>
+              <yht:postinumero>03220</yht:postinumero>
+              <yht:postitoimipaikannimi>TERVALAMPI</yht:postitoimipaikannimi>
+            </yht:osoite>
+            <yht:sahkopostiosoite>Veijo.Viranomainen@example.com</yht:sahkopostiosoite>
+            <yht:puhelin>0123456789</yht:puhelin>
+          </yht:henkilo>
+          <yht:vaadittuPatevyysluokka>A</yht:vaadittuPatevyysluokka>
+          <yht:koulutus>arkkitehti</yht:koulutus>
+          <yht:valmistumisvuosi>1994</yht:valmistumisvuosi>
+          <yht:liitetieto>
+            <yht:Liite>
+              <yht:kuvaus />
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+            </yht:Liite>
+          </yht:liitetieto>
+          <yht:alkamisPvm>2015-11-29</yht:alkamisPvm>
+          <yht:hakemuksenSaapumisPvm>2015-11-30</yht:hakemuksenSaapumisPvm>
+          <yht:sijaistettavaHlo />
+          <yht:paatosPvm>2015-11-29</yht:paatosPvm>
+          <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+        </rakval:tyonjohtajanVaativuustaso>
+        <rakval:toimitustapa>postitse</rakval:toimitustapa>
+      </rakval:Lisatiedot>
+    </rakval:lisatiedot>
+    <rakval:liitetieto>
+      <rakval:Liite>
+        <yht:kuvaus />
+        <yht:linkkiliitteeseen>http://notused</yht:linkkiliitteeseen>
+      </rakval:Liite>
+    </rakval:liitetieto>
+    <rakval:asianTiedot>
+      <rakval:Asiantiedot>
+        <rakval:vahainenPoikkeaminen>Poikkeaminen.</rakval:vahainenPoikkeaminen>
+        <rakval:rakennusvalvontaasianKuvaus>Kuvaus.</rakval:rakennusvalvontaasianKuvaus>
+      </rakval:Asiantiedot>
+    </rakval:asianTiedot>
+    <rakval:hankkeenVaativuus>A</rakval:hankkeenVaativuus>
+  </rakval:RakennusvalvontaAsia>
+</gml:featureMember></wfs:FeatureCollection>

@@ -1,0 +1,8 @@
+{:organization {:authority #{:document/approve
+                             :document/edit
+                             :document/edit-identifiers}
+                :approver  #{:document/edit-post-verdict}}
+ :document     {:writer  #{:document/edit
+                           :document/edit-draft}
+                :foreman #{:document/edit
+                           :document/edit-draft}}}

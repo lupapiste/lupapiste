@@ -1,0 +1,171 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Network connections",
+    :fi "Verkostoliittymä",
+    :sv "Nätverksanslutning"},
+   :codeValue "01",
+   :created "2023-01-04T16:27:37.444Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/01/members/",
+   :modified "2023-12-04T11:33:05.271Z",
+   :status "VALID",
+   :id "bf38f4fc-9dba-4e44-87a8-806b4cb7a907",
+   :statusModified "2023-01-04T16:27:37.444Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Wastewater tank",
+    :fi "Jätevesisäiliö",
+    :sv "Avloppsbehållare"},
+   :codeValue "02",
+   :created "2023-01-04T16:27:37.462Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/02/members/",
+   :modified "2023-12-04T11:33:05.288Z",
+   :status "VALID",
+   :id "4813f08a-34c4-4244-b49a-b56187df1542",
+   :statusModified "2023-01-04T16:27:37.462Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Subsurface disposal system",
+    :fi "Maapuhdistamo",
+    :sv "Markbäddsanläggning"},
+   :codeValue "03",
+   :created "2023-01-04T16:27:37.470Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/03/members/",
+   :modified "2023-12-04T11:33:05.295Z",
+   :status "VALID",
+   :id "39f2c7bd-65eb-4d61-af93-6f00b742aedc",
+   :statusModified "2023-01-04T16:27:37.470Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Small sewage treatment plant",
+    :fi "Laitepuhdistamo",
+    :sv "Reningsverk för anordningar"},
+   :codeValue "04",
+   :created "2023-01-04T16:27:37.476Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/04/members/",
+   :modified "2023-12-04T11:33:05.303Z",
+   :status "VALID",
+   :id "24a20ad3-669a-4e21-9bc7-5a51696556a1",
+   :statusModified "2023-01-04T16:27:37.476Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/04",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Greywater treatment plant",
+    :fi "Harmaavesipuhdistamo",
+    :sv "Gråvattenreningsverk"},
+   :codeValue "05",
+   :created "2023-01-04T16:27:37.481Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/05/members/",
+   :modified "2023-12-04T11:33:05.312Z",
+   :status "VALID",
+   :id "a58b3466-0be6-4599-b97d-ed4bb33cd930",
+   :statusModified "2023-01-04T16:27:37.481Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/05",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "No need for wastewater treatment",
+    :fi "Ei tarvetta jätevesien käsittelylle",
+    :sv "Inget behov av avloppsvattenhantering"},
+   :codeValue "06",
+   :created "2023-01-04T16:27:37.487Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/06/members/",
+   :modified "2023-12-04T11:33:05.332Z",
+   :status "VALID",
+   :id "108c18c5-3caf-489d-abcc-1d0d1a0b8222",
+   :statusModified "2023-01-04T16:27:37.487Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/06",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other treatment",
+    :fi "Muu käsittely",
+    :sv "Övrig behandling"},
+   :codeValue "99",
+   :created "2023-01-04T16:27:37.492Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/99/members/",
+   :modified "2023-12-04T11:33:05.339Z",
+   :status "VALID",
+   :id "b10d0b76-c9f5-4094-98d7-c933ba86dd6d",
+   :statusModified "2023-01-04T16:27:37.492Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jatevesienkasittely/codes/99",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/jatevesienkasittely/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:51:34.228Z"}

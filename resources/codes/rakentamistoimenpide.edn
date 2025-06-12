@@ -1,0 +1,205 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "New building or structure",
+    :fi "Uusi rakennus tai rakennelma",
+    :sv "Ny byggnad eller konstruktion"},
+   :codeValue "01",
+   :created "2021-07-12T11:57:50.157Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/01/members/",
+   :modified "2023-12-04T08:53:58.215Z",
+   :status "VALID",
+   :id "f2dd3243-52f1-45d3-937f-f8cc57492ee8",
+   :statusModified "2021-07-12T11:57:50.157Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Expansion", :fi "Laajentaminen", :sv "Utvidgning"},
+   :codeValue "02",
+   :created "2021-07-12T11:57:50.163Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/02/members/",
+   :modified "2023-12-04T08:53:58.229Z",
+   :status "VALID",
+   :id "f05f4f76-ab2a-4be7-bc57-be4e52c9b4c9",
+   :statusModified "2021-07-12T11:57:50.163Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Alteration work comparable to rebuilding",
+    :fi "Uudelleen rakentamiseen verrattava muutostyö",
+    :sv "Ändringsarbete som är jämförbar med nybyggande"},
+   :codeValue "03",
+   :created "2021-07-12T11:57:50.168Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/03/members/",
+   :modified "2023-12-04T08:53:58.237Z",
+   :status "VALID",
+   :id "ab0691de-3658-4b4f-b644-f3cf53c85e0a",
+   :statusModified "2021-07-12T11:57:50.168Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other alteration work",
+    :fi "Muu muutostyö",
+    :sv "Annat ändringsarbete"},
+   :codeValue "04",
+   :created "2021-07-12T11:57:50.173Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/04/members/",
+   :modified "2023-12-04T08:53:58.244Z",
+   :status "VALID",
+   :id "d33c35e5-eec2-4d88-8f0b-85ba97baa710",
+   :statusModified "2021-07-12T11:57:50.173Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/04",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Demolition", :fi "Purkaminen", :sv "Rivning"},
+   :codeValue "05",
+   :created "2021-07-12T11:57:50.178Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/05/members/",
+   :modified "2023-12-04T08:53:58.251Z",
+   :status "VALID",
+   :id "af07db13-8d36-4537-afc0-f8354ba446f1",
+   :statusModified "2021-07-12T11:57:50.178Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/05",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Partial demolition of building",
+    :fi "Rakennuksen osittainen purkaminen",
+    :sv "Delvis rivning av en byggnad"},
+   :codeValue "06",
+   :created "2021-07-12T11:57:50.183Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/06/members/",
+   :modified "2023-12-04T08:53:58.257Z",
+   :status "VALID",
+   :id "dbcd2651-3954-4993-a42a-529e9bc74344",
+   :statusModified "2021-07-12T11:57:50.183Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/06",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Cityscape action",
+    :fi "Kaupunkikuvatoimenpide",
+    :sv "Stadbildsåtgärd"},
+   :codeValue "07",
+   :created "2023-02-14T15:30:02.913Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/07/members/",
+   :modified "2023-12-04T08:53:58.264Z",
+   :status "VALID",
+   :id "34026ed0-c20e-4d5b-a6ad-6956bb6f75b4",
+   :statusModified "2023-02-14T15:30:02.913Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/07",
+   :order 10,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Landscape-altering action",
+    :fi "Maisemaa muuttava toimenpide",
+    :sv "Åtgärd som ändrar landskapet"},
+   :codeValue "08",
+   :created "2023-02-20T13:03:41.356Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/08/members/",
+   :modified "2023-12-04T08:53:58.271Z",
+   :status "VALID",
+   :id "7a0fa1a4-3f73-409e-b40c-a7c1850a7d2e",
+   :statusModified "2023-02-20T13:03:41.356Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/08",
+   :order 11,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/08",
+   :hierarchyLevel 1}
+  {:description
+   {:en "An action to update building information.",
+    :fi "Rakennustiedon päivitystoimenpide.",
+    :sv "Åtgärd för uppdatering av byggnadsinformation."},
+   :prefLabel
+   {:en "Update of building or structure",
+    :fi "Rakennuksen tai rakennelman päivitys",
+    :sv "Uppdatering av byggnad eller konstruktion"},
+   :codeValue "09",
+   :created "2023-04-06T05:26:38.440Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/09/members/",
+   :modified "2023-12-04T08:53:58.278Z",
+   :status "VALID",
+   :id "754a78f2-61ab-462a-a654-878ae541f878",
+   :statusModified "2023-04-06T05:26:38.440Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Rakentamistoimenpide/codes/09",
+   :order 12,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Rakentamistoimenpide/code/09",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:44:19.023Z"}

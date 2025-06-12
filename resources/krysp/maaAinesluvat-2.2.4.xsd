@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Nosto Consulting Oy, Pasi Lappalainen, tel. +358 400 858101, http://www.nostoconsulting.fi  -->
+<!--  edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy)  -->
+<!--  KRYSP projekti -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ymm="http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.2.4">
+    <xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+    <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd"/>
+    <!-- Local usage -->
+    <!-- <xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\gml_dummy.xsd"/>
+    <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset.xsd"/> -->
+    <!--  =================================================  -->
+    <!--  Package: <<XSDschema>> Maa-ainesluvat  -->
+    <!--  =================================================  -->
+    <!--  Kohdejoukko: Maa-ainesluvat  -->
+    <!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+    <!--  Class: <<FeatureType>> Maa-ainesluvat -->
+    <!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+    <xs:element name="MaaAinesluvat" type="ymm:MaaAinesluvatType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>Skeeman juurielementti</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="ToiminnanSijaintiType">
+        <xs:sequence>
+            <xs:element name="osoite" type="yht:PostiosoiteType"/>
+            <xs:element name="kunta" type="xs:string"/>
+            <xs:element name="sijainti" type="gml:PointPropertyType"/>
+            <xs:element name="liite" type="yht:YmparistoLiiteType" minOccurs="0"/>
+            <xs:element name="kiinteistorekisterinumero" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="AbstractIlmoitusKohde">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractYmparistotoimiKohde"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="VakuusType">
+        <xs:choice>
+            <xs:element name="kylla">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="Rahaa"/>
+                        <xs:enumeration value="Pankkitakaus"/>
+                        <xs:enumeration value="ei tiedossa"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="ei" type="xs:string"/>
+        </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="OttamismaaraType">
+        <xs:sequence>
+            <xs:element name="kokonaismaara" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Haettu kokonaismaara, m3</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="vuotuinenOtto" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Arvioitu vuotuinen otto, m3</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ottamisaika" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Ottamisaika, vuotta</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="OttamissuunnitelmaType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:element name="ottamissuunnitelmanLaatija">
+                        <xs:complexType>
+                            <xs:complexContent>
+                                <xs:extension base="yht:YhteyshenkiloType">
+                                    <xs:sequence>
+                                        <xs:element name="ammatti" type="xs:string" minOccurs="0"/>
+                                        <xs:element name="koulutus" type="xs:string" minOccurs="0"/>
+                                    </xs:sequence>
+                                </xs:extension>
+                            </xs:complexContent>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType">
+                        <xs:annotation>
+                            <xs:documentation>ottamisalueen sijainti</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="selvitys" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>suoritetut tutkimukset ja selvitys ainesten määrästä ja laadusta</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="toimenpiteet" type="xs:string">
+                                    <xs:annotation>
+                                        <xs:documentation>Lyhyt selvitys niistä toimenpiteistä, joille lupaa haetaan</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                                <xs:element name="tutkimukset" type="xs:string"/>
+                                <xs:element name="ainesLaatu" type="xs:string"/>
+                                <xs:element name="ainesMaara" type="xs:string"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="luonnonolot" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>luonnonolot, maisema ja alueen suunnittelutilanne</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="maisemakuva" type="xs:string"/>
+                                <xs:element name="kasvillisuusJaElaimisto" type="xs:string"/>
+                                <xs:element name="kaavoitustilanne" type="xs:string"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="toimintaAlueenKuvaus" type="yht:YmparistoLiiteType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>toiminta-alueen kuvaus (suunnittelu- ja ottamisalue, kaivu- tai louhinta-alue, suoja-alueet, tukitoimintojen alueet, sivukivien läjitysalueet ja säilytettävä puusto)</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="ottamisenJarjestaminen" type="yht:YmparistoLiiteType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>ottamisen järjestäminen (kaivausten ja leikkausten syvyys ja muoto, tasot, massat, pintamaat, vaiheistus, toiminta-aika) </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="pohjavesiolot" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>alueen yleiset pohjavesiolot, pohjavesialueen luokitus ja suojavyöhykkeet </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="luokitus" type="xs:string"/>
+                                <xs:element name="suojavyohykkeet" type="xs:string"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="vedenottamot" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>vedenottamot, joihin hanke voi vaikuttaa</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="ymparistoHaittojenVahentaminen" type="yht:YmparistoLiiteType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>toimet ympäristöhaittojen vähentämiseksi (pohjavesi, pöly, melu) </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="alueenJalkihoito" type="yht:YmparistoLiiteType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>alueen jälkihoito ja alueen myöhempi käyttö</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="vakuus" type="ymm:VakuusType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Vakuus ottamisen aloittamiseksi ennen luvan lainvoimaa</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="valtakirja" type="yht:YmparistoLiiteType" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ValvontakohdeType">
+        <xs:sequence>
+            <xs:element name="lupa" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Luvan tiedot</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ilmoitustieto" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Ilmoitus">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="haltija" type="yht:YhteyshenkiloType" minOccurs="0"/>
+                                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType"/>
+                                    <xs:element name="ilmoitusvuosi" minOccurs="0">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="Luvan mukainen otto päättynyt"/>
+                                                <xs:enumeration value="Ei ottoa ko. vuonna"/>
+                                                <xs:enumeration value="ei tiedossa"/>
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:element>
+                                    <xs:element name="aineksenLaatu" minOccurs="0">
+                                        <xs:annotation>
+                                            <xs:documentation>Otetun aineksen laatu</xs:documentation>
+                                        </xs:annotation>
+                                        <xs:complexType>
+                                            <xs:sequence>
+                                                <xs:element name="kalliokiviaines" minOccurs="0">
+                                                    <xs:complexType>
+                                                        <xs:sequence>
+                                                            <xs:element name="kalliomurske">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="louhe">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="tarvekivi">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="kivilouhimoidenSivukivi">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                        </xs:sequence>
+                                                    </xs:complexType>
+                                                </xs:element>
+                                                <xs:element name="soraJaHiekka" minOccurs="0">
+                                                    <xs:complexType>
+                                                        <xs:sequence>
+                                                            <xs:element name="jalostamatonHiukkaJaSora">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="seulottuHiekkaJaSora">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="soramurske">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                        </xs:sequence>
+                                                    </xs:complexType>
+                                                </xs:element>
+                                                <xs:element name="SilttiJaSavi" minOccurs="0">
+                                                    <xs:complexType>
+                                                        <xs:sequence>
+                                                            <xs:element name="siltti">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="savi">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                        </xs:sequence>
+                                                    </xs:complexType>
+                                                </xs:element>
+                                                <xs:element name="moreeni" minOccurs="0">
+                                                    <xs:complexType>
+                                                        <xs:sequence>
+                                                            <xs:element name="jalostamatonSoramoreeni">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="seulottuSoramoreeni">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="moreenimurske">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                            <xs:element name="hietaJaHiesumoreeni">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                        </xs:sequence>
+                                                    </xs:complexType>
+                                                </xs:element>
+                                                <xs:element name="kiviaineksetYhteensa" type="xs:string" minOccurs="0"/>
+                                                <xs:element name="EloperaisetMaalajit" minOccurs="0">
+                                                    <xs:complexType>
+                                                        <xs:sequence>
+                                                            <xs:element name="multaJaLieju">
+                                                                <xs:complexType>
+                                                                    <xs:sequence>
+                                                                        <xs:element name="otettuAinesmaara" type="xs:string">
+                                                                            <xs:annotation>
+                                                                                <xs:documentation>Vuoden aikana otettu ainesmäärä (k-m3)</xs:documentation>
+                                                                            </xs:annotation>
+                                                                        </xs:element>
+                                                                    </xs:sequence>
+                                                                </xs:complexType>
+                                                            </xs:element>
+                                                        </xs:sequence>
+                                                    </xs:complexType>
+                                                </xs:element>
+                                            </xs:sequence>
+                                        </xs:complexType>
+                                    </xs:element>
+                                    <xs:element name="ennenOtettuMaamaara" type="xs:string">
+                                        <xs:annotation>
+                                            <xs:documentation>Maa-aineslain nojalla ottamisalueelta ennen tätä ilmoitusvuotta otettu määrä yhteensä, k-m3</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:element>
+                                    <xs:element name="jalkihoito">
+                                        <xs:annotation>
+                                            <xs:documentation>Luvan edellyttämä jälkihoito</xs:documentation>
+                                        </xs:annotation>
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="tehty"/>
+                                                <xs:enumeration value="tehty osittain %"/>
+                                                <xs:enumeration value="tekemättä"/>
+                                                <xs:enumeration value="ei tiedossa"/>
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:element>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MaaAinesluvatType">
+        <xs:complexContent>
+            <xs:extension base="gml:AbstractFeatureType">
+                <xs:sequence>
+                    <xs:element name="toimituksenTiedot" type="yht:AineistotoimituksentiedotType"/>
+                    <xs:element name="maaAineslupaAsiatieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element ref="ymm:MaaAineslupaAsia"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="kotitarveottoasiaTieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element ref="ymm:Kotitarveotto"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ValvontakohteetType">
+        <xs:sequence>
+            <xs:element name="Valvontakohde" type="ymm:ValvontakohdeType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MaaAineslupaAsiaType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:element name="kasittelytietotieto" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="KasittelyTieto" type="yht:KasittelyTietoType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="kiinteistotunnus" type="yht:KiinteistotunnusType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="luvanTunnistetiedot" type="yht:YmparistoLuvanTunnisteTiedotType" minOccurs="0"/>
+                    <xs:element name="lausuntotieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Lausunto" type="yht:LausuntoYmpType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="paatostieto" minOccurs="0">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Paatos" type="yht:YmparistoPaatosType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="hakemustieto" minOccurs="0">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Hakemus" minOccurs="0">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element name="hakija" maxOccurs="unbounded">
+                                                <xs:complexType>
+                                                    <xs:complexContent>
+                                                        <xs:extension base="yht:YhteystietoType">
+                                                            <xs:sequence>
+                                                                <xs:element name="ammatti" type="xs:string" minOccurs="0"/>
+                                                            </xs:sequence>
+                                                        </xs:extension>
+                                                    </xs:complexContent>
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="omistaja" type="yht:YhteyshenkiloType" minOccurs="0">
+                                                <xs:annotation>
+                                                    <xs:documentation>Kiinteistön omistaja</xs:documentation>
+                                                </xs:annotation>
+                                            </xs:element>
+                                            <xs:element name="ottamistoiminnanYhteyshenkilo" type="yht:YhteyshenkiloType" minOccurs="0">
+                                                <xs:annotation>
+                                                    <xs:documentation>Maa-ainesten ottamistoiminnan yhteyshenkilö</xs:documentation>
+                                                </xs:annotation>
+                                            </xs:element>
+                                            <xs:element name="alueenKiinteistonSijainti" type="yht:SijaintitietoType" minOccurs="0" maxOccurs="unbounded">
+                                                <xs:annotation>
+                                                    <xs:documentation>Ottamisalueen sisältävän kiinteistön sijaintitiedot</xs:documentation>
+                                                </xs:annotation>
+                                            </xs:element>
+                                            <xs:element name="ottamismaara" type="ymm:OttamismaaraType" minOccurs="0">
+                                                <xs:annotation>
+                                                    <xs:documentation>Maa-ainesten suunniteltu ottamismäärä</xs:documentation>
+                                                </xs:annotation>
+                                            </xs:element>
+                                            <xs:element name="paatoksenToimittaminen" minOccurs="0">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:enumeration value="Noudetaan"/>
+                                                        <xs:enumeration value="Postitetaan"/>
+                                                        <xs:enumeration value="ei tiedossa"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="viranomaismaksujenSuorittaja" type="yht:YhteyshenkiloType" minOccurs="0"/>
+                                            <xs:element name="ottamissuunnitelmatieto" minOccurs="0">
+                                                <xs:annotation>
+                                                    <xs:documentation>Lupaa haettaessa on ainesten ottamisesta ja ympäristön hoitamisesta sekä alueen myöhemmästä käyttämisestä esitettävä ottamissuunnitelma</xs:documentation>
+                                                </xs:annotation>
+                                                <xs:complexType>
+                                                    <xs:sequence>
+                                                        <xs:element name="Ottamissuunnitelma" minOccurs="0">
+                                                            <xs:annotation>
+                                                                <xs:documentation>Lupaa haettaessa on ainesten ottamisesta ja ympäristön hoitamisesta sekä alueen myöhemmästä käyttämisestä esitettävä ottamissuunnitelma</xs:documentation>
+                                                            </xs:annotation>
+                                                            <xs:complexType>
+                                                                <xs:complexContent>
+                                                                    <xs:extension base="ymm:OttamissuunnitelmaType">
+                                                                        <xs:sequence>
+                                                                            <xs:element name="toimenpidealue" type="yht:SijaintitietoType" minOccurs="0"/>
+                                                                        </xs:sequence>
+                                                                    </xs:extension>
+                                                                </xs:complexContent>
+                                                            </xs:complexType>
+                                                        </xs:element>
+                                                    </xs:sequence>
+                                                </xs:complexType>
+                                            </xs:element>
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="osapuolitieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Osapuoli" type="yht:OsapuoliType">
+                                    <xs:annotation>
+                                        <xs:documentation>Hankkeessa mukana olevien tahojen tiedot pl. Suunnittelijat ja työnjohtajat</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="maksajatieto" minOccurs="0">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Maksaja" type="yht:MaksajaType" minOccurs="0"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="valvontakohdetieto" type="ymm:ValvontakohteetType" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>Maa-ainesluvan aikaiset valvontakohteet</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="valvontatapahtumattieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Valvontatapahtuma" type="yht:ValvontatapahtumaType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+                    <xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="asianKuvaus" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="MaaAineslupaAsia" type="ymm:MaaAineslupaAsiaType" substitutionGroup="gml:_Feature"/>
+    <xs:element name="Kotitarveotto" type="ymm:KotitarveottoType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>Maa-aineslain mukaista lupaa ei tarvita, jos maa-aineksia otetaan omaa tavanomaista kotitarvekäyttöä varten asumiseen tai maa- ja metsätalouteen. Mikäli kuitenkin kotitarveoton määrä on enemmän kuin 500 kiintokuutiometriä, tulee ottajan ilmoittaa kaupungin viranomaiselle ottamispaikan sijainti ja laajuus</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="KotitarveottoType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:element name="kiinteistotunnus" type="yht:KiinteistotunnusType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="ilmoittaja" type="yht:YhteystietoType" maxOccurs="unbounded"/>
+                    <xs:element name="maksajatieto" minOccurs="0">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Maksaja" type="yht:MaksajaType" minOccurs="0"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="kesto" minOccurs="0">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="alkanut" type="xs:string">
+                                    <xs:annotation>
+                                        <xs:documentation>vuonna</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                                <xs:element name="jatkuu" type="xs:string">
+                                    <xs:annotation>
+                                        <xs:documentation>Kotitarveotto jatkuu alueella arviolta vuoteen</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="kotitarveotonKokonaismaara" type="xs:decimal" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Arvio kotitarveoton kokonaismäärästä</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="jakautuminenEriLaatuihin" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Mahdollinen arvio kokonaismäärän jakautumisesta eri laatuihin</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="kalliokiviainesta" type="xs:string" minOccurs="0"/>
+                                <xs:element name="soraaJaHiekkaa" type="xs:string" minOccurs="0"/>
+                                <xs:element name="silttiaJaSavea" type="xs:string" minOccurs="0">
+                                    <xs:annotation>
+                                        <xs:documentation>Silttiä ja savea</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                                <xs:element name="moreenia" type="xs:string" minOccurs="0"/>
+                                <xs:element name="eloperaisiaMaalajeja" type="xs:string" minOccurs="0">
+                                    <xs:annotation>
+                                        <xs:documentation>Liejua tai multaa</xs:documentation>
+                                    </xs:annotation>
+                                </xs:element>
+                                <xs:element name="muuta" type="xs:string" minOccurs="0"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="koontiKentta" type="xs:string" minOccurs="0"/>
+                    <xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="asianKuvaus" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>

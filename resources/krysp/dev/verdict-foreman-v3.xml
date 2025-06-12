@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><rakval:Rakennusvalvonta xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ymv="http://www.kuntatietopalvelu.fi/gml/ymparisto/vesihuoltolaki" xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" xmlns:ymy="http://www.kuntatietopalvelu.fi/gml/ymparisto/ymparistoluvat" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:mkos="http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet" xmlns:kiito="http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus" xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta" xmlns:ymi="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset" xmlns:ppst="http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu" xmlns:ymm="http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.11/yhteiset.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta/2.2.6/rakennusvalvonta.xsd">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KuntaGML</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Tampere</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2025-05-30</yht:toimitusPvm>
+    <yht:kuntakoodi>837</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.63208">
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2025-05-27</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2025-05-27</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Työnjohtajailmoitus</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>25-0006-TJO</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>6835f5aef474d548879dfa53</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>83700025-0006</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2025-05-27</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>25-0012-RL</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-837-2025-90024</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>83700025-0012</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2025-05-27</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Armi</yht:etunimi>
+                  <yht:sukunimi>Amuri</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>-</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00400</yht:postinumero>
+                  <yht:postitoimipaikannimi>*</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>armi.amuri@example.org</yht:sahkopostiosoite>
+                <yht:puhelin>012456789</yht:puhelin>
+                <yht:henkilotunnus>231252-2267</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:patevyysvaatimusluokka>A+</yht:patevyysvaatimusluokka>
+              <yht:alkamisPvm>2025-05-27</yht:alkamisPvm>
+              <yht:hakemuksenSaapumisPvm>2025-05-27</yht:hakemuksenSaapumisPvm>
+              <yht:vainTamaHankeKytkin>true</yht:vainTamaHankeKytkin>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.89012">
+          <yht:yksilointitieto>945895</yht:yksilointitieto>
+          <yht:alkuHetki>2025-05-27T00:00:00</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>II</yht:kylanimi>
+                  <yht:tilannimi>II kaupunginosan toriaukiot</yht:tilannimi>
+                  <yht:kiinteistotunnus>83710299020000</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>false</yht:kokotilaKytkin>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4258">
+                  <gml:pos>18.7141854261 59.4075989408</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:4258">
+          <gml:pos>18.7141854261 59.4075989408</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Työnjohtajailmoitus</yht:paatoksentekija>
+            <yht:paatospvm>2025-05-27</yht:paatospvm>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

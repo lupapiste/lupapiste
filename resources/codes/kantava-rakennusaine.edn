@@ -1,0 +1,135 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "Not known", :fi "Ei tiedossa", :sv "Okänt"},
+   :codeValue "00",
+   :created "2023-01-04T13:47:24.006Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/00/members/",
+   :modified "2023-12-01T08:59:13.075Z",
+   :status "VALID",
+   :id "03734d2d-a31a-4603-b5e6-9f56f6c4bdcb",
+   :statusModified "2023-01-04T13:47:24.006Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/00",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/kantavanrakenteenrakennusaine/code/00",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Concrete", :fi "Betoni", :sv "Betong"},
+   :codeValue "01",
+   :created "2023-01-04T13:47:24.014Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/01/members/",
+   :modified "2023-12-01T08:59:13.088Z",
+   :status "VALID",
+   :id "b2c5c2d2-0e02-4edd-b8c7-1da6ba7a8ab6",
+   :statusModified "2023-01-04T13:47:24.014Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/01",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/kantavanrakenteenrakennusaine/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Brick", :fi "Tiili", :sv "Tegel"},
+   :codeValue "02",
+   :created "2023-01-04T13:47:24.022Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/02/members/",
+   :modified "2023-12-01T08:59:13.095Z",
+   :status "VALID",
+   :id "55d96f28-b31e-4709-93ca-fb9eacd35fce",
+   :statusModified "2023-01-04T13:47:24.022Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/02",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/kantavanrakenteenrakennusaine/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Steel", :fi "Teräs", :sv "Stål"},
+   :codeValue "03",
+   :created "2023-01-04T13:47:24.029Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/03/members/",
+   :modified "2023-12-01T08:59:13.102Z",
+   :status "VALID",
+   :id "29a75ad6-df12-4466-8fdc-5944475a3a74",
+   :statusModified "2023-01-04T13:47:24.029Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/03",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/kantavanrakenteenrakennusaine/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Wood", :fi "Puu", :sv "Trä"},
+   :codeValue "04",
+   :created "2023-01-04T13:47:24.036Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/04/members/",
+   :modified "2023-12-01T08:59:13.108Z",
+   :status "VALID",
+   :id "22aa9c31-5ea3-4154-ada3-107e94943246",
+   :statusModified "2023-01-04T13:47:24.036Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/04",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/kantavanrakenteenrakennusaine/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-01-04T13:47:24.043Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/99/members/",
+   :modified "2023-12-01T08:59:13.114Z",
+   :status "VALID",
+   :id "62446bff-79b2-477f-85c4-4bec7348f595",
+   :statusModified "2023-01-04T13:47:24.043Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/kantavanrakenteenrakennusaine/codes/99",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/kantavanrakenteenrakennusaine/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:50:41.514Z"}

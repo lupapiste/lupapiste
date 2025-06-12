@@ -1,0 +1,228 @@
+@use "../partials/base";
+@use "../partials/frameless";
+@use "../partials/_colors";
+@use "../partials/_responsive";
+
+.main-building-container {
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    border: 2px colors.$gray204;
+}
+
+.building-sidebar {
+    width: 30%;
+    padding: 15px;
+    min-width: 200px;
+    background-color: colors.$panel-background;
+    box-sizing: border-box;
+    border-right: 1px solid colors.$gray221;
+    overflow-y: scroll;
+    z-index: 0;
+}
+
+.building-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: colors.$panel-background;
+    border: 1px solid colors.$gray204;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.building-item:hover {
+    background-color: colors.$night-sky-20;
+}
+
+.building-content-container {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    padding: 1px;
+    box-sizing: border-box;
+    z-index: 0;
+}
+
+.building {
+    height: 150px;
+    background-color: colors.$panel-background;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid colors.$blue-100;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+.building-box {
+    border-width: 2px;
+    background-color: colors.$white;
+    border-style: solid;
+    border-color: colors.$gray204;
+    padding: 5px;
+    margin-bottom: 20px;
+}
+
+.apartment {
+    background-color: colors.$panel-background;
+    border-color: colors.$gray204;
+    border-width: 2px;
+    border-style: solid;
+    padding: 15px;
+    text-align: left;
+    border-radius: 3px;
+    height: 80px;
+    max-width: 300px;
+    cursor: pointer;
+}
+
+.building-box-selected {
+    border-color: colors.$blue-100;
+}
+
+.building-section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.building-section {
+    flex-grow: 1;
+    background-color: colors.$white;
+    padding: 10px;
+    border: 1px solid colors.$gray204;
+    border-radius: 5px;
+}
+
+.building-info {
+    min-height: 200px;
+    background-color: colors.$blue-10;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid;
+    border-color: colors.$gray204;
+    border-radius: 5px;
+    flex-shrink: 0
+}
+
+.apartment-info-sidebar-container {
+    width: 20%;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+}
+
+.apartment-info-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    min-width: 25%;
+    max-width: 30%;
+    background-color: colors.$blue-10;
+    padding: 20px;
+    box-shadow: none;
+    border: 1px solid;
+    z-index: 1;
+    transition: transform 0.3s ease-out;
+    box-sizing: border-box;
+}
+
+.review-building-mobile-nav-btn {
+    display: none;
+}
+
+.close-apartment-info-sidebar-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 5px 10px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.mobile-navigation-panel {
+    display: none;
+}
+
+@media (max-width: responsive.$narrow-breakpoint) {
+
+    .main-building-container {
+        display: block;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .mobile-navigation-panel {
+        display: block;
+    }
+
+    .panel {
+        position: absolute; /* Stack all panels on top of each other */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 0; /* Remove padding from container to use full screen */
+        box-sizing: border-box;
+        overflow-y: auto; /* Allow the content of the active panel to scroll */
+
+        /* Initially hide all panels on mobile */
+        display: none;
+        z-index: 1;
+    }
+
+    /* Reset specific widths to use full screen */
+    .building-sidebar,
+    .building-content-container,
+    .apartment-info-sidebar {
+        width: 100%;
+        min-width: unset;
+        /* Re-add padding that was removed from the parent .panel, for content inside */
+        padding: 15px;
+        border-right: none;
+    }
+
+    /* Reset Right Sidebar position/state */
+    .right-sidebar {
+        transform: none; /* No sliding transformation needed */
+        position: absolute; /* Ensure it stays in the flow */
+        box-shadow: none;
+        background-color: #333; /* Dark background for distinction */
+        color: white;
+    }
+
+    /* Ensure only the active panel is shown, overriding the 'open' class */
+    .right-sidebar.open {
+        display: none;
+    }
+    .right-sidebar.active-mobile {
+        display: block;
+    }
+
+    /* Show mobile navigation buttons */
+    .mobile-nav-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: none;
+        background-color: colors.$blue-100;
+        color: colors.$white;
+        cursor: pointer;
+    }
+
+    /* Hide the large screen toggle button on small screens */
+    .sidebar button {
+        display: none;
+    }
+
+    .panel-active-mobile {
+        display: block;
+    }
+}

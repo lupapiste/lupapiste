@@ -1,0 +1,37 @@
+@use "base";
+@use "colors";
+
+@use 'sass:math';
+
+.tags-editor-component {
+  position: relative;
+  ul.tags {
+    list-style: none;
+    padding: base.$marginS 0 0 0;
+    display: block;
+    li.tag {
+      display: inline-block;
+      background-color: colors.resolve-color( "primary", "background", "enabled");
+      color: colors.resolve-color( "primary", "text", "enabled");
+      font-size: 16px;
+      margin-right: base.$marginS;
+      white-space: nowrap;
+      margin-bottom: base.$marginS;
+      line-height: 32px;
+      span.tag-label, input.tag-editor {
+        vertical-align: middle;
+        margin-left: base.$marginL + math.div(base.$marginS, 2);
+        font-size: 16px;
+      }
+
+      input.tag-editor {
+        margin-right: base.$marginS;
+        width: 300px;
+      }
+    }
+    li.tag.tag--disabled {
+      background-color: colors.resolve-color( "primary", "background", "disabled");
+      color: colors.resolve-color( "primary", "text", "disabled");
+    }
+  }
+}

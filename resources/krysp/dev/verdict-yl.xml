@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FeatureCollection xmlns="http://www.opengis.net/wfs"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+	xmlns:ogc="http://www.opengis.net/ogc"
+	xmlns:wfs="http://www.opengis.net/wfs"
+	xmlns:ows="http://www.opengis.net/ows"
+	xmlns:gml="http://www.opengis.net/gml"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat/2.1.2/ymparistoluvat.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd">
+	<featureMember xmlns="http://www.opengis.net/gml">
+		<Ymparistoluvat xmlns="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat">
+			<toimituksenTiedot>
+				<yht:aineistonnimi>Sample</yht:aineistonnimi>
+				<yht:aineistotoimittaja>Porvoo</yht:aineistotoimittaja>
+				<yht:tila>valmis</yht:tila>
+				<yht:toimitusPvm>2014-04-11</yht:toimitusPvm>
+				<yht:kuntakoodi>638</yht:kuntakoodi>
+				<yht:kielitieto>Suomi</yht:kielitieto>
+			</toimituksenTiedot>
+			<ymparistolupatieto>
+				<Ymparistolupa>
+				<kasittelytietotieto><Kasittelytieto><yht:muutosHetki>2014-04-11T00:00:00</yht:muutosHetki></Kasittelytieto></kasittelytietotieto>
+					<luvanTunnistetiedot>
+						<LupaTunnus xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+							<kuntalupatunnus>638-2014-0037</kuntalupatunnus>
+							<muuTunnustieto>
+								<MuuTunnus>
+									<tunnus>LP-638-2014-00036</tunnus>
+									<sovellus></sovellus>
+								</MuuTunnus>
+							</muuTunnustieto>
+						</LupaTunnus>
+					</luvanTunnistetiedot>
+					<paatostieto>
+						<Paatos>
+							<yht:takuuaikaPaivat>5</yht:takuuaikaPaivat>
+							<yht:lupaehdotJaMaaraykset>Lupaehdot vapaana tekstinä</yht:lupaehdotJaMaaraykset>
+							<yht:paatoslinkki>http://www.example.com/paatos.pdf</yht:paatoslinkki>
+							<yht:paatosdokumentinPvm>2014-04-11</yht:paatosdokumentinPvm>
+							<liitetieto xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+								<Liite>
+									<kuvaus>paatoksenTiedot</kuvaus>
+									<linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</linkkiliitteeseen>
+									<yht:muokkausHetki>2014-03-29T13:58:15</yht:muokkausHetki>
+									<yht:tyyppi>Muu liite</yht:tyyppi>
+								</Liite>
+							</liitetieto>
+						</Paatos>
+					</paatostieto>
+					<toiminta>
+						<peruste>ei tietoa</peruste>
+						<kuvaus>Uusi laitos</kuvaus>
+					</toiminta>
+					<voimassaOlevatLuvat>
+						<luvat>
+							<lupa>
+								<tunnistetieto>638-2014-0037</tunnistetieto>
+								<kuvaus>Uusi laitos</kuvaus>
+							</lupa>
+						</luvat>
+					</voimassaOlevatLuvat>
+					<alueJaYmparisto>
+						<kiinteistonLaitokset>
+							<kiinteistorekisteritunnus>638-005-0216-0007</kiinteistorekisteritunnus>
+							<laitos/>
+						</kiinteistonLaitokset>
+					</alueJaYmparisto>
+				</Ymparistolupa>
+			</ymparistolupatieto>
+		</Ymparistoluvat>
+	</featureMember>
+</FeatureCollection>

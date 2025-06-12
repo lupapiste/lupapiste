@@ -1,0 +1,16 @@
+; DUMMY PRICING INFORMATION FOR DEVELOPMENT PURPOSES ONLY
+{:by-volume [{:min    1
+              :max    6
+              :fixed 98.50
+              :pricelist-label {:fi "1-6 kuvaa: 98,50 €"
+                                :sv "1-6 bilder: 98,50 €"}}
+             {:min    7
+              :max   12
+              :fixed 188.50
+              :pricelist-label {:fi "7-12 kuvaa: 188,50 €"
+                                :sv "7-12 bilder: 188,50 €"}}
+             {:min   13
+              :pricelist-label {:fi "Yli 12 kuvaa: Sopimuksen mukaan."
+                                :sv "Över 12 bilder: Enligt avtal."}
+              :additionalInformation {:fi "Kysy hintatietoja: cad.jyvaskyla@grano.fi"
+                                      :sv "Fråga om pris: cad.jyvaskyla@grano.fi"}}]}

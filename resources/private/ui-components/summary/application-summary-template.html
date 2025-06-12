@@ -1,0 +1,12 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="application-summary-template">
+  <!-- ko if: _.size( boxes() ) -->
+  <div class="boxgrid"
+       data-bind="foreach: boxes">
+    <div class="boxitem gap--v05 pad--r05 boxitem--bold-labels"
+         data-bind="css: $data.boxCss,
+                    component: {name: $data.component,
+                    params: $data.params}"></div>
+  </div>
+  <!-- /ko -->
+</script>

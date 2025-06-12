@@ -1,0 +1,189 @@
+@use "../partials/base";
+@use "../partials/colors";
+
+.attachments-accordions {
+  margin-bottom: base.$marginL;
+  .attachments-accordion {
+    margin-top: base.$marginS;
+  }
+  .rollup {
+    margin-bottom: base.$marginS;
+  }
+}
+
+.attachments-accordion-content {
+  padding: {
+    left: base.$marginS;
+    right: base.$marginS;
+    bottom: base.$marginS;
+    top: base.$marginS;
+  }
+  position: relative;
+  border: 1px solid colors.$gray221;
+  border-top: none;
+  .attachments-accordion-content-part {
+  }
+}
+
+.attachments-title {
+  margin: {
+    top: base.$marginM;
+    bottom: base.$marginS;
+  }
+  display: inline-block;
+}
+
+// ----------------------------
+// Upload and related
+// ----------------------------
+
+.upload-progress {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  i {
+    color: white;
+    background-color: colors.$positive;
+  }
+}
+
+@mixin progress-bar( $color ) {
+  border: {
+    color: $color;
+    style: solid;
+    width: 1px;
+    top-right-radius: 20px;
+    bottom-right-radius: 20px;
+  }
+  box-sizing: border-box;
+}
+
+
+.upload-progress__bar {
+  @include progress-bar( colors.$primary );
+  width: 50%;
+}
+
+.upload-progress__percentage {
+  @include progress-bar( colors.$primary );
+  display: inline-block;
+  color: white;
+  text-align: right;
+  background-color: colors.$primary;
+  padding-right: 10px;
+  span {
+    font-size: 20px;
+  }
+}
+
+.upload-progress__bar.upload-progress--finished {
+  border-color: colors.$positive;
+  > .upload-progress__percentage {
+    border-color: colors.$positive;
+    background-color: colors.$positive;
+    i {
+      padding-left: 6px;
+      float: left;
+      margin: 0;
+    }
+  }
+}
+
+.batch-required:after {
+  content: "*";
+  color: colors.$negative;
+}
+
+label.batch-required {
+  display: block;
+}
+
+.batch-buttons {
+  margin-top: base.$marginL;
+  margin-bottom: base.$marginL;
+  button {
+    margin-right: base.$marginM;
+  }
+}
+
+.batch-bad-files {
+  .like-btn {
+    color: colors.$negative;
+    span {
+      font-size: 20px;
+    }
+  }
+  ul {
+    margin-top: base.$marginS;
+    margin-bottom: base.$marginL;
+    font-size: 16px;
+    li {
+      list-style-type: none;
+    }
+  }
+}
+
+.batch-bind-failed {
+  .like-btn {
+    color: colors.$negative;
+    span {
+      font-size: 20px;
+    }
+  }
+}
+
+.batch-password {
+  i {
+    vertical-align: middle;
+  }
+  i.lupicon-check {
+    color: colors.$positive;
+  }
+  i.lupicon-warning {
+    color: colors.$negative;
+  }
+  i.lupicon-flag {
+    color: colors.$primary;
+  }
+}
+
+.dialog.multi-attachment-edit-dialog {
+  min-height: 35em !important;
+  max-height: 40em !important;
+
+  .fileIcon{
+    float: left;
+  }
+
+  ul{
+    list-style-type: none;
+  }
+
+  .cancel-button{
+    float: right;
+  }
+
+  .content{
+    margin: auto;
+  }
+
+  .button-group{
+    margin: 15px;
+  }
+
+  .dialog-desc{
+    margin-left: 50px;
+  }
+
+  .divider{
+    margin: 1em;
+  }
+
+  .filename{
+    margin: 0px 0px 10px 50px;
+  }
+
+  div#modal-dialog-content-component[data-test-id=multi-attachment-edit-dialog]{
+    min-height: 30em;
+    max-height: 35em;
+  }
+}

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Lupapiste extensions to XML Schema for RSS v2.0
+Copyright (C) 2025 Cloudpermit Oy
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="https://www.lupapiste.fi/rss/extensions"
+           targetNamespace="https://www.lupapiste.fi/rss/extensions"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:annotation>
+    <xs:documentation>Lupapiste extensions to XML Schema for RSS v2.0</xs:documentation>
+    <xs:documentation>Project home: https://github.com/lupapiste/lupapiste-schemas </xs:documentation>
+    <xs:documentation>Author: Cloudpermit Oy</xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="lupatunnus" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Hankkeen LP-tunnus.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="rakennuspaikka" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Hankkeen rakennuspaikan osoite.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="toimenpideteksti" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Hankkeen julkipanossa/kuulutuksissa näkyvä toimenpideteksti.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="julkaisuAlkaa" type="Rfc822FormatDate">
+    <xs:annotation>
+      <xs:documentation>Päivä, jolloin julkaisu alkaa.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="julkaisuPaattyy" type="Rfc822FormatDate">
+    <xs:annotation>
+      <xs:documentation>Päivä, jolloin julkaisu päättyy.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="asiakirjaLink" type="xs:anyURI">
+    <xs:annotation>
+      <xs:documentation>Linkki kuulutettavaan asiakirjaan</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="paatostiedotLink" type="xs:anyURI">
+    <xs:annotation>
+      <xs:documentation>Linkki päätöstietoihin</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="kiinteistotunnus" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Kiintestötunnus</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="paatosPvm" type="Rfc822FormatDate">
+    <xs:annotation>
+      <xs:documentation>Päivä, jolloin päätös annettu</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="paatoksenPykala" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Päätöksen pykälä</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="paattaja" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Päättäjän nimeke</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="luvanPaatoimenpide" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Luvan päätoimenpide</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="kuntanumero" type="Kuntanumero">
+    <xs:annotation>
+      <xs:documentation>Luvan kolminumeroinen kuntanumero</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:simpleType name="Rfc822FormatDate">
+    <xs:annotation>
+      <xs:documentation>A date-time displayed in RFC-822 format.</xs:documentation>
+      <xs:documentation>Using the regexp definiton of rfc-822 date by Sam Ruby at http://www.intertwingly.net/blog/1360.html </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(((Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)), *)?\d\d? +((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec)) +\d\d(\d\d)? +\d\d:\d\d(:\d\d)? +(([+\-]?\d\d\d\d)|(UT)|(GMT)|(EST)|(EDT)|(CST)|(CDT)|(MST)|(MDT)|(PST)|(PDT)|\w)"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Kuntanumero">
+    <xs:annotation>
+      <xs:documentation>Kolminumeroinen kuntanumero</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

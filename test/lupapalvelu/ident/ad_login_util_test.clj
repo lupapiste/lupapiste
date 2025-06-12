@@ -1,0 +1,159 @@
+(ns lupapalvelu.ident.ad-login-util-test
+  (:require [lupapalvelu.ident.ad-login-util :refer :all]
+            [lupapalvelu.organization :as org]
+            [midje.sweet :refer :all]))
+
+(def saml-info
+  {:before {:assertions   (list {:attrs        {"displayName"  (list "Iina Tuttifrutti")
+                                                "email"        (list "iina.tuttifrutti@pori.fi")
+                                                "firstName"    (list "Iina")
+                                                "groups"       (list "authority"
+                                                                     "archivist"
+                                                                     "writer")
+                                                "lastName"     (list "Tuttifrutti")
+                                                "mobilePhone"  (list "050 1234 578")
+                                                "organization" (list "609-R")}
+                                 :audiences    (list "http://www.lupapiste.fi/api/saml/ad-login/609-R")
+                                 :confirmation {:in-response-to  "f8ea3430-c7b0-11e8-afbb-5795e0ed89a3"
+                                                :not-before      nil
+                                                :not-on-or-after #inst "2018-10-04T09:39:15.470-00:00"
+                                                :recipient       "http://www.lupapiste.fi/api/saml/ad-login/609-R"}
+                                 :name-id      {:format "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+                                                :value  "iina.tuttifrutti@pori.fi"}})
+            :destination  "http://www.lupapiste.fi/api/saml/ad-login/609-R"
+            :inResponseTo "f8ea3430-c7b0-11e8-afbb-5795e0ed89a3"
+            :issueInstant #inst "2018-10-04T08:39:15.000-00:00"
+            :status       "urn:oasis:names:tc:SAML:2.0:status:Success"
+            :success?     true
+            :version      "2.0"}
+   :after  {:assertions   {:attrs        {:displayName  "Iina Tuttifrutti"
+                                          :email        "iina.tuttifrutti@pori.fi"
+                                          :firstName    "Iina"
+                                          :groups       ["authority" "archivist" "writer"]
+                                          :lastName     "Tuttifrutti"
+                                          :mobilePhone  "050 1234 578"
+                                          :organization "609-R"}
+                           :audiences    "http://www.lupapiste.fi/api/saml/ad-login/609-R"
+                           :confirmation {:in-response-to  "f8ea3430-c7b0-11e8-afbb-5795e0ed89a3"
+                                          :not-before      nil
+                                          :not-on-or-after #inst "2018-10-04T09:39:15.470-00:00"
+                                          :recipient       "http://www.lupapiste.fi/api/saml/ad-login/609-R"}
+                           :name-id      {:format "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+                                          :value  "iina.tuttifrutti@pori.fi"}}
+            :destination  "http://www.lupapiste.fi/api/saml/ad-login/609-R"
+            :inResponseTo "f8ea3430-c7b0-11e8-afbb-5795e0ed89a3"
+            :issueInstant #inst "2018-10-04T08:39:15.000-00:00"
+            :status       "urn:oasis:names:tc:SAML:2.0:status:Success"
+            :success?     true
+            :version      "2.0"}})
+
+(def nested-garbage-map
+  {:eka-taso (list {:toka-taso     "Ah ma nauran"
+                    "jeejee"       (list "kun kuvani n\u00e4in kauniina")
+                    ":kolmas-taso" (list {:jee   "peilist\u00e4in n\u00e4\u00e4\u00e4\u00e4n"
+                                          :howdy (list {:dadaa  "\u00f6h\u00f6h\u00f6"
+                                                        :viihii (list {:right "on"})})})})})
+
+(facts "Relevant Lupapiste roles can be deducted from the SAML payload & ad-login settings"
+  (let [ad-params ["GG_Lupapiste_RAVA_Kommentointi" "Jeejee" "Kikka"]
+        org-roles {:commenter "GG_Lupapiste_RAVA_Kommentointi"
+                   :writer    "writer"}]
+    (fact "Commenter role is resolved"
+      (resolve-roles org-roles ad-params) => #{"commenter"})
+    (facts "If the matching role is removed, an empty set is returned"
+      (resolve-roles (dissoc org-roles :commenter) ad-params) => #{}
+      (resolve-roles org-roles (rest ad-params)) => #{})))
+
+(facts "parse-saml-info converts the unwieldy SAML response into a friendly Clojure map"
+  (fact "SAML response map parsing works as expected"
+    (let [{:keys [before after]} saml-info]
+      (parse-saml-info before) => after))
+  (fact "Response parsing works for deeply nested maps"
+    (let [parsed-and-flattened-map (->> nested-garbage-map
+                                        parse-saml-info
+                                        (into {} (mapcat (partial tree-seq (comp map? val) val))))]
+      (not-any? list? (vals parsed-and-flattened-map)) => true
+      (every? keyword? (keys parsed-and-flattened-map)) => true)))
+
+(facts "orgAuthz are resolved as one would expect"
+  (against-background
+    (org/get-organization anything) => {})
+  (letfn [(make-ad-login [org-id roles]
+            {:enabled         true
+             :idp-certs       ["somecert"]
+             :idp-uri         "http://www.panaani.fi"
+             :trusted-domains ["pori.fi"]
+             :organizations   [{:id org-id :role-mapping roles}]})]
+    (let [valid-ad-login (make-ad-login "609-R" {:commenter "comment" :reader "read"})]
+      (fact "when an AD-group has been mapped to an LP role, it's resolved"
+        (resolve-authz valid-ad-login ["comment" "heavy metal samurai"]) => {:orgAuthz    {:609-R #{"commenter"}}
+                                                                             :oauth-roles []})
+      (fact "when not, the resulting organization auth is empty"
+        (resolve-authz valid-ad-login ["jee jee moi äiti"]) => {:orgAuthz    {:609-R #{}}
+                                                                :oauth-roles []})
+      (fact "when multiple organizations have roles found in the received group list, all are resolved"
+        (let [multiple-org-ad-login (update valid-ad-login
+                                            :organizations
+                                            conj
+                                            {:id           "123-YMP"
+                                             :role-mapping {:commenter "comment"
+                                                            :nytnykii  "tero on best"}})]
+          (resolve-authz multiple-org-ad-login ["comment" "read"])
+          => {:orgAuthz    {:609-R   #{"commenter" "reader"}
+                            :123-YMP #{"commenter"}}
+              :oauth-roles []})))))
+
+(facts "oauth-roles are resolved as one would expect"
+  (against-background
+    (org/get-organization anything) => {:reporting-system "bi-app"
+                                        :docstore-info    {:docDepartmentalInUse true}})
+  (letfn [(make-ad-login [org-id roles]
+            {:enabled         true
+             :idp-certs       ["somecert"]
+             :idp-uri         "http://www.panaani.fi"
+             :trusted-domains ["pori.fi"]
+             :organizations   [{:id org-id :role-mapping roles}]})]
+    (let [valid-ad-login (make-ad-login "609-R" {:departmental "dept" :reporter "rept"})]
+      (fact "when an AD-group has been mapped to an LP client role, it's resolved"
+        (resolve-authz valid-ad-login ["dept" "heavy metal samurai"]) => {:oauth-roles [{:organization "609-R"
+                                                                                         :client-type  "docdepartmental"
+                                                                                         :role         "departmental"}]
+                                                                          :orgAuthz    {:609-R #{}}})
+      (fact "when not, the resulting oauth-roles is empty"
+        (resolve-authz valid-ad-login ["jee jee moi äiti"]) => {:oauth-roles []
+                                                                :orgAuthz    {:609-R #{}}})
+      (fact "when multiple organizations have roles found in the received group list, all are resolved"
+        (let [multiple-org-ad-login (update valid-ad-login
+                                            :organizations
+                                            conj
+                                            {:id           "123-YMP"
+                                             :role-mapping {:reader       "read"
+                                                            :departmental "dept2"
+                                                            :nytnykii     "tero on best"}})]
+          (resolve-authz multiple-org-ad-login ["dept" "rept" "dept2" "read"])
+          => {:oauth-roles [{:organization "609-R"
+                             :client-type  "bi-app"
+                             :role         "reporter"}
+                            {:organization "609-R"
+                             :client-type  "docdepartmental"
+                             :role         "departmental"}
+                            {:organization "123-YMP"
+                             :client-type  "docdepartmental"
+                             :role         "departmental"}]
+              :orgAuthz    {:123-YMP #{"reader"} :609-R #{}}})))))
+
+(facts "valid-email"
+  (valid-email nil) => nil
+  (valid-email "") => nil
+  (valid-email "bad") => nil
+  (valid-email " HelLo@wOrLd ") => nil
+  (valid-email "@example.com") => nil
+  (valid-email " HelLo@wOrLd.COM ") => "hello@world.com")
+
+(facts "email-domain"
+  (email-domain nil) => nil
+  (email-domain "") => nil
+  (email-domain "bad") => nil
+  (email-domain " HelLo@wOrLd ") => nil
+  (email-domain "@example.com") => nil
+  (email-domain " HelLo@wOrLd.COM ") => "world.com")

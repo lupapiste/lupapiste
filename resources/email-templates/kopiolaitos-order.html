@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    td, th { padding: 0.5em; text-align: left; }
+    </style>
+  </head>
+  <body>
+    <h1>{{titles.orderedPrints}}</h1>
+    {{{contentsTable}}}
+    <h1>{{titles.orderDetails}}</h1>
+    <table>
+      <tbody>
+        <tr>
+          <th>{{titles.ordererOrganization}}</th>
+          <td>{{ordererOrganization}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.ordererEmail}}</th>
+          <td>{{ordererEmail}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.ordererPhone}}</th>
+          <td>{{ordererPhone}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.ordererAddress}}</th>
+          <td>{{ordererAddress}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.applicantName}}</th>
+          <td>{{applicantName}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.kuntalupatunnus}}</th>
+          <td>{{kuntalupatunnus}}
+              {{^kuntalupatunnus}}
+                -
+              {{/kuntalupatunnus}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.propertyId}}</th>
+          <td>{{propertyId}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.lupapisteId}}</th>
+          <td>{{lupapisteId}}</td>
+        </tr>
+        <tr>
+          <th>{{titles.address}}</th>
+          <td>{{address}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </body>
+</html>

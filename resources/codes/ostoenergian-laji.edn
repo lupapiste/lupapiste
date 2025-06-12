@@ -1,0 +1,123 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Renewable fuel",
+    :fi "Uusiutuva polttoaine",
+    :sv "Förnybart bränsle"},
+   :codeValue "01",
+   :created "2023-01-03T15:59:07.029Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/01/members/",
+   :modified "2023-12-04T06:47:18.951Z",
+   :status "VALID",
+   :id "839b513d-90d3-4abf-b7b9-17b4a6e5ea96",
+   :statusModified "2023-01-03T15:59:07.029Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/ostoenergia/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Fossil fuel",
+    :fi "Fossiilinen polttoaine",
+    :sv "Fossilt bränsle"},
+   :codeValue "02",
+   :created "2023-01-03T15:59:21.225Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/02/members/",
+   :modified "2023-12-04T06:47:18.969Z",
+   :status "VALID",
+   :id "d66ba69f-4c2c-4c0e-90a3-66703217ad6b",
+   :statusModified "2023-01-03T15:59:21.225Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/ostoenergia/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "District heating", :fi "Kaukolämpö", :sv "Fjärrvärme"},
+   :codeValue "03",
+   :created "2023-01-03T15:59:36.526Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/03/members/",
+   :modified "2023-12-04T06:47:18.979Z",
+   :status "VALID",
+   :id "3b30288f-a58f-45c9-bc0b-428abfe23544",
+   :statusModified "2023-01-03T15:59:36.526Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/ostoenergia/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "District cooling", :fi "Kaukojäähdytys", :sv "Fjärrkyla"},
+   :codeValue "04",
+   :created "2023-01-03T16:10:12.153Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/04/members/",
+   :modified "2023-12-04T06:47:18.988Z",
+   :status "VALID",
+   :id "1940b9ee-f174-4d48-a6fb-fd637f881b2b",
+   :statusModified "2023-01-03T16:10:12.153Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/ostoenergia/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Electricity", :fi "Sähkö", :sv "El"},
+   :codeValue "05",
+   :created "2023-01-03T16:10:30.268Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/05/members/",
+   :modified "2023-12-04T06:47:18.996Z",
+   :status "VALID",
+   :id "492d7757-860d-44ac-956c-88b6403b3feb",
+   :statusModified "2023-01-03T16:10:30.268Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ostoenergia/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/ostoenergia/code/05",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:53:17.479Z"}

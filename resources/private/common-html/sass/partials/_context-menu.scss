@@ -1,0 +1,49 @@
+@use "frameless";
+
+.context-menu-container {
+  position: relative;
+}
+
+.context-menu-button {
+  background-color: transparent;
+  border-width: 0;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  text-decoration: none;
+}
+
+.context-menu-dropdown {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  min-width: 100%;
+  width: max-content;
+  overflow: auto;
+  background-color: white;
+  max-height: 13rem;
+  filter: drop-shadow(0 20px 13px rgba(0, 0, 0, .3));
+}
+
+.context-menu-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.context-menu-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.context-menu-item {
+  border-radius: 0;
+  width: 100%;
+  min-height: 0;
+  max-height: none;
+  line-height: normal;
+
+  [class^="lupicon-"], [class*=" lupicon-"] {
+    font-size: frameless.$font-size;
+  }
+}

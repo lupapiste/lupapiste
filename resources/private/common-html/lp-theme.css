@@ -1,0 +1,389 @@
+/* Generated from Figma file Cloudpermit_Design_System_2026 on 2026-04-24. */
+/* Included collections: primitives, semantic, components-lupapiste. */
+/* Excluded collections: spacing (use Tailwind), components-vaahtera, components-cloudpermit, *-code-reverse. */
+
+/* Global layout constants */
+:root {
+  --topbar-height: 59px; /* New topbar: logo (35px) + py-3 padding (2 × 12px) */
+}
+
+.lp-theme {
+  /*
+   * PRIMITIVES
+   * Sorted alphabetically.
+   */
+
+  /* Brand */
+  --figma-color-brand-additional-coral: #ff4b64;
+  --figma-color-brand-additional-light-blue: #afccef;
+  --figma-color-brand-additional-orange: #fb9232;
+  --figma-color-brand-additional-sea-blue: #0064a3;
+  --figma-color-brand-additional-teal-dark: #004a63;
+  --figma-color-brand-complementary-purple: #4f0891;
+  --figma-color-brand-complementary-teal: #82c1c9;
+  --figma-color-brand-complementary-teal-20: rgba(130, 193, 201, 0.2);
+  --figma-color-brand-primary-night-sky: #191147;
+  --figma-color-brand-primary-night-sky-hover: #302859;
+
+  /* Brand tints-night-sky */
+  --figma-color-brand-tint-night-sky-05: #2e2563;
+  --figma-color-brand-tint-night-sky-15: #473d7c;
+  --figma-color-brand-tint-night-sky-35: #685f97;
+  --figma-color-brand-tint-night-sky-55: #928cb6;
+  --figma-color-brand-tint-night-sky-75: #beb9d4;
+  --figma-color-brand-tint-night-sky-85: #e3e0ed;
+
+  /* Brand tints-coral */
+  --figma-color-brand-tint-coral-25: #ff7386;
+  --figma-color-brand-tint-coral-45: #ff9ba8;
+  --figma-color-brand-tint-coral-65: #ffc3cb;
+  --figma-color-brand-tint-coral-85: #ffebed;
+
+  /* Brand tints-light-blue */
+  --figma-color-brand-tint-light-blue-25: #c0d7f2;
+  --figma-color-brand-tint-light-blue-45: #d2e2f6;
+  --figma-color-brand-tint-light-blue-65: #e4eef9;
+  --figma-color-brand-tint-light-blue-85: #f6f9fd;
+
+  /* Brand tints-purple */
+  --figma-color-brand-tint-purple-25: #763ea9;
+  --figma-color-brand-tint-purple-45: #9d75c1;
+  --figma-color-brand-tint-purple-65: #c4acda;
+  --figma-color-brand-tint-purple-85: #eae1f3;
+
+  /* Brand tints-sea-blue */
+  --figma-color-brand-tint-sea-blue-15: #3886b7;
+  --figma-color-brand-tint-sea-blue-45: #71a8cb;
+  --figma-color-brand-tint-sea-blue-75: #c6dcea;
+  --figma-color-brand-tint-sea-blue-85: #e2edf4;
+
+  /* Brand tints-teal */
+  --figma-color-brand-tint-teal-45: #b9dce1;
+  --figma-color-brand-tint-teal-65: #d5eaed;
+
+  /* UI neutrals */
+  --figma-color-ui-neutral-black: #191147;
+  --figma-color-ui-green-10: #e6f6ea;
+  --figma-color-ui-green-20: #cceed6;
+  --figma-color-ui-green-30: #b2e5c2;
+  --figma-color-ui-green-40: #99dcad;
+  --figma-color-ui-green-50: #80d498;
+  --figma-color-ui-green-60: #66cb84;
+  --figma-color-ui-green-70: #4cc270;
+  --figma-color-ui-green-80: #33b95b;
+  --figma-color-ui-green-90: #1ab146;
+  --figma-color-ui-green-100: #00a832;
+  --figma-color-ui-green-110: #00972d;
+  --figma-color-ui-green-120: #008628;
+  --figma-color-ui-green-130: #007623;
+  --figma-color-ui-neutral-black-alt: #011627;
+  --figma-color-ui-neutral-blue: #e7ecfb;
+  --figma-color-ui-neutral-dark: #3b3d3f;
+  --figma-color-ui-neutral-dimmed-white: #f8f8f8;
+  --figma-color-ui-neutral-light: #cdd1d4;
+  --figma-color-ui-neutral-lighter: #ecedef;
+  --figma-color-ui-neutral-lightest: #ebecee;
+  --figma-color-ui-neutral-mid: #b3b9be;
+  --figma-color-ui-neutral-transparent: #ffffff00;
+  --figma-color-ui-neutral-white: #ffffff;
+
+  /* Typography primitives */
+  --figma-font-mono: "Roboto Mono", monospace;
+  --figma-font-sans: "Mulish", sans-serif;
+  --figma-font-weight-black: 900;
+  --figma-font-weight-bold: 700;
+  --figma-font-weight-regular: 400;
+  --figma-font-weight-semibold: 600;
+
+  --figma-line-height-textarea: 17.9px;
+
+  --figma-text-2xl: 28px;
+  --figma-text-3xl: 32px;
+  --figma-text-4xl: 36px;
+  --figma-text-5xl: 48px;
+  --figma-text-body-large: 18px;
+  --figma-text-body-regular: 16px;
+  --figma-text-body-small: 14px;
+  --figma-text-button-label: 16px;
+  --figma-text-grid-input-forms: 16px;
+  --figma-text-h1: 48px;
+  --figma-text-h1-dialog: 24px;
+  --figma-text-h1-login: 32px;
+  --figma-text-h1-modal: 28px;
+  --figma-text-h2: 36px;
+  --figma-text-h3: 24px;
+  --figma-text-h4: 18px;
+  --figma-text-h5: 16px;
+  --figma-text-h6: 14px;
+  --figma-text-lg: 18px;
+  --figma-text-md: 16px;
+  --figma-text-pate-secondary: 14px;
+  --figma-text-pate-verdict: 16px;
+  --figma-text-pete-small: 12px;
+  --figma-text-secondary-label: 14px;
+  --figma-text-sm: 14px;
+  --figma-text-tag-badge: 12px;
+  --figma-text-tooltip: 16px;
+  --figma-text-xl: 24px;
+  --figma-text-xs: 12px;
+  --figma-text-xxs: 10px;
+
+  --figma-text-case-allcaps: uppercase;
+  --figma-text-case-default: capitalize;
+  --figma-text-case-lowercase: lowercase;
+
+  --figma-tracking-body: 0;
+  --figma-tracking-header: 0;
+  --figma-tracking-link: 0;
+  --figma-tracking-list: 0;
+  --figma-tracking-number: 0;
+
+  /* Radius & borders */
+  --figma-border-width-default: 1px;
+  --figma-border-width-focus: 2px;
+  --figma-radius-button: 6px;
+  --figma-radius-full: 9999px;
+  --figma-radius-sm: 4px;
+
+  /* Shadows */
+  --figma-shadow-color: #3b3d3f40;
+  --figma-shadow-lg: 4px 4px 4px 4px #3b3d3f40;
+  --figma-shadow-md: 2px 2px 4px 2px #3b3d3f29;
+  --figma-shadow-sm: 2px 0 2px 0 #3b3d3f1a;
+
+  /* Motion */
+  --figma-delay-standard: 500ms;
+  --figma-duration-fast: 150ms;
+  --figma-duration-normal: 250ms;
+  --figma-duration-slow: 350ms;
+  --figma-duration-xslow: 500ms;
+  --figma-ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --figma-ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  --figma-ease-emphasized: cubic-bezier(0.2, 0, 0, 1.2);
+  --figma-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --figma-tooltip-delay: 500ms;
+  --figma-tooltip-duration: 150ms;
+  --figma-tooltip-ease: ease-out;
+
+  /*
+   * SEMANTIC
+   * Prefer referencing primitives.
+   */
+
+  --figma-color-bg-primary: var(--figma-color-ui-neutral-white);
+  --figma-color-bg-quaternary: var(--figma-color-ui-neutral-light);
+  --figma-color-bg-quinary: var(--figma-color-ui-neutral-mid);
+  --figma-color-bg-secondary: var(--figma-color-ui-neutral-lighter);
+  --figma-color-bg-tertiary: var(--figma-color-ui-neutral-blue);
+  --figma-color-bg-transparent: var(--figma-color-ui-neutral-transparent);
+
+  --figma-color-text-dark: var(--figma-color-ui-neutral-white);
+  --figma-color-text-disabled: var(--figma-color-ui-neutral-light);
+  --figma-color-text-error: #ec0a28;
+  --figma-color-text-light: var(--figma-color-ui-neutral-black);
+  --figma-color-text-muted: var(--figma-color-ui-neutral-dark);
+
+  --figma-color-state-danger-active: #ec0a28;
+  --figma-color-state-danger-enabled: #ec0a28;
+  --figma-color-state-danger-focus: #fde6e9;
+  --figma-color-state-danger-hover: #be0720;
+
+  --figma-color-state-primary-active: var(--figma-color-brand-primary-night-sky);
+  --figma-color-state-primary-enabled: var(--figma-color-brand-complementary-purple);
+  --figma-color-state-primary-focus: #dccee9;
+  --figma-color-state-primary-hover: #370666;
+
+  --figma-color-state-secondary-active: var(--figma-color-brand-primary-night-sky);
+  --figma-color-state-secondary-enabled: var(--figma-color-ui-neutral-transparent);
+  --figma-color-state-secondary-focus: #4f089133;
+  --figma-color-state-secondary-hover: #370666;
+
+  --figma-color-state-tertiary-active: var(--figma-color-brand-primary-night-sky);
+  --figma-color-state-tertiary-enabled: var(--figma-color-ui-neutral-transparent);
+  --figma-color-state-tertiary-focus: #4f089133;
+  --figma-color-state-tertiary-hover: var(--figma-color-brand-complementary-purple);
+
+  --figma-color-focus-ring: #0f3fd2;
+
+  /*
+   * COMPONENTS (Lupapiste)
+   * Prefer referencing semantic variables.
+   */
+
+  --figma-color-card-border: var(--figma-color-bg-quinary);
+  --figma-color-card-surface-0: var(--figma-color-bg-primary);
+  --figma-color-card-surface-1: var(--figma-color-bg-secondary);
+  --figma-color-card-surface-2: var(--figma-color-bg-tertiary);
+  --figma-color-card-surface-3: var(--figma-color-brand-complementary-teal);
+  --figma-color-card-surface-4: var(--figma-color-brand-additional-sea-blue);
+  --figma-color-card-surface-5: var(--figma-color-brand-additional-coral);
+  --figma-color-card-divider: var(--figma-color-brand-tint-sea-blue-45);
+
+  --figma-color-canvas-cloudpermit: #ede6f5;
+  --figma-color-canvas-lupapiste: var(--figma-color-ui-neutral-dimmed-white);
+
+  --figma-color-header-fill: var(--figma-color-brand-primary-night-sky);
+  --figma-color-header-border: var(--figma-color-brand-complementary-teal-20);
+  --figma-color-header-menu-fill: var(--figma-color-header-fill);
+  --figma-color-header-menu-focus-fill: #dccee9;
+  --figma-color-header-menu-hover-fill: var(--figma-color-brand-primary-night-sky-hover);
+  --figma-color-header-menu-text: var(--figma-color-text-dark);
+
+  --figma-header-height-lg: 60px;
+  --figma-header-height-lmd: 50px;
+
+  --figma-button-height: 40px;
+  --figma-button-height-small: 24px;
+  --figma-button-icon-padding: 8px;
+  --figma-button-padding-x: 16px;
+
+  --figma-tooltip-radius: var(--figma-radius-sm);
+  --figma-tooltip-width: 250px;
+  --figma-tooltip-width-long: 400px;
+
+  --figma-modal-width-sm: 360px;
+  --figma-modal-height-sm: 300px;
+  --figma-modal-width-md: 480px;
+  --figma-modal-height-md: 400px;
+  --figma-modal-width-lg: 980px;
+  --figma-modal-height-lg: 700px;
+
+  /* Added, change Tailwind default. */
+  --default-font-family: var(--figma-font-sans);
+}
+
+/* @theme inline { */
+@theme inline {
+  /* Consider resetting the Tailwind theme: */
+  /* --*: initial; */
+  --color-brand-night-sky: var(--figma-color-brand-primary-night-sky);
+  --color-brand-night-sky-05: var(--figma-color-brand-tint-night-sky-05);
+  --color-brand-night-sky-15: var(--figma-color-brand-tint-night-sky-15);
+  --color-brand-night-sky-35: var(--figma-color-brand-tint-night-sky-35);
+  --color-brand-night-sky-55: var(--figma-color-brand-tint-night-sky-55);
+  --color-brand-night-sky-75: var(--figma-color-brand-tint-night-sky-75);
+  --color-brand-night-sky-85: var(--figma-color-brand-tint-night-sky-85);
+
+  --color-brand-coral-25: var(--figma-color-brand-tint-coral-25);
+  --color-brand-coral-45: var(--figma-color-brand-tint-coral-45);
+  --color-brand-coral-65: var(--figma-color-brand-tint-coral-65);
+  --color-brand-coral-85: var(--figma-color-brand-tint-coral-85);
+
+  --color-brand-light-blue-25: var(--figma-color-brand-tint-light-blue-25);
+  --color-brand-light-blue-45: var(--figma-color-brand-tint-light-blue-45);
+  --color-brand-light-blue-65: var(--figma-color-brand-tint-light-blue-65);
+  --color-brand-light-blue-85: var(--figma-color-brand-tint-light-blue-85);
+
+  --color-brand-purple-25: var(--figma-color-brand-tint-purple-25);
+  --color-brand-purple-45: var(--figma-color-brand-tint-purple-45);
+  --color-brand-purple-65: var(--figma-color-brand-tint-purple-65);
+  --color-brand-purple-85: var(--figma-color-brand-tint-purple-85);
+
+  --color-brand-sea-blue-15: var(--figma-color-brand-tint-sea-blue-15);
+  --color-brand-sea-blue-45: var(--figma-color-brand-tint-sea-blue-45);
+  --color-brand-sea-blue-75: var(--figma-color-brand-tint-sea-blue-75);
+  --color-brand-sea-blue-85: var(--figma-color-brand-tint-sea-blue-85);
+
+  --color-brand-teal-45: var(--figma-color-brand-tint-teal-45);
+  --color-brand-teal-65: var(--figma-color-brand-tint-teal-65);
+
+  --color-brand-purple: var(--figma-color-brand-complementary-purple);
+  --color-brand-teal: var(--figma-color-brand-complementary-teal);
+  --color-brand-coral: var(--figma-color-brand-additional-coral);
+  --color-brand-sea-blue: var(--figma-color-brand-additional-sea-blue);
+  --color-brand-light-blue: var(--figma-color-brand-additional-light-blue);
+  --color-brand-orange: var(--figma-color-brand-additional-orange);
+  --color-surface: var(--figma-color-bg-primary);
+  --color-surface-muted: var(--figma-color-bg-secondary);
+  --color-surface-subtle: var(--figma-color-bg-tertiary);
+  --color-card-border: var(--figma-color-card-border);
+  --color-card-divider: var(--figma-color-card-divider);
+
+  --color-ui-neutral-black: var(--figma-color-ui-neutral-black);
+  --color-ui-neutral-black-alt: var(--figma-color-ui-neutral-black-alt);
+  --color-ui-neutral-blue: var(--figma-color-ui-neutral-blue);
+  --color-ui-neutral-dark: var(--figma-color-ui-neutral-dark);
+  --color-ui-neutral-dimmed-white: var(--figma-color-ui-neutral-dimmed-white);
+  --color-ui-neutral-light: var(--figma-color-ui-neutral-light);
+  --color-ui-neutral-lighter: var(--figma-color-ui-neutral-lighter);
+  --color-ui-neutral-lightest: var(--figma-color-ui-neutral-lightest);
+  --color-ui-neutral-mid: var(--figma-color-ui-neutral-mid);
+  --color-ui-neutral-transparent: var(--figma-color-ui-neutral-transparent);
+  --color-ui-neutral-white: var(--figma-color-ui-neutral-white);
+
+  /* FIXME: Bad name, util is now text-text */
+  --color-text: var(--figma-color-text-light);
+  --color-text-inverse: var(--figma-color-text-dark);
+  --color-text-muted: var(--figma-color-text-muted);
+  --color-text-disabled: var(--figma-color-text-disabled);
+  --color-header: var(--figma-color-header-fill);
+  --color-header-border: var(--figma-color-header-border);
+  --color-header-menu: var(--figma-color-header-menu-fill);
+  --color-header-menu-focus: var(--figma-color-header-menu-focus-fill);
+  --color-header-menu-hover: var(--figma-color-header-menu-hover-fill);
+  --color-header-menu-text: var(--figma-color-header-menu-text);
+  --color-primary: var(--figma-color-state-primary-enabled);
+  --color-primary-hover: var(--figma-color-state-primary-hover);
+  --color-primary-active: var(--figma-color-state-primary-active);
+  --color-primary-focus: var(--figma-color-state-primary-focus);
+  --color-secondary: var(--figma-color-state-secondary-enabled);
+  --color-secondary-hover: var(--figma-color-state-secondary-hover);
+  --color-secondary-active: var(--figma-color-state-secondary-active);
+  --color-secondary-focus: var(--figma-color-state-secondary-focus);
+  --color-tertiary: var(--figma-color-state-tertiary-enabled);
+  --color-tertiary-hover: var(--figma-color-state-tertiary-hover);
+  --color-tertiary-active: var(--figma-color-state-tertiary-active);
+  --color-tertiary-focus: var(--figma-color-state-tertiary-focus);
+  --color-focus-ring: var(--figma-color-focus-ring);
+  --color-canvas-lupapiste: var(--figma-color-canvas-lupapiste);
+
+  --font-sans: var(--figma-font-sans);
+  --font-mono: var(--figma-font-mono);
+  --font-weight-regular: var(--figma-font-weight-regular);
+  --font-weight-semibold: var(--figma-font-weight-semibold);
+  --font-weight-bold: var(--figma-font-weight-bold);
+  --font-weight-black: var(--figma-font-weight-black);
+
+  --text-xxs: var(--figma-text-xxs);
+  --text-xs: var(--figma-text-xs);
+  --text-sm: var(--figma-text-sm);
+  --text-md: var(--figma-text-md);
+  --text-lg: var(--figma-text-lg);
+  --text-xl: var(--figma-text-xl);
+  --text-2xl: var(--figma-text-2xl);
+  --text-3xl: var(--figma-text-3xl);
+  --text-4xl: var(--figma-text-4xl);
+  --text-5xl: var(--figma-text-5xl);
+  --text-body-small: var(--figma-text-body-small);
+  --text-body-regular: var(--figma-text-body-regular);
+  --text-body-large: var(--figma-text-body-large);
+  --text-button-label: var(--figma-text-button-label);
+  --text-secondary-label: var(--figma-text-secondary-label);
+  --text-h1: var(--figma-text-h1);
+  --text-h2: var(--figma-text-h2);
+  --text-h3: var(--figma-text-h3);
+  --text-h4: var(--figma-text-h4);
+  --text-h5: var(--figma-text-h5);
+  --text-h6: var(--figma-text-h6);
+  --text-h1-login: var(--figma-text-h1-login);
+  --text-h1-modal: var(--figma-text-h1-modal);
+  --text-h1-dialog: var(--figma-text-h1-dialog);
+  --text-tag-badge: var(--figma-text-tag-badge);
+  --text-tooltip: var(--figma-text-tooltip);
+
+  --tracking-body: var(--figma-tracking-body);
+  --tracking-header: var(--figma-tracking-header);
+  --tracking-link: var(--figma-tracking-link);
+  --tracking-list: var(--figma-tracking-list);
+  --tracking-number: var(--figma-tracking-number);
+  --leading-textarea: var(--figma-line-height-textarea);
+
+  --radius-sm: var(--figma-radius-sm);
+  --radius-button: var(--figma-radius-button);
+  /* Figma has built in rounded-full util */
+  --radius-full: var(--figma-radius-full);
+
+  --shadow-sm: var(--figma-shadow-sm);
+  --shadow-md: var(--figma-shadow-md);
+  --shadow-lg: var(--figma-shadow-lg);
+}

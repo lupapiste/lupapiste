@@ -1,0 +1,34 @@
+// Mixins
+@mixin image-replacement {
+  text-indent:100%;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+@mixin clearfix() {
+  *zoom: 1;
+  @content;
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+@mixin disable-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin spite-bg {
+  background-image: url('/lp-static/img/icons-sprite-1.18.png');
+  background-repeat: no-repeat;
+}
+

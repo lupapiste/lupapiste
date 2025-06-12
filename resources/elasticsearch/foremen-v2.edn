@@ -1,0 +1,31 @@
+{:properties
+ {:application-id    {:type "keyword"}
+  :address           {:type "keyword"}
+  :auth              {:type       "nested"
+                      :properties {:id           {:type "keyword"}
+                                   :role         {:type "keyword"}
+                                   :company-role {:type "keyword"}}}
+  :created           {:type "date" :format "epoch_millis"}
+  :modified          {:type "date" :format "epoch_millis"}
+  :handler-sortfield {:type "keyword"}
+  :handlers          {:type       "nested"
+                      :properties {:userId    {:type "keyword"}
+                                   :roleId    {:type "keyword"}
+                                   :firstName {:type "text" :index false}
+                                   :lastName  {:type "text" :index false}}}
+  :id                {:type "keyword"}
+  ;; check kuntalupatunnus from foreman verdict (referenced with document-id)
+  :kuntalupatunnus   {:type "keyword"}
+  :location          {:properties {:x {:type "float" :index false :doc_values false}
+                                   :y {:type "float" :index false :doc_values false}}}
+  :location-wgs84    {:type "geo_point"}
+  :municipality      {:type "keyword"}
+  :organization      {:type "keyword"}
+  :propertyId        {:type "keyword"}
+  :state             {:type "keyword"}
+  :type              {:type "keyword"}
+  :foreman           {:type "text"}
+  :foremanRole       {:type "keyword"}
+  :started           {:type "date" :format "epoch_millis"}
+  :submitted         {:type "date" :format "epoch_millis"}
+  :text-search       {:type "text"}}}

@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rakval:Rakennusvalvonta xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                                             http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.8/rakennusvalvonta.xsd"
+                         xmlns:gml="http://www.opengis.net/gml"
+                         xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+                         xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <gml:boundedBy>
+    <gml:Envelope srsDimension="2" srsName="Unknown EPSG">
+      <gml:lowerCorner>0.00 0.00</gml:lowerCorner>
+      <gml:upperCorner>0.00 0.00</gml:upperCorner>
+    </gml:Envelope>
+  </gml:boundedBy>
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi></yht:aineistonnimi>
+    <yht:aineistotoimittaja></yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2015-06-01</yht:toimitusPvm>
+    <yht:kuntakoodi>853</yht:kuntakoodi>
+    <yht:kielitieto>fi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rakennusvalvontaAsia.170549508">
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2012-03-12</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Jukka Testaaja</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>853-2012-183</yht:kuntalupatunnus>
+          <yht:saapumisPvm>2012-02-09</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:sukunimi>Testaaja Jukka</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="und">Kuukuja 2</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>12345</yht:postinumero>
+                  <yht:postitoimipaikannimi>KUU</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>jukka.testaaja@example.com</yht:sahkopostiosoite>
+                <yht:puhelin>040 123456</yht:puhelin>
+              </yht:henkilo>
+              <yht:vaadittuPatevyysluokka>A</yht:vaadittuPatevyysluokka>
+              <yht:valmistumisvuosi>1994</yht:valmistumisvuosi>
+              <yht:liite>
+                <yht:kuvaus>Päätösdoku</yht:kuvaus>
+                <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              </yht:liite>
+              <yht:alkamisPvm>2015-06-02</yht:alkamisPvm>
+              <yht:paattymisPvm>2015-06-01</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2015-05-25</yht:hakemuksenSaapumisPvm>
+              <yht:sijaistettavaHlo></yht:sijaistettavaHlo>
+              <yht:paatosPvm>2015-06-01</yht:paatosPvm>
+              <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka>
+          <yht:yksilointitieto>170549510</yht:yksilointitieto>
+          <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>HAARLA</yht:kylanimi>
+                  <yht:kiinteistotunnus>85305400460006</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:hallintaperuste>vuokra</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti><yht:alue>
+  <gml:PolyhedralSurface>
+    <gml:polygonPatches>
+      <gml:PolygonPatch>
+        <gml:exterior>
+          <gml:Ring>
+            <gml:curveMember>
+              <gml:Curve>
+                <gml:segments>
+                  <gml:LineStringSegment>
+                    <gml:pos>23455712.6954 6698310.0790</gml:pos>
+                    <gml:pos>23455683.7713 6698328.2819</gml:pos>
+                  </gml:LineStringSegment>
+                  <gml:Arc>
+                    <gml:pos>23455683.7713 6698328.2819</gml:pos>
+                    <gml:pos>23455691.7324 6698337.5892</gml:pos>
+                    <gml:pos>23455700.8360 6698345.7824</gml:pos>
+                  </gml:Arc>
+                  <gml:LineStringSegment>
+                    <gml:pos>23455700.8360 6698345.7824</gml:pos>
+                    <gml:pos>23455724.1635 6698320.7908</gml:pos>
+                  </gml:LineStringSegment>
+                  <gml:Arc>
+                    <gml:pos>23455724.1635 6698320.7908</gml:pos>
+                    <gml:pos>23455718.0777 6698315.8114</gml:pos>
+                    <gml:pos>23455712.6954 6698310.0790</gml:pos>
+                  </gml:Arc>
+                </gml:segments>
+              </gml:Curve>
+            </gml:curveMember>
+          </gml:Ring>
+        </gml:exterior>
+      </gml:PolygonPatch>
+    </gml:polygonPatches>
+  </gml:PolyhedralSurface>
+</yht:alue></yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:rakennusoikeusYhteensa>235.000</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="und">Montinkatu 13</yht:teksti>
+            </yht:osoitenimi>
+            <yht:postinumero>20900</yht:postinumero>
+            <yht:postitoimipaikannimi>TURKU</yht:postitoimipaikannimi>
+          </yht:osoite>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide><rakval:uudelleenrakentaminen><rakval:kuvaus>muu</rakval:kuvaus><rakval:perusparannusKytkin>false</rakval:perusparannusKytkin>
+</rakval:uudelleenrakentaminen><rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>85305400460006</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>35</rakval:aanestysalue>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Aloitusilmoitus</rakval:tarkastuksenTaiKatselmuksenNimi>
+              <rakval:lasnaolijat></rakval:lasnaolijat>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:rakennustieto>
+            <rakval:Rakennus gml:id="rakennus.170637691">
+              <yht:yksilointitieto>170637691</yht:yksilointitieto>
+              <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki><rakval:sijaintitieto>
+  <rakval:Sijainti>
+    <yht:osoite>
+      <yht:yksilointitieto>170637723</yht:yksilointitieto>
+      <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+      <yht:kunta>Turku</yht:kunta>
+      <yht:osoitenimi>
+        <yht:teksti xml:lang="fi">Montinkatu</yht:teksti>
+      </yht:osoitenimi>
+      <yht:osoitenumero>13</yht:osoitenumero>
+      <yht:postinumero>20900</yht:postinumero>
+      <yht:postitoimipaikannimi>TURKU</yht:postitoimipaikannimi>
+    </yht:osoite>
+    <yht:tyhja/>
+  </rakval:Sijainti>
+</rakval:sijaintitieto><rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>85305400460006</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>35</rakval:aanestysalue>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
+                <rakval:tilavuus>660</rakval:tilavuus>
+                <rakval:kokonaisala>184</rakval:kokonaisala>
+                <rakval:kellarinpinta-ala>104</rakval:kellarinpinta-ala>
+                <rakval:osoite>
+                  <yht:kunta>Turku</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="fi">Montinkatu</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>13</yht:osoitenumero>
+                  <yht:postinumero>20900</yht:postinumero>
+                  <yht:postitoimipaikannimi>TURKU</yht:postitoimipaikannimi>
+                </rakval:osoite>
+                <rakval:kerrosluku>2</rakval:kerrosluku>
+                <rakval:kerrosala>180</rakval:kerrosala>
+                <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine><rakval:rakennusaine>puu</rakval:rakennusaine></rakval:kantavaRakennusaine>
+                <rakval:julkisivu><rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali></rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:paloluokka>P3</rakval:paloluokka>
+                <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                <rakval:lammonlahde><rakval:polttoaine>maalämpö</rakval:polttoaine></rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                  <rakval:saunoja>0</rakval:saunoja>
+                  <rakval:uima-altaita>0</rakval:uima-altaita>
+                  <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+                </rakval:varusteet>
+                <rakval:asuinhuoneistot>
+                  <rakval:huoneisto>
+                    <rakval:muutostapa>lisäys</rakval:muutostapa>
+                    <rakval:huoneluku>4</rakval:huoneluku>
+                    <rakval:keittionTyyppi>keittio</rakval:keittionTyyppi>
+                    <rakval:huoneistoala>150.0</rakval:huoneistoala>
+                    <rakval:varusteet>
+                      <rakval:WCKytkin>true</rakval:WCKytkin>
+                      <rakval:ammeTaiSuihkuKytkin>true</rakval:ammeTaiSuihkuKytkin>
+                      <rakval:saunaKytkin>true</rakval:saunaKytkin>
+                      <rakval:parvekeTaiTerassiKytkin>true</rakval:parvekeTaiTerassiKytkin>
+                      <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                    </rakval:varusteet>
+                    <rakval:huoneistonTyyppi>asuinhuoneisto</rakval:huoneistonTyyppi>
+                    <rakval:huoneistotunnus>
+                      <rakval:huoneistonumero>000</rakval:huoneistonumero>
+                    </rakval:huoneistotunnus>
+                  </rakval:huoneisto>
+                  <rakval:asuntojenPintaala>150.000</rakval:asuntojenPintaala>
+                  <rakval:asuntojenLkm>1</rakval:asuntojenLkm>
+                </rakval:asuinhuoneistot>
+                <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+              </rakval:rakennuksenTiedot>
+              <rakval:rakentajatyyppi>liiketaloudellinen</rakval:rakentajatyyppi>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide><rakval:uudelleenrakentaminen><rakval:kuvaus>muu</rakval:kuvaus><rakval:perusparannusKytkin>false</rakval:perusparannusKytkin>
+</rakval:uudelleenrakentaminen><rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:jarjestysnumero>2</rakval:jarjestysnumero>
+                  <rakval:kiinttun>85305400460006</rakval:kiinttun>
+                  <rakval:rakennusnro>002</rakval:rakennusnro>
+                  <rakval:aanestysalue>35</rakval:aanestysalue>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Aloitusilmoitus</rakval:tarkastuksenTaiKatselmuksenNimi>
+              <rakval:lasnaolijat></rakval:lasnaolijat>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:rakennustieto>
+            <rakval:Rakennus gml:id="rakennus.170637694">
+              <yht:yksilointitieto>170637694</yht:yksilointitieto>
+              <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki><rakval:sijaintitieto>
+  <rakval:Sijainti>
+    <yht:osoite>
+      <yht:yksilointitieto>170637722</yht:yksilointitieto>
+      <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+      <yht:kunta>Turku</yht:kunta>
+      <yht:osoitenimi>
+        <yht:teksti xml:lang="fi">Montinkatu</yht:teksti>
+      </yht:osoitenimi>
+      <yht:osoitenumero>13</yht:osoitenumero>
+      <yht:postinumero>20900</yht:postinumero>
+      <yht:postitoimipaikannimi>TURKU</yht:postitoimipaikannimi>
+    </yht:osoite>
+    <yht:tyhja/>
+  </rakval:Sijainti>
+</rakval:sijaintitieto><rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:jarjestysnumero>2</rakval:jarjestysnumero>
+                  <rakval:kiinttun>85305400460006</rakval:kiinttun>
+                  <rakval:rakennusnro>002</rakval:rakennusnro>
+                  <rakval:aanestysalue>35</rakval:aanestysalue>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>941 talousrakennukset</rakval:kayttotarkoitus>
+                <rakval:tilavuus>130</rakval:tilavuus>
+                <rakval:kokonaisala>44</rakval:kokonaisala>
+                <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+                <rakval:osoite>
+                  <yht:kunta>Turku</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="fi">Montinkatu</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>13</yht:osoitenumero>
+                  <yht:postinumero>20900</yht:postinumero>
+                  <yht:postitoimipaikannimi>TURKU</yht:postitoimipaikannimi>
+                </rakval:osoite>
+                <rakval:kerrosluku>1</rakval:kerrosluku>
+                <rakval:kerrosala>44</rakval:kerrosala>
+                <rakval:rakentamistapa>paikalla</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine><rakval:rakennusaine>puu</rakval:rakennusaine></rakval:kantavaRakennusaine>
+                <rakval:julkisivu><rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali></rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:paloluokka>P3</rakval:paloluokka>
+                <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                <rakval:lammonlahde><rakval:polttoaine>maalämpö</rakval:polttoaine></rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                  <rakval:saunoja>0</rakval:saunoja>
+                  <rakval:uima-altaita>0</rakval:uima-altaita>
+                  <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+                </rakval:varusteet>
+                <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+              </rakval:rakennuksenTiedot>
+              <rakval:rakentajatyyppi>liiketaloudellinen</rakval:rakentajatyyppi>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:kerrosala>224.000</yht:kerrosala>
+            <yht:kokonaisala>228.000</yht:kokonaisala>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>aloituskokous</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Aloituskokous</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaadittuErityissuunnitelma>Rakennesuunnitelmat
+Vesi- ja viemärisuunnitelmat
+Ilmanvaihtosuunnitelmat</yht:vaadittuErityissuunnitelma>
+            <yht:maarays>
+              <yht:sisalto>Ennen rakennustöiden aloittamista on kirjallisesti pyydettävä rakennusvalvontatoimistolta rakennustyön aloituskokouksen järjestämistä.</yht:sisalto>
+            </yht:maarays>
+            <yht:maarays>
+              <yht:sisalto>Vastaavaksi työnjohtajaksi hyväksytyn henkilön on pidettävä työmaapäiväkirjaa ja työmaan tarkastusasiakirjaa, jotka sisältävät selonteon rakennustyön eri vaiheista.</yht:sisalto>
+            </yht:maarays>
+            <yht:maarays>
+              <yht:sisalto>Työmaan tarkastusasiakirjana on käytettävä Ympäristöministeriön ympäristöopasta 76 (Pientalotyömaan valvonta ja tarkastusasiakirja), joka jaetaan luvanhakijalle lupapäätöksen yhteydessä.</yht:sisalto>
+            </yht:maarays>
+            <yht:maarays>
+              <yht:sisalto>Sijaintikatselmus maalämpökaivo</yht:sisalto>
+            </yht:maarays>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>Vastaava työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>KVV-työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>IV-työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:lainvoimainenPvm>2012-03-29</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2017-03-29</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2012-03-14</yht:antoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Päätösteksti:
+Päätösehdotuksen lisäteksti: </yht:paatos>
+            <yht:paatoskoodi>hyväksytty</yht:paatoskoodi>
+            <yht:paatoksentekija>Rakennustarkastaja</yht:paatoksentekija>
+            <yht:paatospvm>2012-03-12</yht:paatospvm>
+            <yht:pykala>147</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+          <rakval:rakentamisentiedot>
+            <rakval:uusiaAsuntojaLkm>1</rakval:uusiaAsuntojaLkm>
+            <rakval:uusiaRakennuksiaLkm>2</rakval:uusiaRakennuksiaLkm>
+            <rakval:paloluokka>P3</rakval:paloluokka>
+            <rakval:tilavuus>790</rakval:tilavuus>
+          </rakval:rakentamisentiedot>
+          <rakval:tyonjohtajanVaativuustaso>
+            <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+            <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Testaaja Jukka</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="und">Kuukuja 2</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>12345</yht:postinumero>
+                <yht:postitoimipaikannimi>KUU</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:sahkopostiosoite>jukka.testaaja@example.com</yht:sahkopostiosoite>
+              <yht:puhelin>040 1234567</yht:puhelin>
+            </yht:henkilo>
+            <yht:vaadittuPatevyysluokka>A</yht:vaadittuPatevyysluokka>
+            <yht:valmistumisvuosi>1994</yht:valmistumisvuosi>
+            <yht:liite>
+              <yht:kuvaus>Päätösdoku</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+            </yht:liite>
+            <yht:alkamisPvm>2015-06-02</yht:alkamisPvm>
+            <yht:paattymisPvm>2015-06-01</yht:paattymisPvm>
+            <yht:hakemuksenSaapumisPvm>2015-05-25</yht:hakemuksenSaapumisPvm>
+            <yht:sijaistettavaHlo></yht:sijaistettavaHlo>
+            <yht:paatosPvm>2015-06-01</yht:paatosPvm>
+            <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+          </rakval:tyonjohtajanVaativuustaso>
+          <rakval:toimitustapa>postitse</rakval:toimitustapa>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen>Poikkeukset:
+1) Sallitun kerrosluvun ylitys ...</rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>- omakotitalo ja talousrakennus (autosuoja/varasto)
+</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

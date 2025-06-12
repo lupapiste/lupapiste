@@ -1,0 +1,253 @@
+@use "../partials/base";
+@use "../partials/colors";
+@use "../partials/frameless";
+@use "../partials/mixins";
+
+.application-row {
+  cursor: pointer;
+}
+
+.inforequest-row {
+  cursor: pointer;
+}
+
+.assignment-row {
+  cursor: pointer;
+}
+
+@mixin missing-type ( $left, $right ) {
+  padding: {
+    left: $left;
+    right: $right;
+  }
+  min-height: 250px;
+}
+
+.applications-empty-state {
+  margin-top: base.$baseline;
+  margin-right: base.$marginL * 3;
+  width: 100%;
+  .app-type-box {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 32%;
+    margin: {
+      left: auto;
+      right: auto;
+    }
+    vertical-align: top;
+    position: relative;
+
+  }
+
+  .app-type-button {
+    @extend .app-type-box;
+    margin-top: 0;
+    padding-bottom: 0 !important;
+  }
+
+  .missing-wrapper {
+    width: 100%;
+  }
+
+  .first-box {
+    @include missing-type( 0, base.$marginL );
+  }
+
+  .middle-box {
+    @include missing-type( base.$marginL, base.$marginL );
+    border-left: 1px dotted colors.$gray153;
+    border-right: 1px dotted colors.$gray153;
+    padding-bottom: 95px;
+  }
+
+  .last-box {
+    @include missing-type( base.$marginL, 0 );
+    p {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.applications-empty-state.wide {
+  .app-type-box {
+    width: 33%;
+  }
+
+  .last-box {
+    border-right: none;
+  }
+
+  .missing-prev-permit-box {
+    display: none;
+  }
+}
+
+.first-box.app-type-button,
+.middle-box.app-type-button,
+.last-box.app-type-button {
+  min-height: 0;
+}
+
+
+
+#applications-list_paginate, .dataTables_paginate {
+  display: inline-block;
+  width: frameless.$cols3;
+  float: left;
+  .paginate_button.previous {
+    margin-right: base.$marginM;
+  }
+}
+
+#applications-list_length {
+  width: frameless.$cols3;
+  position: absolute;
+  left: frameless.$cols3;
+  bottom: -27px;
+  select {
+    width: frameless.$cols1*1.5;
+    margin-right: base.$marginS;
+  }
+}
+
+.sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
+  cursor: pointer;
+  position: relative;
+}
+.sorting_asc:after, .sorting.asc:after {
+  content:"";
+  display: block;
+  position: absolute;
+  @include mixins.spite-bg;
+  background-position: 0px -3393px;
+  height:22px;
+  width: 10px;
+  top: 7px;
+  right: 2px;
+}
+.sorting_desc:after, .sorting.desc:after {
+  content:"";
+  display: block;
+  position: absolute;
+  @include mixins.spite-bg;
+  background-position: 0px -3293px;
+  height:22px;
+  width: 10px;
+  top: 7px;
+  right: 2px;
+}
+
+.dataTables_info {
+  width: frameless.$cols3;
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  bottom: base.$baseline * 0.5;
+}
+
+.invitations {
+  margin-bottom: base.$baseline;
+  .invitation {
+    display: table-row;
+    span {
+      margin-right: base.$marginM;
+    }
+    div {
+      padding-right: base.$marginL;
+      display: table-cell;
+      .btn {
+        margin: 0 base.$marginS 0 base.$marginS;
+      }
+    }
+    p {
+      max-width: base.$breakpoint5;
+      margin-bottom: base.$marginS;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    h3 {
+      max-width: base.$breakpoint5;
+      margin-top: base.$marginM;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .invitation-actions {
+      white-space: nowrap;
+    }
+  }
+}
+.filter-controls {
+  div {
+    display: inline-block;
+    margin-bottom: base.$marginL;
+  }
+  label {
+    display: block;
+  }
+  select {
+    display: block;
+  }
+}
+
+#applications-list, .applications-table {
+  .indicator-count {
+    padding-left: 0;
+    padding-right: 0;
+    font-weight: bold;
+    color: colors.$primary;
+    text-align: center;
+    width: 22px;
+    padding: 3px;
+  }
+  div {padding-top: 3px; height: 30px;}
+  span.handlers {
+    display: block;
+  }
+}
+
+.clearable{
+    position:relative;
+    display: inline-block;
+    vertical-align: bottom;
+}
+.applications-search {
+    padding-right:17px; /* add space for the 'x' icon*/
+}
+.applications-search::-ms-clear {
+    display: none;
+}
+span.icon_clear {
+    position:absolute;
+    right: 12px;
+    top: 8px;
+    display:none;
+
+    /* now go with the styling */
+    cursor:pointer;
+    font: bold 1em sans-serif;
+    color:#38468F;
+    &:before {
+     color:#f52;
+    }
+}
+
+#application-structures-tab {
+  .version-link {
+    min-width: 40px;
+  }
+
+  table.model-table {
+    thead tr {
+      border: 0;
+    }
+    tbody tr {
+      background-color: white;
+    }
+    // Fixes the context menu item sizes
+    .context-menu-section {
+      border-collapse: separate;
+      border-spacing: 0 0.7em;
+    }
+  }
+}

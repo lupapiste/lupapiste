@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FeatureCollection xmlns="http://www.opengis.net/wfs"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd">
+	<featureMember xmlns="http://www.opengis.net/gml">
+		<RakennusvalvontaAsia
+			xmlns="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" p4:id="rakennusvalvontaasia.1"
+			xmlns:p4="http://www.opengis.net/gml">
+			<kasittelynTilatieto>
+				<Tilamuutos xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+					<pvm>2013-06-26</pvm>
+					<tila>lupa hyväksytty</tila>
+				</Tilamuutos>
+			</kasittelynTilatieto>
+			<luvanTunnisteTiedot>
+				<LupaTunnus xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+					<kuntalupatunnus>638-2013-0310</kuntalupatunnus>
+					<muuTunnustieto>
+						<MuuTunnus>
+							<tunnus>LP-638-2013-00024</tunnus>
+              <sovellus>Lupapiste</sovellus>
+						</MuuTunnus>
+					</muuTunnustieto>
+					<VRKLupatunnus>638-2013-0310</VRKLupatunnus>
+					<saapumisPvm>2013-05-31</saapumisPvm>
+				</LupaTunnus>
+			</luvanTunnisteTiedot>
+			<osapuolettieto>
+				<Osapuolet xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+					<osapuolitieto>
+						<Osapuoli>
+							<kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</kuntaRooliKoodi>
+							<VRKrooliKoodi>maksaja</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Jani Petteri</etunimi>
+									<sukunimi>Testaus</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Testikuja</teksti>
+									</osoitenimi>
+									<osoitenumero>7</osoitenumero>
+									<porras>A</porras>
+									<huoneisto>1</huoneisto>
+									<postinumero>06400</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+						</Osapuoli>
+					</osapuolitieto>
+					<osapuolitieto>
+						<Osapuoli>
+							<kuntaRooliKoodi>Rakennusvalvonta-asian hakija</kuntaRooliKoodi>
+							<VRKrooliKoodi>hakija</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Jani Petteri</etunimi>
+									<sukunimi>Testaus</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Testikuja</teksti>
+									</osoitenimi>
+									<osoitenumero>7</osoitenumero>
+									<porras>A</porras>
+									<huoneisto>1</huoneisto>
+									<postinumero>06400</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+						</Osapuoli>
+					</osapuolitieto>
+					<osapuolitieto>
+						<Osapuoli>
+							<kuntaRooliKoodi>Rakennusvalvonta-asian hakija</kuntaRooliKoodi>
+							<VRKrooliKoodi>hakija</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Marianne</etunimi>
+									<sukunimi>Testaus</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Testikuja</teksti>
+									</osoitenimi>
+									<osoitenumero>7</osoitenumero>
+									<porras>A</porras>
+									<huoneisto>1</huoneisto>
+									<postinumero>06400</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+						</Osapuoli>
+					</osapuolitieto>
+					<osapuolitieto>
+						<Osapuoli>
+							<kuntaRooliKoodi>Pääsuunnittelija</kuntaRooliKoodi>
+							<VRKrooliKoodi>pääsuunnittelija</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Jouko</etunimi>
+									<sukunimi>Aaponen</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Länsitie</teksti>
+									</osoitenimi>
+									<osoitenumero>15</osoitenumero>
+									<postinumero>06100</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+						</Osapuoli>
+					</osapuolitieto>
+					<osapuolitieto>
+						<Osapuoli>
+							<kuntaRooliKoodi>Asian osapuoli</kuntaRooliKoodi>
+							<VRKrooliKoodi>työnjohtaja</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Jouko</etunimi>
+									<sukunimi>Aaponen</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Länsitie</teksti>
+									</osoitenimi>
+									<osoitenumero>15</osoitenumero>
+									<postinumero>06100</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+						</Osapuoli>
+					</osapuolitieto>
+					<suunnittelijatieto>
+						<Suunnittelija>
+							<VRKrooliKoodi>pääsuunnittelija</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Jouko</etunimi>
+									<sukunimi>Aaponen</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Länsitie</teksti>
+									</osoitenimi>
+									<osoitenumero>15</osoitenumero>
+									<postinumero>06100</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+						</Suunnittelija>
+					</suunnittelijatieto>
+					<tyonjohtajatieto>
+						<Tyonjohtaja>
+							<tyonjohtajaRooliKoodi>työnjohtaja</tyonjohtajaRooliKoodi>
+							<VRKrooliKoodi>työnjohtaja</VRKrooliKoodi>
+							<henkilo>
+								<nimi>
+									<etunimi>Jouko</etunimi>
+									<sukunimi>Aaponen</sukunimi>
+								</nimi>
+								<osoite>
+									<osoitenimi>
+										<teksti>Länsitie</teksti>
+									</osoitenimi>
+									<osoitenumero>15</osoitenumero>
+									<postinumero>06100</postinumero>
+									<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+								</osoite>
+							</henkilo>
+							<alkamisPvm>2013-08-07</alkamisPvm>
+						</Tyonjohtaja>
+					</tyonjohtajatieto>
+				</Osapuolet>
+			</osapuolettieto>
+			<toimenpidetieto>
+				<Toimenpide>
+					<uusi />
+					<katselmustieto>
+						<Katselmus>
+							<rakennustunnus>
+								<jarjestysnumero>31216</jarjestysnumero>
+							</rakennustunnus>
+							<pitoPvm>2013-09-17</pitoPvm>
+							<osittainen>pidetty</osittainen>
+							<pitaja>Samppa Esimerkki</pitaja>
+							<katselmuksenLaji>rakennekatselmus</katselmuksenLaji>
+							<vaadittuLupaehtonaKytkin>true</vaadittuLupaehtonaKytkin>
+							<huomautukset>
+								<huomautus>
+									<kuvaus>Rakennekatselmus näkyviltä osin, yläpohjarakenteet
+										ullakkoportailta katsottuna. Välipohjan puhalluseriste oli
+										asennettu. Nr-ristikon yläpohjan kiinnitykset varmistettava
+										(naulamäärät).</kuvaus>
+								</huomautus>
+							</huomautukset>
+						</Katselmus>
+					</katselmustieto>
+					<katselmustieto>
+						<Katselmus>
+							<rakennustunnus>
+								<jarjestysnumero>31216</jarjestysnumero>
+							</rakennustunnus>
+							<pitoPvm>2013-08-14</pitoPvm>
+							<osittainen>pidetty</osittainen>
+							<pitaja>Juhani Example</pitaja>
+							<katselmuksenLaji>rakennuksen paikan tarkastaminen</katselmuksenLaji>
+							<vaadittuLupaehtonaKytkin>true</vaadittuLupaehtonaKytkin>
+						</Katselmus>
+					</katselmustieto>
+					<katselmustieto>
+						<Katselmus>
+							<rakennustunnus>
+								<jarjestysnumero>31216</jarjestysnumero>
+							</rakennustunnus>
+							<pitoPvm>2013-07-30</pitoPvm>
+							<osittainen>pidetty</osittainen>
+							<pitaja>Lars Exempel</pitaja>
+							<katselmuksenLaji>rakennuksen paikan merkitseminen</katselmuksenLaji>
+							<vaadittuLupaehtonaKytkin>true</vaadittuLupaehtonaKytkin>
+						</Katselmus>
+					</katselmustieto>
+					<rakennustieto>
+						<Rakennus>
+							<yksilointitieto xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">31216</yksilointitieto>
+							<alkuHetki xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">1001-01-01T00:00:00</alkuHetki>
+
+							<sijaintitieto>
+								<Sijainti>
+									<piste xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+										<Point srsDimension="2" srsName="EPSG:3067" axisLabels="x y"
+											xmlns="http://www.opengis.net/gml">
+											<pos>6694176.58935258 424118.895545285</pos>
+										</Point>
+									</piste>
+								</Sijainti>
+							</sijaintitieto>
+							<rakennuksenTiedot>
+							  <rakennustunnus>
+							    <valtakunnallinenNumero>1234567892</valtakunnallinenNumero>
+							    <jarjestysnumero>31216</jarjestysnumero>
+							    <kiinttun>63820130310000</kiinttun>
+							    <rakennusnro>123</rakennusnro>
+							  </rakennustunnus>
+								<kayttotarkoitus>011 yhden asunnon talot</kayttotarkoitus>
+								<tilavuus>620</tilavuus>
+								<kokonaisala>186</kokonaisala>
+								<kerrosluku>2</kerrosluku>
+								<kerrosala>186</kerrosala>
+								<rakentamistapa>elementti</rakentamistapa>
+								<kantavaRakennusaine>
+									<rakennusaine>puu</rakennusaine>
+								</kantavaRakennusaine>
+								<julkisivu>
+									<julkisivumateriaali>puu</julkisivumateriaali>
+								</julkisivu>
+								<verkostoliittymat>
+									<viemariKytkin>true</viemariKytkin>
+									<vesijohtoKytkin>true</vesijohtoKytkin>
+									<sahkoKytkin>true</sahkoKytkin>
+									<maakaasuKytkin>false</maakaasuKytkin>
+									<kaapeliKytkin>true</kaapeliKytkin>
+								</verkostoliittymat>
+								<lammitystapa>vesikeskus</lammitystapa>
+								<lammonlahde>
+									<polttoaine>maalämpö</polttoaine>
+								</lammonlahde>
+								<varusteet>
+									<sahkoKytkin>true</sahkoKytkin>
+									<kaasuKytkin>false</kaasuKytkin>
+									<viemariKytkin>true</viemariKytkin>
+									<vesijohtoKytkin>true</vesijohtoKytkin>
+									<lamminvesiKytkin>true</lamminvesiKytkin>
+									<aurinkopaneeliKytkin>false</aurinkopaneeliKytkin>
+									<hissiKytkin>false</hissiKytkin>
+									<koneellinenilmastointiKytkin>true</koneellinenilmastointiKytkin>
+									<saunoja>0</saunoja>
+									<uima-altaita>0</uima-altaita>
+									<vaestonsuoja>0</vaestonsuoja>
+								</varusteet>
+								<asuinhuoneistot>
+									<huoneisto>
+										<osoite>
+											<osoitenimi xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+												<teksti>Creutzinkatu</teksti>
+											</osoitenimi>
+											<osoitenumero xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">11</osoitenumero>
+											<postinumero xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset"> 06400</postinumero>
+											<postitoimipaikannimi
+												xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">PORVOO</postitoimipaikannimi>
+										</osoite>
+										<muutostapa>lisäys</muutostapa>
+										<huoneluku>6</huoneluku>
+										<keittionTyyppi>tupakeittio</keittionTyyppi>
+										<huoneistoala>167</huoneistoala>
+										<varusteet>
+											<WCKytkin>true</WCKytkin>
+											<ammeTaiSuihkuKytkin>true</ammeTaiSuihkuKytkin>
+											<saunaKytkin>true</saunaKytkin>
+											<parvekeTaiTerassiKytkin>true</parvekeTaiTerassiKytkin>
+											<lamminvesiKytkin>true</lamminvesiKytkin>
+										</varusteet>
+										<huoneistonTyyppi>asuinhuoneisto</huoneistonTyyppi>
+									</huoneisto>
+								</asuinhuoneistot>
+							</rakennuksenTiedot>
+							<omistajatieto>
+								<Omistaja>
+									<henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+										<nimi>
+											<etunimi>Jani Petteri</etunimi>
+											<sukunimi>Testaus</sukunimi>
+										</nimi>
+										<osoite>
+											<osoitenimi>
+												<teksti>Testikuja</teksti>
+											</osoitenimi>
+											<osoitenumero>7</osoitenumero>
+											<porras>A</porras>
+											<huoneisto>1</huoneisto>
+											<postinumero>06400</postinumero>
+											<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+										</osoite>
+										<henkilotunnus>141275-9612</henkilotunnus>
+									</henkilo>
+									<omistajalaji>
+										<muu>muu yksityinen henkilö tai perikunta</muu>
+									</omistajalaji>
+								</Omistaja>
+							</omistajatieto>
+							<omistajatieto>
+								<Omistaja>
+									<henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+										<nimi>
+											<etunimi>Marianne</etunimi>
+											<sukunimi>Testaus</sukunimi>
+										</nimi>
+										<osoite>
+											<osoitenimi>
+												<teksti>Testikuja</teksti>
+											</osoitenimi>
+											<osoitenumero>7</osoitenumero>
+											<porras>A</porras>
+											<huoneisto>1</huoneisto>
+											<postinumero>06400</postinumero>
+											<postitoimipaikannimi>PORVOO</postitoimipaikannimi>
+										</osoite>
+										<henkilotunnus>120476-9208</henkilotunnus>
+									</henkilo>
+									<omistajalaji>
+										<muu>muu yksityinen henkilö tai perikunta</muu>
+									</omistajalaji>
+								</Omistaja>
+							</omistajatieto>
+						</Rakennus>
+					</rakennustieto>
+				</Toimenpide>
+			</toimenpidetieto>
+			<lausuntotieto>
+				<Lausunto>
+					<viranomainen xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">Ympäristösuojeluviranomainen
+					</viranomainen>
+					<pyyntoPvm xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">1001-01-01</pyyntoPvm>
+					<maaraPvm xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">2013-06-06</maaraPvm>
+					<lausuntotieto xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+						<Lausunto>
+							<lausunto>Lausunto koskee maalämpökaivon poraamista</lausunto>
+						</Lausunto>
+					</lausuntotieto>
+				</Lausunto>
+			</lausuntotieto>
+			<lausuntotieto>
+				<Lausunto>
+					<viranomainen xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">Vesi- ja viemärilaitos
+					</viranomainen>
+					<pyyntoPvm xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">1001-01-01</pyyntoPvm>
+					<maaraPvm xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">2013-05-30</maaraPvm>
+				</Lausunto>
+			</lausuntotieto>
+			<lausuntotieto>
+				<Lausunto>
+					<viranomainen xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">Rakennuskatselmusmiehet
+					</viranomainen>
+					<pyyntoPvm xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">1001-01-01</pyyntoPvm>
+					<maaraPvm xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">2013-06-03</maaraPvm>
+				</Lausunto>
+			</lausuntotieto>
+			<paatostieto>
+				<Paatos xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+					<lupamaaraykset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+								<tarkastuksenTaiKatselmuksenNimi>rakennuksen paikan merkitseminen</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+								<tarkastuksenTaiKatselmuksenNimi>pohjakatselmus</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+								<tarkastuksenTaiKatselmuksenNimi>rakennuksen paikan tarkastaminen</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+								<tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+							  <katselmuksenLaji>loppukatselmus</katselmuksenLaji>
+								<tarkastuksenTaiKatselmuksenNimi>osittainen loppukatselmus</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+								<tarkastuksenTaiKatselmuksenNimi>loppukatselmus</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<vaaditutKatselmukset>
+							<Katselmus>
+								<tarkastuksenTaiKatselmuksenNimi>lämpö-, vesi- ja ilmanvaihtolaitteiden katselmus
+								</tarkastuksenTaiKatselmuksenNimi>
+							</Katselmus>
+						</vaaditutKatselmukset>
+						<maarays>
+							<sisalto> Rakennuksessa on suoritettva ennen
+								käyttöönottokatselmusta tiiveysmittaus. Ilmanvuotoluku q50 saa
+								olla enintään 1,8.</sisalto>
+						</maarays>
+						<maarays>
+							<sisalto>Mahdolliset radonhaitat on huomioitava
+								rakennusvaiheessa. </sisalto>
+						</maarays>
+						<maarays>
+							<sisalto>Rakennus on varustettava sähköverkkoon kytketyillä
+								palovaroittimilla. </sisalto>
+						</maarays>
+						<maarays>
+							<sisalto>Tulisijan ja savuhormin yhteensopivuus on tarkistettava.
+							</sisalto>
+						</maarays>
+						<maarays>
+							<sisalto>KVV/IV-työnjohtajan on pidettävä rakennushankkeesta
+								tarkastusasiakirjaa.
+							</sisalto>
+						</maarays>
+						<maarays>
+							<sisalto>Putkistossa käytettävän maalämpönesteen
+								käyttöturvallisuuden takia terveydelle ja ympäristölle
+								myrkyllisten tai haitallisten kemikaalien käyttö on kielletty.
+
+								Porausraportti josta ilmenee reiän tiivistysmateriaali ja
+								tiivistyssyvyys on toimitettava rakennusvalvontaan ennen
+								käyttöönottoa.
+
+								Lämmönsiirtoputkisto on koeponnistettava vedellä ennen putkiston täyttämistä
+								lämmönsiirtonesteellä. Koeponnistuspöytäkirja on toimitettava
+								rakennusvalvontaan ennen käyttöönottoa.
+							</sisalto>
+						</maarays>
+						<maarays>
+							<sisalto>Ympäristönsuojeluviranomaisen lausuntoa maalämpökaivon
+								poraamisesta on noudatettava. Lausunto annettu 6.6.2013
+							</sisalto>
+						</maarays>
+						<vaaditutTyonjohtajat>Rakennustyön vastaavan työnjohtajan
+						</vaaditutTyonjohtajat>
+					</lupamaaraykset>
+					<paivamaarat>
+						<aloitettavaPvm>2016-07-12</aloitettavaPvm>
+						<lainvoimainenPvm>2013-07-12</lainvoimainenPvm>
+						<voimassaHetkiPvm>2018-07-12</voimassaHetkiPvm>
+						<antoPvm>2013-06-28</antoPvm>
+						<julkipanoPvm>2013-06-27</julkipanoPvm>
+					</paivamaarat>
+					<poytakirja>
+						<paatos>Päätän maankäyttö- ja rakennuslain ja sen nojalla
+							annettujen säännösten ja määräysten perusteella myöntää haetun
+							luvan sekä vahvistan esitetyt suunnitelmat noudatettavaksi
+							seuraavin ehdoin: </paatos>
+						<paatoskoodi>myönnetty</paatoskoodi>
+						<paatoksentekija></paatoksentekija>
+						<paatospvm>2013-06-26</paatospvm>
+						<pykala>450</pykala>
+					</poytakirja>
+				</Paatos>
+			</paatostieto>
+			<lisatiedot>
+				<Lisatiedot>
+					<asioimiskieli>suomi</asioimiskieli>
+				</Lisatiedot>
+			</lisatiedot>
+		</RakennusvalvontaAsia>
+	</featureMember>
+</FeatureCollection>

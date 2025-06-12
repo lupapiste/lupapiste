@@ -1,0 +1,62 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="handler-roles-template">
+  <h2 data-bind="ltext: 'handler-roles.title'"></h2>
+  <p data-bind="lhtml: 'handler-roles.info'"></p>
+  <div class="handler-roles-container">
+    <toggle params="value: showAll,
+                    prefix: 'blockbox',
+                    ltext: 'handler-roles.show-all',
+                    testId: 'show-all-handler-roles'"></toggle>
+    <table class="handler-roles">
+      <thead>
+        <tr>
+          <!-- ko foreach: languages -->
+          <th data-bind="text: $parent.nameHeader( $data )"></th>
+          <!-- /ko -->
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: roles">
+        <!-- ko if: !$data.disabled() || $parent.showAll() -->
+        <tr>
+          <!-- ko foreach: $parent.languages -->
+          <td>
+            <input type="text"
+                   class="grid-style-input"
+                   data-bind="value: $parent.name[$data],
+                              disable: $parents[1].isDisabled() || $parent.disabled(),
+                              css: {required: $parents[1].isRequired( $parent.name, $data )},
+                              testId: sprintf( 'edit-role-%s-%s', $parentContext.$index, $data )">
+          </td>
+          <!-- /ko -->
+          <td>
+            <!-- ko ifnot: $data.disabled -->
+            <i class="lupicon-remove primary"
+               data-bind="visible: !$parent.isDisabled() && !$data.general,
+                          click: $parent.toggleRole,
+                          testId: sprintf( 'remove-role-%s', $index() )">
+            </i>
+            <!-- /ko -->
+            <!-- ko if: $data.disabled() && $parent.showAll() -->
+            <i class="lupicon-undo primary"
+               data-bind="click: $parent.toggleRole,
+                          testId: sprintf( 'recover-role-%s', $index() )">
+            </i>
+            <!-- /ko -->
+          </td>
+        </tr>
+        <!-- /ko -->
+      </tbody>
+    </table>
+    <div data-bind="visible: showWarning,
+                    ltext: 'invite.error.missing-parameters'"
+         class="handler-role-warning"
+         data-test-id="handler-roles-warning">
+    </div>
+  </div>
+  <icon-button params="ltext: 'handler-roles.add',
+                       click: addRole,
+                       icon: 'circle-plus',
+                       testId: 'add-handler-role'"
+               data-bind="visible: !isDisabled()"></icon-button>
+</script>

@@ -1,0 +1,68 @@
+@use "base";
+@use "theme";
+
+// Note: The fonts are loaded in the template.html.
+// Earlier @import approach resulted in a peculiar hard to trace rendering bug,
+//where some texts were invisible until hard reload, window size change or zooming.
+
+$font-body: 'Inter', sans-serif;
+$font-heading: 'Inter', sans-serif;
+$font-size-body: 15px;
+$line-height-body: 1.5em;
+
+@mixin engraved{ text-shadow: 0px 1px 0px rgba(255,255,255,.3), 0px -1px 0px rgba(0,0,0,.7);}
+
+*:where(:not(.nobase, .nobase *)) {
+  font-family: $font-body;
+}
+
+body {
+  font-size: $font-size-body;
+  line-height: $line-height-body;
+  margin-bottom: base.$baseline;
+  color: theme.$primary-text;
+}
+
+p:where(:not(.nobase, .nobase *)) {
+  color: theme.$primary-text;
+  margin-bottom: 2em;
+  line-height: $line-height-body;
+}
+
+h1:where(:not(.nobase, .nobase *)), .h1 {
+  font-family: $font-heading;
+  font-weight: normal;
+  line-height: normal;
+  font-size: base.$baseline;
+  margin-bottom: base.$marginM;
+  text-transform: uppercase;
+
+}
+
+h2:where(:not(.nobase, .nobase *)), .h2 {
+  font-size: base.$baseline * .9;
+  line-height: normal;
+  font-family: $font-heading;
+  margin-bottom: base.$marginS;
+  text-transform: none;
+}
+
+h3:where(:not(.nobase, .nobase *)), .h3 {
+  font-size: base.$baseline * .75;
+  font-family: $font-heading;
+  font-weight: normal;
+  line-height: normal;
+  margin-bottom: base.$marginS;
+  text-transform: none;
+}
+i:where(:not(.nobase, .nobase *)) {
+  margin-bottom: base.$marginM;
+}
+
+.success-message {
+  color: theme.$green-dark;
+}
+
+blockquote:where(:not(.nobase, .nobase *)) {
+  margin-left: 2em;
+}

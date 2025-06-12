@@ -1,0 +1,376 @@
+@use "../partials/base";
+@use "../partials/colors";
+@use "../partials/frameless";
+@use "../partials/theme";
+
+@use "sass:math";
+
+#register3 {
+  .container {
+    width: 600px;
+    margin: 24px 0;
+  }
+}
+
+.register-form {
+  .error-message {
+    font-style: italic;
+    color: colors.get-signal( "red" );
+  }
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  .form-entry {
+    &.register-checkbox {
+      width: 100%;
+      height: auto;
+      min-height: 32px;
+      label.checkbox-required::after {
+        color: theme.$lp-orange;
+        content: "*";
+        display: inline;
+      }
+    }
+  }
+
+  .register-error {
+    position: relative;
+    margin: base.$marginS 0;
+  }
+
+  .architect-toggle {
+    min-height: 36px;
+  }
+
+  .info-indicator {
+    cursor: pointer;
+  }
+
+}
+
+.account-select-help {
+  margin-top: base.$marginL;
+  margin-left: base.$marginL;
+}
+
+div.register-company-wizard {
+  h1, h2 {
+    text-transform: none;
+    text-align: center;
+    margin-top: 1em;
+  }
+  h1 {
+      font: {
+        size: 60px;
+        weight: bold;
+      }
+  }
+  h2 {
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+    font-size: 1.5em;
+    font-weight: normal;
+    .required {
+      color: theme.$label-required-star-color;
+    }
+  }
+
+  div.company-steps {
+    $disabled: colors.get-gray( 8 );
+    h2 {
+      margin-bottom: 1.5em;
+    }
+    h2.register-company-subtitle {
+      max-width: 44em;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 0;
+    }
+
+    .tabby {
+      width: 80%;
+      margin: 0 auto;
+      padding-top: 1.5em;
+      // margin-bottom: $marginL;
+      text-align: center;
+      vertical-align: middle;
+      .tabby__cell {
+        padding-left: 0;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .circle-title {
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      .circle-row {
+        display: table-row;
+      }
+      .circle-number {
+        $radius: 40px;
+        min-width: 2 * $radius;
+        min-height: 2 * $radius;
+        line-height: 2 * $radius;
+        border-radius: $radius;
+        font-size: 2em;
+        font-weight: bold;
+        color: colors.$white;
+        background-color: $disabled;
+        display: table-cell;
+      }
+      .circle-number.current {
+        background-color: colors.$primary;
+      }
+      .circle-number.past {
+        background-color: colors.$positive;
+      }
+      .edge {
+        box-sizing: content-box;
+        width: 100%;
+        background-color: $disabled;
+        height: 4px;
+        z-index: -1;
+        &.past {
+          background-color: colors.$positive;
+        }
+        &.current {
+          background-color: colors.$primary;
+        }
+      }
+      .circle-pad {
+        display: table-cell;
+        width: 50%;
+        vertical-align: middle;
+      }
+    }
+  }
+  div.account-type-boxes {
+    $hover: colors.resolve-color( "primary", "background", "hover");
+    margin-top: 1em;
+    .account-type-box {
+      display: block;
+      position: relative;
+      text-align: center;
+      padding: {
+        top: 3em;
+        left: 2em;
+        right: 2em;
+        bottom: 3em;
+      }
+      &[aria-pressed="false"] {
+        opacity: .7;
+        background-color: colors.get-gray( 15 );
+      }
+      > h3 {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      > .account-type-price {
+        margin-top: .5em;
+        margin-bottom: .5em;
+        font-size: 4em;
+        font-weight: bold;
+        color: colors.$primary;
+        white-space: nowrap;
+      }
+      > .account-billing-type-description {
+        margin-top: .5em;
+        margin-bottom: .5em;
+        span {
+          text-wrap: wrap;
+          font-weight: bold;
+          font-size: base.$baseline;
+          color: colors.get-gray( 5 );
+        }
+      }
+      > .account-type-description {
+        border-top: 3px dotted  colors.$gray221;
+        padding-top: 1em;
+        font-weight: bold;
+        padding-bottom: 1em;
+      }
+      > .small-print {
+        border-top: 3px dotted  colors.$gray221;
+        padding-top: 1em;
+      }
+      > .last-discount-date {
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+      > .overstrike-price {
+        font-size: 2em;
+        font-weight: bold;
+        text-decoration: line-through;
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+      > .ribbon span {
+        color: colors.$white;
+        background-color: rgba(colors.$primary, .85);
+        font-size: frameless.$font-size * 1.2;
+        line-height: 32px;
+        border-top: 1px solid colors.$primary;
+        border-bottom: 1px solid colors.$primary;
+      }
+    }
+  }
+  .account-billing-type-select {
+    div.button-container {
+      button {
+        display: block;
+        margin: base.$marginM auto;
+        padding: base.$marginL;
+        //background-color: $gray247;
+        line-height: 0; // btn-base has 40px default, which wasn't appropriate here
+        //border: 4px solid transparent;
+        span {
+          display: block;
+          text-align: center;
+        }
+      }
+      &.yearly {
+        button {
+          margin-bottom: 0;
+          &:not([aria-pressed="true"]) {
+            padding-top: base.$marginL + 3px;
+            padding-bottom: base.$marginL;
+            padding-left: base.$marginL + 3px;
+            padding-right: base.$marginL + 3px;
+          }
+        }
+      }
+      div.discount {
+        $color: colors.get-gray( 13 );
+        display: block;
+        color: colors.$positive;
+        border-right: 1px dashed $color;
+        border-bottom: 1px dashed $color;
+        border-left: 1px dashed $color;
+        padding: base.$baseline * .75;
+        line-height: 0;
+        span {
+          font-size: frameless.$font-size * 1.2;
+          text-align: center;
+          display: block;
+        }
+      }
+    }
+  }
+
+  register-company-buttons {
+    display: block;
+    text-align: center;
+    .register-company-buttons-group {
+      margin-top: 2em;
+      display: inline-block;
+      icon-button {
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+    }
+  }
+  div.form-grid {
+    margin-top: 2em;
+    border: 1px solid colors.$gray221;
+    h3 {
+      font-weight: bold;
+      font-size: 1.5em;
+      margin-bottom: 0;
+    }
+    &.form-grid--no-border {
+      margin-top: 0;
+      border: none;
+    }
+  }
+  .form-grid + .form-grid {
+    margin-top: 0;
+  }
+  .existing-user-sign-in {
+    padding-top: base.$marginS;
+    padding-bottom: base.$marginS;
+
+  }
+  div.register-company-container {
+    margin-top: 0;
+    border: 1px solid colors.$gray221;
+    padding: {
+      left: 20px;
+      right: 20px;
+      top: 20px;
+      bottom: 20px;
+    }
+    p {
+      margin-bottom: base.$marginS;
+    }
+    h3 {
+      font-weight: bold;
+      font-size: 1.5em;
+      margin-bottom: .5em;
+    }
+    a.btn {
+      margin-top: base.$marginL;
+      margin-bottom: base.$marginL;
+    }
+    form {
+      margin-top: 2em;
+      margin-top: 1em;
+      icon-button {
+        margin-right: 2em;
+      }
+    }
+    img.logo {
+      width: 200px;
+      height: auto;
+    }
+  }
+  div.register-company-summary {
+    .tabby__row {
+      .tabby__cell {
+        &:last-child {
+          text-align: right;
+        }
+      }
+      &:last-child {
+        .tabby__cell {
+          border-top: 2px dotted colors.$gray221;
+          padding-top: base.$marginM;
+        }
+      }
+      &:nth-last-child(2) {
+        .tabby__cell {
+          padding-bottom: 20px;
+        }
+      }
+    }
+    span.discount {
+      color: colors.get-signal( "green" );
+    }
+  }
+  div.register-company-confirmation {
+    display: block;
+    margin: base.$marginL 0;
+    padding: 0;
+    border: 1px solid colors.get-signal( "blue" );
+    i, span {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    i {
+      color: colors.$white;
+      background-color: colors.get-signal( "blue" );
+      margin-bottom: 0;
+      padding: base.$marginM;
+    }
+    span {
+      padding-left: base.$marginS;
+    }
+  }
+}
+
+.login--error {
+  color: colors.$negative;
+}

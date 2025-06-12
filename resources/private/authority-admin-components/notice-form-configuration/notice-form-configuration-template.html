@@ -1,0 +1,42 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="notice-form-configuration-template">
+  <div class="notice-form-configuration">
+    <toggle params="value: formEnabled,
+                    prefix: 'blockbox',
+                    ltext: 'notice-forms.' + formType,
+                    testId: testId( 'toggle' ),
+                    disable: isDisabled"></toggle>
+    <div class="notice-form-configuration__details">
+      <table data-bind="if: formEnabled">
+        <tbody data-bind="testId: testId( 'details' )">
+          <!-- ko foreach: languages -->
+          <tr>
+            <td class="details-label" data-bind="text: $parent.infoHeader($data)"></td>
+            <td class="details-value">
+              <textarea class="grid-style-input"
+                        rows="4"
+                        data-bind="value: $parent.formText[$data],
+                                   disable: $parent.isDisabled(),
+                                   testId: $parent.testId( $data )">
+              </textarea>
+            </td>
+          </tr>
+          <!-- /ko -->
+          <!-- ko if: showIntegration -->
+          <tr>
+            <td class="details-label"
+                data-bind="ltext: 'admin.organization.backend-system'"></td>
+            <td class="details-value">
+              <toggle params="prefix: 'blockbox',
+                              ltext: 'notice-forms.config.integration',
+                              disable: isDisabled,
+                              testId: testId( 'integration' ),
+                              value: formIntegration"></toggle>
+            </td>
+          </tr>
+          <!-- /ko -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</script>

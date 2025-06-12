@@ -1,0 +1,116 @@
+@use "../partials/base";
+@use "../partials/colors";
+@use "../partials/theme";
+
+.inspection-summary-template-editor-container {
+  width: 50%;
+  display: table;
+}
+
+.inspection-summary-template-editor {
+  margin-bottom: base.$marginL;
+  width: 100%;
+
+  input[type=text], input[type=password], select {
+    min-height: theme.$grid-input-height;
+    height: theme.$grid-input-height;
+  }
+
+  textarea {
+    min-height: theme.$grid-textarea-height * 2;
+    height: theme.$grid-textarea-height * 2;
+
+    &.placeholder-visible {
+      color: colors.$gray153;
+    }
+  }
+
+  input[type=text], input[type=password], select, textarea {
+    box-sizing: border-box;
+    font-size: theme.$grid-font-size;
+    color: theme.$input-color;
+    border: 1px solid theme.$input-border-color;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0px;
+    -moz-appearance:none;
+    display: block;
+    width: 100%;
+
+    &.required {
+      border-color: colors.$violet-100;
+    }
+    &:focus {
+      color: theme.$input-focus-color;
+      border-color: theme.$input-focus-border-color;
+    }
+  }
+  &> div {
+    margin: base.$marginM base.$marginM;
+  }
+  label.required {
+
+    &:after {
+      content: "*";
+      display: inline;
+      color: theme.$label-required-star-color;
+    }
+  }
+}
+
+.inspection-summary-edit {
+  margin-left: 10px;
+}
+
+.inspection-summary-link:hover {
+  text-decoration: none;
+}
+
+.inspection-date-input {
+  min-width: 100px;
+}
+
+.inspection-date-row {
+  width: 85%;
+  white-space: nowrap;
+}
+
+.create-summary-bubble {
+  .container-bubble {
+    margin: 0px;
+    padding: 0px 24px;
+  }
+
+  div.row.left-buttons {
+    padding-top: 12px;
+  }
+
+}
+
+div.summary-button-bar {
+  padding-top: 24px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#targets-table {
+  td {
+    input {
+      width: initial;
+    }
+
+    &.functions {
+      a {
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+    }
+  }
+  .target-title {
+    /* same breakpoint as tables */
+    @media (max-width: 1080px) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 30em;
+    }
+  }
+}

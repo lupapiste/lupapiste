@@ -1,0 +1,40 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="send-neighbor-email-template">
+  <div class="content pad--h05">
+    <form data-bind="submit: send">
+      <label data-bind="ltext: 'neighbors.sendEmail.name'"
+             class="form-label"></label>
+      <span data-bind="text: name"
+            id="neighbors-sendemail-name"
+            class="form-input text long">
+      </span>
+
+      <label data-bind="ltext: 'neighbors.sendEmail.email',
+                        css: {required: required}"
+             class="lux form-label"
+             for="neighbors-sendemail-email"></label>
+      <input data-bind="textInput: email,
+                        ariaInvalid: badEmail,
+                        required: required,
+                        lplaceholder: 'neighbors.sendEmail.email.placeholder'"
+             id="neighbors-sendemail-email"
+             type="text"
+             class="lux dsp--block lux--wide">
+      <div class="neighbor-error"
+           data-bind="visible: error,
+                      ltext: error"></div>
+    </form>
+    <div class="button-group">
+      <button data-bind="ltext: 'neighbors.sendEmail.ok',
+                         enable: ok,
+                         click: send"
+              data-test-id="neighbors-sendemail-send"
+              class="positive btn-dialog">
+      </button>
+      <button data-bind="ltext: 'neighbors.sendEmail.cancel',
+                         click: close,
+                         focusNext: '#modal-dialog-button-close:visible'"
+              class="secondary btn-dialog close"></button>
+    </div>
+  </div>
+</script>

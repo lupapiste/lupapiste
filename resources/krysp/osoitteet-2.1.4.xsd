@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Nosto Consulting Oy, Pasi Lappalainen, tel. +358 400 858101, http://www.nostoconsulting.fi  -->
+<!--  edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy)  -->
+<!--  KRYSP projekti -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mkos="http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.4">
+    <xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+    <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd"/>
+    <!-- Local usage -->
+    <!-- <xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\..\gml_dummy.xsd"/>
+    <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset" schemaLocation="..\..\yhteiset.xsd"/> -->
+    <!--  =================================================  -->
+    <!--  Package: <<XSDschema>> Osoitteet  -->
+    <!--  =================================================  -->
+    <!--  Kohdejoukko: Osoitteet -->
+    <!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+    <!--  Class: <<FeatureType>> Osoitteet -->
+    <!--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+    <xs:complexType name="OsoitteetType">
+        <xs:complexContent>
+            <xs:extension base="gml:AbstractFeatureCollectionType">
+                <xs:sequence>
+                    <xs:element name="toimituksentiedot" type="yht:AineistotoimitusType"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="Osoitteet" type="mkos:OsoitteetType" substitutionGroup="gml:_FeatureCollection">
+        <xs:annotation>
+            <xs:documentation>Skeeman juurielementti </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="KulkuOsoiteType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:choice>
+                        <xs:annotation>
+                            <xs:documentation>Osoitteeseen voidaan joko viiitata tai tuomalla koko osoitetietoelementti</xs:documentation>
+                        </xs:annotation>
+                        <xs:element name="osoiteID" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Viittaus osoitteen Yksilointiteto:on</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="osoitetieto">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Osoite" type="yht:OsoiteType">
+                                        <xs:annotation>
+                                            <xs:documentation>Osoitekohde</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:element>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:choice>
+                    <xs:element name="sijaintipiste" type="gml:PointPropertyType">
+                        <xs:annotation>
+                            <xs:documentation>Liittymäpisteen sijainti väylällä</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="sijainti" type="gml:LineStringPropertyType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Reitti(viivakohde) liittymäpisteestä sisäänkäyntiin. Viivakohde: 1) Sisältää minimissään liityntäpiste - sisäänkäyntipiste - eli suora viiva liittymästä sisäänkäyntiin. 2) Suositeltavaa: On tallettaa reitti(murtoviiva) liityntäpisteeltä sisäänkäyntipisteeseen</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="kulkuyhteydenLaatu" type="mkos:KulkuyhteydenLaatuType"/>
+                    <xs:element name="tarkkaReittiKytkin" type="xs:boolean"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="KayntiOsoiteType">
+        <xs:complexContent>
+            <xs:extension base="yht:AbstractPaikkatietopalveluKohde">
+                <xs:sequence>
+                    <xs:choice minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Osoite, jonka käyntiosoitetta kuvataan.Osoitteeseen voidaan joko viiitata tai tuomalla koko osoitetietoelementti</xs:documentation>
+                        </xs:annotation>
+                        <xs:element name="virallinenosoiteID" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Viittaus osoitteen Yksilointiteto:on</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="virallinenosoite" type="yht:OsoiteType">
+                            <xs:annotation>
+                                <xs:documentation>Osoitekohde</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:choice>
+                    <xs:choice>
+                        <xs:annotation>
+                            <xs:documentation>Käyntiosoite</xs:documentation>
+                        </xs:annotation>
+                        <xs:element name="kayntiosoiteID" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Viittaus osoitteen Yksilointiteto:on</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="kayntiosoite" type="yht:OsoiteType">
+                            <xs:annotation>
+                                <xs:documentation>Osoitekohde</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:choice>
+                    <xs:element name="sijainti" type="gml:PointPropertyType" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>Käyntiosoiteen sijainti. Esim. Oven sijainti</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="Osoite" type="yht:OsoiteType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>Osoitetieto. Kunnan osoiterekisterin tiedot ?</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Kulkuosoite" type="mkos:KulkuOsoiteType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>Kyseisen osoitteen liiittymäpiste väylältä</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="KayntiOsoite" type="mkos:KayntiOsoiteType" substitutionGroup="gml:_Feature">
+        <xs:annotation>
+            <xs:documentation>Osoitteen käyntiosoitetieto</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:simpleType name="KulkuyhteydenLaatuType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="jalankulku"/>
+            <xs:enumeration value="esteetön jalankulku"/>
+            <xs:enumeration value="henkilöauto"/>
+            <xs:enumeration value="pakettiauto"/>
+            <xs:enumeration value="kuorma-auto"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

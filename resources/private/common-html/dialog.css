@@ -1,0 +1,93 @@
+/* Dialog (modal) and drawer */
+
+.ui2-dialog-backdrop {
+  --backdrop-opacity: 0.6;
+  --bleed: 3rem;
+  --drawer-swipe-progress: 0.0;
+  --drawer-swipe-strength: 0.0;
+  position: fixed;
+  min-height: 100dvh;
+  inset: 0;
+  background-color: black;
+  opacity: calc(var(--backdrop-opacity) * (1 - var(--drawer-swipe-progress)));
+  transition-duration: 450ms;
+  transition-property: opacity;
+  transition-timing-function: var(--dialog-ease);
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+
+  &[data-swiping] {
+    transition-duration: 0ms;
+  }
+
+  &[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+  }
+}
+
+.ui2-drawer-viewport {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.ui2-dialog-popup {
+  --bleed: 3rem;
+  --drawer-swipe-strength: 0.0;
+  box-sizing: border-box;
+  margin-right: calc(-1 * var(--bleed));
+  outline: 1px solid var(--color-gray-200);
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-900);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition: transform 450ms var(--dialog-ease);
+
+  &[data-swiping] {
+    user-select: none;
+  }
+
+  &.from-left {
+    &[data-starting-style],
+    &[data-ending-style] {
+      transform: translateX(calc(-1 * var(--dialog-width) - var(--bleed) + 2px));
+    }
+  }
+
+  &.from-right {
+    &[data-starting-style],
+    &[data-ending-style] {
+      transform: translateX(calc(100% - var(--bleed) + 2px));
+    }
+  }
+
+  &.from-left, &.from-right {
+    height: 100%;
+    width: calc(var(--dialog-width) + var(--bleed));
+    will-change: transform;
+    /* Why? */
+    max-width: calc(var(--dialog-width) - 3rem + var(--bleed));
+    transform: translateX(var(--drawer-swipe-movement-x));
+
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+    }
+  }
+
+  &.position-center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--dialog-width);
+    transition: all 150ms;
+
+    &[data-starting-style], &[data-ending-style] {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
+}

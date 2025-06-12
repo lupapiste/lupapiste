@@ -1,0 +1,167 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="applications-search-results-template">
+      <div class="tabs-content">
+        <!-- ko if: dataProvider.pending -->
+        <div class="btn search-results-waiting">
+          <i class="lupicon-refresh spin primary"></i>
+          <span data-bind="ltext: 'applications.loading'"></span>
+        </div>
+        <!-- /ko -->
+        <!-- ko ifnot: dataProvider.pending -->
+        <table id="applications-list" class="application-search-result__table" data-bind="if: gotResults()">
+          <thead>
+            <tr data-bind="foreach: columns" role="row">
+              <!-- ko if: $data.clickFn -->
+              <th data-bind="attr: $data.attr, css: $data.css">
+                <button class="th-button"
+                        data-bind="click: $data.clickFn">
+                  <span data-bind="ltext: $data.ltext"></span>
+                  <i data-bind="css: {'lupicon-chevron-small-up': $data.isAscending(),
+                                'lupicon-chevron-small-down': !$data.isAscending(),
+                                'placeholder': !($data.isAscending() || $data.isDescending())}">
+                </button>
+              </th>
+              <!-- /ko -->
+              <!-- ko ifnot: $data.clickFn -->
+              <th data-bind="css: $data.css,
+                             attr: $data.attr,
+                             ltext: $data.ltext">
+              </th>
+              <!-- /ko -->
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: {data: data, afterRender: scrollPop}">
+            <!-- ko if: _.isString($data) -->
+            <tr class="application-subheader-row">
+              <td data-bind="attr: {colspan: $parent.rowWidth},
+                             ltext: $data"></td>
+            </tr>
+            <!-- /ko -->
+            <!-- ko ifnot: _.isString($data) -->
+            <tr class="application-row"
+                tabindex="0"
+                data-bind="click: $parent.openApplication,
+                           event: {keypress: $parent.keyOpenApplication},
+                           attr: {'data-id': $data.id,
+                           'data-test-address': $data.address}">
+              <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.authorityNotice || $data.urgency !== 'normal'"
+                  data-test-col-name="urgent">
+                <a href="#"
+                   class="application-search-results__urgency"
+                   data-bind="click: _.partialRight($parent.openApplication, 'notice'),
+                              clickBubble: false,
+                              css: $data.urgency,
+                              tooltip: {text: _.trim($data.authorityNotice) ? _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency]), longText: true}">
+                  <i role="img" data-bind="css: $data.urgencyClass, ariaLtext: 'notice.title'"></i>
+                </a>
+              </td>
+              <!-- /ko -->
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.indicators > 0"
+                  data-test-col-name="indicators">
+                <div data-bind="tooltip: {ltext: 'info.title'}">
+                  <i class="lupicon-star"></i>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.attachmentsRequiringAction > 0,
+                             click: _.partialRight($parent.openApplication, 'attachments'), clickBubble: false"
+                  data-test-col-name="newAttachments">
+                <div data-bind="tooltip: {ltext: 'attachments.title'}">
+                  <i class="lupicon-paperclip"></i>
+                  <span data-bind="text: $data.attachmentsRequiringAction"></span>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.unseenComments > 0"
+                  data-test-col-name="unseenComments">
+                <a href="#"
+                   data-bind="click: _.partialRight($parent.openApplication, 'conversation'),
+                              clickBubble: false,
+                              tooltip: {ltext: 'conversation.messages'}"
+                   data-test-id="unseen-comments">
+                  <i class="lupicon-conversation"></i>
+                  <span data-bind="text: $data.unseenComments"></span>
+                </a>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.fullyArchived"
+                  data-test-col-name="fullyArchived">
+                <div data-bind="tooltip: {ltext: 'fullyArchived.title'}">
+                  <i class="lupicon-archives enabled"></i>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.statementsSummary"
+                  data-test-col-name="statementsSummary">
+                <div data-bind="with: $data.statementsSummary">
+                  <div data-bind="tooltip: {text: true && $component.statementSummaryText($data)}">
+                    <i data-bind="css: {'lupicon-circle-question negative' : open.length,
+                                        'lupicon-circle-check positive': open.length === 0 && given.length}"></i>
+                  </div>
+                </div>
+              </td>
+              <!-- ko if: $parent.isProcessing -->
+              <td class="applications-search-results__indicator"
+                  data-test-col-name="procUnseen"
+                  data-bind="if: $parent.procUnseen( $data )">
+                <span data-bind="tooltip: {ltext: 'statistics.entries.unseen', longText: true}">
+                  <i class="lupicon-bell" style="color: #0f3fd2"></i>
+                </span>
+              </td>
+              <!-- /ko -->
+              <!-- ko ifnot: $parent.isProcessing -->
+              <td data-bind="ltext: ($data.primaryOperation && $data.primaryOperation.name === 'purkamisilmoitus') ? 'applications.notice' : $data.kind" data-test-col-name="type"></td>
+              <!-- /ko -->
+              <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
+              <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>
+              <!-- ko if: !_.isEmpty(ko.unwrap($data.applicant)) -->
+              <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
+              <!-- /ko -->
+              <!-- ko if: _.isEmpty(ko.unwrap($data.applicant)) && _.isObject(ko.unwrap($data.creator)) -->
+              <td data-bind="fullName: $data.creator" data-test-col-name="applicant"></td>
+              <!-- /ko -->
+              <!-- ko if: _.isEmpty(ko.unwrap($data.applicant)) && !_.isObject(ko.unwrap($data.creator)) -->
+              <td data-bind="ltext: 'ei-tiedossa'" data-test-col-name="applicant"></td>
+              <!-- /ko -->
+              <!-- ko ifnot: $parent.isProcessing -->
+              <td data-bind="dateTimeString: _.includes( ['verdict', 'construction'], $data.searchType ) ? $data.verdictDate : $data.submitted" data-test-col-name="submitted"></td>
+              <!-- /ko -->
+              <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>
+              <!-- ko ifnot: $parent.isProcessing -->
+              <td data-bind="ltext: $data.state, attr: {'data-test-row-state': $data.state}" data-test-col-name="status"></td>
+              <!-- /ko -->
+              <!-- ko ifnot: $parent.isProcessing -->
+              <td data-bind="foreach: $data.handlers" data-test-col-name="authority">
+                <span class="handlers" data-bind="fullName: $data"></span>
+              </td>
+              <!-- /ko -->
+              <!-- ko if: $parent.isProcessing -->
+              <td data-bind="text: $parent.procComplexity( $data )"
+                  style="text-align: center"></td>
+              <td data-bind="text: $parent.procStatus( $data )"
+                  style="text-align: center"></td>
+              <td style="text-align: center">
+                <span data-bind="css: {'lux-new': $parent.procUnseen( $data )},
+                                 text: $parent.procRequests( $data )"></span>
+              </td>
+              <td data-bind="text: $parent.procRemaining( $data, 'remaining'),
+                             class: $parent.procClass( $data )"
+                  style="text-align: center"></td>
+              <!-- /ko -->
+            </tr>
+            <!-- /ko -->
+          </tbody>
+        </table>
+        <!-- ko ifnot: gotResults -->
+        <p data-bind="ltext: 'applications.search.no-results'"></p>
+        <!-- /ko -->
+        <!-- /ko -->
+      </div>
+</script>

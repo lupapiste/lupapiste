@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container" id="property-formation-app">
+  <h1 data-bind="ltext: 'createPropertyFormationApp.topic'"></h1>
+  <span data-bind="ltext: 'createPropertyFormationApp.info'"></span>
+  <div class="property-formation-app-location-info"
+       data-bind="ltext: 'applications.location'">
+  </div>
+  <div class="copy-selection-verified copy-selection-wrapper copy-background-color">
+      <span data-bind="text: propertyInfo"
+            data-test-id="location-for-new-app"></span>
+  </div>
+
+  <!-- ko if: inviteCandidates().length > 0 -->
+  <div class="copy-auth-selection-text"
+       data-bind="ltext: 'application.copy.osapuolet.candidates'"></div>
+  <div id="auths-to-invite"
+       data-bind="foreach: inviteCandidates ">
+    <div class="blockbox-wrapper copy-selection-wrapper">
+      <input type="checkbox"
+             data-bind="attr: {'id': $index()},
+                                 checked: $data.selected">
+      <label class="blockbox-label"
+             data-bind="attr: {'for': $index()},
+                          text: $parent.authDescription($data)"></label>
+    </div>
+  </div>
+  <!-- /ko -->
+
+  <!-- ko if: fetchingCandidates() -->
+  <div class="copy-auth-selection-text"
+       data-bind="ltext: 'createPropertyFormationApp.fetching-candidates'"></div>
+  <!-- /ko -->
+
+  <!-- ko if: inviteCandidates().length === 0 && !fetchingCandidates() -->
+  <div class="copy-auth-selection-text"
+       data-bind="ltext: 'application.copy.osapuolet.not-available'"></div>
+  <!-- /ko -->
+
+  <div class="copy-phase-buttons">
+    <button data-bind="click: goBackToApp,
+                       disable: processing() || pending()"
+            data-test-id="go-back-to-app-button"
+            class="secondary">
+      <i class="lupicon-arrow-left"></i>
+      <span data-bind="ltext: 'application.return'"></span>
+    </button>
+    <button data-bind="click: createPropertyFormationApp,
+                       disable: processing() || pending(),
+                       css: {waiting: pending()}"
+            data-test-id="create-property-formation-app-button"
+            class="positive">
+      <i class="lupicon-circle-plus"></i>
+      <i class="wait spin lupicon-refresh"></i>
+      <span data-bind="ltext: 'createPropertyFormationApp.topic'"></span>
+    </button>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="date-input-template">
+  <!-- NOTE: Binding order matters! datepicker MUST come after attr and value. -->
+  <input type="text"
+         class="lux dateinput"
+         data-bind="attr: {id: id},
+                    value: value,
+                    datepicker: datepicker,
+                    required: required,
+                    ariaInvalid: isInvalid,
+                    testId: testId,
+                    disable: isDisabled,
+                    ariaText: text,
+                    css: css">
+</script>

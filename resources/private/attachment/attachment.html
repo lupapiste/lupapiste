@@ -1,0 +1,7 @@
+<section class="page container"
+         id="attachment"
+         role="main">
+  <!-- ko if: $data.attachment() && $data.attachment().id -->
+  <attachment-details params="attachmentModel: $data.attachment, signingModel: $data.signingModel"></attachment-details>
+  <!-- /ko -->
+</section>

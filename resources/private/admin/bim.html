@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <body>
+  <section class="page" id="bim">
+    <div class="container container--authority-admin"
+         data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+      <!-- ko if: lupapisteApp.models.globalAuthModel.ok("bim-checking-plans") -->
+      <cljs-admin_bim_checking-plan-config></cljs-admin_bim_checking-plan-config>
+      <!-- /ko -->
+    </div>
+  </section>
+  </body>
+</html>

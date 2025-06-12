@@ -1,0 +1,118 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:description
+   {:fi
+    "Kiinteistön vesi- ja viemärilaitteiston rakentamisesta vastaava työnjohtaja"},
+   :prefLabel
+   {:en "Plumbing foreman ",
+    :fi "KVV-työnjohtaja ",
+    :sv "FVA-arbetsledare "},
+   :codeValue "01",
+   :created "2023-06-22T12:17:22.475Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/01/members/",
+   :modified "2024-11-20T16:17:16.266Z",
+   :status "VALID",
+   :id "d314fafe-67b0-4b4c-846f-f9aa6f02ee0c",
+   :statusModified "2023-06-22T12:17:22.475Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/01",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/tyonjohtajanrooli/code/01",
+   :hierarchyLevel 1}
+  {:description
+   {:fi "Ilmanvaihtolaitteiston rakentamisesta vastaava työnjohtaja"},
+   :prefLabel
+   {:en "AC foreman ",
+    :fi "IV-työnjohtaja ",
+    :sv "Ventilationsarbetsledare"},
+   :codeValue "02",
+   :created "2023-06-22T12:17:22.480Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/02/members/",
+   :modified "2024-11-20T16:17:30.783Z",
+   :status "VALID",
+   :id "e383a11a-9b85-4af0-ba69-453377ab520c",
+   :statusModified "2023-06-22T12:17:22.480Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/02",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/tyonjohtajanrooli/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Specialities foreman ",
+    :fi "Erityisalojen työnjohtaja ",
+    :sv "Arbetsledare för specialbranscher "},
+   :codeValue "03",
+   :created "2023-06-22T12:17:22.485Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/03/members/",
+   :modified "2023-12-04T11:08:31.037Z",
+   :status "VALID",
+   :id "38361e69-bb20-4df6-bb1c-ceb6eddad72c",
+   :statusModified "2023-06-22T12:17:22.485Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/03",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/tyonjohtajanrooli/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Foreman in charge ",
+    :fi "Vastaava työnjohtaja ",
+    :sv "Ansvarig arbetsledare "},
+   :codeValue "04",
+   :created "2023-06-22T12:17:22.490Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/04/members/",
+   :modified "2023-12-04T11:08:31.045Z",
+   :status "VALID",
+   :id "0ce71c38-b87a-4029-9348-0d53ad6191a3",
+   :statusModified "2023-06-22T12:17:22.490Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/tyonjohtajanrooli/codes/04",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/tyonjohtajanrooli/code/04",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:56:05.788Z"}

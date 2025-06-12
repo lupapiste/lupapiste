@@ -1,0 +1,136 @@
+@use "base";
+@use "colors";
+@use "theme";
+
+/*
+  Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
+*/
+
+.map-expand-button {
+  padding: 0px 7px 0px 7px;
+  background-color: #333333;
+  :first-child {
+    padding: 0px;
+    color: #ffffff;
+  }
+}
+
+.map {
+  margin-bottom: base.$marginM;
+  img {
+    max-width: none;
+  }
+}
+
+.map-large {
+  width: 100%;
+  height: base.$baseline * 16;
+}
+
+.create-application-actions {
+  position: absolute;
+  bottom: 0px;
+  right: base.$marginS;
+  z-index: 12000;
+}
+
+.related-map {
+  margin: 0 0 0 12px;
+}
+
+.organization-areas-map {
+  margin-bottom: base.$marginS;
+}
+
+.ol-map-component {
+  height: 400px;
+}
+
+.react-map-component {
+  height: 280px;
+  width: 320px;
+  &.extended {
+    width: 100%;
+  }
+  &.property-list {
+    min-height: 350px; // More space for a popup
+  }
+}
+
+.ol-popup {
+  .ol-popup-closer {
+    font-size: 14px;
+    font-weight: bold;
+    top: base.$marginS;
+    &:after {
+      content: " ";
+    }
+  }
+}
+
+// Applications map view
+div.applications-map-view {
+  background-color: colors.$panel-background;
+  div.applications-map-toggles {
+    background-color: colors.$white;
+    margin-left: base.$marginL;
+    display: inline-block;
+    padding: 0 0;
+    margin-bottom: 0;
+  }
+
+  div.map-view-panel {
+    background-color: colors.$white;
+    padding: base.$marginL base.$marginL;
+    div.map-view-results {
+      margin-top: base.$marginS;
+      margin-bottom: base.$marginL;
+      font-weight: bold;
+    }
+    div.map-view-results--searching {
+      color: colors.$gray187;
+    }
+
+    div.applications-map-container {
+      div#applications-marker-map {
+        width: 100%;
+        min-height: 50vh;
+        height: 90vh;
+        position: relative;
+        &.map--focused {
+          border: 1px solid theme.$blue;
+        }
+      }
+    }
+
+    div#applications-map-view-popup_GroupDiv {
+      border: 1px solid black;
+      border-radius: 1px 10px 10px;
+      padding: 4px 4px;
+    }
+
+    div.applications-map-marker-info {
+      ul {
+        list-style-type: none;
+        padding: 0 0;
+        li.info--applicant {
+          font-weight: bold;
+        }
+        li.info--inforequest {
+          font-style: italic;
+        }
+        li.info--state {
+          font-weight: bold;
+        }
+      }
+      ul + ul {
+        margin-top: 4px;
+        border-top: 1px solid colors.$gray221;
+        padding-top: 4px;
+      }}
+
+    div.applications-map-marker-info ul {
+      list-style-type: none;
+    }
+  }
+}

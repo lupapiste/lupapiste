@@ -1,0 +1,101 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "P0", :fi "P0", :sv "P0"},
+   :codeValue "00",
+   :created "2023-01-03T15:49:57.322Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/00/members/",
+   :modified "2023-12-04T13:21:01.961Z",
+   :status "VALID",
+   :id "4eeefbb4-b480-48cf-aa24-bad78b24db84",
+   :statusModified "2023-01-03T15:49:57.322Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/00",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/Paloluokka/code/00",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "P1", :fi "P1", :sv "P1"},
+   :codeValue "01",
+   :created "2021-07-15T09:08:15.047Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/01/members/",
+   :modified "2023-12-04T13:21:01.975Z",
+   :status "VALID",
+   :id "1b7df8c5-46bf-4912-8c48-105214462097",
+   :statusModified "2021-07-15T09:08:15.047Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/01",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/Paloluokka/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "P2", :fi "P2", :sv "P2"},
+   :codeValue "02",
+   :created "2021-07-15T09:08:15.051Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/02/members/",
+   :modified "2023-12-04T13:21:01.982Z",
+   :status "VALID",
+   :id "fc96b0d4-c668-4eaf-ae26-a43106385c7e",
+   :statusModified "2021-07-15T09:08:15.051Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/02",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/Paloluokka/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "P3", :fi "P3", :sv "P3"},
+   :codeValue "03",
+   :created "2021-07-15T09:08:15.054Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/03/members/",
+   :modified "2023-12-04T13:21:01.989Z",
+   :status "VALID",
+   :id "da5f4afd-8d26-4773-b2dc-b46e15f98c9c",
+   :statusModified "2021-07-15T09:08:15.054Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Paloluokka/codes/03",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/Paloluokka/code/03",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:53:01.102Z"}

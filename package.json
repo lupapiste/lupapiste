@@ -1,0 +1,65 @@
+{
+  "name": "lupapiste",
+  "version": "1.0.0",
+  "description": "Lupapiste on sähköinen palvelu, jossa rakentamisen lupiin liittyvät hakemukset ja aineistot välittyvät kunnan järjestelmiin sähköisessä muodossa. Lupapiste palvelee ensikontaktista tai neuvontapyynnöstä alkaen koko hankkeen ajan aina valmistumiseen saakka. Ympäristöministeriön tilaamaa palvelua kehittää ja operoi rakennetun ympäristön lupa-asiointiin keskittyvä pilvipalveluyhtiö [Cloudpermit](https://cloudpermit.com/).",
+  "main": "index.js",
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">=14.0.0"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "sass:dev:watch": "sass -w resources/private/common-html/sass:resources/public/lp-static/css --source-map-urls absolute",
+    "sass:dev:once": "sass resources/private/common-html/sass:resources/public/lp-static/css",
+    "sass:prod:once": "sass --style=compressed resources/private/common-html/sass:resources/public/lp-static/css",
+    "tailwind:dev:watch": "npx @tailwindcss/cli -i ./resources/private/common-html/tailwind.input.css -o ./resources/public/lp-static/css/tailwind.css --watch",
+    "tailwind:prod:once": "npx @tailwindcss/cli -i ./resources/private/common-html/tailwind.input.css -o ./resources/public/lp-static/css/tailwind.css",
+    "storybook": "storybook dev -h 0.0.0.0 -p 3555"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloudpermit/lupapiste.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/cloudpermit/lupapiste/issues"
+  },
+  "homepage": "https://github.com/cloudpermit/lupapiste#readme",
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.3.5",
+    "@storybook/addon-docs": "^10.3.5",
+    "@storybook/addon-mcp": "^0.6.0",
+    "@storybook/react-vite": "^10.3.5",
+    "@tailwindcss/cli": "4.2.2",
+    "sass": "1.99.0",
+    "shadow-cljs": "3.4.4",
+    "tailwindcss": "4.2.2",
+    "tailwindcss-debug-screens": "3.0.1",
+    "tailwindcss-scoped-preflight": "4.0.1"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.4.0",
+    "@carbon/icons-react": "11.78.0",
+    "@cloudpermit/map-component": "5.1.6",
+    "@dnd-kit/react": "https://pkg.pr.new/@dnd-kit/react@52bcfe4",
+    "@dnd-kit/sortable": "10.0.0",
+    "@types/react": "19.2.14",
+    "@xeokit/xeokit-sdk": "2.6.69",
+    "date-fns": "4.1.0",
+    "moment": "2.30.1",
+    "react": "19.2.5",
+    "react-day-picker": "9.14.0",
+    "react-dom": "19.2.5",
+    "react-quill-new": "3.8.3",
+    "react-select": "5.10.2",
+    "react-transition-group": "4.4.5"
+  },
+  "overrides": {
+    "lodash": false
+  }
+}

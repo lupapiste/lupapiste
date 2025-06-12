@@ -1,0 +1,27 @@
+.oauth {
+  .user {
+    margin: 1em 0;
+    i, span {
+      vertical-align: middle;
+    }
+    span {
+      margin-left: 5px;
+    }
+  }
+  em {
+    font-style: normal;
+    font-weight: bold;
+  }
+  .buttons {
+    margin-top: 1em;
+    form {
+      display: inline-block;
+      &.accept {
+        margin-right: 1em;
+      }
+      button.accept {
+
+      }
+    }
+  }
+}

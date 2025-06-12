@@ -1,0 +1,17 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="card-buttons-template">
+  <div class="card-buttons-group">
+    <!-- ko foreach:  visibleCards -->
+    <div class="dsp--inline-block pad--v05 gap--r1"
+         data-bind="component: {name: 'card-button',
+                    params: $data}"></div>
+    <!-- /ko -->
+    <!-- ko if: toggleLtext -->
+    <div class="dsp--inline-block pad--v05">
+      <card-button params="ltext: toggleLtext,
+                           click: lessMore">
+      </card-button>
+    </div>
+    <!-- /ko -->
+  </div>
+</script>

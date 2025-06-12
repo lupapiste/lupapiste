@@ -1,0 +1,92 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Air-cooled", :fi "Ilmajäähdytteinen", :sv "Luftkyld"},
+   :codeValue "01",
+   :created "2023-01-04T16:11:29.489Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytystapa/codes/01/members/",
+   :modified "2023-11-30T11:26:12.628Z",
+   :status "VALID",
+   :id "85a31782-fb95-452e-87fc-504c361e7b98",
+   :statusModified "2023-01-04T16:11:29.489Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytystapa/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytystapa/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Water-cooled", :fi "Vesijäähdytteinen", :sv "Vattenkyld"},
+   :codeValue "02",
+   :created "2023-01-04T16:11:49.638Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytystapa/codes/02/members/",
+   :modified "2023-11-30T11:26:12.641Z",
+   :status "VALID",
+   :id "86e84489-682e-4dda-b803-553ac4eba9b4",
+   :statusModified "2023-01-04T16:11:49.638Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytystapa/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytystapa/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "No fixed cooling device",
+    :fi "Ei kiinteää jäähdytyslaitetta",
+    :sv "Inget fast kylaggregat"},
+   :codeValue "03",
+   :created "2023-01-04T16:12:45.957Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytystapa/codes/03/members/",
+   :modified "2023-11-30T11:26:12.648Z",
+   :status "VALID",
+   :id "eedb861f-a0ea-4568-839e-19d79658be47",
+   :statusModified "2023-01-04T16:12:45.957Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/jaahdytystapa/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/jaahdytystapa/code/03",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:51:05.002Z"}

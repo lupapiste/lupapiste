@@ -1,0 +1,102 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="application-guests-template">
+        <div class="application-guests">
+          <table class="auth-table"
+                 data-test-id="application-guest-table"
+                 data-bind="visible: allGuests().length">
+            <thead>
+              <th data-bind="ltext: 'application-guests.user'"></th>
+              <th data-bind="ltext: 'application-guests.inviter'"></th>
+              <th data-bind="ltext: 'guest-authority.description'"></th>
+              <!-- ko if: show.subscribeColumn -->
+              <th data-bind="ltext: 'application-guests.notifications'"></th>
+              <!-- /ko -->
+              <!-- ko if: canDelete() -->
+              <th data-bind="ltext: 'application-guests.remove'"></th>
+              <!-- /ko -->
+            </thead>
+            <tbody data-bind="foreach: allGuests">
+              <tr data-bind="attr: {'data-test-id': username}">
+                <td data-bind="text: $parent.nameAndUsername( $data )"
+                    data-test-id="guest-name"></td>
+                <td data-bind="text: inviter"
+                    data-test-id="guest-inviter"></td>
+                <td data-bind="text: description"
+                    data-test-id="guest-description"></td>
+                <!-- ko if: $parent.show.subscribeColumn -->
+                <td data-test-id="guest-subscribe">
+                  <a data-bind="visible: $parent.canSubscribe( $data ),
+                                  text: $parent.subscriptionLinkText( unsubscribed ),
+                                  click: $parent.subscriptionLinkClick"></a>
+                </td>
+                <!-- /ko -->
+                <!-- ko if: $parent.canDelete() -->
+                <td><i data-bind="visible: $parent.canDelete( $data ),
+                                  click: $parent.deleteGuest"
+                       data-test-id="guest-delete"
+                       class="primary lupicon-remove"></i></td>
+                <!-- /ko -->
+              </tr>
+            </tbody>
+          </table>
+          <div class="stacked">
+            <button class="positive"
+                    data-test-id="application-guest-add"
+                    data-bind="click: toggleBubble,
+                               visible: canInvite()">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'guest-authority.add'"></span>
+            </button>
+            <div class="bubble-dialog-arrow"
+                 data-bind="visible: bubbleVisible"></div>
+          </div>
+          <bubble-dialog params="visible: bubbleVisible,
+                                 buttonIcon: 'lupicon-circle-arrow-right',
+                                 buttonText: 'application-guests.send',
+                                 okEnabled: sendEnabled,
+                                 okFun: send,
+                                 initFun: initBubble,
+                                 error: error,
+                                 waiting: waiting,
+                                 prefix: 'guest'">
+            <p data-bind="ltext: 'application-guests.info'"></p>
+            <!-- ko if: $parent.isAuthority -->
+            <div data-bind="visible: $parent.show.inviteTable">
+              <label class="mandatory"
+                     data-bind="ltext: 'application-guests.caption'">
+              </label>
+              <table data-test-id="application-guest-authorities"
+                     data-bind="css: {mandatory: $parent.show.mandatory}">
+                <tbody data-bind="foreach: $parent.guestAuthorities">
+                  <tr data-bind="attr: {'data-test-id': description}">
+                    <td><input type="radio" name="guest-authorities"
+                               data-bind="attr: {value: email},
+                                          checked: $parents[1].email"/></td>
+                    <td class="full" data-bind="text: name"></td>
+                    <td class="full" data-bind="text: email"></td>
+                    <td class="full" data-bind="text: description"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- /ko -->
+            <!-- ko ifnot: $parent.isAuthority -->
+            <label data-bind="ltext: 'guest-authority.email',
+                              attr: {'for': $parent.emailId}"
+                   class="mandatory"></label>
+            <input type="text"
+                   data-test-id="application-guest-email"
+                   data-bind="textInput: $parent.email,
+                              attr: {id: $parent.emailId},
+                              css: {mandatory: $parent.show.mandatory}"/>
+            <!-- /ko -->
+            <div data-bind="visible: $parent.show.inviteMessage">
+              <label data-bind="ltext: 'application-guests.message',
+                                attr: {'for': $parent.messageId }"></label>
+              <textarea data-bind="value: $parent.message,
+                                   attr: {id: $parent.messageId}"
+                        data-test-id="application-guest-message"></textarea>
+            </div>
+
+          </bubble-dialog>
+        </div>
+      </script>

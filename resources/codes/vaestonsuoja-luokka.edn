@@ -1,0 +1,580 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Reinforced concrete shelters",
+    :fi "Teräsbetonisuojat",
+    :sv "Skyddsrum av stålbetong"},
+   :codeValue "01",
+   :created "2024-11-25T17:28:27.050Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01/members/",
+   :modified "2025-12-03T11:38:35.173Z",
+   :status "VALID",
+   :id "09798080-03fa-4910-abd3-498d78af07e8",
+   :statusModified "2024-11-25T17:28:27.050Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/01",
+   :hierarchyLevel 1}
+  {:description
+   {:fi
+    "Aikakausi: 1959-1963. \nSelite: Enintään 150 henkilöä. Paineoven merkintä on SO-1,25. Sulkuhuoneen ovi on puuta ja aukeaa sulkuhuoneeseen päin. Seinän paksuus 400 mm. Käsikäyttöinen ilmanvaihto ja vain hiekkasuodatin, voi olla lisäksi sähkökäyttöinen ilmanottokone. Hätäpoistumiskäytävä sortuman ulkopuolelle.\nSisäasiainministeriön päätös 318/1959 tullut voimaan 1.7.1959."},
+   :prefLabel {:en "C59", :fi "C59", :sv "C59"},
+   :codeValue "0101",
+   :created "2024-11-25T17:28:27.079Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0101/members/",
+   :modified "2025-12-03T08:23:46.540Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Reinforced concrete shelters",
+     :fi "Teräsbetonisuojat                          ",
+     :sv "Skyddsrum av stålbetong"},
+    :codeValue "01",
+    :created "2024-11-25T17:28:27.050Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01/members/",
+    :modified "2025-12-03T08:23:46.515Z",
+    :status "VALID",
+    :id "09798080-03fa-4910-abd3-498d78af07e8",
+    :statusModified "2024-11-25T17:28:27.050Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "18952430-c9be-4ef4-8486-e7d5da0ebca5",
+   :statusModified "2024-11-25T17:28:27.079Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0101",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0101",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 1964-1971. \nSelite: Enintään 150 henkilöä. Paineoven merkintä SO-1,25. Sulkuhuoneen ovi on metallia, aukeaa suojaan päin, seinän paksuus 400 mm. Käsi- ja sähkökäyttöinen ilmanvaihto. Hiekkasuodatin ja lattialla seisova noin 100 kg hiilisuodatin. Hätäpoistumiskäytävä sortuman ulkopuolelle.\nSisäasiainministeriön päätös 291/1963 tullut voimaan 1.10.1963."},
+   :prefLabel {:en "C63", :fi "C63", :sv "C63"},
+   :codeValue "0102",
+   :created "2024-11-25T17:28:27.097Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0102/members/",
+   :modified "2025-12-03T08:23:46.555Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Reinforced concrete shelters",
+     :fi "Teräsbetonisuojat                          ",
+     :sv "Skyddsrum av stålbetong"},
+    :codeValue "01",
+    :created "2024-11-25T17:28:27.050Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01/members/",
+    :modified "2025-12-03T08:23:46.515Z",
+    :status "VALID",
+    :id "09798080-03fa-4910-abd3-498d78af07e8",
+    :statusModified "2024-11-25T17:28:27.050Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "9c5e99fc-fc76-4cbb-8c7a-93aaf856f95f",
+   :statusModified "2024-11-25T17:28:27.097Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0102",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0102",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 1971-1986. \nSelite: Enintään 150 henkilöä. Paineoven merkintä SO-1, oven sisäpuolella sen reunoissa on sulkuteltan kiinnityspuut. Nykyaikainen ilmanvaihtolaite. Maanalaisessa suojassa hätäpoistumiskäytävä sortuman ulkopuolelle. Seinän paksuus maan alla 250 mm ja päällä 400 mm. Lisäksi ns. minisuojia, joissa korkeintaan 25 suojapaikkaa ja ei jakokanavaa. \nSisäasiainministeriön päätös 561/1971 tullut voimaan 1.7.1971.\n\nAikakausi: 1986-1991. \nSelite: Enintään 150 henkilöä. Paineoven merkintä SO-1, oven sisäpuolella sen reunoissa on sulkuteltan kiinnityspuut. Nykyaikainen ilmanvaihtolaite. Maanalaisessa suojassa hätäpoistumiskäytävä sortuman ulkopuolelle. Seinän paksuus maan alla 300 mm ja päällä 450 mm. Lisäksi ns. minisuojia, joissa korkeintaan 25 suojapaikkaa ja ei jakokanavaa. \nTeknilliset määräykset A8 170/701/85 tullut voimaan 1.1.1986.\n\nAikakausi: 1991-2011. \nSelite: Enintään 150 m2/ 150 hlöä (suojelukohteessa).  Paineoven merkintä SO-1, oven sisäpuolella sen reunoissa on sulkuteltan kiinnityspuut. Nykyaikainen ilmanvaihtolaite. Maanalaisessa suojassa hätäpoistumiskäytävä sortuman ulkopuolelle. Seinän paksuus maan alla 300 mm ja päällä 400 mm. Lisäksi ns. minisuojia, joissa korkeintaan 25 suojapaikkaa ja ei jakokanavaa. \nTeknilliset määräykset A39 SM nro 11/91 tullut voimaan 1.11.1991.\n\nAikakausi: 2011-. \nSelite: Suojatila enintään 135 m2. Paineoven merkintä SO-1, oven sisäpuolella sen reunoissa on sulkuteltan kiinnityspuut. Nykyaikainen ilmanvaihtolaite. Maanalaisessa suojassa hätäpoistumiskäytävä sortuman ulkopuolelle. Seinän paksuus aina 300 mm. Max kuormitus 1 bar.\nSisäasiainministeriön asetus 506/2011 tullut voimaan 1.7.2011."},
+   :prefLabel {:en "S1", :fi "S1", :sv "S1"},
+   :codeValue "0103",
+   :created "2024-11-25T17:28:27.114Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0103/members/",
+   :modified "2025-12-03T08:23:46.570Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Reinforced concrete shelters",
+     :fi "Teräsbetonisuojat                          ",
+     :sv "Skyddsrum av stålbetong"},
+    :codeValue "01",
+    :created "2024-11-25T17:28:27.050Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01/members/",
+    :modified "2025-12-03T08:23:46.515Z",
+    :status "VALID",
+    :id "09798080-03fa-4910-abd3-498d78af07e8",
+    :statusModified "2024-11-25T17:28:27.050Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "01ba345f-a1b4-45b5-8b79-02e61a583014",
+   :statusModified "2024-11-25T17:28:27.114Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0103",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0103",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 1991-2011. \nSelite: Enintään 180 m2. Paineoven merkintä SO-K. Seinän paksuus maan alla 200 mm ja maan päällä 300 mm. Lisäksi ns. minisuojia kooltaan enintään 20 m2, ei jakokanavaa. \nTeknilliset määräykset A34 SM nro 5/91 tullut voimaan 1.9.1991."},
+   :prefLabel {:en "K", :fi "K", :sv "K"},
+   :codeValue "0104",
+   :created "2024-11-25T17:28:27.131Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0104/members/",
+   :modified "2025-12-03T08:23:46.585Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Reinforced concrete shelters",
+     :fi "Teräsbetonisuojat                          ",
+     :sv "Skyddsrum av stålbetong"},
+    :codeValue "01",
+    :created "2024-11-25T17:28:27.050Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01/members/",
+    :modified "2025-12-03T08:23:46.515Z",
+    :status "VALID",
+    :id "09798080-03fa-4910-abd3-498d78af07e8",
+    :statusModified "2024-11-25T17:28:27.050Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/01",
+    :order 1,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/01",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "f2fba5cd-3566-42aa-9ffc-7533294f24f6",
+   :statusModified "2024-11-25T17:28:27.131Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0104",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0104",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Heavy reinforced concrete shelters",
+    :fi "Raskaat teräsbetonisuojat",
+    :sv "Tunga skyddsrum av stålbetong"},
+   :codeValue "02",
+   :created "2024-11-25T17:28:27.147Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02/members/",
+   :modified "2025-12-03T08:23:46.600Z",
+   :status "VALID",
+   :id "792b0139-001e-4d93-9066-bde32c2e2844",
+   :statusModified "2024-11-25T17:28:27.147Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/02",
+   :hierarchyLevel 1}
+  {:description
+   {:fi
+    "Aikakausi: 1959-1976. \nSelite: A-luokan suojan henkilömäärä 300-800. Seinän paksuus 1600 mm. \nSisäasiainministeriön päätös 318/1959 tullut voimaan 1.7.1959."},
+   :prefLabel {:en "A", :fi "A", :sv "A"},
+   :codeValue "0201",
+   :created "2024-11-25T17:28:27.163Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0201/members/",
+   :modified "2025-12-03T08:23:46.697Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Heavy reinforced concrete shelters",
+     :fi "Raskaat teräsbetonisuojat",
+     :sv "Tunga skyddsrum av stålbetong"},
+    :codeValue "02",
+    :created "2024-11-25T17:28:27.147Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02/members/",
+    :modified "2025-12-03T08:23:46.600Z",
+    :status "VALID",
+    :id "792b0139-001e-4d93-9066-bde32c2e2844",
+    :statusModified "2024-11-25T17:28:27.147Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02",
+    :order 6,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "15b0349e-ae09-4310-8583-de9777955bb6",
+   :statusModified "2024-11-25T17:28:27.163Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0201",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0201",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 1959-1976. \nSelite: Paineoven merkintä SO-2,5. B-luokan suojan henkilömäärä 150-300, muutoin C-luokan suoja. Sulkuhuoneen lisäksi puhdistushuone 6-10 m2. Seinän paksuus maan alla 600 mm, maan päällä 800 mm. Käsikäyttöinen ilmanvaihto ja vain hiekkasuodatin, voi olla lisäksi sähkökäyttöinen ilmanottokone.\nSisäasiainministeriön päätös 318/1959 tullut voimaan 1.7.1959."},
+   :prefLabel {:en "B59", :fi "B59", :sv "B59"},
+   :codeValue "0202",
+   :created "2024-11-25T17:28:27.182Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0202/members/",
+   :modified "2025-12-03T08:23:46.711Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Heavy reinforced concrete shelters",
+     :fi "Raskaat teräsbetonisuojat",
+     :sv "Tunga skyddsrum av stålbetong"},
+    :codeValue "02",
+    :created "2024-11-25T17:28:27.147Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02/members/",
+    :modified "2025-12-03T08:23:46.600Z",
+    :status "VALID",
+    :id "792b0139-001e-4d93-9066-bde32c2e2844",
+    :statusModified "2024-11-25T17:28:27.147Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02",
+    :order 6,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "84c41855-4fe7-49dc-a7e0-ba4e63ca399a",
+   :statusModified "2024-11-25T17:28:27.182Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0202",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0202",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 1963-1976\nSelite: Paineoven merkintä SO-2,5. B-luokan suojan henkilömäärä 150-300, muutoin C- luokan suoja. Sulkuhuoneen lisäksi puhdistushuone 6-10 m2. Seinän paksuus maan alla 600 mm, maan päällä 800 mm. Käsi- ja sähkökäyttöinen ilmanvaihto, jossa hiekka- ja erityissuodatin.\nSisäasiainministeriön päätös 291/1963 tullut voimaan 1.10.1963"},
+   :prefLabel {:en "B63", :fi "B63", :sv "B63"},
+   :codeValue "0203",
+   :created "2024-11-25T17:28:27.198Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0203/members/",
+   :modified "2025-12-03T08:23:46.725Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Heavy reinforced concrete shelters",
+     :fi "Raskaat teräsbetonisuojat",
+     :sv "Tunga skyddsrum av stålbetong"},
+    :codeValue "02",
+    :created "2024-11-25T17:28:27.147Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02/members/",
+    :modified "2025-12-03T08:23:46.600Z",
+    :status "VALID",
+    :id "792b0139-001e-4d93-9066-bde32c2e2844",
+    :statusModified "2024-11-25T17:28:27.147Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02",
+    :order 6,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "2617eac3-b16a-400b-9a6c-b1234d58d4b1",
+   :statusModified "2024-11-25T17:28:27.198Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0203",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0203",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 1976-1998. \nSelite: Paineoven merkintä SO-3. Sulkuhuone, jossa kaasutiivis ovi VO-1. Seinän paksuus 500-900 mm.  Enintään 450 m2. Käsikäyttöisillä ilmanvaihtolaitteilla oma huone. Laitteet ripustettu telineeseen. \nSisäasiainministeriön päätös 972/1975 tullut voimaan 1.1.1976.\n\nAikakausi: 1998-2001. \nSelite: Paineoven merkintä SO-3. Sulkuhuone, jossa kaasutiivis ovi VO-1. Seinän paksuus 400-700 mm.  Enintään 450 m2. Enintään 600 henkilön suojan ilmanvaihtolaite voi olla kasikäyttöinen ja sillä on erillinen huone. Laitteet ripustettu telineeseen. Yli 600 henkilön suojassa on polttomoottorikäyttöinen ilmanvaihtolaite. Enintään 750 hlöä.\nTeknilliset määräykset SM nro 15/95 tullut voimaan 30.4.1998.\n\nAikakausi: 2001-2011. \nSelite: Paineoven merkintä SO-3. Sulkuhuone jossa kaasutiivis ovi VO-1. Seinän paksuus 400-700 mm. Enintään 450 m2. Ilmanvaihtolaitteisto on polttomoottorikäyttöinen. \nSisäasiainministeriön asetus 1075/2001 tullut voimaan 1.12.2001."},
+   :prefLabel {:en "S3", :fi "S3", :sv "S3"},
+   :codeValue "0204",
+   :created "2024-11-25T17:28:27.207Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0204/members/",
+   :modified "2025-12-03T08:23:46.739Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Heavy reinforced concrete shelters",
+     :fi "Raskaat teräsbetonisuojat",
+     :sv "Tunga skyddsrum av stålbetong"},
+    :codeValue "02",
+    :created "2024-11-25T17:28:27.147Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02/members/",
+    :modified "2025-12-03T08:23:46.600Z",
+    :status "VALID",
+    :id "792b0139-001e-4d93-9066-bde32c2e2844",
+    :statusModified "2024-11-25T17:28:27.147Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02",
+    :order 6,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "ed969d89-0244-4b61-90b3-c2c18b3e8b58",
+   :statusModified "2024-11-25T17:28:27.207Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0204",
+   :order 10,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0204",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Aikakausi: 2011-. \nSelite: Paineoven merkintä SO-2. Sulkuhuone jossa kaasutiivis ovi VO-1. Seinän paksuus vähintään 400 mm. Enintään 900 m2. Ilmanvaihtolaitteisto on polttomoottorikäyttöinen. Max kuormitus 2 bar.\nSisäasiainministeriön asetus 506/2011 tullut voimaan 1.7.2011."},
+   :prefLabel {:en "S2", :fi "S2", :sv "S2"},
+   :codeValue "0205",
+   :created "2024-11-25T17:28:27.224Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0205/members/",
+   :modified "2025-12-03T08:23:46.753Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Heavy reinforced concrete shelters",
+     :fi "Raskaat teräsbetonisuojat",
+     :sv "Tunga skyddsrum av stålbetong"},
+    :codeValue "02",
+    :created "2024-11-25T17:28:27.147Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02/members/",
+    :modified "2025-12-03T08:23:46.600Z",
+    :status "VALID",
+    :id "792b0139-001e-4d93-9066-bde32c2e2844",
+    :statusModified "2024-11-25T17:28:27.147Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/02",
+    :order 6,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "f12b7969-19f0-43eb-88b1-8e3b677cd3a2",
+   :statusModified "2024-11-25T17:28:27.224Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0205",
+   :order 11,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0205",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Bedrock shelters", :fi "Kalliosuojat", :sv "Bergrum"},
+   :codeValue "03",
+   :created "2024-11-25T17:28:27.240Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/03/members/",
+   :modified "2025-12-03T08:23:46.767Z",
+   :status "VALID",
+   :id "2b247f6c-3747-4e1e-9d4b-a8a725ad3380",
+   :statusModified "2024-11-25T17:28:27.240Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/03",
+   :order 12,
+   :uri "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/03",
+   :hierarchyLevel 1}
+  {:description
+   {:fi
+    "Aikakausi: 1959. \nSelite: Yli 300 henkilön suoja tehtävä joko A-luokan suojaksi tai kalliosuojaksi, ei tarkempaa määrittelyä. \nVäestönsuojeluasetus 237/1959 tullut voimaan 1.7.1959.\n\nAikakausi: 1960-1966. \nSelite: Kalliokatto suojattu betoniholvilla tai tiilimuurauksella. Kallion ja sisäkaton välissä noin metrin tuuletustila. Rakennettava kalliosuoja, jos suojapaikkoja yli 800. Henkilömäärä mitoitettu 0,6 m2 mukaan. Hiilidioksidin poisto, hapen lisäys. \nLuonnos teknillisistä määräyksistä 24.8.1960.\n\nAikakausi: 1966-1975. \nSelite: Kalliokatto suojattu betoniholvilla tai tiilimuurauksella. Kallion ja sisäkaton välissä noin metrin tuuletustila. Rakennettava kalliosuoja, jos suojapaikkoja yli 800. Henkilömäärä mitoitettu 0,6 m2 mukaan. Hiilidioksidin poisto, hapen lisäys. \nLuonnos teknillisistä määräyksistä 7.5.1966.\n\nAikakausi: 1975-1998: luokat S6 ja S3. \nSelite: Ensimmäiset viralliset kalliosuojien vaatimukset. Kallio pultitettu ja ruiskubetonoitu. Iso muutos aiempaan mitoitustapaan, henkilömäärä määräytyy nyt laskennallisen kalliopinnan mukaan 2,4 m2/suojapaikka. Väestönsuojan koolla ja henkilömäärillä ei ollut rajoituksia, mutta max 1500 hlöä / osasto ja osasto jaettu max 250 hlön huoneisiin. Paineseinä S6-luokassa vähintään 1200 mm ja S3-luokassa 900 mm. Max kuormitus S3-luokassa 8 bar ja S6-luokassa 16 bar .\nSisäasiainministeriön päätös 972/1975 tullut voimaan 1.1.1976.\n\nAikakausi: 1998-2001: luokat S1, S3 ja S6; ja 2001-2011: luokat S1, S3 ja S6. \nSelite: Kalliosuojat luokiteltu koon mukaan kolmeen luokkaan suojelukohteessa S1 1500 hlö (valvonta-alueella S1 3000 hlöä, muut samat kuin suojelukohteessa), S3 3000 hlö ja S6 6000 hlö. Henkilömäärän mitoitus jäähdyttävän pinnan mukaan 2,4 m2/suojapaikka. Max kuormitus S1-luokassa 3 bar, S3-luokassa 8 bar ja S6-luokassa 9 bar.\nTeknilliset määräykset A55 (1998) SM nro 15/95 ja sisäministeriön asetukset 1075/2001 ja 1384/2006. Voimaan 30.4.1998.\n\nAikakausi: 2011-. \nSelite: Enimmäiskoko 4500 m2. Henkilömäärän mitoitus jäähdyttävän pinnan mukaan 2,4 m2/suojapaikkaa. Max kuormitus 3 bar. \nSisäasiainministeriön asetus 506/2011 tullut voimaan 1.7.2011."},
+   :prefLabel
+   {:en "Bedrock shelter", :fi "Kalliosuoja", :sv "Bergrum"},
+   :codeValue "0301",
+   :created "2024-11-25T17:28:27.256Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0301/members/",
+   :modified "2025-12-03T08:23:46.780Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Bedrock shelters", :fi "Kalliosuojat", :sv "Bergrum"},
+    :codeValue "03",
+    :created "2024-11-25T17:28:27.240Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/03/members/",
+    :modified "2025-12-03T08:23:46.767Z",
+    :status "VALID",
+    :id "2b247f6c-3747-4e1e-9d4b-a8a725ad3380",
+    :statusModified "2024-11-25T17:28:27.240Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/03",
+    :order 12,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/03",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "11973c01-1b4b-4146-80f7-a38d03defb6f",
+   :statusModified "2024-11-25T17:28:27.256Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0301",
+   :order 13,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0301",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Temporary shelters",
+    :fi "Tilapäiset suojat",
+    :sv "Tillfälliga skyddsrum"},
+   :codeValue "04",
+   :created "2024-11-25T17:28:27.272Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/04/members/",
+   :modified "2025-12-03T08:23:46.793Z",
+   :status "VALID",
+   :id "d1f6d915-022b-4f1f-89d5-9720c009ae1d",
+   :statusModified "2024-11-25T17:28:27.272Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/04",
+   :order 14,
+   :uri "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/04",
+   :hierarchyLevel 1}
+  {:description
+   {:fi
+    "Suojatiloja, joissa on vahvat rakenteet tai rakenteita on vahvistettu jälkikäteen. Tilat antavat muuta rakennusta paremman suojan sirpalevaikutuksilta. Useimmiten tiloissa ei ole omaa ilmanvaihtolaitteistoa. Esimerkiksi sisäministeriön päätöksen 429/54 mukaan rakennetut suojatilat tai jälkikäteen vahvistetut tilat, joissa ei ole ilmanvaihtolaitteistoa."},
+   :prefLabel
+   {:en "Protection against splinters",
+    :fi "Sirpaleilta suojaavat",
+    :sv "Skydd mot splitter"},
+   :codeValue "0401",
+   :created "2024-11-25T17:28:27.279Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0401/members/",
+   :modified "2025-12-03T08:23:46.813Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Temporary shelters",
+     :fi "Tilapäiset suojat",
+     :sv "Tillfälliga skyddsrum"},
+    :codeValue "04",
+    :created "2024-11-25T17:28:27.272Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/04/members/",
+    :modified "2025-12-03T08:23:46.793Z",
+    :status "VALID",
+    :id "d1f6d915-022b-4f1f-89d5-9720c009ae1d",
+    :statusModified "2024-11-25T17:28:27.272Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/04",
+    :order 14,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "964d910a-0c4f-4ce8-8ea1-603dbba2e6b7",
+   :statusModified "2024-11-25T17:28:27.279Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0401",
+   :order 15,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0401",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Suojatilat, joissa on sätelyiltä suojaa antavat paksut seinärakenteet sekä suojan omaan käyttöön tarkoitettu ilmanvaihtolaitteisto ja ilman suodatusmahdollisuus. Esimerkiksi sisäministeriön päätöksen 429/54 mukaan rakennetut suojatilat tai jälkikäteen vahvistetut tilat, joissa on suojan oma ilmanvaihtolaitteisto ja sisään tulevan ilman suodatusmahdollisuus."},
+   :prefLabel
+   {:en "Protection against radiation and splinters",
+    :fi "Säteilyltä ja sirpaleilta suojaavat",
+    :sv "Skydd mot strålning och splitter"},
+   :codeValue "0402",
+   :created "2024-11-25T17:28:27.287Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0402/members/",
+   :modified "2025-12-03T08:23:46.826Z",
+   :broaderCode
+   {:prefLabel
+    {:en "Temporary shelters",
+     :fi "Tilapäiset suojat",
+     :sv "Tillfälliga skyddsrum"},
+    :codeValue "04",
+    :created "2024-11-25T17:28:27.272Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/04/members/",
+    :modified "2025-12-03T08:23:46.793Z",
+    :status "VALID",
+    :id "d1f6d915-022b-4f1f-89d5-9720c009ae1d",
+    :statusModified "2024-11-25T17:28:27.272Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/04",
+    :order 14,
+    :uri
+    "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/04",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "8a8bac4d-5bdf-41e1-8d51-e697523bf1e6",
+   :statusModified "2024-11-25T17:28:27.287Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/0402",
+   :order 16,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/0402",
+   :hierarchyLevel 2}
+  {:description
+   {:fi
+    "Suojaluokka ei ole tiedossa tai tila ei vastaa muita suojaluokkia."},
+   :prefLabel
+   {:en "Other shelter/not known",
+    :fi "Muu suoja/ei tiedossa",
+    :sv "Annat skyddsrum/okänt"},
+   :codeValue "99",
+   :created "2024-11-25T17:28:27.294Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/99/members/",
+   :modified "2025-12-03T08:24:39.487Z",
+   :status "VALID",
+   :id "86eb5273-2231-4901-b437-f2c4966cf54d",
+   :statusModified "2024-11-25T17:28:27.294Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/VaestonsuojaLuokka/codes/99",
+   :order 17,
+   :uri "http://uri.suomi.fi/codelist/rytj/VaestonsuojaLuokka/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-12-03T08:23:46.180Z"}

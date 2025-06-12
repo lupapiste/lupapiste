@@ -1,0 +1,18 @@
+@use "colors";
+@use "theme";
+
+.check-result {
+  width: 100%;
+  color: colors.$white;
+  text-transform: uppercase;
+  font-weight: bold;
+  box-shadow: 1px 1px 2px theme.$lp-dark-grey;
+
+  &.positive {
+    background-color: colors.$positive;
+  }
+
+  &.negative {
+    background-color: colors.$negative;
+  }
+}

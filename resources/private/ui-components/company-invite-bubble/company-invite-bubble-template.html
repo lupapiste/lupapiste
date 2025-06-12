@@ -1,0 +1,25 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="company-invite-bubble-template">
+        <div class="company-invite">
+          <bubble-dialog params="visible: bubbleVisible,
+                                 buttonIcon: 'lupicon-circle-arrow-right',
+                                 buttonText: 'application-guests.send',
+                                 okEnabled: selected,
+                                 okFun: send,
+                                 initFun: init,
+                                 error: error,
+                                 prefix: 'company-invite',
+                                 waiting: waiting">
+            <p data-bind="ltext: 'company-invite.desc'"></p>
+            <div data-bind="component: {
+                            name: 'base-autocomplete',
+                            params: {
+                            options: $parent.companyOptions,
+                            lPlaceholder: 'company.autocomplete.search',
+                            query: $parent.query,
+                            selectedOption: $parent.selected}}"
+                 data-test-id="company-invite-companies"></div>
+            <p data-bind="text: $parent.confirmText,
+                          visible: $parent.confirmText"></p>
+          </bubble-dialog>
+        </div>
+</script>

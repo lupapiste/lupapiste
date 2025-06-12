@@ -1,0 +1,9 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="processing-days-template">
+  <!-- ko if: authOk( 'processing-days' ) -->
+  <cljs-statistics_summary></cljs-statistics_summary>
+  <!-- /ko -->
+  <!-- ko if: !authOk( 'processing-days' ) && authOk( 'processing-requests-status' ) -->
+  <cljs-statistics_entriestitle></cljs-statistics_entriestitle>
+  <!-- /ko -->
+</script>

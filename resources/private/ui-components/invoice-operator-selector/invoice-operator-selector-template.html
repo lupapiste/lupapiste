@@ -1,0 +1,17 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="invoice-operator-selector-template">
+  <label class="lux"
+         for="invoice-operator-select"
+         data-bind="ltext: 'register.company.form.billing.pop',
+                    css: { tip: required }"></label>
+  <select id="invoice-operator-select"
+          class="lux"
+          data-test-id="invoice-operator-selector"
+          data-bind="options: operators,
+                     optionsText: 'name',
+                     optionsValue: 'code',
+                     enable: enabled,
+                     optionsAfterRender: setOptionDisable,
+                     value: selected">
+  </select>
+</script>

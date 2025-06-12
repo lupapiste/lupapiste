@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="inforequest">
+      <div class="summary-container">
+        <div class="flex-preamble"
+             data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true ),
+                        css: {'map--extended': $root.isMapExtended}">
+          <!-- ko if:  $root.isMapExtended -->
+          <preamble-title class="w--100"
+                          params="application: $root.application"></preamble-title>
+          <!-- /ko -->
+          <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
+          <div class="preamble--map-container"
+               data-bind="template: 'preamble-map-template'">
+          </div>
+          <!-- ko ifnot: $root.isMapExtended -->
+          <preamble-summary params="rootApplication: $root">
+          </preamble-summary>
+          <!-- /ko -->
+          <!-- /ko -->
+        </div>
+        <card params="deck: 'summary',
+                      card: 'edit-handlers'">
+          <edit-handlers></edit-handlers>
+        </card>
+        <div class="clear"></div>
+      </div>
+
+      <div class="container">
+        <div class="related-map">
+          <div id="inforequest-marker-map" class="map map-large"></div>
+          <div id="inforequest-marker-map-contents"></div>
+        </div>
+
+        <div class="content-narrow" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest'">
+
+          <div data-bind="visible: lupapisteApp.models.currentUser.oir">
+            <h2 data-test-id="wanna-join">
+              <span data-bind="ltext: 'oir.wanna-join.message'"></span>
+              <a data-bind="attr: {href: LUPAPISTE.config.wannaJoinUrl}, ltext: 'oir.wanna-join.link'" href="#" target="_blank"></a>
+            </h2>
+          </div>
+          <div data-bind="lhtml: application.state() === 'canceled' ? 'inforequest.desc-canceled' : 'inforequest.desc',
+                          testId: 'inforequest-description'"
+               class="operation-info"></div>
+          <div class="organizationLinks">
+            <organization-links></organization-links>
+          </div>
+          <h2 data-bind="ltext: 'inforequest.attachments'"></h2>
+
+          <div data-bind="if: lupapisteApp.services.attachmentsService.hasAttachments">
+            <table class="table" data-test-id="inforequest-attachments-table">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                  <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- ko foreach: lupapisteApp.services.attachmentsService.attachments -->
+                <!-- ko if: $data.latestVersion && latestVersion.filename -->
+                <tr data-bind="with: latestVersion">
+                  <td>
+                    <a href="#" data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $parent.id}"
+                       target="_blank"></a><br/>
+                    <i data-bind="ltext: contentType"></i>
+                    <i data-bind="size: size"></i>
+                  </td>
+                  <td>
+                    <span data-bind="dateString: $parent.modified"></span>
+                    <span data-bind="fullName: user"></span>
+                  </td>
+                  <td>
+                    <div data-bind="visible: $root.authorization.ok('delete-attachment')">
+                      <icon-button params="iconOnly: true,
+                                           icon: 'remove',
+                                           buttonClass: 'tertiary',
+                                           ltext: 'attachment.delete',
+                                           click: _.wrap( $parent, $root.application.deleteSingleAttachment )">
+                      </icon-button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- /ko -->
+                <!-- /ko -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="spacerM" data-bind="ifnot: application.hasAttachment">
+            <i data-bind="ltext: 'inforequest.attachmentsEmpty'" data-test-id="inforequest-attachments-no-attachments"></i>
+          </div>
+
+          <form id="inforequest-upload-form" data-bind="submit: uploadModel.submit">
+            <file-upload params="files: uploadModel.files,
+                                 readOnly: uploadModel.waiting,
+                                 allowMultiple: true,
+                                 testId: 'inforequest-upload',
+                                 buttonClass: 'btn ' + (_.gt(uploadModel.files().length, 0) ? 'secondary' : 'primary'),
+                                 dropZone: 'section#inforequest'">
+              <icon-button class="gap--l1"
+                           params="type: 'submit',
+                                   visible: _.gt(upload.files().length, 0),
+                                   disable: $root.uploadModel.waiting,
+                                   icon: 'save',
+                                   ltext: 'application.saveAttachments'">
+              </icon-button>
+            </file-upload>
+          </form>
+
+          <div class="inforequest-conversation gap--t4">
+            <h2  data-bind="ltext: 'inforequest.comments'"></h2>
+            <div data-bind="component: {name: 'conversation',
+                            params: {application: sidePanelService.application,
+                            authorization: sidePanelService.authorization,
+                            authorities: sidePanelService.authorities,
+                            currentPage: sidePanelService.currentPage,
+                            comments: sidePanelService.comments,
+                            showAllComments: sidePanelService.showAllComments,
+                            mainConversation: sidePanelService.mainConversation}}"></div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </body>
+</html>

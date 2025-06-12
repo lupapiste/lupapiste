@@ -1,0 +1,8 @@
+<section class="page" id="auth-admin-import-config">
+  <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
+                      if: organization.organizationId() &&
+                          lupapisteApp.models.rootVMO.currentPage() === 'auth-admin-import-config'">
+    <cljs-auth-admin_imports_config></cljs-auth-admin_imports_config>
+  </div>
+</section>

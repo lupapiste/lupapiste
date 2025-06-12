@@ -1,0 +1,22 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="textarea-dialog-template">
+  <div class="content">
+    <label class="lux"
+           data-bind="text: textarea.label,
+                      for: id,
+                      css: {mandatory: mandatory}"></label>
+    <textarea class="form-input textarea grid-style-input high"
+              data-bind="textInput: textarea.observable,
+                         id: id,
+                         hasFocus: true,
+                         attr: {rows: textarea.rows}"
+              data-test-id="modal-dialog-textarea"></textarea>
+
+    <p data-bind="html: text" class="dialog-desc"></p>
+  </div>
+  <div data-bind="component: {name:'yes-no-button-group',
+                              params: {yesFn:    yes,
+                                      noFn:     no,
+                                      yesEnabled: yesEnabled,
+                                      yesTitle: yesTitle,
+                                      noTitle:  noTitle}}"></div>
+</script>

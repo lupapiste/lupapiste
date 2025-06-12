@@ -1,0 +1,40 @@
+@use "../partials/base";
+@use "../partials/frameless";
+@use "../partials/links";
+
+#mypage .accordion-container {
+  padding:0 base.$marginL;
+
+  .button-group {
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .architect-toggle, .allowDirectMarketing-toggle {
+    height: 55px;
+    margin: 9px 0;
+    display: block;
+    width: 100%;
+
+    label, input {
+     display: inline;
+     width: frameless.$cols1;
+    }
+    input {
+      margin-right: base.$marginM;
+      display: inline;
+    }
+  }
+  .form-group {
+    padding: base.$marginM;
+  }
+}
+
+#mypage-register-company, #mypage-company {
+  p {
+    // TODO not needed after all links are changed
+    a {
+      @include links.link;
+    }
+  }
+}

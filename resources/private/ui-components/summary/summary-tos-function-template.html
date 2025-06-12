@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-tos-function-template">
+  <label class="lux"
+         data-bind="ltext: 'application.tosFunction',
+                    required: required,
+                    attr: {for: uniqId}"></label>
+  <!-- ko if: editing -->
+  <select class="lux full-width"
+          data-bind="attr: {id: uniqId},
+                     options: tosFunctions,
+                     required: required,
+                     value: selected,
+                     optionsText: 'name',
+                     optionsValue: 'code',
+                     valueAllowUnset: true,
+                     optionsCaption: loc('choose')">
+  </select>
+  <!-- /ko -->
+  <!-- ko ifnot: editing -->
+  <span data-bind="text: text"></span>
+  <!-- /ko -->
+</script>

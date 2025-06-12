@@ -1,0 +1,174 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Central hot-water heating",
+    :fi "Vesikeskuslämmitys",
+    :sv "Vattenburen centralvärme"},
+   :codeValue "01",
+   :created "2021-07-15T08:50:13.241Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/01/members/",
+   :modified "2023-12-04T11:49:39.458Z",
+   :status "VALID",
+   :id "21422a8e-cddd-4333-ae08-7ed70bc31500",
+   :statusModified "2021-07-15T08:50:13.241Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Central air heating",
+    :fi "Ilmakeskuslämmitys",
+    :sv "Luftburen centralvärme"},
+   :codeValue "02",
+   :created "2021-07-15T08:50:13.253Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/02/members/",
+   :modified "2023-12-04T11:49:39.472Z",
+   :status "VALID",
+   :id "96df1442-d43d-4df9-97fd-7808fbd6ef4f",
+   :statusModified "2021-07-15T08:50:13.253Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Electric heating", :fi "Sähkölämmitys", :sv "Eluppvärmning"},
+   :codeValue "03",
+   :created "2021-07-15T08:50:13.258Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/03/members/",
+   :modified "2023-12-04T11:49:39.479Z",
+   :status "VALID",
+   :id "1d6d8404-c5d9-4f56-b368-981bf6423fc7",
+   :statusModified "2021-07-15T08:50:13.258Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Furnace/fireplace/stove heating",
+    :fi "Uuni-takka-kamiinalämmitys",
+    :sv "Uppvärmning med ugn/öppen spis/kamin"},
+   :codeValue "04",
+   :created "2021-07-15T08:50:13.262Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/04/members/",
+   :modified "2023-12-04T11:49:39.485Z",
+   :status "VALID",
+   :id "2d5773d6-310a-4745-b4a8-b043004d88f7",
+   :statusModified "2021-07-15T08:50:13.262Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Solar heating", :fi "Aurinkolämmitys", :sv "Soluppvärmning"},
+   :codeValue "05",
+   :created "2021-07-15T08:50:13.266Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/05/members/",
+   :modified "2023-12-04T11:49:39.491Z",
+   :status "VALID",
+   :id "1d4df905-f61c-4dfa-95e4-e646bcacdd50",
+   :statusModified "2021-07-15T08:50:13.266Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Air source heat pump",
+    :fi "Ilmalämpöpumppu",
+    :sv "Luftvärmepump"},
+   :codeValue "06",
+   :created "2023-01-04T13:59:36.388Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/06/members/",
+   :modified "2023-12-04T11:49:39.498Z",
+   :status "VALID",
+   :id "3364f18c-2277-46fb-8dbf-b88fa46c3a1c",
+   :statusModified "2023-01-04T13:59:36.388Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "No fixed heating device",
+    :fi "Ei kiinteää lämmityslaitetta",
+    :sv "Inget fast värmeaggregat"},
+   :codeValue "07",
+   :created "2023-01-04T13:59:36.396Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/07/members/",
+   :modified "2023-12-04T11:49:39.504Z",
+   :status "VALID",
+   :id "81cc48b3-d4ce-42a2-8351-b23d3a42e63d",
+   :statusModified "2023-01-04T13:59:36.396Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/07",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-01-04T13:59:36.403Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/99/members/",
+   :modified "2023-12-04T11:49:39.510Z",
+   :status "VALID",
+   :id "495437ea-d7b9-4115-ab23-a09d1dc60d01",
+   :statusModified "2023-01-04T13:59:36.403Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/lammitystapa/codes/99",
+   :order 8,
+   :uri "http://uri.suomi.fi/codelist/rytj/lammitystapa/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:54:33.295Z"}

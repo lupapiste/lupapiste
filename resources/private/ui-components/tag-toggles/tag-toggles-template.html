@@ -1,0 +1,27 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="tag-toggles-template">
+  <ul class="tag-toggle-list"
+      data-bind="foreach: toggles">
+    <li>
+      <div data-bind="attr: {class: $data.prefix + '-wrapper'}">
+        <input data-bind="attr: {type: $parent.toggleType,
+                          name: $parent.groupName,
+                          id: $data.id},
+                          ariaText: $data.text,
+                          testId: $data.testId + '-input',
+                          value: $data.value,
+                          checked: $parent.selected">
+        <label aria-hidden="true"
+               data-bind="attr: {class: $data.prefix + '-label',
+                          for: $data.id,
+                          name: $parent.groupName},
+                          testId: $data.testId">
+          <!-- ko if: $data.icon -->
+          <i data-bind="attr: {class: $data.icon}"></i>
+          <!-- /ko -->
+          <span data-bind="text: $data.text"></span>
+        </label>
+      </div>
+    </li>
+  </ul>
+</script>

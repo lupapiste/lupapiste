@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="attachments-require-bubble-template">
+  <div class="content">
+    <bubble-dialog params="visible: bubbleVisible,
+                           buttonIcon: 'lupicon-check',
+                           okEnabled: submitEnabled,
+                           okFun: requireAttachmentTemplates,
+                           prefix: 'require-attachments'">
+      <div data-bind="component: { name: 'attachments-require',
+                                   params: { selectedTypes: $parent.selectedTypes,
+                                             selectedGroup: $parent.selectedGroup } }"></div>
+    </bubble-dialog>
+  </div>
+</script>

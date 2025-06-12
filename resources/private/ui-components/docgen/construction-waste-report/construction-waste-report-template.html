@@ -1,0 +1,72 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="construction-waste-report-template">
+      <div class="form-table" data-bind="attr: {id: groupId}">
+
+        <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
+
+        <!-- ko if: groupHelp -->
+        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+        <!-- /ko -->
+
+        <table class="form-table--waste waste-report-table">
+          <thead>
+            <tr data-bind="foreach: columnHeaders">
+              <th>
+                <span data-bind="ltext: name"></span>
+                <span data-bind="visible: required">*</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: combinedGroups">
+            <!-- ko if: _.size( warnings() ) -->
+            <tr>
+              <td data-bind="attr: {colspan: _.size( $parent.columnHeaders )}">
+            <warnings class="table-warnings"
+                      params="warnings: warnings"></warnings>
+              </td>
+            </tr>
+            <!-- /ko -->
+            <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
+              <!-- ko foreach: $component.buildSubSchemas(schema) -->
+              <td data-bind="if: renderElement">
+                <span class="form-entry"
+                  data-bind="component: { name: uicomponent,
+                                          params: { schema: $data,
+                                                    path: $parent.path.concat(name),
+                                                    i18npath: i18npath,
+                                                    applicationId: applicationId,
+                                                    documentId: documentId,
+                                                    authModel: authModel,
+                                                    ariaLabel: $component.columnName( $data ),
+                                                    ariaErrorMessage: true }}">
+                </span>
+              </td>
+              <!-- /ko -->
+
+              <td class="action-column">
+                <i class="lupicon-remove primary" data-bind="click: $parent.removeGroup,
+                                                             visible: $component.groupsRemovable(schema)"></i>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="button-group" data-bind="visible: updatable()">
+        <span data-bind="saveIndicator: indicator"></span>
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-append-button',
+                                               className: 'positive',
+                                               icon: 'lupicon-circle-plus',
+                                               label: appendLabel,
+                                               clickFn: addGroup }}">
+        </span>
+        <span data-bind="component: { name: 'docgen-button',
+                                     params: { id: groupId + '-copy-button',
+                                               className: 'secondary',
+                                               icon: 'lupicon-copy',
+                                               label: copyLabel,
+                                               clickFn: duplicateLastGroup }}">
+        </span>
+      </div>
+</script>

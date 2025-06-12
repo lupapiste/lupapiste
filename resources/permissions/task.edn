@@ -1,0 +1,2 @@
+{:organization {:authority #{:task/edit
+                             :task/send}}}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ah:AsianPaatos version="1.1" xmlns:ah="http://www.lupapiste.fi/asianhallinta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lupapiste.fi/asianhallinta asianhallinta.xsd">
+  <ah:HakemusTunnus>LP-297-2015-00001</ah:HakemusTunnus>
+  <ah:AsianTunnus>2015-1234</ah:AsianTunnus> <!-- -> Kuntalupatunnus -->
+  <ah:PaatoksenTunnus>12345678</ah:PaatoksenTunnus>
+  <ah:PaatoksenPvm>2015-01-01</ah:PaatoksenPvm>
+  <ah:PaatosKoodi>myönnetty</ah:PaatosKoodi>
+  <ah:PaatoksenTekija>Pena Panaani</ah:PaatoksenTekija>
+  <ah:Pykala>§987</ah:Pykala>
+  <ah:Liitteet>
+    <ah:Liite>
+        <ah:Kuvaus>Liitteen kuvaus</ah:Kuvaus>
+        <ah:Tyyppi>Liitteen tyyppi</ah:Tyyppi>
+        <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment.pdf</ah:LinkkiLiitteeseen>
+    </ah:Liite>
+    <ah:Liite>
+        <ah:Kuvaus>Liitteen 2 kuvaus</ah:Kuvaus>
+        <ah:Tyyppi>Liitteen 2 tyyppi</ah:Tyyppi>
+        <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment2.txt</ah:LinkkiLiitteeseen>
+    </ah:Liite>
+  </ah:Liitteet>
+</ah:AsianPaatos>

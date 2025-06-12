@@ -1,0 +1,151 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Electricity connection",
+    :fi "Sähköliittymä",
+    :sv "Elanslutning"},
+   :codeValue "01",
+   :created "2023-01-04T09:30:00.798Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/01/members/",
+   :modified "2023-12-04T10:48:24.081Z",
+   :status "VALID",
+   :id "3d247b74-369c-4f66-86f8-78cec5e1e6b7",
+   :statusModified "2023-01-04T09:30:00.798Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Hydropower", :fi "Vesivoima", :sv "Vattenkraft"},
+   :codeValue "02",
+   :created "2023-01-04T09:30:20.873Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/02/members/",
+   :modified "2023-12-04T10:48:24.099Z",
+   :status "VALID",
+   :id "3e58084c-fe52-417c-b132-ed1d263cfb65",
+   :statusModified "2023-01-04T09:30:20.873Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "District heating", :fi "Kaukolämpö", :sv "Fjärrvärme"},
+   :codeValue "03",
+   :created "2023-01-04T09:30:50.406Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/03/members/",
+   :modified "2023-12-04T10:48:24.107Z",
+   :status "VALID",
+   :id "4b6fdac3-3efb-4234-8a36-7206e34466e5",
+   :statusModified "2023-01-04T09:30:50.406Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Solar power", :fi "Aurinkosähkö", :sv "Solel"},
+   :codeValue "04",
+   :created "2023-01-04T09:31:17.620Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/04/members/",
+   :modified "2023-12-04T10:48:24.114Z",
+   :status "VALID",
+   :id "d5362487-6c1b-40bb-bd74-3583a3a6dc5a",
+   :statusModified "2023-01-04T09:31:17.620Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Diesel power", :fi "Dieselvoima", :sv "Dieselkraft"},
+   :codeValue "05",
+   :created "2023-01-04T09:31:34.656Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/05/members/",
+   :modified "2023-12-04T10:48:24.122Z",
+   :status "VALID",
+   :id "2830f212-bb31-445b-8c40-f8161a4e2071",
+   :statusModified "2023-01-04T09:31:34.656Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Electric energy storage",
+    :fi "Sähköenergiavarasto",
+    :sv "Elenergilager"},
+   :codeValue "06",
+   :created "2023-01-04T09:31:49.348Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/06/members/",
+   :modified "2023-12-04T10:48:24.130Z",
+   :status "VALID",
+   :id "5eca3bfc-f892-44aa-97e2-5e4513f14ba2",
+   :statusModified "2023-01-04T09:31:49.348Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-01-04T09:32:07.360Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/99/members/",
+   :modified "2023-12-04T10:48:24.137Z",
+   :status "VALID",
+   :id "1c588184-fbb2-46d9-a2aa-c9fe43b3fc4f",
+   :statusModified "2023-01-04T09:32:07.360Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sahkoenergianlahde/codes/99",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/sahkoenergianlahde/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:57:04.192Z"}

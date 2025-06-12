@@ -1,0 +1,1290 @@
+@use "sass:string";
+@use "base";
+@use "buttons";
+@use "colors";
+@use "frameless";
+@use "lupicons";
+@use "svg";
+@use "theme";
+@use "typography";
+
+// Support for miscellaneous inputs and other stuff.
+// See also _forms.scss.
+
+
+@mixin input-dimensions() {
+  padding: 0 base.$marginM;
+  box-sizing: border-box;
+  min-height: theme.$grid-input-height;
+  // height: $grid-input-height;
+  font-size: theme.$grid-font-size;
+  @content;
+  &.lux--wide {
+    width: 90%;
+  }
+}
+
+.align--middle {
+  vertical-align: middle;
+}
+
+.dsp--inline {
+  display: inline;
+}
+
+.dsp--inline-block {
+  display: inline-block;
+}
+
+.dsp--block {
+  display: block;
+}
+
+// Flex
+
+.dsp--flex,
+.flex {
+  display: flex;
+}
+
+// Flex container classes. Imply flex.
+
+.flex--between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex--around {
+  display: flex;
+  justify-content: space-around;
+}
+
+.flex--center {
+  display: flex;
+  justify-content: center;
+}
+
+.flex--right {
+  display: flex;
+  justify-content: right;
+}
+
+.flex--align-center {
+  display: flex;
+  align-items: center;
+}
+
+.flex--align-start {
+  display: flex;
+  align-items: start;
+}
+
+.flex--align-end {
+  display: flex;
+  align-items: end;
+}
+
+.flex--align-stretch {
+  display: flex;
+  align-items: stretch;
+}
+
+.flex--wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flex--wrap-reverse {
+  display: flex;
+  flex-wrap: wrap-reverse;
+}
+
+.flex--column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex--row-reverse {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+// Flex item classes
+
+.flex--self-start {
+  align-self: flex-start;
+}
+
+.flex--self-end {
+  align-self: flex-end;
+}
+
+.flex--self-center {
+  align-self: center;
+}
+
+.flex--self-stretch {
+  align-self: stretch;
+}
+
+@for $i from 0 to 11 {
+  .flex--g#{$i} {
+    flex-grow: $i;
+  }
+}
+
+@for $i from 1 to 10 {
+  .flex--g0#{$i} {
+    flex-grow: $i * .1;
+  }
+}
+
+// Whitespace
+
+.ws--pre-wrap {
+  white-space: pre-wrap;
+}
+
+.ws--nowrap {
+  white-space: nowrap;
+}
+
+// Text transforms and fonts
+.txt--upper {
+  text-transform: uppercase;
+}
+
+.txt--bold {
+  font-weight: bold;
+}
+
+.txt--left {
+  text-align: left;
+}
+
+.txt--center {
+  text-align: center;
+}
+
+.txt--right {
+  text-align: right;
+}
+
+.txt--small {
+  font-size: theme.$grid-font-size - 4px;
+}
+
+.txt--code {
+  font-family: monospace;
+}
+
+@for $i from 0 to 8 {
+  .txt--inc#{$i} {
+    font-size: typography.$font-size-body + $i * 1px;
+  }
+    .txt--dec#{$i} {
+    font-size: typography.$font-size-body - $i * 1px;
+  }
+}
+
+
+// Overflow
+
+.of--hidden {
+  overflow: hidden;
+}
+
+.of--hidden-x {
+  overflow-x: hidden;
+}
+
+.of--hidden-y {
+  overflow-y: hidden;
+}
+
+// Vertical align
+
+@each $va in top, middle, bottom {
+  .va--#{$va} {
+    vertical-align: $va;
+  }
+}
+
+@mixin error-state() {
+  &.warning, &.err, &.warn,
+  &.warning.required, &.warning.tip, &.warning.mandatory,
+  &.err.required, &.err.tip, &.err.mandatory,
+  &.warn.required, &.warn.tip, &.warn.mandatory,
+  &[aria-invalid=true],
+  &[aria-invalid=true][aria-required=true] {
+    @content;
+  }
+}
+
+@mixin required-state( $enabled-supported: true) {
+  &.required, &.tip, &.mandatory,
+  &:required:invalid,
+  &[aria-required=true] {
+    @if $enabled-supported {
+      &:enabled {
+        @content;
+      }
+    } @else {
+      @content;
+    }
+  }
+}
+
+@mixin input-colors-and-border( $type) {
+  color: colors.resolve-color( $type, "text", "enabled" );
+  border-color: colors.resolve-color( $type, "border", "enabled" );
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+  border-radius: 0 0 0 0;
+  outline: none;
+  @content;
+  &:active {
+    @include colors.colors-and-border( $type, "active" );
+  }
+  &:disabled {
+    @include colors.colors-and-border( $type, "disabled" );
+  }
+  @include required-state() {
+    @include colors.colors-and-border( $type, "required" );
+  }
+  @include error-state() {
+    @include colors.colors-and-border( $type, "error" );
+  }
+  &:focus {
+    @include colors.colors-and-border( $type, "focus" );
+  }
+  // Used in docgen to highlight user changes for backing system values
+  &.source-value-changed {
+    outline: 2px solid colors.$green;
+  }
+}
+
+@mixin input-reset() {
+  @content;
+  &:active {
+    @content;
+  }
+  &:focus {
+    @content;
+  }
+  &:disabled {
+    @content;
+  }
+  @include error-state() {
+    @content;
+  }
+  @include required-state() {
+    @content;
+  }
+}
+
+@mixin placeholder( $color ) {
+  input::placeholder {
+    color: $color
+  }
+  input::-ms-input-placeholder {
+    color: $color
+  }
+  textarea::placeholder {
+    color: $color
+  }
+  input::-ms-input-placeholder {
+    textarea: $color
+  }
+}
+
+@mixin input-error {
+  @include error-state() {
+    background: {
+      image: svg.svg-url( "circle-attention", colors.resolve-color( "input", "border", "error"));
+      position: right 10px center;
+      repeat: no-repeat;
+    }
+    padding-right: 36px;
+    min-width: 5em;
+  }
+
+}
+
+input[type=text].lux,
+input[type=password].lux,
+input[type=email].lux,
+input[type=number].lux,
+input[type=tel].lux,
+textarea.lux,
+{
+  @include input-dimensions {
+    @include input-colors-and-border( "input" ) {
+      border: none;
+      border-bottom: 1px solid colors.resolve-color( "input", "border", "enabled");
+    }
+  }
+  &::placeholder {
+    color: colors.resolve-color( "input", "text", "placeholder" );
+  }
+
+  @include input-error;
+  &:read-only {
+    background-color: colors.resolve-color( "input", "background", "read-only" );
+  }
+}
+
+input[type=text].lux,
+input[type=password].lux,
+input[type=email].lux,
+input[type=number].lux,
+input[type=tel].lux {
+  max-height: theme.$grid-input-height;
+}
+
+// No lupicon-circle-attention on error
+input.lux[aria-invalid=true].no-error-bg {
+  background-image: none;
+  padding-right: 12px;
+}
+
+span.lux {
+  @include input-dimensions {
+    line-height: theme.$grid-input-height;
+  }
+  @include input-error;
+  &:empty {
+    background-color: colors.get-gray( 15 );
+  }
+}
+
+@mixin input-icon( $icon-name ) {
+  background: {
+    image: svg.svg-url( $icon-name, colors.resolve-color( "input", "border", "enabled"));
+    position: right 10px center;
+    repeat: no-repeat;
+  }
+  padding-right: 36px;
+}
+
+input.lux.hasDatePicker,
+input.lux.form-date,
+input.lux.dateinput {
+  @include input-icon( "calendar");
+}
+
+input.lux.timepicker {
+  @include input-icon( "clock");
+}
+
+input.lux.search {
+  @include input-icon( "search");
+}
+
+
+textarea.lux {
+  border: {
+    left:  colors.resolve-border( "input", "textarea" );
+    top:  colors.resolve-border( "input", "textarea" );
+    right:  colors.resolve-border( "input", "textarea" );
+  }
+}
+
+select.lux,
+select.dropdown {
+  @include input-dimensions {
+    @include input-colors-and-border( "dropdown" ) {
+      padding-right: 40px;
+      text-overflow: ellipsis;
+      background: {
+        image: svg.svg-url( "chevron", colors.resolve-color( "dropdown", "text", "enabled"));
+        position: right 10px center;
+        repeat: no-repeat;
+      }
+    }
+  }
+  &:disabled {
+     background-image: svg.svg-url( "chevron", colors.resolve-color( "dropdown", "text", "disabled"));
+  }
+}
+
+label.lux {
+  color: colors.$black;
+  display: block;
+  &.lux--inline {
+    display: inline-block;
+  }
+
+  @include required-state( false ) {
+    &:after {
+      content: "*";
+      color: colors.get-signal( "red" );
+      font-weight: bold;
+    }}
+}
+
+.lux-new {
+  &:after {
+    content: " \e938";
+    color: colors.get-signal( "blue" );
+    font-family: "lupapiste";
+  }
+}
+
+@mixin input-fields() {
+  padding: 0 base.$marginM;
+  box-sizing: border-box;
+  min-height: theme.$grid-input-height;
+  height: theme.$grid-input-height;
+  font-size: theme.$grid-font-size;
+  color: theme.$input-color;
+  border: 1px solid theme.$input-border-color;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance:none;
+  @content;
+
+  &:focus {
+    color: theme.$input-focus-color;
+    border-color: theme.$input-focus-border-color;
+  }
+  &:disabled {
+    border-color: theme.$input-disabled-border-color;
+    background-color: theme.$input-disabled-background-color;
+    cursor: not-allowed;
+  }
+  &.warning {
+    border-color: colors.$negative;
+  }
+  &.required {
+    border-color: colors.$primary;
+  }
+}
+
+@mixin hide {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+@mixin hide-radio-check-input ($display: inherit) {
+  input[type=checkbox], input[type=radio] {
+    @include hide;
+    display: $display;
+  }
+}
+
+input.hide-input {
+  @include hide;
+}
+
+// http://stackoverflow.com/questions/30421570/sass-unicode-escape-is-not-preserved-in-css-file
+@function unicode($str) {
+  @return string.unquote("\"") + string.unquote(string.insert($str, "\\", 1)) + string.unquote("\"")
+}
+
+// Defines the following classes:
+// .cls-label
+// .cls-wrapper
+// and the definition
+// .cls-wrapper.wrapper--disabled
+@mixin toggle-helper ($cls, $on, $off,
+                      $type: "checkbox",
+                      $size: lupicons.$lupicon-size,
+                      $wrapper-display: inherit,
+                      $input-display: block,
+                      $label-display: inline-block) {
+
+  label.#{$cls}-label {
+    width: 100%;
+    display: $label-display;
+    padding: {
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      top: 7px;
+    }
+  }
+  .#{$cls}-label:before {
+    @include colors.icon-color-and-outline( $type, "enabled");
+    @include lupicons.lupicon-font( $size );
+    content: unicode($off);
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    cursor: pointer;
+  }
+
+  .#{$cls}-label:hover.#{$cls}-label:before,
+  input:checked + .#{$cls}-label:hover.#{$cls}-label:before {
+    @include colors.icon-color-and-outline( $type, "selected:hover");
+  }
+
+  input:focus + .#{$cls}-label:before {
+    @include colors.icon-color-and-outline( $type, "focus");
+  }
+
+  input:checked + .#{$cls}-label:before {
+    @include colors.icon-color-and-outline( $type, "selected");
+    @include lupicons.lupicon-font($size);
+    content: unicode($on);
+  }
+
+  .group-title.tip:after,
+  input.required + .#{$cls}-label:after,
+  input.tip + .#{$cls}-label:after,
+  input:required:invalid + .#{$cls}-label:after,
+  input[aria-required=true] .#{$cls}-label:after {
+      content: "*";
+      color: colors.get-signal( "red" );
+      font-weight: bold;
+  }
+
+  input:required:invalid + .#{$cls}-label:before
+  {}
+
+  input.warning + .#{$cls}-label:before,
+  input.warn + .#{$cls}-label:before,
+  input.err + .#{$cls}-label:before,
+  input[aria-invalid=true] + .#{$cls}-label:before,
+  input[aria-invalid=true][aria-required=true]  + .#{$cls}-label:before {
+    color: colors.get-signal( "red" );
+  }
+
+
+  input:disabled + .#{$cls}-label:before,
+  input:disabled + .#{$cls}-label:hover.#{$cls}-label:before{
+    cursor: initial;
+    @include colors.icon-color-and-outline( $type, "disabled");
+  }
+
+  .no-label-text.#{$cls}-label:before {
+    margin-right: 0;
+  }
+
+  // Used in docgen to highlight user changes for backing system values
+  input.source-value-changed + .#{$cls}-label:before {
+    outline: 2px solid colors.$green;
+  }
+
+  .#{$cls}-wrapper {
+    @include colors.colors-and-border( $type, "enabled" );
+    display: $wrapper-display;
+    box-sizing: border-box;
+    @include hide-radio-check-input ($input-display);
+  }
+
+  .#{$cls}-wrapper.wrapper--disabled {
+    @include colors.colors-and-border( $type, "disabled" );
+  }
+
+  .#{$cls}-wrapper.wrapper--no-border {
+    border: none;
+  }
+
+  .#{$cls}-wrapper.wrapper--no-label > label {
+    width: initial;
+    &::before {
+      margin-right: 0;
+    }
+  }
+  .#{$cls}-wrapper.vertical-radio {
+      border: none !important;
+    }
+
+  .#{$cls}-wrapper.vertical-radio > label {
+      display: flex;
+      padding-top: 0;
+    }
+
+  @content;
+}
+
+.cljs-source-value-changed {
+  outline: 2px solid colors.$green;
+}
+
+@include toggle-helper ( arrow, "e614", "e611" ) {}
+
+// Checkboxes
+@include toggle-helper ( checkbox, "e604", "e603" ) {}
+@include toggle-helper ( blockbox, "e604", "e603", $wrapper-display: block ) {}
+@include toggle-helper ( buttonbox, "e604", "e603", $wrapper-display: inline-block ) {}
+.buttonbox-wrapper {
+  vertical-align: middle;
+}
+
+@include toggle-helper ( docgen-checkbox, "e604", "e603", $wrapper-display: block ) {}
+.docgen-checkbox-wrapper.form-input {
+  height: auto;
+  width: auto;
+}
+@include toggle-helper ( sectionbox, "e61d", "e620" ) {}
+
+@include toggle-helper ( stampbox, "e61e", "e620") {}
+.stampbox-wrapper {
+  border: none;
+}
+
+@include toggle-helper ( signbox, "e619", "e620" ) {}
+.signbox-wrapper {
+  border: none;
+}
+
+@include toggle-helper ( bottombox, "e604", "e603", $wrapper-display: block ) {}
+
+.bottombox-wrapper {
+  margin-top: 12px;
+}
+
+// Radio boxes
+@include toggle-helper (radio, "e635", "e634", $wrapper-display: inline-block, $input-display: block) {}
+
+// Radio field component. In order to make sure that the components are adjacent without
+// gaps, some adjustments are needed.
+@include toggle-helper (radio-field, "e635", "e634", $wrapper-display: inline-block,
+                        $input-display: inline-block, $label-display: inline) {}
+.radio-field-wrapper {
+  padding: 7px 7px 7px 7px;
+}
+
+
+// Defines the following classes:
+// .cls-label
+// .cls-wrapper
+// and the definition
+// .cls-wrapper.wrapper--disabled
+@mixin tag-helper ($cls, // Target class prefix
+                   $type, // Color type name. Parameter for resolve-colors (see _colors.scss)
+                   $size: lupicons.$lupicon-size,
+                   $wrapper-display: inline-block,
+                   $input-display: block,
+                   $label-display: inline-block) {
+  $disabled-bg: colors.resolve-color( $type, "background", "disabled");
+  $disabled-border: colors.resolve-border( $type, "disabled" );
+  label.#{$cls}-label {
+    @include colors.colors-and-border( $type, "enabled");
+    cursor: pointer;
+    width: 100%;
+    display: $label-display;
+    padding: {
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      top: 7px;
+    }
+    i {
+      vertical-align: text-bottom;
+      margin-right: .2em;
+    }
+  }
+
+  input:enabled + .#{$cls}-label:hover {
+    @include colors.colors-and-border( $type, "hover")
+  }
+
+  input:checked:enabled + .#{$cls}-label:hover {
+    @include colors.colors-and-border( $type, "selected:hover")
+  }
+
+  input:checked + .#{$cls}-label {
+    @include colors.colors-and-border( $type, "selected")
+  }
+
+  input:focus + .#{$cls}-label {
+    @include colors.colors-and-border( $type, "focus");
+  }
+
+  input:disabled + .#{$cls}-label {
+    cursor: initial;
+    color: $disabled-bg;
+    border: $disabled-border;
+  }
+
+  input:checked:disabled + .#{$cls}-label {
+    cursor: initial;
+    color: colors.resolve-color( $type, "text", "selected" );
+    background-color: $disabled-bg;
+    border: $disabled-border;
+  }
+
+  .#{$cls}-wrapper {
+    display: $wrapper-display;
+    box-sizing: border-box;
+    @include hide-radio-check-input ($input-display);
+  }
+
+  .#{$cls}-wrapper.wrapper--disabled {
+    background-color: $disabled-bg;
+  }
+
+  .#{$cls}-wrapper.wrapper--no-border {
+    border: none;
+  }
+
+  .#{$cls}-wrapper.wrapper--no-label > label {
+    width: initial;
+  }
+
+  .#{$cls}-wrapper.wrapper--small > label.#{$cls}-label {
+    font-size: 13px;
+    padding: 4px;
+  }
+
+  @content;
+}
+
+ul.tag-toggle-list {
+  padding: 0 0;
+  list-style-type: none;
+  li {display: inline-block;}
+}
+
+div.app-view-radio-group {
+  margin-top: base.$marginL;
+  margin-bottom: base.$marginL;
+}
+
+@include tag-helper( plain-tag, "plain" );
+
+@include tag-helper( plain-bold-tag, "plain" );
+
+label.plain-bold-tag-label {
+  font-weight: bold;
+  text-align: center;
+  padding: .5em 4em;
+}
+
+@include tag-helper( person-vs-company, "plain" );
+
+label.person-vs-company-label {
+  font-weight: bold;
+  text-align: center;
+  padding: .5em 4em;
+}
+
+@include tag-helper( filter-tag, "plain-filter");
+
+label.filter-tag-label {
+  border-radius: .5em;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+div.person-vs-company-wrapper {
+  // Make sure that outline is fully visible.
+  margin-right: 2px;
+}
+
+@include tag-helper( plain-bold-narrow-tag, "plain" );
+
+label.plain-bold-narrow-tag-label {
+  font-weight: bold;
+  text-align: center;
+  padding: .5em 2em;
+}
+
+@include tag-helper( primary-tag, "primary-tag" );
+
+@include tag-helper( attachment-approval-tag, "status-tag" );
+input[type=checkbox] + label.attachment-approval-tag-label,
+input[type=radio] + label.attachment-approval-tag-label {
+  @include buttons.small {
+    border-radius: 8px;
+    padding: {
+      left: 8px;
+      right: 8px;
+      top: 4px;
+      bottom: 4px;
+    }
+  }
+}
+input:checked + label.attachment-approval-tag-label {
+  font-weight: bold;
+}
+
+
+// Defines the following classes:
+// .cls-label
+// .cls-wrapper
+// and the definition
+// .cls-wrapper.wrapper--disabled
+@mixin stateful-helper ($cls,
+                        $color: white,
+                        $hover: theme.$checkbox-hover-color,
+                        $selected: theme.$checkbox-selected-color,
+                        $disabled: theme.$input-select-disabled-icon,
+                        $border: theme.$checkbox-border-color,
+                        $disabled-bg: theme.$input-disabled-background-color,
+                        $wrapper-display: inline-block,
+                        $input-display: block,
+                        $label-display: inline-block) {
+  label.#{$cls}-label {
+    width: 100%;
+    display: $label-display;
+    color: $selected;
+    background-color: $color;
+    padding: {
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      top: 7px;
+    }
+  }
+  input + .#{$cls}-label {
+    cursor: pointer;
+  }
+
+  input:checked + .#{$cls}-label {
+    color: $color;
+    background-color: $selected;
+  }
+
+  input:checked + .#{$cls}-label:hover {
+    color: $color;
+    background-color: $hover;
+  }
+
+  input + .#{$cls}-label:hover {
+    color: $hover;
+  }
+
+  input:disabled + .#{$cls}-label,
+  input:disabled + .#{$cls}-label:hover{
+    cursor: default;
+    color: $disabled;
+  }
+
+
+  input:disabled:checked + .#{$cls}-label,
+  input:disabled:checked + .#{$cls}-label:hover {
+    cursor: default;
+    color: $color;
+    background-color: $disabled;
+  }
+
+  .#{$cls}-wrapper {
+    display: $wrapper-display;
+    box-sizing: border-box;
+    border: 1px solid $border;
+    @include hide-radio-check-input ($input-display);
+    }
+
+  .#{$cls}-wrapper.wrapper--disabled {
+    background-color: $disabled-bg;
+  }
+
+  .#{$cls}-wrapper.wrapper--no-border {
+    border: none;
+  }
+
+  @content;
+}
+
+@include stateful-helper ( primary-stateful );
+
+
+// Wrapper helpers
+.wrapper--break {
+  margin-bottom: base.$marginL;
+}
+
+.wrapper--break-small {
+  margin-bottom: base.$marginS;
+}
+
+.wrapper--block {
+
+}
+
+toggle.no-border > div {
+  border: none;
+}
+
+// Radio buttons
+@mixin radio-bg ($bg) {
+  color: white;
+  background-color: $bg;
+}
+
+.radio-button {
+  span {
+    display: inline-block;
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+
+  &.toggled {
+    @include radio-bg(theme.$gray-link);
+  }
+  &:hover {
+    @include radio-bg(theme.$gray-hover);
+  }
+  &:active {
+    @include radio-bg(theme.$gray-active);
+  }
+  &:disabled, &.disabled, &.waiting {
+    @include buttons.disabled(colors.$gray153, colors.$gray221);
+  }
+}
+
+.radio-button-table {
+  border: 1px solid theme.$gray-link;
+  width: auto;
+  margin-bottom: base.$marginS;
+
+  > tbody > tr > td {
+    padding: 0;
+    width: auto;
+    border: 1px solid theme.$input-border-color;
+  }
+}
+
+// Attachment filters related
+@include toggle-helper ( filter, "e604", "e603", $wrapper-display: inline-block, $input-display: block ) {}
+
+.filter-group {
+  border: 1px solid colors.$gray187;
+  padding: {
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    bottom: 14px;
+  }
+  margin-bottom: 1em;
+  .filter-group__state {
+    i {
+      cursor: pointer;
+      color: colors.$primary;
+    }
+    span {
+      text-transform: uppercase;
+    }
+    &:hover > i {
+      color: theme.$checkbox-hover-color;
+    }
+  }
+  .filter-group__toggles {
+    margin-left: 2px;
+    margin-top: base.$marginS;
+  }
+}
+
+
+.button-input {
+  white-space: nowrap;
+  input, button {
+    vertical-align: middle;
+  }
+  input {
+    // Forcefully override the .form-grid styles.
+    width: 50% !important;
+    -webkit-appearance: textfield !important;
+  }
+}
+
+input[type=text].textinput {
+  box-sizing: border-box;
+  padding: 4px;
+  display: block;
+  &:focus {
+    border-color: theme.$input-focus-border-color;
+  }
+}
+
+@mixin textinputBig {
+  @include buttons.btn-height;
+  line-height: 1;
+  font-size: frameless.$font-size;
+}
+
+.textinput.textinput--big {
+    @include textinputBig;
+}
+
+.textinput.textinput--big-long {
+    @include textinputBig;
+    display: inline-block;
+    width: 20em;
+    vertical-align: middle;
+}
+
+$timepicker-default-width: 200px;
+
+div.timepicker-container {
+  min-width: 120px;
+  width: $timepicker-default-width;
+  position: relative;
+  input.timepicker  {
+    width: 100%;
+  }
+  input.timepicker--error {
+    border-color: colors.$negative;
+    // color: $negative;
+  }
+  .timepicker-picker {
+    background-color: white;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 100%;
+    width: 100%;
+    padding: 4px;
+    margin: 0 0;
+    border-left: 1px solid colors.$gray51;
+    border-right: 1px solid colors.$gray51;
+    border-bottom: 1px solid colors.$gray51;
+    .timepicker--cell {
+      padding: 0 0;
+      text-align: center;
+    }
+    .timepicker--hour {
+      width: 16%;
+    }
+    .timepicker--minute {
+      width: 20%;
+      border-left: 1px solid colors.$gray51;
+    }
+    .timepicker--selectable {
+      cursor: pointer;
+      &:hover {
+        background-color: theme.$input-focus-border-color;
+      }
+    }
+    .timepicker--selected {
+      color: white;
+      background-color: colors.$primary;
+    }
+  }
+}
+
+timepicker.layout--full-width > div.timepicker-container {
+  width: 100%;
+}
+
+timepicker.layout--initial-width > div.timepicker-container {
+  width: $timepicker-default-width;
+}
+
+input.grid-style-input {
+  @include input-fields {
+    vertical-align: middle;
+  }
+}
+
+input.grid-style-input--wide {
+  @include input-fields {
+    width: 100%;
+    vertical-align: middle;
+  }
+}
+
+@mixin input-and-button( $cls, $padding: 8px, $input-width: 20em) {
+  $height: frameless.$font-size + 2 * $padding;
+  .#{$cls} {
+    display: table;
+    white-space: nowrap;
+    > .#{$cls}--input {
+      display: table-cell;
+      line-height: $height;
+      height: $height;
+      min-height: $height;
+      max-height: $height;
+    }
+    > input.#{$cls}--input {
+      width: $input-width;
+      vertical-align: middle;
+      padding-right: 4px;
+  }
+  > button.#{$cls}--input {
+    padding: {
+      left: $padding;
+      right: $padding;
+    }
+  }
+}
+@content;
+}
+
+drop-zone {
+  display: none;
+  .drop-zone-placeholder {
+    border: 4px dashed colors.$primary !important;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    color: colors.$primary;
+    z-index: 200;
+    text-align: center;
+    background-color: rgba( 255, 255, 255, 0.8);
+    padding-top: 2em;
+    > div {
+      font-size: 20px;
+    }
+    > i {
+      font-size: 60px;
+    }
+  }
+}
+
+.drop-zone--highlight drop-zone {
+  display: block;
+}
+
+.combobox-container {
+  position: relative;
+  display: inline-block;
+  ul.combobox__list {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 100%;
+    max-width: 200%;
+    list-style: none;
+    background-color: white;
+    border: 1px solid theme.$input-focus-border-color;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    li {
+      padding-left: base.$marginS;
+    }
+    li.combobox--selected {
+      background-color: colors.$primary;
+      color: white;
+    }
+  }
+}
+
+.upload-zone {
+  min-height: buttons.$btn-height;
+  padding: 8px;
+  vertical-align: middle;
+  padding: {
+    left: 10px;
+    right: 10px;
+  }
+  border: 2px dashed colors.$primary;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: auto;
+  display: block;
+  i, label {
+    color: colors.resolve-color( "link", "text", "enabled");
+  }
+  i {
+    margin-right: 10px;
+  }
+  label {
+    font-size: 16px;
+  }
+  label:hover {
+    color: colors.resolve-color( "link", "text", "hover");
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  label:active {
+    color: colors.resolve-color( "link", "text", "active");
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+@mixin autocomplete( $cls, $width: 20em ) {
+    display: inherit;
+    #{$cls} {
+      min-width: $width;
+      max-width: $width;
+      display: inline-block;
+      vertical-align: middle;
+      .autocomplete-selection-wrapper {
+        display: table;
+        .autocomplete-selection {
+          padding-left: 6px;
+          display: table-cell;
+          vertical-align: middle;
+          min-height: buttons.$btn-height;
+          height: buttons.$btn-height;
+        }
+      }
+      span.caption {
+        white-space: normal;
+        line-height: normal;
+        padding-left: 0;
+      }
+    }
+    #{$cls}.no-events {
+      .autocomplete-selection-wrapper {
+        background-color: colors.$gray247;
+        i.tag-chevron, span.selection-text {
+          color: colors.$gray187;
+        }
+      }
+    }
+}
+
+input.date-validator--invalid {
+  border: 1px solid colors.$negative;
+}
+
+// Convenience wrapper for labeled input that is not part of any grid
+// or similar container.
+div.labeled-input {
+  margin-top: base.$marginM;
+  margin-bottom: base.$marginM;
+  > label {
+    display: block;
+  }
+  .row {
+    display: table-row;
+  }
+  .cell {
+    display: table-cell;
+    padding-right: base.$marginL;
+    vertical-align: bottom;
+  }
+}
+
+.fill-info-toolbar {
+  margin: base.$marginS base.$marginS;
+  > button {margin-right: buttons.$btn-spacer;}
+}
+
+// For *-field components
+.field--vertical > .field--block {
+  display: block;
+}
+
+// Osapuoli, pätevyystodistus, suostumus
+
+.party-attachment-input {
+  // Match .form-input
+  font-size: 16px;
+  width: 16.25em;
+  margin: 2px 6px 12px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.party-attachment-input__value {
+  display: flex;
+  flex-direction: row;
+  min-height: 40px;
+  line-height: 24px;
+  align-items: center;
+  padding: 0 0 0 12px;
+  margin: 2px 0 12px 0;
+
+  & > div {
+    flex: 1;
+  }
+}

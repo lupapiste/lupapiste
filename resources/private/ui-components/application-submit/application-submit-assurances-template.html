@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-submit-assurances-template">
+
+  <div data-bind="foreach: assurances">
+    <input class="hidden" type="checkbox"
+           data-bind="value: id,
+                      checked: $parent.selectedAssurances,
+                      attr: { id: 'assurance-checkbox-' + id }" />
+    <label class="checkbox-label lux"
+           data-bind="text: text[$parent.lang],
+                      css: { required: $data.required || false },
+                      attr: { for: 'assurance-checkbox-' + id }" />
+  </div>
+
+</script>

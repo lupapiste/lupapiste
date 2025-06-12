@@ -1,0 +1,95 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="guest-authorities-template">
+        <div class="guest-authorities">
+          <h2 class="help-adjacent-title"
+              data-bind="ltext: 'guest-authorities.title'"></h2>
+          <span data-bind="component: {
+                           name: 'help-toggle',
+                           params: {lhtml: 'auth-admin.guest-authorities.help'}}"></span>
+          <table class="table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'guest-authority.description'"></th>
+                <th data-bind="ltext: 'guest-authority.name'"></th>
+                <th data-bind="ltext: 'guest-authority.email'"></th>
+                <th data-bind="ltext: 'auth-admin.actions'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: guests">
+              <tr data-bind="attr: {'data-test-guest-description': description}">
+                <td data-bind="text: description"></td>
+                <td data-bind="text: name"></td>
+                <td data-bind="text: email"></td>
+                <td>
+                  <span data-bind="visible: $parent.canEdit()">
+                    <button class="secondary" data-bind="click: $parent.removeGuest">
+                      <i class="lupicon-remove"></i>
+                      <span data-bind="ltext: 'remove'"></span>
+                    </button>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="positive"
+                  data-test-id="guest-authority-add",
+                  data-bind="enable: canEdit(),
+                             click: addGuest">
+            <i class="lupicon-circle-plus"></i><span data-bind="ltext: 'guest-authority.add'"></span>
+          </button>
+        </div>
+        <div id="dialog-add-guest-authority" class="window autosized">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'guest-authority.add'"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+          <div class="dialog-content">
+            <form>
+              <label data-bind="ltext: 'auth-admin.add-dialog.email'"
+                     class="form-label"></label>
+              <div>
+                <input class="form-input--inline"
+                       data-test-id="guest-dialog-email"
+                       data-bind="value: dialogData.email,
+                                  css: {'form-input--error': dialogData.error}"
+                       type="text"/>
+                <div class="spin-container"
+                     data-bind="visible: dialogData.waitingEmail">
+                  <i class="spin lupicon-refresh"></i>
+                </div>
+              </div>
+              <label data-bind="ltext: 'userinfo.firstName'"
+                     class="form-label"></label>
+              <input class="form-input"
+                     data-test-id="guest-dialog-firstname"
+                     data-bind="textInput: dialogData.firstName,
+                                enable: dialogData.namesEditable"
+                     type="text"/>
+
+              <label data-bind="ltext: 'userinfo.lastName'" class="form-label"></label>
+              <input class="form-input"
+                     data-test-id="guest-dialog-lastname"
+                     data-bind="textInput: dialogData.lastName,
+                                enable: dialogData.namesEditable"
+                     type="text"/>
+
+              <label data-bind="ltext: 'guest-authority.description'" class="form-label"></label>
+              <input class="form-input"
+                     data-test-id="guest-dialog-description"
+                     data-bind="textInput: dialogData.description"
+                     type="text"/>
+              <div class="form-error-message"
+                   data-test-id="guest-dialog-error"
+                   data-bind="visble: dialogData.errorMessage,
+                              ltext: dialogData.errorMessage"></div>
+              <button data-bind="click: dialogData.guestClick,
+                                 enable: dialogData.isGood,
+                                 css: {waiting: dialogData.waitingOk}"
+                      class="positive btn-dialog"
+                      data-test-id="guest-dialog-ok">
+                <i class="wait spin lupicon-refresh"></i>
+                <span data-bind="ltext: 'ok'"></span>
+              </button>
+            </form>
+          </div>
+        </div>
+</script>

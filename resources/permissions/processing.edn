@@ -1,0 +1,23 @@
+;; Permissions relating to statistics processing and processing entries (requests and
+;; delays).
+{:organization {:authority      #{:processing/read
+                                  :processing/edit
+                                  :processing/toggle-seen}
+                :commenter      #{:processing/read
+                                  :processing/toggle-seen}
+                :reader         #{:processing/read
+                                  :processing/toggle-seen}
+                :biller         #{:processing/read
+                                  :processing/toggle-seen}
+                :statementGiver #{:processing/read
+                                  :processing/mark-seen}}
+ :application  {:writer             #{:processing/read
+                                      :processing/mark-seen
+                                      :processing/answer}
+                :reader             #{:processing/read}
+                :foreman            #{:processing/read}
+                :guest              #{:processing/read}
+                :guestAuthority     #{:processing/read}
+                :financialAuthority #{:processing/read}
+                :statementGiver     #{:processing/read
+                                      :processing/mark-seen}}}

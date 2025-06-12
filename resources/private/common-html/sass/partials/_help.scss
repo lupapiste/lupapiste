@@ -1,0 +1,124 @@
+@use "base";
+@use "bubble";
+@use "colors";
+
+
+@include bubble.bubble-arrow( help-arrow, colors.get-signal( "blue"), colors.$gray247);
+
+.help-toggle {
+  margin: {
+    left: base.$marginM;
+  }
+  display: inline-block;
+  color: colors.get-signal( "violet");
+  text-align: center;
+  button.help.expanded {
+    color: colors.get-signal( "blue");
+  }
+}
+
+.help-toggle.tight {
+  margin-left: 0;
+  button.help {
+    border: none;
+    padding: 0 0 0 0;
+    &:active, &:hover {
+      span {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.stacked.help-toggle,
+.stacked.help-toggle div {
+  overflow-y: visible;
+}
+
+.help-text {
+  display: none;
+  position: relative;
+  background: colors.$gray247;
+  color: colors.$gray51;
+  padding: base.$marginM;
+  margin-bottom: base.$marginL;
+  border: 1px solid colors.get-signal( "blue");
+  p {
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  ul.help-items {
+    padding: 0;
+    list-style-type: none;
+  }
+}
+
+.cljs-help-text {
+    overflow: hidden;
+
+    .help-text {
+        display: block !important;
+    }
+}
+
+.help-text.help-text--show {
+  display: inherit;
+}
+
+.tab-info {
+  width: 80%;
+}
+
+// Reset is needed to make sure that the text flow is reset.
+// Without this the first element after (collapsed) help
+// could start with wrong alignment.
+.help-reset {
+  clear: both;
+  max-height: base.$marginS;
+}
+
+.panel-info {
+  width: 100%;
+  text-align: justify;
+}
+
+.expanded-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 400ms;
+  &.expand {
+    max-height: 1000px;
+  }
+}
+
+.page-info {
+  margin: base.$marginM 0;
+}
+
+.help-adjacent-title {
+  margin-top: 0 !important;
+  line-height: normal;
+  display: inline-block;
+}
+
+.help-box {
+  padding: 12px;
+  background-color: colors.$gray238;
+  border-left: 10px solid colors.get-signal( "violet");
+  p {
+    padding-bottom: 0;
+  }
+}
+
+.light {
+  background: colors.$white;
+}
+
+.codeblock {
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: .9em;
+  padding: base.$marginS;
+  margin: base.$marginS;
+}

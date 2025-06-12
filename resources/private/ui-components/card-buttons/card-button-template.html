@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="card-button-template">
+<!-- ko if: isVisible -->
+<button data-bind="attr: attr,
+                   disable: isDisabled,
+                   css: {'btn-card': true},
+                   click: click,
+                   ariaText: buttonText,
+                   focusNext: focusNext,
+                   testId: testId">
+  <!-- ko if:  iconClass -->
+  <i data-bind="attr: {'class': iconClass}"
+     aria-hidden="true"></i>
+  <!-- /ko -->
+  <!-- ko if: showText -->
+  <span data-bind="text: buttonText"
+        aria-hidden="true"></span>
+  <!-- /ko -->
+ </button>
+<!-- /ko -->
+</script>

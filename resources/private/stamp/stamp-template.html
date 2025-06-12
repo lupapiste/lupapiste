@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container" id="stamping">
+      <div id="stamping-container" >
+        <div class="nav-back-container">
+          <a class="btn secondary"
+             data-bind="click: cancelStamping"
+             data-test-id="back-to-application-from-stamping">
+              <i class="lupicon-chevron-start"></i>
+            <span data-bind =" ltext: 'application.return'"></span>
+          </a>
+        </div>
+        <div class="attachment-multiselect-content" data-bind="if: stampingMode() && selectedStampId()">
+          <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
+          <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stamps: stamps, selectedStampId: selectedStampId}}"></div>
+        </div>
+      </div>
+
+      <script type="text/x-jquery-tmpl" id="stamp-attachments-template">
+         <div data-bind="visible: !selectedStamp()" data-test-id="stamp-templates-missing" class="row">
+            <h2 data-bind="ltext: 'stamp.templates.missing.title'"></h2>
+            <div class="info-line like-btn">
+                <i class="lupicon-circle-attention"></i>
+                <span data-bind="ltext: 'stamp.templates.missing.guide'"></span>
+            </div>
+            <div class="col-4"><br></div>
+         </div>
+
+        <div class="stamp-info-container form-grid" data-bind="visible: selectedStamp()">
+          <form id="stamp-info">
+            <div class="row">
+              <h3 data-bind="ltext: 'stamp.title'"></h3>
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.name'"
+                       for="stamp--selected"></label>
+                <select data-bind="options: stamps,
+                                  optionsText: 'name',
+                                  optionsValue: 'id',
+                                  value: selectedStampsId"
+                        class="lux"
+                        id="stamp--selected"
+                        data-test-id="stamp-selected"></select>
+              </div>
+              <div class="col-2">
+                <label data-bind="ltext: 'stamp.preview'"
+                       label="stamp--preview"></label>
+               <textarea data-bind="value: preview"
+                         class="stamping--stamp-preview"
+                         rows="8"
+                         id="stamp--preview"
+                         readonly="true"></textarea>
+              </div>
+            </div>
+            <div class="row">
+              <h3 data-bind="ltext: 'stamp.information'"></h3>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.current-date'"
+                       for="stamp--date"></label>
+                <!-- ko if: currentDate() !== undefined -->
+                <input data-bind="
+                            datepicker: currentDate,
+                            enable: status() === statusReady,
+                            valueUpdate: 'afterkeydown'"
+                       type="text"
+                       class="lux"
+                       id="stamp--date"
+                       data-test-id="stamp-info-date">
+                <!-- /ko -->
+                <!-- ko ifnot: currentDate() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.organization'"
+                       for="stamp--organization"></label>
+                <!-- ko if: organization() !== undefined -->
+                <input data-bind="value: organization, enable: status() === statusReady"
+                       type="text"
+                       class="lux"
+                       id="stamp--organization"
+                       data-test-id="stamp-info-organization">
+                <!-- /ko -->
+                <!-- ko ifnot: organization() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.extra-text'"
+                       for="stamp--extra"></label>
+                <!-- ko if: extraText() !== undefined -->
+                <input data-bind="value: extraText, enable: status() === statusReady"
+                       type="text"
+                       class="lux"
+                       id="stamp--extra"
+                       data-test-id="stamp-info-extratext">
+                <!-- /ko -->
+                <!-- ko ifnot: extraText() !== undefined -->
+                  <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+
+              <div class="col-4"><br></div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.application-id'"
+                       for="stamp--app-id"></label>
+                <!-- ko if: applicationId() !== undefined -->
+                <input data-bind="value: applicationId, enable: status() === statusReady"
+                       type="text"
+                       class="lux"
+                       id="stamp--app-id"
+                       data-test-id="stamp-info-applicationId">
+                <!-- /ko -->
+                <!-- ko ifnot: applicationId() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.verdict-date'"
+                       for="stamp--verdict-date"></label>
+                <!-- ko if: verdictDate() !== undefined -->
+                <input data-bind="
+                            datepicker: verdictDate,
+                            enable: status() === statusReady,
+                            valueUpdate: 'afterkeydown'"
+                       type="text"
+                       class="lux"
+                       id="stamp--verdict-date"
+                       data-test-id="stamp-info-verdict-date">
+                <!-- /ko -->
+                <!-- ko ifnot: verdictDate() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.user'"
+                       for="stamp--user"></label>
+                <!-- ko if: user() !== undefined -->
+                <input data-bind="value: user, enable: status() === statusReady"
+                       type="text"
+                       class="lux"
+                       id="stamp--user"
+                       data-test-id="stamp-info-user">
+                <!-- /ko -->
+                <!-- ko ifnot: user() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+            </div>
+
+            <div class="row">
+              <h3 data-bind="ltext: 'stamp.reference-info'"></h3>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.backend-id'"
+                       for="stamp--backend-id"></label>
+                <!-- ko if: backendId() !== undefined -->
+                <input data-bind="value: backendId, enable: status() === statusReady"
+                       type="text"
+                       class="lux"
+                       id="stamp--backend-id"
+                       data-test-id="stamp-info-kuntalupatunnus"/>
+                <!-- /ko -->
+                <!-- ko ifnot: backendId() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.section'"
+                       for="stamp--section"></label>
+                <!-- ko if: section() !== undefined -->
+                <input data-bind="value: section, enable: status() === statusReady"
+                       type="text"
+                       class="lux"
+                       id="stamp--section"
+                       data-test-id="stamp-info-section">
+              <!-- /ko -->
+              <!-- ko ifnot: section() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+              <!-- /ko -->
+              </div>
+              <div class="col-1">
+                <label>&nbsp;</label>
+                <toggle params="value: qrCode,
+                                ltext: 'stamp.qrcode',
+                                testId: 'qr-code-enabled',
+                                prefix: 'blockbox'"></toggle>
+              </div>
+            </div>
+
+            <div class="row">
+              <h3 data-bind="ltext: 'stamp.location-and-scale'"></h3>
+
+              <div class="col-1">
+                <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"
+                       for="stamp--x"></label>
+                <input data-bind="value: xMargin,
+                            enable: status() === statusReady,
+                            css: {'invalid-margin': !xMarginOk()}"
+                       type="text"
+                       class="lux"
+                       id="stamp--x"
+                       data-test-id="stamp-info-xmargin">
+              </div>
+
+              <div class="col-1">
+                <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"
+                       for="stamp--y"></label>
+                <input data-bind="value: yMargin,
+                            enable: status() === statusReady,
+                            css: {'invalid-margin': !yMarginOk()}"
+                       type="text"
+                       class="lux"
+                       id="stamp--y"
+                       data-test-id="stamp-info-ymargin">
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.scale'" for="stamp-scale"
+                       for="stamp-scale"></label>
+                <select id="stamp-scale"
+                        class="lux"
+                        data-bind="options: scales,
+                                   optionsText: 'text',
+                                   optionsValue: 'value',
+                                   value: scale"></select>
+              </div>
+            </div>
+
+            <div class="row">
+              <span></span>
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.transparency'"
+                       for="stamp--transparency"></label>
+                <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency"
+                        class="dropdown"
+                        id="stamp--transparency"
+                        data-test-id="stamp-info-transparency"></select>
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.page'"
+                       for="stamp--page"></label>
+                <select data-bind="options: pages, optionsText: 'text', optionsValue: 'value', value: page"
+                        class="dropdown"
+                        id="stamp--page"
+                        data-test-id="stamp-info-page"></select>
+              </div>
+            </div>
+
+            <div class="row">
+              <button data-bind="
+                  ltext: 'stamp.reload',
+                  enable: stampsChanged(),
+                  click: $parent.reloadStamps"
+                class="secondary close"
+                data-test-id="stamp-reload">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ko if: !$parent.pending() -->
+        <attachments-listing params="pageName: 'stamp-attachments',
+                                     options: {columns: ['status', 'drawing', 'content', 'type', 'edited', 'stamp'],
+                                               selectableRows: true,
+                                               pageModel: $component,
+                                               attachmentWhiteList: listedAttachments}">
+        </attachments-listing>
+        <!-- /ko -->
+
+        <!-- The buttons at the bottom of the page -->
+        <div class="stamp-status like-btn">
+          <i class="lupicon-circle-check positive" data-bind="visible: status() === statusDone"></i>
+          <i class="lupicon-circle-attention negative" data-bind="visible: status() >= statusError"></i>
+          <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
+        </div>
+        <div class="attachment-multiselect-buttons">
+          <button data-bind="click: start,
+                             enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+                             visible: status() <= statusReady && $parent.authorization.ok('stamp-attachments')"
+                  class="positive"
+                  data-test-id="start-stamping">
+            <i class="lupicon-circle-stamp"></i>
+            <span data-bind="text: stampButtonText"></span>
+          </button>
+          <button data-bind="
+              ltext: 'stamp.reset',
+              visible: status() > statusRunning,
+              click: stampAgain"
+            class="positive close"
+            data-test-id="stamp-reset">
+          </button>
+          <button data-bind="
+              ltext: 'application.return',
+              enable: status() !== statusStarting && status() !== statusRunning,
+              click: $parent.cancelStamping"
+            class="secondary close"
+            data-test-id="cancel-stamping">
+          </button>
+        </div>
+      </script>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Entirely above terrain",
+    :sv "Helt ovanför jordytan",
+    :fi "Kokonaan pinnan yllä"},
+   :codeValue "01",
+   :created "2021-07-15T09:03:48.822Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/01/members/",
+   :modified "2023-12-04T07:45:48.559Z",
+   :status "VALID",
+   :id "eee74a99-d5d1-4e7a-977e-ecbfb37dd631",
+   :statusModified "2021-07-15T09:03:48.822Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/Suhde_pintaan/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Substantially above terrain",
+    :sv "Väsentligen helt ovanför jordytan",
+    :fi "Olennaisesti kokonaan pinnan yllä"},
+   :codeValue "02",
+   :created "2021-07-15T09:03:48.826Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/02/members/",
+   :modified "2023-12-04T07:45:48.575Z",
+   :status "VALID",
+   :id "6ed418cd-c232-41a1-b167-35c53d028072",
+   :statusModified "2021-07-15T09:03:48.826Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/Suhde_pintaan/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Above and below terrain",
+    :sv "Ovanför och under jordytan",
+    :fi "Pinnan yllä ja alla"},
+   :codeValue "03",
+   :created "2021-09-27T08:43:02.677Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/03/members/",
+   :modified "2024-11-20T11:36:48.159Z",
+   :status "VALID",
+   :id "77a79f0a-d807-4bd0-b967-7b844abf2ce7",
+   :statusModified "2021-09-27T08:43:02.677Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/Suhde_pintaan/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Substantially below terrain",
+    :sv "Väsentligen helt under jordytan",
+    :fi "Olennaisesti kokonaan pinnan alla"},
+   :codeValue "04",
+   :created "2023-01-04T16:59:06.429Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/04/members/",
+   :modified "2024-11-20T11:36:29.987Z",
+   :status "VALID",
+   :id "e77b99fe-4c89-4199-92b7-83844690587b",
+   :statusModified "2023-01-04T16:59:06.429Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/Suhde_pintaan/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Entirely below terrain",
+    :sv "Helt under jordytan",
+    :fi "Kokonaan pinnan alla"},
+   :codeValue "05",
+   :created "2023-01-04T16:59:06.436Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/05/members/",
+   :modified "2023-12-04T07:45:48.601Z",
+   :status "VALID",
+   :id "7c9586ac-1d67-4fab-a3ec-d681184101a8",
+   :statusModified "2023-01-04T16:59:06.436Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Suhde_pintaan/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/Suhde_pintaan/code/05",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:57:32.141Z"}

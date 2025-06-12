@@ -1,0 +1,98 @@
+@use "sass:color";
+@use "base";
+@use "colors";
+@use "theme";
+
+// jquery-ui
+#ui-datepicker-div {
+  background: theme.$lp-light-grey;
+  border: 1px solid color.adjust(theme.$lp-light-grey, $lightness: -10%);
+  padding: base.$marginS;
+  box-shadow: 2px 2px 3px #888888;
+  z-index: 100000 !important;
+
+  .ui-datepicker-prev {
+  }
+  .ui-datepicker-next {
+  }
+  .ui-datepicker-month {
+    font-size: 0.7em;
+    height: 28px;
+  }
+  .ui-datepicker-year {
+    font-size: 0.7em;
+    height: 28px;
+  }
+  .ui-datepicker-header {
+    height: 36px;
+  }
+  .ui-datepicker-year , .ui-datepicker-month {
+    vertical-align: top;
+  }
+  .ui-icon.ui-icon-circle-triangle-w {
+    position: relative;
+  }
+  .ui-icon.ui-icon-circle-triangle-e {
+    position: relative;
+  }
+}
+
+// components.day-edit
+div.source-value-changed {
+  .day-picker-input-and-button {
+    outline: 2px solid colors.$green;
+  }
+}
+
+div.day-picker-container {
+  position: relative;
+  white-space: nowrap;
+  background-color: colors.$white;
+  .day-picker-input-and-button {
+    width: fit-content;
+  }
+  button.day-picker-toggle {
+    border-radius: 0;
+    vertical-align: bottom;
+    border-left: 0;
+    &.regular {
+      border: {
+        top: 0;
+        right: 0;
+      }
+    }
+    &:disabled {
+      color: colors.resolve-color( "input", "text", "disabled") !important;
+      background-color: colors.resolve-color( "input", "background", "disabled") !important;
+      .indicator {
+        background-color: colors.resolve-color( "input", "background", "disabled");
+      }
+      &.negative {
+        border: colors.resolve-border( "input", "error");
+        color: colors.resolve-color( "input", "border", "error") !important;
+        border-left: 0;
+      }
+    }
+  }
+
+  input.day-picker-input {
+    width: 8em;
+    // &[aria-invalid=true] {
+    //   background-image: none;
+    //   padding-right: 12px;
+    // }
+  }
+
+  .day-picker-popup {
+    margin-top: 4px;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    //width: 100%;
+    display: inline-block;
+    background-color: colors.resolve-color( "listbox", "default", "background" );
+    border: 1px solid colors.resolve-color( "listbox", "default", "border" );
+    padding: 12px;
+  }
+}

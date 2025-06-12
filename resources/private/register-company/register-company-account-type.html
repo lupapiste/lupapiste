@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="register-company-account-type">
+
+    <!-- ko if: features.enabled("company-registration-disabled") -->
+    <div role="main" class="register-company-wizard">
+      <div class="company-steps">
+        <h1 data-bind="ltext: 'register.company.title'"></h1>
+        <div class="tabby">
+          <p data-bind="ltext: 'register.company.disabled'"></p>
+        </div>
+      </div>
+    </div>
+    <!-- /ko -->
+
+    <!-- ko ifnot: features.enabled("company-registration-disabled") -->
+    <div role="main"
+         class="register-company-wizard"
+         data-bind="if: lupapisteApp.services.companyRegistrationService.guard">
+      <register-company-steps></register-company-steps>
+      <div data-bind="component: lupapisteApp.services.companyRegistrationService.currentConfig().component"></div>
+      <!-- ko ifnot: lupapisteApp.services.companyRegistrationService.currentConfig().noButtons -->
+      <register-company-buttons></register-company-buttons>
+      <!-- /ko -->
+    </div>
+    <!-- /ko -->
+
+  </section>
+</body>
+</html>

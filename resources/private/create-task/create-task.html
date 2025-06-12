@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="create-task" style="visibility: visible; display: block;">
+      <div id="dialog-create-task" class="window autosized" >
+        <div data-bind="with: createTask">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'task.create'"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+
+          <div class="dialog-content">
+
+            <label class="form-label" data-bind="ltext: 'task.type'"></label>
+            <select id="choose-task-type"
+              data-bind="options: taskTypes,
+                         optionsText: 'text',
+                         optionsValue: 'id',
+                         optionsCaption: loc('choose'),
+                         value: taskType"
+              class="form-input combobox long">
+            </select>
+
+            <label class="form-label" data-bind="visible: subtypeNeeded, text: subtypeHeader"></label>
+            <select id="choose-task-subtype"
+              data-bind="options: taskSubtypes,
+                         optionsText: 'text',
+                         optionsValue: 'id',
+                         optionsCaption: loc('choose'),
+                         value: taskSubtype,
+                         visible: subtypeNeeded,
+                         valueAllowUnset: true"
+              class="form-input combobox long">
+            </select>
+
+            <label class="form-label" data-bind="ltext: 'task.name'"></label>
+            <input class="form-input text long" type="text" id="create-task-name" data-bind="textInput: taskName" />
+
+            <button data-test-id="create-task-save" class="btn btn-primary btn-dialog close" data-bind="click: save, enable: enabled, ltext: 'save'"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

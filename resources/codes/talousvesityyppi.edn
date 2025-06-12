@@ -1,0 +1,228 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Network connections",
+    :fi "Verkostoliittymä",
+    :sv "Nätverksanslutning"},
+   :codeValue "01",
+   :created "2023-01-04T16:43:20.111Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/01/members/",
+   :modified "2023-12-04T10:50:18.464Z",
+   :status "VALID",
+   :id "21e61332-a19b-4452-83b5-56a1374d62ee",
+   :statusModified "2023-01-04T16:43:20.111Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/01",
+   :order 9,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Private well", :fi "Oma kaivo", :sv "Egen brunn"},
+   :codeValue "02",
+   :created "2023-01-04T16:43:20.127Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02/members/",
+   :modified "2023-12-04T10:50:18.479Z",
+   :status "VALID",
+   :id "d7da1665-2a4a-4a8a-917e-a6e098934197",
+   :statusModified "2023-01-04T16:43:20.127Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02",
+   :order 10,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Dug well", :fi "Rengaskaivo", :sv "Schaktbrunn"},
+   :codeValue "0201",
+   :created "2023-01-04T16:43:20.133Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0201/members/",
+   :modified "2023-12-04T10:50:18.485Z",
+   :broaderCode
+   {:prefLabel {:en "Private well", :fi "Oma kaivo", :sv "Egen brunn"},
+    :codeValue "02",
+    :created "2023-01-04T16:43:20.127Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02/members/",
+    :modified "2023-12-04T10:50:18.479Z",
+    :status "VALID",
+    :id "d7da1665-2a4a-4a8a-917e-a6e098934197",
+    :statusModified "2023-01-04T16:43:20.127Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02",
+    :order 10,
+    :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "899ade50-efb9-41ae-bf7a-f1878302ab68",
+   :statusModified "2023-01-04T16:43:20.133Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0201",
+   :order 11,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/0201",
+   :hierarchyLevel 2}
+  {:prefLabel {:en "Bored well", :fi "Porakaivo", :sv "Borrbrunn"},
+   :codeValue "0202",
+   :created "2023-01-04T16:43:20.139Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0202/members/",
+   :modified "2023-12-04T10:50:18.492Z",
+   :broaderCode
+   {:prefLabel {:en "Private well", :fi "Oma kaivo", :sv "Egen brunn"},
+    :codeValue "02",
+    :created "2023-01-04T16:43:20.127Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02/members/",
+    :modified "2023-12-04T10:50:18.479Z",
+    :status "VALID",
+    :id "d7da1665-2a4a-4a8a-917e-a6e098934197",
+    :statusModified "2023-01-04T16:43:20.127Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02",
+    :order 10,
+    :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "cecd76e2-6bbb-47f5-8641-8eed542239e2",
+   :statusModified "2023-01-04T16:43:20.139Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0202",
+   :order 12,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/0202",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Perforated casing well",
+    :fi "Siiviläputkikaivo",
+    :sv "Brunn med perforerat foderrör"},
+   :codeValue "0203",
+   :created "2023-01-04T16:43:20.145Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0203/members/",
+   :modified "2023-12-04T10:50:18.499Z",
+   :broaderCode
+   {:prefLabel {:en "Private well", :fi "Oma kaivo", :sv "Egen brunn"},
+    :codeValue "02",
+    :created "2023-01-04T16:43:20.127Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02/members/",
+    :modified "2023-12-04T10:50:18.479Z",
+    :status "VALID",
+    :id "d7da1665-2a4a-4a8a-917e-a6e098934197",
+    :statusModified "2023-01-04T16:43:20.127Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02",
+    :order 10,
+    :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "f5b8de4b-41a4-4f69-9540-192aa3b21ae1",
+   :statusModified "2023-01-04T16:43:20.145Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0203",
+   :order 13,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/0203",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Surface well", :fi "Pintavesikaivo", :sv "Ytvattenbrunn"},
+   :codeValue "0204",
+   :created "2023-01-04T16:43:20.151Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0204/members/",
+   :modified "2023-12-04T10:50:18.505Z",
+   :broaderCode
+   {:prefLabel {:en "Private well", :fi "Oma kaivo", :sv "Egen brunn"},
+    :codeValue "02",
+    :created "2023-01-04T16:43:20.127Z",
+    :membersUrl
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02/members/",
+    :modified "2023-12-04T10:50:18.479Z",
+    :status "VALID",
+    :id "d7da1665-2a4a-4a8a-917e-a6e098934197",
+    :statusModified "2023-01-04T16:43:20.127Z",
+    :url
+    "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/02",
+    :order 10,
+    :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/02",
+    :hierarchyLevel 1},
+   :status "VALID",
+   :id "169f527d-4bc6-4aac-9c4e-0135af8cb54b",
+   :statusModified "2023-01-04T16:43:20.151Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/0204",
+   :order 14,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/0204",
+   :hierarchyLevel 2}
+  {:prefLabel
+   {:en "Water carried or pumped", :fi "Kantovesi", :sv "Bärvatten"},
+   :codeValue "03",
+   :created "2023-01-04T16:43:20.156Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/03/members/",
+   :modified "2023-12-04T10:50:18.511Z",
+   :status "VALID",
+   :id "f774c34f-e4ea-4a11-815c-fde2a8fb6dc2",
+   :statusModified "2023-01-04T16:43:20.156Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/03",
+   :order 15,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "No household water",
+    :fi "Ei talousvettä",
+    :sv "Inget hushållsvatten"},
+   :codeValue "04",
+   :created "2023-01-04T16:43:20.161Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/04/members/",
+   :modified "2023-12-04T10:50:18.518Z",
+   :status "VALID",
+   :id "98adc6c5-3e3f-401a-9ced-1c615de61e2d",
+   :statusModified "2023-01-04T16:43:20.161Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/talousvesi/codes/04",
+   :order 16,
+   :uri "http://uri.suomi.fi/codelist/rytj/talousvesi/code/04",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:56:49.668Z"}

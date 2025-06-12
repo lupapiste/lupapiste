@@ -1,0 +1,56 @@
+@use "colors";
+
+@keyframes tooltip-bubble-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tooltip-wrapper {
+  position: relative;
+}
+
+.tooltip-bubble {
+  display: none;
+  width: 250px;
+  background-color: colors.$white;
+  border: 2px solid colors.$night-sky-80;
+  color: colors.$black;
+  padding: 8px 12px;
+  border-radius: 6px;
+  z-index: 1;
+  bottom: 100%;
+  margin-bottom: 10px;
+  left: 0;
+  font-size: 15px;
+  // margin-top: -50px;
+  position: absolute;
+  white-space: pre-line;
+  line-height: 1.5em;
+  transform-origin: 10px 100%;
+  opacity: 0;
+  animation: tooltip-bubble-appear 150ms ease-out 500ms both;
+  cursor: default;
+  font-weight: normal;
+  /* Add some invisible padding below the tooltip to allow hovering it without closing */
+  &:before {
+    content: "";
+    position: absolute;
+    top: 100%;
+    bottom: -12px;
+    left: -2px;
+    width: 50px;
+  }
+  &.long {
+    width: 400px;
+    max-height: 400px;
+    overflow-y: scroll;
+    text-overflow: ellipsis;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+}

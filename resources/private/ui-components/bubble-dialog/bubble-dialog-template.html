@@ -1,0 +1,45 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="bubble-dialog-template">
+  <div data-bind="if: bubbleVisible,
+                  visible: bubbleVisible,
+                  css: css">
+    <div data-bind="template: {nodes: $componentTemplateNodes}"></div>
+    <div class="error"
+         data-bind="visible: error,
+                    ltext: error,
+                    testId: prefix + 'bubble-dialog-error'"></div>
+    <div class="left-buttons">
+      <button class="positive"
+              data-bind="visible: okVisible,
+                         click: ok,
+                         enable: okEnabled,
+                         css: {waiting: waiting},
+                         testId: prefix + 'bubble-dialog-ok'">
+        <i aria-hidden="true"
+           data-bind="css: buttonIcon,
+                      visible: buttonIcon"></i>
+        <i aria-hidden="true"
+           class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: buttonText"></span>
+      </button>
+      <button class="negative"
+              data-bind="visible: removeVisible,
+                         click: remove,
+                         enable: removeEnabled,
+                         css: {waiting: waitingRemove},
+                         testId: prefix + 'bubble-dialog-remove'">
+        <i aria-hidden="true"
+           class="lupicon-remove"></i>
+        <i aria-hidden="true"
+           class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: removeText"></span>
+      </button>
+      <button class="secondary"
+              data-bind="click: cancel,
+                         testId: prefix + 'bubble-dialog-cancel'">
+        <i aria-hidden="true"
+           class="lupicon-remove"></i>
+        <span data-bind="ltext: cancelText"></span>
+      </button>
+    </div>
+  </div>
+</script>

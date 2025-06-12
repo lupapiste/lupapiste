@@ -1,0 +1,6 @@
+"application.calendar.comment.reservation-accepted" "en" "Invitation approved"
+"application.calendar.comment.reservation-accepted" "fi" "Kutsu hyväksytty"
+"application.calendar.comment.reservation-accepted" "sv" "Inbjudan godkänd"
+"auth-admin.organization.properties" "en" "Settings"
+"auth-admin.organization.properties" "fi" "Asetukset"
+"auth-admin.organization.properties" "sv" "Inställningar"

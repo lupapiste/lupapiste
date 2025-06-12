@@ -1,0 +1,20 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="add-property-dialog-template">
+      <div class="content">
+        <div class="map-container">
+          <div id="add-location-map" class="map map-large" style="width: 430px; height: 360px;"></div>
+        </div>
+
+        <div class="with-map-top">
+          <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
+          <input data-bind="textInput: propertyIdInHumanFormat"
+                 data-test-id="app-new-propertyid type="text" maxlength="20" class="form-input text long" />
+         <span data-bind="ltext: 'add-property.propertyId-not-found'"></span>
+         <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
+        </div>
+      </div>
+
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { submit: submit,
+                                            lSubmitTitle: 'application.dialog.add-property.submit',
+                                            isSubmitEnabled: submitIsEnabled}}"></div>
+</script>

@@ -1,0 +1,31 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="person-invite-template">
+        <div class="person-invite">
+          <bubble-dialog params="visible: bubbleVisible,
+                                 buttonIcon: 'lupicon-circle-arrow-right',
+                                 buttonText: 'application-guests.send',
+                                 okEnabled: sendEnabled,
+                                 okFun: send,
+                                 initFun: init,
+                                 error: error,
+                                 prefix: 'person-invite',
+                                 waiting: waiting">
+            <p data-bind="ltext: 'invite.desc'"></p>
+            <label data-bind="ltext: 'guest-authority.email',
+                              attr: {'for': $parent.emailId}"
+                   class="mandatory"></label>
+            <input type="text"
+                   class="lux gap--b1"
+                   data-test-id="person-invite-email"
+                   data-bind="textInput: $parent.email,
+                              attr: {id: $parent.emailId},
+                              valueRequired: $parent.email" />
+            <label data-bind="ltext: 'application-guests.message',
+                              attr: {'for': $parent.messageId }"></label>
+            <textarea data-bind="value: $parent.message,
+                                 attr: {id: $parent.messageId}"
+                      rows="10"
+                      class="lux"
+                      data-test-id="person-invite-message"></textarea>
+          </bubble-dialog>
+        </div>
+</script>

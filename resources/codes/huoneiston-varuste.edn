@@ -1,0 +1,115 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "Toilet", :fi "WC", :sv "Toalett"},
+   :codeValue "01",
+   :created "2021-07-29T08:31:12.492Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/01/members/",
+   :modified "2023-12-04T11:14:28.282Z",
+   :status "VALID",
+   :id "715c5efb-4a07-40f2-b113-24cc1112132e",
+   :statusModified "2021-07-29T08:31:12.492Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/HuoneistoVaruste/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Shower", :fi "Suihku", :sv "Dusch"},
+   :codeValue "02",
+   :created "2021-07-29T08:31:12.497Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/02/members/",
+   :modified "2023-12-04T11:14:28.297Z",
+   :status "VALID",
+   :id "6fef0f02-7baa-4173-a8f9-f516ffba1ae3",
+   :statusModified "2021-07-29T08:31:12.497Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/HuoneistoVaruste/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Sauna", :fi "Sauna", :sv "Bastu"},
+   :codeValue "03",
+   :created "2021-07-29T08:31:12.502Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/03/members/",
+   :modified "2023-12-04T11:14:28.304Z",
+   :status "VALID",
+   :id "979630bb-cef4-4419-b39f-f068593e1e10",
+   :statusModified "2021-07-29T08:31:12.502Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/HuoneistoVaruste/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Balcony", :fi "Parveke", :sv "Balkong"},
+   :codeValue "04",
+   :created "2021-07-29T08:31:12.506Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/04/members/",
+   :modified "2023-12-04T11:14:28.311Z",
+   :status "VALID",
+   :id "6ec78b67-11b7-40ab-8a0b-d7766a3e472a",
+   :statusModified "2021-07-29T08:31:12.506Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/HuoneistoVaruste/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Hot water", :fi "Lämmin vesi", :sv "Varmt vatten"},
+   :codeValue "05",
+   :created "2021-07-29T08:31:12.511Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/05/members/",
+   :modified "2023-12-04T11:14:28.318Z",
+   :status "VALID",
+   :id "5be40305-597e-46b8-99aa-4d74fe1126f3",
+   :statusModified "2021-07-29T08:31:12.511Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/HuoneistoVaruste/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/HuoneistoVaruste/code/05",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:47:34.755Z"}

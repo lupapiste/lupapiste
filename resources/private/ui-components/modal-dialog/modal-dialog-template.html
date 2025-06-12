@@ -1,0 +1,39 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="modal-dialog-template">
+    <!-- dummy div for catching keypress events -->
+    <div data-bind="visible: false, documentEvent: {keypress: cancelAndCloseDialog, key: 27}"></div>
+    <div data-bind="if: showDialog,
+                    descendantsComplete: calculateHeight"
+         id="modal-dialog-content-container">
+      <div class="mask" data-bind="visible: dialogVisible, click: cancelAndCloseDialog"></div>
+      <div class="dialog"
+           role="dialog" aria-labelledby="modal-dialog-title"
+           id="modal-dialog-content" data-test-id="modal-dialog-content"
+           data-bind="fader: dialogVisible, duration: 600,
+                      style: {'max-height': dialogHeightPx()},
+                      css: css">
+        <div class="header">
+          <span id="modal-dialog-title"
+                class="title"
+                data-bind="html: title"></span>
+          <button  class="tertiary close btn-icon-only btn-no-border"
+                   id="modal-dialog-button-close"
+                   autofocus="true"
+                   data-bind="click: cancelAndCloseDialog,
+                              hasFocus: ko.observable( true ),
+                              ariaLtext: 'close',
+                              focusPrevious: '#modal-dialog-content:visible button:last'">
+            <i aria-hidden="true" class="lupicon-remove"></i>
+          </button>
+        </div>
+        <div id="modal-dialog-content-component" class="component"
+             tabindex="-1"
+             data-bind="component: {name: component, params: componentParams},
+                        attr: {'data-test-id': id},
+                        hasFocus: true,
+                        style: {'height': dialogContentHeightPx,
+                        'min-height': minContentHeight},
+                        click: componentClicked">
+        </div>
+      </div>
+    </div>
+</script>

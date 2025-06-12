@@ -1,0 +1,8 @@
+"error.quill.data" "fi" "Virheellinen tekstiformaatti."
+"error.quill.data" "sv" "Felaktigt textformat."
+"error.quill.image.count" "fi" "Tekstissä voi olla enintään yksi kuva."
+"error.quill.image.count" "sv" "Texten kan endast innehålla en bild."
+"error.quill.image.format" "fi" "Virheellinen kuvaformaatti."
+"error.quill.image.format" "sv" "Felaktigt bildformat."
+"error.quill.image.size" "fi" "Kuva on liian iso. Kuvan maksimikoko on vajaa 100 kt."
+"error.quill.image.size" "sv" "Bilden är för stor. Största tillåtna bildstorleken är ca 100 kB."

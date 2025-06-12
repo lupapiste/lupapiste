@@ -1,0 +1,86 @@
+;; shadow-cljs configuration
+{:lein     {:profile "+shadow"}
+ :npm-deps {:install false}
+ ;; Builtin server used to host browser tests
+ :dev-http {8021 "out/test"}
+ :builds   {:front        {:target            :browser
+                           :js-options        {:entry-keys ["module" "browser" "main"]
+                                               ;; Move module & import from end of the priority to the start, to match entry-keys order.
+                                               ;; This is important e.g. for some new @dnd-kit packages, where some
+                                               ;; of them only declare base entries (module etc.) and some use exports.
+                                               ;; It is usually better if e.g. all @dnd-kit packages use same system instead of
+                                               ;; mixing cjs and mjs.
+                                               ;; NOTE: using module/import before require breaks @base-ui/react
+                                               ;; :export-conditions ["module" "import" "browser" "require" "default"]
+                                               }
+                           :output-dir        "resources/public/lp-static/js/"
+                           :asset-path        "/lp-static/js"
+                           :module-loader     true
+                           :module-hash-names true
+                           :modules           {:shared              {:entries [lupapalvelu.next.router
+                                                                               lupapalvelu.dev]}
+                                               :shared-lp           {:depends-on #{:shared}
+                                                                     :entries    [lupapalvelu.ui.entries.shared-lupapiste]}
+                                               :shared-admin        {:depends-on #{:shared-lp}
+                                                                     :entries    []}
+                                               :shared-docgen       {:depends-on #{:shared}
+                                                                     :entries    [lupapalvelu.ui.entries.shared-docgen]}
+                                               :admin               {:depends-on #{:shared-admin}
+                                                                     :entries    [lupapalvelu.ui.entries.admin]}
+                                               :auth-admin          {:depends-on #{:shared-admin}
+                                                                     :entries    [lupapalvelu.ui.entries.auth-admin]}
+                                               :shared-auth-and-app {:depends-on #{:shared-lp
+                                                                                   :shared-docgen}
+                                                                     :entries    [lupapalvelu.ui.entries.shared-auth-and-applicant]}
+                                               :authority           {:depends-on #{:shared-auth-and-app}
+                                                                     :entries    [lupapalvelu.ui.entries.authority]}
+                                               ;; NOTE: the OIR authority view doesn't really need all this. But even though many cljs components
+                                               ;; are not visible, they are still unnecessarily loaded in the DOM.
+                                               :oir-authority       {:depends-on #{:shared-auth-and-app}}
+                                               :suomifi             {:depends-on #{:shared}
+                                                                     :entries    [lupapalvelu.ui.entries.suomifi]}
+                                               :bulletins           {:depends-on #{:shared-docgen}
+                                                                     :entries    [lupapalvelu.ui.entries.bulletins]}
+                                               :bim-viewer          {:entries    [lupapalvelu.ui.location.bim-viewer.viewer]
+                                                                     :depends-on #{:shared-auth-and-app}}
+                                               :financial-authority {:depends-on #{:authority}
+                                                                     :entries    []}
+                                               :neighbor            {:depends-on #{:shared-docgen}}
+                                               :dashboard           {:depends-on #{:shared}
+                                                                     :entries    [lupapalvelu.ui.dashboard.view]}
+                                               :dev-tools           {:depends-on #{:shared}
+                                                                     :entries    [lupapalvelu.dev.impl]}
+                                               :map-libary          {:entries    [lupapalvelu.ui.map-wrapper.impl]
+                                                                     :depends-on #{:shared}}}
+                           :devtools          {:preloads   [lupafront.dev
+                                                            devtools.preload]
+                                               :watch-dir  "resources/public/lp-static/"
+                                               :watch-path "/lp-static"}
+                           :closure-defines   {goog.LOCALE "fi"}
+                           :compiler-options  {:infer-externs :auto}
+                           :dev               {:closure-defines {goog.DEBUG                            true
+                                                                 "re_frame.trace.trace_enabled_QMARK_" true}}
+                           ;; release aka prod (advanced compilation)
+                           ;; use `npx shadow-cljs release front --debug` to de-munge mystical names
+                           ;; if you see errors with with advanced compilation
+                           :release           {:compiler-options
+                                               {:warnings-as-errors true
+                                                :closure-warnings   {:useless-code :off}
+                                                :source-map         true}}}
+            ;; Tests for CI running on node CLI
+            :test         {:target    :node-test
+                           :output-to "out/node-tests.js"
+                           :devtools  {:preloads [lupafront.test-preloads]}}
+            ;; Real-time test results in the browser for developers
+            :test-browser {:target   :browser-test
+                           :test-dir "out/test"
+                           :devtools {:preloads [lupafront.test-preloads]}}
+
+            ;; storybooks
+            ;; Note: source maps are not enabled for prod build
+            ;; as `build-storybook` throws errors when parsing them
+            :ui-doc     {:target          :esm-files
+                         :ns-regexp       "-stories$"
+                         :closure-defines {goog.DEBUG true}
+                         :output-dir      "target/ui-doc/js/"
+                         :build-hooks [(lupapalvelu.dev.ui-doc.shadow-hook/hook)]}}}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="verdict-attachment-prints-order-history-dialogs" style="visibility: visible; display: block;">
+
+      <div id="dialog-verdict-attachment-prints-order-history" class="window autosized">
+        <div data-bind="with: $root.verdictAttachmentPrintsOrderHistoryModel">
+
+          <div class="dialog-header">
+            <p data-bind="ltext: 'verdict-attachment-prints-order-history.dialog.title'"></p>
+            <button class="tertiary close btn-icon-only btn-no-border"
+                    id="print-order-history-close"
+                    data-test-id="verdict-attachment-prints-order-history-close-dialog"
+                    data-bind="ariaLtext: 'close',
+                               focusPrevious: '#print-order-history-ok'">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+            </button>
+          </div>
+          <div class="dialog-content">
+
+            <h3 data-bind="ltext: 'verdict-attachment-prints-order-history.dialog.description'" class="history-dialog-description"></h3>
+            <div data-bind="foreach: historyItems" data-test-id="verdict-attachments-tbody" class="history-items">
+
+              <div class="history-item">
+                <h3>
+                  <span data-bind="dateTimeString: timestamp" data-test-id="print-order-timestamp"></span>:
+                  <span data-bind="text: orderInfo.ordererOrganization" data-test-id="print-order-ordererOrganization"></span>
+                </h3>
+
+                <div class="print-order-files">
+
+                  <!-- Making table's tbody scrollable: -->
+                  <!-- IE < 10 does not like giving a tbody a height.  The workaround here applies the scrolling to a wrapped <div>. -->
+                  <!--[if lte IE 9]>
+                  <div class="old_ie_wrapper">
+                  <![endif]-->
+
+                  <table class="fixed-headers">
+                    <thead>
+                      <tr>
+                        <th data-bind="ltext: 'application.attachmentType'"></th>
+                        <th data-bind="ltext: 'application.attachmentContents'"></th>
+                        <th data-bind="ltext: 'application.attachmentFile'"></th>
+                        <th data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderCount'"></th>
+                      </tr>
+                    </thead>
+                    <tbody data-bind="foreach: attachments" data-test-id="verdict-attachments-tbody">
+                      <tr>
+                        <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])" data-test-id="test-order-attachment-type"></td>
+                        <td data-bind="text: $data.contents" data-test-id="test-order-attachment-contents"></td>
+                        <td data-bind="text: filename" data-test-id="test-order-attachment-filename"></td>
+                        <td class="center">
+                          <input type="text"
+                                 data-bind="textInput: amount,
+                                            ariaLtext: 'verdict-attachment-prints-order.order-dialog.orderCount'"
+                                 data-test-id="test-order-amount"
+                                 class="lux order-amount" disabled />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <!--[if lte IE 9]>
+                  </div>
+                  <!--<![endif]-->
+
+                </div>
+              </div>
+            </div>
+
+            <div class="clear">
+              <button data-bind="click: LUPAPISTE.ModalDialog.close,
+                                 ltext: 'button.ok',
+                                 focusNext: '#print-order-history-close'"
+                      class="btn btn-primary btn-dialog btn-prints-dialog-ok"
+                      id="print-order-history-ok"
+                      autofocus="true"
+                      data-test-id="verdict-attachment-prints-history-ok">
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

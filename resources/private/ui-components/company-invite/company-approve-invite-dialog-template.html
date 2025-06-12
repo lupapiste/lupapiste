@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="company-approve-invite-dialog-template">
+  <div class="content">
+    <p data-bind="html: text" class="dialog-desc"></p>
+    <!-- ko if: lupapisteApp.models.globalAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths") -->
+    <div class="checkbox-wrapper">
+      <input type="checkbox"
+             id="apply-submit-restriction"
+             data-bind="checked: applySubmitRestriction">
+      <label class="checkbox-label"
+             for="apply-submit-restriction"
+             data-bind="ltext: 'application.applySubmitRestrictionForOthers'"></label>
+    </div>
+    <!-- /ko  -->
+  </div>
+  <div data-bind="component: {name:'yes-no-button-group',
+                              params: {yesFn: yes,
+                                       noFn:  no,
+                                       yesTitle: yesTitle,
+                                       noTitle: noTitle,
+                                       yesEnabled: yesEnabled}}"></div>
+</script>

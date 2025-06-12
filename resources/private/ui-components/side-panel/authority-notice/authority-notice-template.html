@@ -1,0 +1,35 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="authority-notice-template">
+  <div>
+    <div>
+        <label class="lux" data-bind="ltext: 'application.tags'"></label>
+        <div data-test-id="autocomplete-application-tags-component"
+             data-bind="component: {name: 'autocomplete-application-tags',
+                        params: {tags: true,
+                        selectedValues: tags,
+                        disable: !authorization.ok('add-application-tags'),
+                        lPlaceholder: 'tags.autocomplete.placeholder'}}"></div>
+    </div>
+
+    <div class="gap--t1 notice--urgency"
+         data-bind="component: {name: 'select-field',
+                    params: {value: urgency,
+                    options: LUPAPISTE.config.urgencyStates,
+                    optionsText: function(item) {
+                    return loc(['notice', 'urgency', item]);
+                    },
+                    lLabel: 'notice.urgency',
+                    id: 'application-authority-urgency',
+                    disable: !authorization.ok('change-urgency')}}">
+      </div>
+
+    <div class="gap--t1 notice--notes"
+         data-bind="component: {name: 'textarea-field',
+                    params: {value: authorityNotice,
+                    id: 'application-authority-notice',
+                    label: noticeLabel,
+                    lPlaceholder: 'comment.placeholder',
+                    disable: !authorization.ok('add-authority-notice')}}">
+      </div>
+  </div>
+</script>

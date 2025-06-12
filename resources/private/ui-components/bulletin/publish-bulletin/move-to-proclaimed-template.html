@@ -1,0 +1,15 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="move-to-proclaimed-template">
+  <!-- ko if: !alreadyProclaimed() || proclaimAgain() -->
+  <p>
+    <span data-bind="ltext: 'bulletin.application.state.label'"></span>
+    <span class="bulletin-state" data-bind="ltext: 'bulletin.state.proclaimed'"></span>
+  </p>
+  <div data-bind="template: 'edit-proclaimed-template'"></div>
+  <div data-bind="template: 'publish-button-template'"></div>
+  <!-- /ko -->
+  <!-- ko if: alreadyProclaimed() && !proclaimAgain() -->
+  <button class="primary" data-bind="toggleClick: proclaimAgain">
+    <span data-bind="ltext: 'bulletin.proclamation.proclaimAgain'"></span>
+  </button>
+  <!-- /ko -->
+</script>

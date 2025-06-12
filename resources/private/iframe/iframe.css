@@ -1,0 +1,3 @@
+/* Document that is displayed in iframe
+   must have these properties to avoid scrollbars */
+html,body {overflow:hidden;width:100%;}

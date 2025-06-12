@@ -1,0 +1,6 @@
+"suomi.fi.huoneistotyyppi.asuinhuoneisto" "en" "Apartment"
+"suomi.fi.huoneistotyyppi.asuinhuoneisto" "fi" "Asuinhuoneisto"
+"suomi.fi.huoneistotyyppi.asuinhuoneisto" "sv" "Bostadslägenhet"
+"suomi.fi.huoneistotyyppi.toimitila" "en" "Business premises"
+"suomi.fi.huoneistotyyppi.toimitila" "fi" "Toimitila"
+"suomi.fi.huoneistotyyppi.toimitila" "sv" "Lokal"

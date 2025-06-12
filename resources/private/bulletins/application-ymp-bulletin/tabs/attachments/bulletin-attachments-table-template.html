@@ -1,0 +1,40 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="bulletin-attachments-table-template">
+      <table class="table attachments-template-table bulletin-attachments" data-test-id="bulletin-attachments-template-table">
+        <thead>
+            <tr>
+              <th data-bind="ltext: 'application.attachmentType'"></th>
+              <th data-bind="ltext: 'application.attachmentFile'"></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: $data">
+          <tr>
+            <td>
+              <span data-bind="if: type">
+                <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+              </span>
+              <span data-bind="if: !type">
+                <i data-bind="ltext: 'attachment.noName'"></i>
+              </span>
+              <!-- ko if: $data.contents -->
+                <div><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
+              <!-- /ko -->
+            </td>
+            <td>
+              <span data-bind="if: $data.latestVersion">
+                <a href="#" data-bind="text: latestVersion.filename,
+                                       attr: {'href': '/api/raw/download-bulletin-attachment?bulletin-id=' + $component.bulletinId() + '&attachment-id=' + latestVersion.fileId,
+                                              'title': loc('download'),
+                                              'data-test-id': 'download-bulletin-attachment-' + $index()},
+                                       click: function() {return true;},
+                                       clickBubble: false"></a><br/>
+                <i data-bind="ltext: latestVersion.contentType"></i>
+                <i data-bind="size: latestVersion.size"></i>
+              </span>
+              <!-- ko if: !$data.latestVersion -->
+              <span data-bind="ltext: 'application.attachmentsEmpty'"></span>
+              <!-- /ko -->
+            </td>
+          </tr>
+        </tbody>
+      </table>
+</script>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs"
+                       xmlns:gml="http://www.opengis.net/gml"
+                       xmlns:ogc="http://www.opengis.net/ogc"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:ymi="http://www.kuntatietopalvelu.fi/gml/ymparisto/ilmoitukset"
+                       xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset"
+                       xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.tekla.com/schemas/kuntagml https://helsinki.asiointi.fi/teklaogcweb_test/WFS.ashx?SERVICE=WFS&amp;VERSION=1.1.0&amp;REQUEST=DescribeFeatureType&amp;typeName=ymi:melutarina " timeStamp="2024-08-29T11:32:31+03:00" numberOfFeatures="1">
+ <gml:boundedBy>
+  <gml:Envelope srsName="http://www.opengis.net/gml/srs/epsg.xml#3879">
+   <gml:lowerCorner>25498284.567 6672847.145</gml:lowerCorner>
+   <gml:upperCorner>25498284.567 6672847.145</gml:upperCorner>
+  </gml:Envelope>
+ </gml:boundedBy><gml:featureMember>
+  <ymi:Melutarina>
+    <yht:yksilointitieto>5437192</yht:yksilointitieto>
+    <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+    <ymi:kasittelytietotieto>
+      <ymi:Kasittelytieto>
+        <yht:muutosHetki>2024-04-25T00:00:00</yht:muutosHetki>
+        <yht:hakemuksenTila>2 Lupa haettu</yht:hakemuksenTila>
+        <yht:kunnanYhteyshenkiloSukunimi>RV</yht:kunnanYhteyshenkiloSukunimi>
+        <yht:asiatunnus>LP-091-2024-90156</yht:asiatunnus>
+      </ymi:Kasittelytieto>
+    </ymi:kasittelytietotieto>
+    <ymi:kasittelytietotieto>
+      <ymi:Kasittelytieto>
+        <yht:muutosHetki>2024-05-20T00:00:00</yht:muutosHetki>
+        <yht:hakemuksenTila>3 Lupa myönnetty</yht:hakemuksenTila>
+        <yht:kunnanYhteyshenkiloSukunimi>RV</yht:kunnanYhteyshenkiloSukunimi>
+        <yht:asiatunnus>LP-091-2024-90156</yht:asiatunnus>
+      </ymi:Kasittelytieto>
+    </ymi:kasittelytietotieto>
+    <ymi:kasittelytietotieto>
+      <ymi:Kasittelytieto>
+        <yht:muutosHetki>2024-05-29T00:00:00</yht:muutosHetki>
+        <yht:hakemuksenTila>3 Lupa myönnetty</yht:hakemuksenTila>
+        <yht:asiatunnus>LP-091-2024-90156</yht:asiatunnus>
+      </ymi:Kasittelytieto>
+    </ymi:kasittelytietotieto>
+    <ymi:kasittelytietotieto>
+      <ymi:Kasittelytieto>
+        <yht:muutosHetki>2024-03-28T00:00:00</yht:muutosHetki>
+        <yht:hakemuksenTila>1 Vireillä</yht:hakemuksenTila>
+        <yht:kunnanYhteyshenkiloSukunimi>RV</yht:kunnanYhteyshenkiloSukunimi>
+        <yht:asiatunnus>LP-091-2024-90156</yht:asiatunnus>
+      </ymi:Kasittelytieto>
+    </ymi:kasittelytietotieto>
+    <ymi:luvanTunnistetiedot>
+      <yht:LupaTunnus>
+        <yht:kuntalupatunnus>91-2024-23</yht:kuntalupatunnus>
+        <yht:muuTunnustieto>
+          <yht:MuuTunnus>
+            <yht:tunnus>LP-091-2024-90156</yht:tunnus>
+            <yht:sovellus />
+          </yht:MuuTunnus>
+        </yht:muuTunnustieto>
+        <yht:muuTunnustieto>
+          <yht:MuuTunnus>
+            <yht:tunnus>LP-091-2024-90156</yht:tunnus>
+            <yht:sovellus>Lupapistetunnus</yht:sovellus>
+          </yht:MuuTunnus>
+        </yht:muuTunnustieto>
+        <yht:saapumisPvm>2024-03-28</yht:saapumisPvm>
+      </yht:LupaTunnus>
+    </ymi:luvanTunnistetiedot>
+    <ymi:toiminnanSijaintitieto />
+    <ymi:ilmoittaja>
+      <yht:sukunimi>Kouluttaja</yht:sukunimi>
+      <yht:etunimi>Keke</yht:etunimi>
+      <yht:osoitetieto>
+        <yht:Osoite>
+          <yht:osoitenimi>
+            <yht:teksti xml:lang="und">Osoite 2</yht:teksti>
+          </yht:osoitenimi>
+          <yht:postinumero>00100</yht:postinumero>
+          <yht:postitoimipaikannimi>Helsinki</yht:postitoimipaikannimi>
+        </yht:Osoite>
+      </yht:osoitetieto>
+      <yht:puhelinnumero>987876222</yht:puhelinnumero>
+      <yht:sahkopostiosoite>ilmoittaja@example.com</yht:sahkopostiosoite>
+      <yht:verkkolaskutustieto>
+        <yht:Verkkolaskutus>
+          <yht:verkkolaskuTunnus>UNKNOWN FIELD 'ElectronicInvoiceAddress' TABLE RpmPermitParty</yht:verkkolaskuTunnus>
+          <yht:valittajaTunnus>UNKNOWN FIELD 'ElectronicInvoiceOperator' TABLE RpmPermitParty</yht:valittajaTunnus>
+        </yht:Verkkolaskutus>
+      </yht:verkkolaskutustieto>
+    </ymi:ilmoittaja>
+    <ymi:asianKuvaus>Luvan kuvauss kohteen tekstiä</ymi:asianKuvaus>
+    <ymi:toimintatieto>
+      <ymi:Toiminta gml:id="toiminta.5437192">
+        <yht:yksilointitieto>5437192</yht:yksilointitieto>
+        <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+        <ymi:tapahtuma>
+          <ymi:muu>Laivastokatu 3</ymi:muu>
+        </ymi:tapahtuma>
+        <ymi:sijaintitieto>
+          <yht:Sijainti>
+            <yht:piste>
+              <gml:Point>
+                <gml:pos>25498284.567 6672847.145</gml:pos>
+              </gml:Point>
+            </yht:piste>
+          </yht:Sijainti>
+        </ymi:sijaintitieto>
+      </ymi:Toiminta>
+    </ymi:toimintatieto>
+    <ymi:toiminnanKesto>
+      <ymi:alkuPvm>2024-04-11</ymi:alkuPvm>
+      <ymi:loppuPvm>2024-04-12</ymi:loppuPvm>
+    </ymi:toiminnanKesto>
+    <ymi:melutiedot>
+      <ymi:koneidenLkm>0</ymi:koneidenLkm>
+      <ymi:melutaso />
+    </ymi:melutiedot>
+    <ymi:melunJaTarinanLeviaminen>
+      <ymi:MelunJaTarinanLeviaminen gml:id="melunJaTarinanLeviaminen.5437192">
+        <yht:yksilointitieto>5437192</yht:yksilointitieto>
+        <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+      </ymi:MelunJaTarinanLeviaminen>
+    </ymi:melunJaTarinanLeviaminen>
+    <ymi:melunJaTarinanTorjuntaJaSeuranta />
+    <ymi:liitetieto>
+      <ymi:Liite>
+        <yht:kuvaus />
+        <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+        <yht:metatietotieto>
+          <yht:metatieto />
+        </yht:metatietotieto>
+      </ymi:Liite>
+    </ymi:liitetieto>
+  </ymi:Melutarina>
+</gml:featureMember></wfs:FeatureCollection>

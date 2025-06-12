@@ -1,0 +1,43 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="register-company-summary-template">
+  <h2 data-bind="lhtml: 'register.company.summary.title'"></h2>
+  <div class="register-company-container register-company-summary tabby">
+    <div class="tabby__row">
+      <div class="tabby__cell">
+        <span><strong data-bind="text: summaryText, testId: 'summary-account-text'"></strong></span>
+      </div>
+      <div class="tabby__cell">
+        <span data-bind="ltext: 'register.company.billing.' + billingType() + '.description'"></span>
+      </div>
+      <div class="tabby__cell">
+        <span data-bind="text: normalPriceText"></span>
+      </div>
+    </div>
+    <div class="tabby__row">
+      <div class="tabby__cell">
+        <span data-bind="text: selectedAccount().description"></span>
+      </div>
+
+      <div class="tabby__cell">
+        <!-- ko if: selectedAccount().isYearly -->
+        <span class="discount" data-bind="ltext: 'register.company.billing.discount'"></span>
+        <!-- /ko -->
+      </div>
+      <div class="tabby__cell">
+        <!-- ko if: selectedAccount().isYearly -->
+        <span class="discount" data-test-id="reduction-price" data-bind="text: yearlyPriceReductionText"></span>
+        <!-- /ko -->
+      </div>
+    </div>
+    <div class="tabby__row total-row">
+      <div class="tabby__cell">
+        <!-- empty -->
+      </div>
+      <div class="tabby__cell">
+        <span><strong data-bind="ltext: 'register.company.total'"></strong></span>
+      </div>
+      <div class="tabby__cell">
+        <span><strong data-bind="text: totalPriceText"></strong></span>
+      </div>
+    </div>
+  </div>
+</script>

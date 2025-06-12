@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="state-icons-template">
+  <div class="attachment-state-icons"
+       data-bind="foreach: stateIcons()">
+    <i data-bind="attr: {'class': css,
+                         'data-test-icon': icon + '-icon'},
+                  tooltip: info && {text: info,
+                                    attr: {'data-test-id': 'attachment-state-icons-hover-' + icon}}">
+    </i>
+  </div>
+
+  <!-- Archive Problem Icon -->
+  <div class="attachment-state-icons">
+      <!-- ko if: hasArchiveProblem() -->
+          <i class="lupicon-circle-info negative"
+            data-bind="tooltip: {ltext: getArchivabilityError(),
+                                 attr: {'data-test-id': 'archive-problem-text'}}"
+            data-test-id="archive-problem-icon">
+          </i>
+      <!-- /ko -->
+  </div>
+</script>

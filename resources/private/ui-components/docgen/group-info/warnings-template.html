@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="warnings-template">
+  <!-- ko if: _.size( warnings() ) -->
+  <div class="warnings"
+       data-bind="foreach: warnings">
+    <div role="alert"
+         data-bind="attr: {id: $data.id},
+                    ariaText: $parent.ariaLabel( $data )">
+      <span class="warning" aria-hidden="true">
+        <strong><span data-bind="text: $data.label"></span>:</strong>
+        <span data-bind="ltext: $data.error"></span>
+      </span>
+    </div>
+  </div>
+  <!-- /ko -->
+</script>

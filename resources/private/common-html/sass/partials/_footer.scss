@@ -1,0 +1,126 @@
+@use "base";
+@use "colors";
+@use "theme";
+
+// Footer colors.
+$footer-bg: colors.$black;
+$footer-bi-bg: colors.get-gray( 2 ); // bi = build info
+$footer-txt: colors.$white;
+$footer-link: colors.$white;
+$footer-hover: colors.get-blue( 15 ); // Hover and active
+$footer-bi: colors.get-gray( 10 );
+
+footer:where(:not(.nobase, .nobase *)) {
+  margin-top: base.$marginL*3;
+  padding-top: base.$marginL;
+  position: absolute;
+  clear:both;
+  color: $footer-txt;
+  background-color: $footer-bg;
+  height: auto;
+  bottom: 0;
+  width: 100%;
+  @media print {
+    display: none;
+  }
+
+  .informations {
+    padding: base.$marginM;
+    width: 100%;
+    max-width: base.$application-max-width;
+    margin: 0 auto base.$marginM;
+    .footer-box {
+      font-size: 16px;
+      vertical-align: top;
+      width: 24.5%;
+      display: inline-block;
+      float: left;
+      padding-right: base.$marginL;
+      box-sizing: border-box;
+      span.footer-title {
+          font-size: 18px;
+          font-weight: bold;
+          display: block;
+          margin-bottom: .5em;
+      }
+      a:link, a:visited {
+          color: $footer-link;
+          display: inline-block;
+          text-decoration: underline;
+          &:hover, &:active { color: $footer-hover }
+      }
+    }
+    @media (max-width:991px) {
+      .footer-box {
+        clear: left;
+        width: 100%;
+        ul.footer-links {
+          li {
+            display: inline-block;
+            margin-right: 1em;
+          }
+        }
+      }
+    }
+  }
+
+  .lupapiste-brand {
+    .footer-box {
+      //@include nav-link($link: $orange, $hover: white);
+      color: theme.$blue;
+      a {
+        vertical-align: middle;
+        span {
+          vertical-align: baseline;
+        }
+      }
+      i {
+        vertical-align: middle;
+        padding-left: base.$marginS;
+      }
+    }
+    .footer-align-right {
+      float: right;
+      ul {
+        float: right;
+      }
+    }
+  }
+
+  p {
+    color: $footer-txt;
+  }
+}
+
+@media (max-width:991px) {
+  body {
+    padding-bottom: base.$footer-mid-padding !important; // from _base.scss
+  }
+}
+
+@media (max-width:383px) {
+  body {
+    padding-bottom: base.$footer-max-padding !important; // from _base.scss
+  }
+}
+
+footer:where(:not(.nobase, .nobase *)) ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+footer:where(:not(.nobase, .nobase *)) ul li {
+    margin: {
+        bottom: .5em;
+        top: 0;
+    }
+}
+
+#buildinfo {
+    clear: both;
+    display: block;
+    background-color: $footer-bi-bg;
+    padding: base.$marginM;
+    color: $footer-bi;
+}

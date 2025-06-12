@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization-store-settings">
+      <div class="container container--authority-admin"
+           data-bind="if: organization.organizationId() &&
+                      lupapisteApp.models.rootVMO.currentPage() === 'organization-store-settings',
+                      css: lupapisteApp.services.naviSidebarService.containerCss">
+        <cljs-auth-admin_store_view params="orgId: organization.organizationId()">
+        </cljs-auth-admin_store_view>
+      </div>
+    </section>
+  </body>
+</html>

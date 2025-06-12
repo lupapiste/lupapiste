@@ -1,0 +1,373 @@
+<?xml version="1.0" standalone="yes"?>
+<rakval:Rakennusvalvonta xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                                             http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.5/rakennusvalvonta.xsd"
+                         xmlns:gml="http://www.opengis.net/gml"
+                         xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+                         xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <gml:boundedBy>
+    <gml:Envelope srsDimension="2" srsName="Unknown EPSG">
+      <gml:lowerCorner>0.00 0.00</gml:lowerCorner>
+      <gml:upperCorner>0.00 0.00</gml:upperCorner>
+    </gml:Envelope>
+  </gml:boundedBy>
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi></yht:aineistonnimi>
+    <yht:aineistotoimittaja></yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2014-04-28</yht:toimitusPvm>
+    <yht:kuntakoodi>109</yht:kuntakoodi>
+    <yht:kielitieto>fi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rakennusvalvontaAsia.150987681">
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2014-04-28</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Koulutus 1 Kayttaja</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>109-2014-140</yht:kuntalupatunnus>
+          <yht:muuTunnustieto><yht:MuuTunnus><yht:tunnus>LP-109-2014-00113</yht:tunnus></yht:MuuTunnus></yht:muuTunnustieto>
+          <yht:saapumisPvm>2014-04-28</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>6</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>6</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Koulutus 1</yht:etunimi>
+                  <yht:sukunimi>Kayttaja 1</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="und"></yht:teksti>
+                  </yht:osoitenimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>r-koulutus-1@109.fi</yht:sahkopostiosoite>
+              </yht:henkilo>
+              <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:VRKrooliKoodi>pääsuunnittelija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:sukunimi>Example</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="und">Jokiniementie 12</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>12700</yht:postinumero>
+                  <yht:postitoimipaikannimi>LOPPI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:puhelin>0400-000000</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>Rak. teknikko talonrak.</yht:koulutus>
+              <yht:valmistumisvuosi>1986</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka>
+          <yht:yksilointitieto>150987686</yht:yksilointitieto>
+          <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kiinteistotunnus>10903600460005</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti><yht:alue>
+  <gml:Polygon>
+    <gml:exterior>
+      <gml:LinearRing>
+        <gml:pos>25475600.3241 6766591.1850</gml:pos>
+        <gml:pos>25475618.4181 6766613.8759</gml:pos>
+        <gml:pos>25475640.1373 6766594.5988</gml:pos>
+        <gml:pos>25475622.9977 6766573.1048</gml:pos>
+        <gml:pos>25475600.3241 6766591.1850</gml:pos>
+      </gml:LinearRing>
+    </gml:exterior>
+  </gml:Polygon>
+</yht:alue></yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:rakennusoikeusYhteensa>0.000</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="und"></yht:teksti>
+            </yht:osoitenimi>
+          </yht:osoite>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide><rakval:uusi>
+  <rakval:huoneistoala>
+    <yht:pintaAla>116.000</yht:pintaAla>
+    <yht:kayttotarkoitusKoodi>asuntotilaa(ei vapaa-ajan asunnoista)</yht:kayttotarkoitusKoodi>
+  </rakval:huoneistoala><rakval:kuvaus>muu</rakval:kuvaus></rakval:uusi><rakval:rakennustieto>
+            <rakval:Rakennus gml:id="rakennus.150987687">
+              <yht:yksilointitieto>150987687</yht:yksilointitieto>
+              <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki><rakval:sijaintitieto>
+  <rakval:Sijainti>
+    <yht:tyhja/>
+  </rakval:Sijainti>
+</rakval:sijaintitieto><rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
+                <rakval:tilavuus>490</rakval:tilavuus>
+                <rakval:kokonaisala>134</rakval:kokonaisala>
+                <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+                <rakval:kerrosluku>1</rakval:kerrosluku>
+                <rakval:kerrosala>134</rakval:kerrosala>
+                <rakval:rakentamistapa>paikalla</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine><rakval:rakennusaine>puu</rakval:rakennusaine></rakval:kantavaRakennusaine>
+                <rakval:julkisivu><rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali></rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>true</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:paloluokka>P3</rakval:paloluokka>
+                <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                <rakval:lammonlahde><rakval:polttoaine>maalämpö</rakval:polttoaine></rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>true</rakval:koneellinenilmastointiKytkin>
+                  <rakval:saunoja>0</rakval:saunoja>
+                  <rakval:uima-altaita>0</rakval:uima-altaita>
+                  <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+                </rakval:varusteet>
+                <rakval:asuinhuoneistot>
+                  <rakval:huoneisto>
+                    <rakval:muutostapa>lisäys</rakval:muutostapa>
+                    <rakval:huoneluku>4</rakval:huoneluku>
+                    <rakval:keittionTyyppi>keittio</rakval:keittionTyyppi>
+                    <rakval:huoneistoala>116.0</rakval:huoneistoala>
+                    <rakval:varusteet>
+                      <rakval:WCKytkin>true</rakval:WCKytkin>
+                      <rakval:ammeTaiSuihkuKytkin>true</rakval:ammeTaiSuihkuKytkin>
+                      <rakval:saunaKytkin>true</rakval:saunaKytkin>
+                      <rakval:parvekeTaiTerassiKytkin>true</rakval:parvekeTaiTerassiKytkin>
+                      <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                    </rakval:varusteet>
+                    <rakval:huoneistonTyyppi>asuinhuoneisto</rakval:huoneistonTyyppi>
+                    <rakval:huoneistotunnus>
+                      <rakval:huoneistonumero>000</rakval:huoneistonumero>
+                    </rakval:huoneistotunnus>
+                  </rakval:huoneisto>
+                  <rakval:asuntojenPintaala>116.000</rakval:asuntojenPintaala>
+                  <rakval:asuntojenLkm>1</rakval:asuntojenLkm>
+                </rakval:asuinhuoneistot>
+                <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+              </rakval:rakennuksenTiedot>
+              <rakval:rakentajatyyppi>liiketaloudellinen</rakval:rakentajatyyppi>
+              <rakval:omistajatieto>
+                <rakval:Omistaja>
+                  <yht:kuntaRooliKoodi>6</yht:kuntaRooliKoodi>
+                  <yht:VRKrooliKoodi>6</yht:VRKrooliKoodi>
+                  <yht:henkilo>
+                    <yht:nimi>
+                      <yht:etunimi>Ville</yht:etunimi>
+                      <yht:sukunimi>Exempel</yht:sukunimi>
+                    </yht:nimi>
+                    <yht:osoite>
+                      <yht:osoitenimi>
+                        <yht:teksti xml:lang="und">Ravikatu 7 b 22</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>13270</yht:postinumero>
+                      <yht:postitoimipaikannimi>Hämeenlinna</yht:postitoimipaikannimi>
+                    </yht:osoite>
+                    <yht:sahkopostiosoite>r-koulutus-1@109.fi</yht:sahkopostiosoite>
+                    <yht:puhelin>040-111111</yht:puhelin>
+                  </yht:henkilo>
+                  <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                  <rakval:omistajalaji><rakval:omistajalaji>muu yksityinen henkilö tai perikunta</rakval:omistajalaji></rakval:omistajalaji>
+                </rakval:Omistaja>
+              </rakval:omistajatieto>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenLaji>33</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Vastaavan työnjohtajan on ylläpidettävä rakennustyön tarkastusasiakirjaa, johon eri rakennusvaiheiden vastuuhenkilöt ja työvaiheiden tarkastuksia suorittavat henkilöt varmentavat tekemänsä tarkastukset (MRL 150 § 3. mom., MRA 77 §).</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:lasnaolijat></rakval:lasnaolijat>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenLaji>33</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Rakennuksesta on, sen käyttöönottoon mennessä, laadittava käyttö- ja huolto-ohje (MRL 153 § 2 mom., MRA 66 §).</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:lasnaolijat></rakval:lasnaolijat>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:kerrosala>134.000</yht:kerrosala>
+            <yht:kokonaisala>134.000</yht:kokonaisala>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>aloituskokous</yht:katselmuksenLaji>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>rakennuksen paikan merkitseminen</yht:katselmuksenLaji>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>rakennuksen paikan tarkastaminen</yht:katselmuksenLaji>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maarays>
+              <yht:sisalto>Vastaavan työnjohtajan on ylläpidettävä rakennustyön tarkastusasiakirjaa, johon eri rakennusvaiheiden vastuuhenkilöt ja työvaiheiden tarkastuksia suorittavat henkilöt varmentavat tekemänsä tarkastukset (MRL 150 § 3. mom., MRA 77 §).</yht:sisalto>
+            </yht:maarays>
+            <yht:maarays>
+              <yht:sisalto>Rakennuksesta on, sen käyttöönottoon mennessä, laadittava käyttö- ja huolto-ohje (MRL 153 § 2 mom., MRA 66 §).</yht:sisalto>
+            </yht:maarays>
+            <yht:maarays>
+              <yht:sisalto>Ennen kunkin työvaiheen aloittamista on rakennusvalvontaviranomaiselle esitettävä: Rakennesuunnitelmat
+Vesi- ja viemärisuunnitelmat
+Ilmanvaihtosuunnitelmat</yht:sisalto>
+            </yht:maarays>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>Vastaava työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>KVV-työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaLaji>IV-työnjohtaja</yht:tyonjohtajaLaji>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:lainvoimainenPvm>2014-05-15</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2019-05-15</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2014-04-30</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2019-05-15</yht:viimeinenValitusPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Päätösteksti:
+Päätösehdotuksen lisäteksti: </yht:paatos>
+            <yht:paatoskoodi>hyväksytty</yht:paatoskoodi>
+            <yht:paatoksentekija>Rak.tark. Heikki Esimerkki</yht:paatoksentekija>
+            <yht:paatospvm>2014-04-28</yht:paatospvm>
+            <yht:pykala>100</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+          <rakval:rakentamisentiedot>
+            <rakval:uusiaAsuntojaLkm>1</rakval:uusiaAsuntojaLkm>
+            <rakval:uusiaRakennuksiaLkm>1</rakval:uusiaRakennuksiaLkm>
+            <rakval:tilavuus>490</rakval:tilavuus>
+          </rakval:rakentamisentiedot>
+          <rakval:suunnittelijanVaativuustaso>
+            <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+            <yht:VRKrooliKoodi>pääsuunnittelija</yht:VRKrooliKoodi>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Example</yht:sukunimi>
+              </yht:nimi>
+              <yht:osoite>
+                <yht:osoitenimi>
+                  <yht:teksti xml:lang="und">Jokiniementie 12</yht:teksti>
+                </yht:osoitenimi>
+                <yht:postinumero>12700</yht:postinumero>
+                <yht:postitoimipaikannimi>LOPPI</yht:postitoimipaikannimi>
+              </yht:osoite>
+              <yht:puhelin>0400-000000</yht:puhelin>
+            </yht:henkilo>
+            <yht:koulutus>Rak. teknikko talonrak.</yht:koulutus>
+            <yht:valmistumisvuosi>1986</yht:valmistumisvuosi>
+          </rakval:suunnittelijanVaativuustaso>
+          <rakval:toimitustapa>postitse</rakval:toimitustapa>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:liitetieto>
+        <rakval:Liite>
+          <yht:kuvaus>Application when sent from Lupapiste</yht:kuvaus>
+          <yht:linkkiliitteeseen>http://localhost/liitteet/Rakennuslupaliitteet/LP-109-2014-00113_current_application.pdf</yht:linkkiliitteeseen>
+        </rakval:Liite>
+      </rakval:liitetieto>
+      <rakval:liitetieto>
+        <rakval:Liite>
+          <yht:kuvaus>Application when submitted</yht:kuvaus>
+          <yht:linkkiliitteeseen>http://localhost/liitteet/Rakennuslupaliitteet/LP-109-2014-00113_submitted_application.pdf</yht:linkkiliitteeseen>
+        </rakval:Liite>
+      </rakval:liitetieto>
+      <rakval:liitetieto>
+        <rakval:Liite>
+          <yht:kuvaus>Mäenlaskijankuja 7: asemapiirros</yht:kuvaus>
+          <yht:linkkiliitteeseen>http://localhost/liitteet/Rakennuslupaliitteet/535e2f32e4b0e7f57b4f2ab6_Halli Pikku Parolantie 22.pdf</yht:linkkiliitteeseen>
+        </rakval:Liite>
+      </rakval:liitetieto>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:rakennusvalvontaasianKuvaus>Omakotitalon ja aidan rakentaminen</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

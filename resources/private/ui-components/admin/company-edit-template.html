@@ -1,0 +1,44 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="company-edit-template">
+    <div class="content">
+      <form class="two-col" data-bind="with: company">
+        <label class="form-label" for="name">Nimi</label>
+        <input class="form-input text" name="name" data-bind="value: name"/>
+        <label class="form-label" for="y">Y-tunnus</label>
+        <input class="form-input text" name="y" data-bind="value: y"/>
+        <label class="form-label" for="address1">Osoite</label>
+        <input class="form-input text" name="address1" data-bind="value: address1"/>
+        <label class="form-label" for="zip">Postikoodi</label>
+        <input class="form-input text" name="zip" data-bind="value: zip"/>
+        <label class="form-label" for="po">Toimipaikka</label>
+        <input class="form-input text" name="po" data-bind="value: po"/>
+        <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+        <select name="account-type"
+                class="form-input combobox"
+                data-bind="options: $parent.accountTypes,
+                           optionsText: function(account) {return loc('register.company.' + account.name + '.title');},
+                           optionsValue: 'name',
+                           value: accountType"></select>
+        <!-- ko if: $parent.showCustomCount -->
+        <label class="form-label">Max k&auml;ytt&auml;j&auml;t</label>
+        <input class="form-input text" name="customAccountLimit" data-bind="value: customAccountLimit" />
+        <!-- /ko -->
+        <label class="form-label" for="billing-type" data-bind="ltext: 'register.company.billing.select-type'"></label>
+        <select name="billing-type"
+                class="form-input combobox"
+                data-bind="options: $component.billingTypes,
+                           optionsText: function(type) {return loc('register.company.billing.' + type + '.title');},
+                           value: billingType"></select>
+        <div class="checkbox-wrapper">
+          <input type="checkbox"
+                 id="enable-submit-restrictor-property"
+                 data-bind="checked: submitRestrictor">
+          <label class="checkbox-label"
+                 for="enable-submit-restrictor-property">Yritystili saa rajoittaa hakemuksen j&auml;tt&auml;mist&auml;</label>
+        </div>
+        <div data-bind="component: {name: 'submit-button-group',
+                                    params: { isSubmitVisible: true,
+                                              submit: $parent.saveCompany,
+                                              submitTitle: 'Tallenna'}}"></div>
+      </form>
+      </div>
+</script>

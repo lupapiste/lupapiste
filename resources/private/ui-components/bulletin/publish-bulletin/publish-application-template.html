@@ -1,0 +1,30 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="publish-application-template">
+      <h1 data-bind="ltext: 'bulletin'"></h1>
+      <!-- ko if: showHelp -->
+      <span data-bind="component: { name: 'help-toggle', params: { lhtml: helpText } }"></span>
+      <!-- /ko -->
+      <!-- ko if: notYetPublishedForApplicant -->
+      <p data-bind="ltext: 'bulletin.application.notYetPublished'"></p>
+      <!-- /ko -->
+      <!-- ko if: canNotPublishForAuthority -->
+      <p data-bind="ltext: 'bulletin.application.canNotPublish'"></p>
+      <!-- /ko -->
+      <!-- ko if: showBulletinState -->
+      <p data-test-id="bulletin-state-paragraph">
+        <span data-bind="ltext: 'bulletin.state.label'"></span>
+        <span class="bulletin-state" data-bind="ltext: showBulletinState"></span>
+      </p>
+      <!-- /ko -->
+      <!-- ko if: canMoveToProclaimed -->
+      <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canMoveToProclaimed, bulletinState: bulletinState } }"
+           data-test-id="move-to-proclaimed-fields" ></div>
+      <!-- /ko -->
+      <!-- ko if: canMoveToVerdictGiven -->
+      <div data-bind="component: { name: 'move-to-verdict-given', params: { appId: appId, canPublish: canMoveToVerdictGiven, bulletinState: bulletinState } }"
+           data-test-id="move-to-verdict-given-fields"></div>
+      <!-- /ko -->
+      <!-- ko if: canMoveToFinal -->
+      <div data-bind="component: { name: 'move-to-final', params: { appId: appId, canPublish: canMoveToFinal, bulletinState: bulletinState } }"
+           data-test-id="move-to-final-fields"></div>
+      <!-- /ko -->
+</script>

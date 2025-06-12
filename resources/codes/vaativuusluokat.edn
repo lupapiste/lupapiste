@@ -1,0 +1,126 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Exceptionally high requirement level",
+    :fi "Poikkeuksellisen vaativa",
+    :sv "Exceptionellt krävande"},
+   :codeValue "1",
+   :created "2024-11-25T16:55:50.039Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/1/members/",
+   :modified "2024-11-25T16:55:50.039Z",
+   :status "VALID",
+   :id "ed713a10-e03a-4646-be16-74f3cc321d33",
+   :statusModified "2024-11-25T16:55:50.039Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/1",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/vaativuusluokat/code/1",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Very high requirement level",
+    :fi "Erittäin vaativa",
+    :sv "Mycket krävande"},
+   :codeValue "2",
+   :created "2024-11-25T16:55:50.082Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/2/members/",
+   :modified "2024-11-25T16:55:50.082Z",
+   :status "VALID",
+   :id "5b7f710a-4185-4cca-b809-6eb405371f4b",
+   :statusModified "2024-11-25T16:55:50.082Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/2",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/vaativuusluokat/code/2",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "High requirement level", :fi "Vaativa", :sv "Krävande"},
+   :codeValue "3",
+   :created "2024-11-25T16:55:50.104Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/3/members/",
+   :modified "2024-11-25T16:55:50.104Z",
+   :status "VALID",
+   :id "43913f39-0645-4512-a166-ab96db252428",
+   :statusModified "2024-11-25T16:55:50.104Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/3",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/vaativuusluokat/code/3",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Ordinary requirement level",
+    :fi "Tavanomainen",
+    :sv "Sedvanlig"},
+   :codeValue "4",
+   :created "2024-11-25T16:55:50.128Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/4/members/",
+   :modified "2024-11-25T16:55:50.128Z",
+   :status "VALID",
+   :id "dc692194-d096-48ca-9668-a07a9d546d1d",
+   :statusModified "2024-11-25T16:55:50.128Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/4",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/vaativuusluokat/code/4",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Low requirement level", :fi "Vähäinen", :sv "Ringa"},
+   :codeValue "5",
+   :created "2024-11-25T16:55:50.144Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/5/members/",
+   :modified "2024-11-25T16:55:50.144Z",
+   :status "VALID",
+   :id "11c9a20d-2e01-4df4-8a51-576563c29ec8",
+   :statusModified "2024-11-25T16:55:50.144Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/vaativuusluokat/codes/5",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/vaativuusluokat/code/5",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:55:01.153Z"}

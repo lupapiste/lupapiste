@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="add-operation">
+
+    <h1 data-bind="ltext: 'addOperation'"></h1>
+
+    <operation-tree params="operationTree: operations,
+                            selected: operation,
+                            lastPageComponent: 'last-page-add-operation',
+                            lastPageParams: lastPageParams,
+                            cancelFn: cancel"></operation-tree>
+  </section>
+
+</body>
+</html>

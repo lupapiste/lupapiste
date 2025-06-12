@@ -1,0 +1,4 @@
+"suomi.fi.rakentamistapa.elementti" "fi" "Elementti"
+"suomi.fi.rakentamistapa.elementti" "sv" "Element"
+"suomi.fi.rakentamistapa.paikalla-tehty" "fi" "Paikalla tehty"
+"suomi.fi.rakentamistapa.paikalla-tehty" "sv" "Uppförd på platsen"

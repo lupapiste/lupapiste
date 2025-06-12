@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd http://www.tekla.com/schemas/kuntagml http://kartta.nurmijarvi.fi/teklaogcweb/WFS.ashx?SERVICE=WFS&amp;REQUEST=DescribeFeatureType&amp;typeName=rakval:RakennusvalvontaAsia ">
+    <gml:boundedBy>
+        <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#3879">
+            <gml:coordinates>25486747.289,6695896.934 25486804.425,6695954.770</gml:coordinates>
+        </gml:Box>
+    </gml:boundedBy><gml:featureMember>
+    <rakval:RakennusvalvontaAsia>
+        <rakval:kasittelynTilatieto>
+            <yht:Tilamuutos>
+                <yht:pvm>2019-12-19</yht:pvm>
+                <yht:tila>lupa hyväksytty</yht:tila>
+            </yht:Tilamuutos>
+        </rakval:kasittelynTilatieto>
+        <rakval:luvanTunnisteTiedot>
+            <yht:LupaTunnus>
+                <yht:kuntalupatunnus>543-2019-733</yht:kuntalupatunnus>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-543-2018-00161</yht:tunnus>
+                        <yht:sovellus>LP-543-2018-00161</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-543-2018-00161</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-543-2019-01196</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>Lupapiste</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>toimenpideId</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>5dcbfadc59412f16618fe93d</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:saapumisPvm>2019-11-14</yht:saapumisPvm>
+            </yht:LupaTunnus>
+        </rakval:luvanTunnisteTiedot>
+        <rakval:viitelupatieto>
+            <yht:LupaTunnus>
+                <yht:kuntalupatunnus>543-2018-169</yht:kuntalupatunnus>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-543-2018-00161</yht:tunnus>
+                        <yht:sovellus />
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+            </yht:LupaTunnus>
+        </rakval:viitelupatieto>
+        <rakval:osapuolettieto>
+            <yht:Osapuolet>
+                <yht:osapuolitieto>
+                    <yht:Osapuoli>
+                        <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+                        <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+                        <yht:yritys>
+                            <yht:nimi>Testijärven Vuokra-asunnot Oy</yht:nimi>
+                            <yht:postiosoitetieto>
+                                <yht:postiosoite>
+                                    <yht:osoitenimi>
+                                        <yht:teksti xml:lang="und">Testikatu 2</yht:teksti>
+                                    </yht:osoitenimi>
+                                    <yht:postinumero>01100</yht:postinumero>
+                                    <yht:postitoimipaikannimi>Testijärvi</yht:postitoimipaikannimi>
+                                </yht:postiosoite>
+                            </yht:postiosoitetieto>
+                        </yht:yritys>
+                        <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                    </yht:Osapuoli>
+                </yht:osapuolitieto>
+                <yht:osapuolitieto>
+                    <yht:Osapuoli>
+                        <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+                        <yht:VRKrooliKoodi>maksaja</yht:VRKrooliKoodi>
+                        <yht:yritys>
+                            <yht:nimi>Testijärven Vuokra-asunnot Oy</yht:nimi>
+                            <yht:postiosoitetieto>
+                                <yht:postiosoite>
+                                    <yht:osoitenimi>
+                                        <yht:teksti xml:lang="und">Testikatu 2</yht:teksti>
+                                    </yht:osoitenimi>
+                                    <yht:postinumero>01100</yht:postinumero>
+                                    <yht:postitoimipaikannimi>Testijärvi</yht:postitoimipaikannimi>
+                                </yht:postiosoite>
+                            </yht:postiosoitetieto>
+                        </yht:yritys>
+                        <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                    </yht:Osapuoli>
+                </yht:osapuolitieto>
+            </yht:Osapuolet>
+        </rakval:osapuolettieto>
+        <rakval:rakennuspaikkatieto>
+            <rakval:Rakennuspaikka>
+                <yht:yksilointitieto>142497194</yht:yksilointitieto>
+                <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+                <yht:rakennuspaikanKiinteistotieto>
+                    <yht:RakennuspaikanKiinteisto>
+                        <yht:kiinteistotieto>
+                            <yht:Kiinteisto>
+                                <yht:kiinteistotunnus>54300301040010</yht:kiinteistotunnus>
+                            </yht:Kiinteisto>
+                        </yht:kiinteistotieto>
+                        <yht:hallintaperuste>vuokra</yht:hallintaperuste>
+                    </yht:RakennuspaikanKiinteisto>
+                </yht:rakennuspaikanKiinteistotieto>
+                <yht:sijaintitieto>
+                    <yht:Sijainti>
+                        <yht:alue>
+                            <gml:Polygon srsName="http://www.opengis.net/gml/srs/epsg.xml#3879">
+                                <gml:outerBoundaryIs>
+                                    <gml:LinearRing>
+                                        <gml:coordinates>25486774.172,6695898.992 25486767.469,6695907.296 25486747.289,6695940.624 25486751.566,6695943.214 25486770.652,6695954.770 25486797.860,6695950.774 25486796.496,6695941.483 25486804.425,6695928.120 25486801.497,6695908.186 25486782.535,6695896.934 25486774.172,6695898.992</gml:coordinates>
+                                    </gml:LinearRing>
+                                </gml:outerBoundaryIs>
+                            </gml:Polygon>
+                        </yht:alue>
+                    </yht:Sijainti>
+                </yht:sijaintitieto>
+                <yht:kaavanaste>asema</yht:kaavanaste>
+                <yht:rakennusoikeudellinenKerrosala>4170.000</yht:rakennusoikeudellinenKerrosala>
+                <yht:rakennusoikeusYhteensa>-8800.000</yht:rakennusoikeusYhteensa>
+                <yht:osoite>
+                    <yht:osoitenimi>
+                        <yht:teksti xml:lang="und">Testijoentie 4</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>01100</yht:postinumero>
+                    <yht:postitoimipaikannimi>TESTILÄ</yht:postitoimipaikannimi>
+                </yht:osoite>
+            </rakval:Rakennuspaikka>
+        </rakval:rakennuspaikkatieto>
+        <rakval:toimenpidetieto>
+            <rakval:Toimenpide>
+                <rakval:uusi>
+                    <rakval:huoneistoala>
+                        <yht:pintaAla>2685.000</yht:pintaAla>
+                        <yht:kayttotarkoitusKoodi>asuntotilaa(ei vapaa-ajan asunnoista)</yht:kayttotarkoitusKoodi>
+                    </rakval:huoneistoala>
+                    <rakval:kuvaus>Kerrostalo</rakval:kuvaus>
+                </rakval:uusi>
+                <rakval:rakennustieto>
+                    <rakval:Rakennus>
+                        <yht:yksilointitieto>142497195</yht:yksilointitieto>
+                        <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+                        <rakval:sijaintitieto>
+                            <rakval:Sijainti>
+                                <yht:tyhja />
+                            </rakval:Sijainti>
+                        </rakval:sijaintitieto>
+                        <rakval:rakennuksenTiedot>
+                            <rakval:rakennustunnus>
+                                <rakval:valtakunnallinenNumero>103695110J</rakval:valtakunnallinenNumero>
+                                <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                <rakval:kiinttun>54300301040010</rakval:kiinttun>
+                                <rakval:muuTunnustieto>
+                                    <rakval:MuuTunnus>
+                                        <yht:tunnus>LP-543-2018-00161</yht:tunnus>
+                                        <yht:sovellus>LP-543-2018-00161</yht:sovellus>
+                                    </rakval:MuuTunnus>
+                                </rakval:muuTunnustieto>
+                                <rakval:muuTunnustieto>
+                                    <rakval:MuuTunnus>
+                                        <yht:tunnus>5dcbfadc59412f16618fe93d</yht:tunnus>
+                                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                                    </rakval:MuuTunnus>
+                                </rakval:muuTunnustieto>
+                                <rakval:rakennuksenSelite>Kerrostalo</rakval:rakennuksenSelite>
+                            </rakval:rakennustunnus>
+                            <rakval:kayttotarkoitus>039 muut asuinkerrostalot</rakval:kayttotarkoitus>
+                            <rakval:tilavuus>15500</rakval:tilavuus>
+                            <rakval:kokonaisala>4640</rakval:kokonaisala>
+                            <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+                            <rakval:kerrosluku>10</rakval:kerrosluku>
+                            <rakval:kerrosala>4400</rakval:kerrosala>
+                            <rakval:rakennusoikeudellinenKerrosala>4170.0</rakval:rakennusoikeudellinenKerrosala>
+                            <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                            <rakval:kantavaRakennusaine>
+                                <rakval:rakennusaine>betoni</rakval:rakennusaine>
+                            </rakval:kantavaRakennusaine>
+                            <rakval:julkisivu>
+                                <rakval:julkisivumateriaali>ei tiedossa</rakval:julkisivumateriaali>
+                            </rakval:julkisivu>
+                            <rakval:verkostoliittymat>
+                                <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                                <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                                <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                                <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                                <rakval:kaapeliKytkin>true</rakval:kaapeliKytkin>
+                            </rakval:verkostoliittymat>
+                            <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                            <rakval:lammonlahde>
+                                <rakval:polttoaine>kauko tai aluelämpö</rakval:polttoaine>
+                            </rakval:lammonlahde>
+                            <rakval:varusteet>
+                                <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                                <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                                <rakval:viemariKytkin>true</rakval:viemariKytkin>
+                                <rakval:vesijohtoKytkin>true</rakval:vesijohtoKytkin>
+                                <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                                <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                                <rakval:hissiKytkin>true</rakval:hissiKytkin>
+                                <rakval:koneellinenilmastointiKytkin>true</rakval:koneellinenilmastointiKytkin>
+                                <rakval:saunoja>2</rakval:saunoja>
+                                <rakval:uima-altaita>0</rakval:uima-altaita>
+                                <rakval:vaestonsuoja>112</rakval:vaestonsuoja>
+                            </rakval:varusteet>
+                            <rakval:asuinhuoneistot>
+                                <rakval:huoneisto>
+                                    <rakval:muutostapa>lisäys</rakval:muutostapa>
+                                    <rakval:huoneluku>1</rakval:huoneluku>
+                                    <rakval:keittionTyyppi>keittio</rakval:keittionTyyppi>
+                                    <rakval:huoneistoala>43.0</rakval:huoneistoala>
+                                    <rakval:varusteet>
+                                        <rakval:WCKytkin>true</rakval:WCKytkin>
+                                        <rakval:ammeTaiSuihkuKytkin>true</rakval:ammeTaiSuihkuKytkin>
+                                        <rakval:saunaKytkin>false</rakval:saunaKytkin>
+                                        <rakval:parvekeTaiTerassiKytkin>true</rakval:parvekeTaiTerassiKytkin>
+                                        <rakval:lamminvesiKytkin>true</rakval:lamminvesiKytkin>
+                                    </rakval:varusteet>
+                                    <rakval:huoneistonTyyppi>asuinhuoneisto</rakval:huoneistonTyyppi>
+                                    <rakval:huoneistotunnus>
+                                        <rakval:porras>A</rakval:porras>
+                                        <rakval:huoneistonumero>001</rakval:huoneistonumero>
+                                    </rakval:huoneistotunnus>
+                                </rakval:huoneisto>
+                                <rakval:asuntojenPintaala>2685.000</rakval:asuntojenPintaala>
+                                <rakval:asuntojenLkm>60</rakval:asuntojenLkm>
+                            </rakval:asuinhuoneistot>
+                            <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+                        </rakval:rakennuksenTiedot>
+                        <rakval:rakentajatyyppi>liiketaloudellinen</rakval:rakentajatyyppi>
+                        <rakval:omistajatieto>
+                            <rakval:Omistaja>
+                                <yht:kuntaRooliKoodi>Rakennuksen omistaja</yht:kuntaRooliKoodi>
+                                <yht:VRKrooliKoodi>rakennuksen omistaja</yht:VRKrooliKoodi>
+                                <yht:yritys>
+                                    <yht:nimi>Testijärven Vuokra-asunnot Oy</yht:nimi>
+                                    <yht:postiosoitetieto>
+                                        <yht:postiosoite>
+                                            <yht:osoitenimi>
+                                                <yht:teksti xml:lang="und">Testitie 2</yht:teksti>
+                                            </yht:osoitenimi>
+                                            <yht:postinumero>01100</yht:postinumero>
+                                            <yht:postitoimipaikannimi>Testijärvi</yht:postitoimipaikannimi>
+                                        </yht:postiosoite>
+                                    </yht:postiosoitetieto>
+                                </yht:yritys>
+                                <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                                <rakval:omistajalaji>
+                                    <rakval:omistajalaji>yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)</rakval:omistajalaji>
+                                </rakval:omistajalaji>
+                            </rakval:Omistaja>
+                        </rakval:omistajatieto>
+                    </rakval:Rakennus>
+                </rakval:rakennustieto>
+            </rakval:Toimenpide>
+        </rakval:toimenpidetieto>
+        <rakval:lausuntotieto>
+            <rakval:Lausunto>
+                <yht:viranomainen>Pelastustoimi</yht:viranomainen>
+                <yht:pyyntoPvm>2019-12-10</yht:pyyntoPvm>
+                <yht:lausuntotieto>
+                    <yht:Lausunto>
+                        <yht:viranomainen>Pelastustoimi</yht:viranomainen>
+                        <yht:lausunto>Pelastusviranomaiselle esitettyihin suunnitelmiin ei ole huomautettavaa.
+                        </yht:lausunto>
+                        <yht:lausuntoPvm>2019-12-12</yht:lausuntoPvm>
+                        <yht:puoltotieto>
+                            <yht:Puolto>
+                                <yht:puolto>ei tiedossa</yht:puolto>
+                            </yht:Puolto>
+                        </yht:puoltotieto>
+                    </yht:Lausunto>
+                </yht:lausuntotieto>
+            </rakval:Lausunto>
+        </rakval:lausuntotieto>
+        <rakval:paatostieto>
+            <yht:Paatos>
+                <yht:lupamaaraykset>
+                    <yht:kerrosala>4400.000</yht:kerrosala>
+                    <yht:kokonaisala>4640.000</yht:kokonaisala>
+                    <yht:rakennusoikeudellinenKerrosala>4170.000</yht:rakennusoikeudellinenKerrosala>
+                </yht:lupamaaraykset>
+                <yht:paivamaarat>
+                    <yht:lainvoimainenPvm>2020-01-07</yht:lainvoimainenPvm>
+                    <yht:antoPvm>2019-12-23</yht:antoPvm>
+                </yht:paivamaarat>
+                <yht:poytakirja>
+                    <yht:paatos>Päätösteksti: Rakentamisessa on noudatettava aiemmassa lupapäätöksessä vahvistettuja lupaehtoja
+                        Päätösehdotuksen lisäteksti: </yht:paatos>
+                    <yht:paatoskoodi>hyväksytty</yht:paatoskoodi>
+                    <yht:paatoksentekija>Rakennustarkastaja</yht:paatoksentekija>
+                    <yht:paatospvm>2019-12-19</yht:paatospvm>
+                    <yht:pykala>250</yht:pykala>
+                    <!--<yht:liite>
+                      <yht:kuvaus />
+                      <yht:linkkiliitteeseen>http://localhost:8000/foo.pdf</yht:linkkiliitteeseen>
+                    </yht:liite>-->
+                </yht:poytakirja>
+            </yht:Paatos>
+        </rakval:paatostieto>
+        <rakval:lisatiedot>
+            <rakval:Lisatiedot>
+                <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+                <rakval:rakentamisentiedot>
+                    <rakval:uusiaAsuntojaLkm>60</rakval:uusiaAsuntojaLkm>
+                    <rakval:uusiaRakennuksiaLkm>1</rakval:uusiaRakennuksiaLkm>
+                    <rakval:tilavuus>15500</rakval:tilavuus>
+                </rakval:rakentamisentiedot>
+                <rakval:suunnittelijanVaativuustaso>
+                    <yht:suunnittelijaRoolikoodi>RAK-rakennesuunnittelija</yht:suunnittelijaRoolikoodi>
+                    <yht:VRKrooliKoodi>erityissuunnittelija</yht:VRKrooliKoodi>
+                    <yht:henkilo>
+                        <yht:nimi>
+                            <yht:sukunimi>Teppo Testaaja</yht:sukunimi>
+                        </yht:nimi>
+                    </yht:henkilo>
+                    <yht:koulutus>diplomi-insinööri</yht:koulutus>
+                    <yht:valmistumisvuosi>1988</yht:valmistumisvuosi>
+                    <yht:vaadittuPatevyysluokka>AA</yht:vaadittuPatevyysluokka>
+                </rakval:suunnittelijanVaativuustaso>
+            </rakval:Lisatiedot>
+        </rakval:lisatiedot>
+        <rakval:asianTiedot>
+            <rakval:Asiantiedot>
+                <rakval:rakennusvalvontaasianKuvaus>Muutos lupaan XYZ: Kerrostalo;
+                    - sisätilojen muutoksia.</rakval:rakennusvalvontaasianKuvaus>
+            </rakval:Asiantiedot>
+        </rakval:asianTiedot>
+        <rakval:hankkeenVaativuus>AA</rakval:hankkeenVaativuus>
+    </rakval:RakennusvalvontaAsia>
+</gml:featureMember></wfs:FeatureCollection>

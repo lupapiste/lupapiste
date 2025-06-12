@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.5/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Helsinki</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2015-12-21</yht:toimitusPvm>
+    <yht:kuntakoodi>091</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.183857">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>4.82E7 3330000.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2015-12-14Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2015-12-18Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>Foobar</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>My-id</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>dum-dum</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2015-12-14Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>Foobar</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>${application-id}</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>dum-dum</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2015-12-14Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:poytakirja>
+            <yht:paatos>
+              on hyväksytty kvv-työnjohtajaksi johtamaan alla mainittua kvv-asennustyötä.</yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>taloteknikkayksikön päällikkö: kvv-työnjohtajan hakemus</yht:paatoksentekija>
+            <yht:paatospvm>2015-12-18Z</yht:paatospvm>
+            <yht:pykala>2126</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus></rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

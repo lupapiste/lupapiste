@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page content" id="biller" role="main">
+      <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'biller'
+           && lupapisteApp.models.globalAuthModel.ok( "biller-organizations" ) -->
+     <cljs-biller_view></cljs-biller_view>
+     <!-- /ko -->
+    </section>
+  </body>
+</html>

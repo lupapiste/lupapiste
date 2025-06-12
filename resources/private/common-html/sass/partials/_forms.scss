@@ -1,0 +1,1626 @@
+@use "base";
+@use "bubble";
+@use "buttons";
+@use "colors";
+@use "frameless";
+@use "inputs";
+@use "lupicons";
+@use "mixins";
+@use "theme";
+@use "typography";
+
+@use 'sass:math';
+@use 'sass:color';
+
+legend:where(:not(.nobase, .nobase *)) {
+  font-size: base.$baseline * 0.9;
+  font-family: typography.$font-heading;
+  margin:0 0 base.$marginM;
+}
+
+// LUX FIXME
+.form-indicator {
+  z-index: 12000;
+  position: absolute;
+  min-height: 18px;
+  display: none;
+  top: 20px;
+  right: 8px;
+  padding: base.$marginS;
+  background-color: white;
+  border: 1px solid theme.$lp-light-grey;
+  box-shadow: 1px 1px 2px theme.$lp-dark-grey;
+  white-space: nowrap;
+
+  .icon {
+    @include mixins.spite-bg;
+    display: none;
+    height: 24px;
+    width: 24px;
+    vertical-align: top;
+    margin: 0;
+  }
+  .text {
+    display: inline-block;
+    vertical-align: top;
+  }
+  &.form-input-saved {
+    .icon {
+      background-position: 6px -2496px;
+      display: inline-block;
+    }
+
+  }
+  &.form-input-warn {
+    .icon {
+      background-position: 6px -3196px;
+      display: inline-block;
+    }
+  }
+  &.form-input-err {
+    .icon {
+      background-position: 6px -2396px;
+      display: inline-block;
+    }
+  }
+}
+
+span.group-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+div.warnings {
+  margin-bottom: 1em;
+  span.warning::before {
+    @include lupicons.lupicon-font(14px);
+    content: "\e63c";
+    margin-right: 1em;
+    color: colors.get-signal("red");
+  }
+}
+
+warnings.table-warnings ul.warnings {
+  margin-bottom: 0;
+}
+
+ping, .cljs-ping {
+  position: relative;
+  left: 80%;
+  top: 100;
+  &.ping--block {
+    display: inline-block;
+    left: 1em;
+    bottom: 1em;
+    top: unset;
+  }
+  > .ping-wrapper {
+    position: absolute;
+    z-index: 12000;
+    border: 1px solid colors.get-gray( 5 );
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: colors.$white;
+    box-shadow: 2px 2px colors.get-gray( 12 );
+    .like-btn {
+      padding-left: 9px;
+      padding-right: 9px;
+
+      i {
+        padding: 0 0;
+      }
+      span {
+        padding-right: 10px;
+      }
+    }
+    &.ping--positive {
+      i {color: colors.get-signal( "green" );}
+    }
+    &.ping--negative {
+      span {font-weight: bold}
+      i {color: colors.get-signal( "red" );}
+    }
+    &.ping--primary {
+      i {color: colors.get-signal( "blue" );}
+    }
+  }
+}
+
+.save-indicator {
+}
+
+.errorPanel {
+  display: none;
+  &[data-docgen-error=true] {
+    display: initial;
+  }
+  span.warn {
+    border-left: 2px solid colors.get-signal("red");
+    display: inline-block;
+    padding: 2px;
+  }
+
+}
+
+.form-entry {
+  display: inline-block;
+
+  margin-right: base.$marginS;
+  position: relative;
+  min-height: 48px;
+  vertical-align: bottom;
+  label {
+    display: inline-block;
+  }
+  button {
+    display: inline-block;
+  }
+}
+
+.docgen-content .form-choice.checkbox-group {
+  // Move a checkbox's "other, what?" text field to it's own row
+  // it is not the same size as a checkbox so messes up the layout otherwise
+  .form-entry.toggle-when {
+    display: block;
+  }
+}
+
+@mixin form-entry-label-top {
+  margin-top: base.$marginM;
+  vertical-align: top;
+  .col--vertical > label,
+  > label {
+    display: block;
+  }
+}
+
+@mixin form-entry-item-wide {
+  > * {
+    width: 90%;
+  }
+}
+
+.form-entry.label--top {
+  @include form-entry-label-top;
+}
+
+.form-entry.item--wide {
+  @include form-entry-item-wide;
+}
+
+.form-entry.label--inline > label {
+  margin-top: 0;
+  display: inline-block;
+}
+
+.form-group.label--top > .form-entry {
+  @include form-entry-label-top;
+}
+
+.form-group.item--wide > .form-entry {
+  @include form-entry-item-wide;
+}
+
+.form-group.label--top > .form-entry.label--inline > label {
+  margin-top: 0;
+  display: inline-block
+}
+
+.form-entry-vcenter { line-height: 40px; }
+
+.form-full-width {
+  width: 60%;
+  .form-help {
+    right: -350px;
+  }
+  .form-label {
+    width: 90%;
+  }
+}
+
+.form-full-width > select, .form-full-width > label {
+  width: 80% !important;
+}
+
+.form-single-line {
+  display: block;
+}
+
+.form-header {
+}
+
+.form-label {
+  font-size: 16px;
+  line-height: base.$baseline;
+  margin-right: base.$marginS;
+  width: auto;
+  vertical-align: bottom;
+}
+
+.form-container {
+  margin-top: base.$baseline;
+  padding: base.$baseline;
+  label {
+    display: inline-block;
+  }
+}
+
+.form-input {
+  line-height: base.$baseline;
+  margin: 2px base.$marginS base.$marginM 0;
+  width: frameless.$cols3;
+  display: block;
+
+  &.long {
+    width: frameless.$cols5;
+  }
+  &.long.full-width-component {
+    width: frameless.$cols11;
+  }
+}
+
+input.form-input.long {
+  width: frameless.$cols5;
+}
+
+input.form-input.full-width-component
+input.form-input.long.full-width-component {
+  width: frameless.$cols11;
+}
+
+input.form-input.inline {
+  display: inline;
+}
+
+.form-add {
+  display: block;
+}
+
+.form-input.file {
+  height: base.$baseline;
+}
+
+.form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
+  width: auto;
+  display: inline-block;
+  vertical-align: bottom;
+  margin: 0 base.$marginS 0 base.$marginS;
+  width: 14px;
+  height: 24px;
+  padding: 0;
+  &.error {
+    outline: 3px solid colors.get-signal( "red" );
+  }
+  &.warning {
+    outline: 3px solid theme.$lp-orange;
+  }
+  &.source-value-changed {
+    outline: 2px solid theme.$green-dark;
+  }
+}
+
+.show-password {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-top: 0;
+  margin-right: 0;
+  margin-left: 0;
+
+  [type="checkbox"] {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: base.$marginS;
+    margin-left: 0;
+    padding: 0;
+    width: auto;
+    height: auto;
+  }
+}
+
+// if map is not wrapped into another group padding is needed
+.accordion-fields > .docgen-component > .application-map-container {
+  padding: 6px
+}
+
+// for new docgen without `.docgen-component` class
+.accordion-fields > .application-map-container {
+  padding: 6px
+}
+
+.form-input.combobox, select:where(:not(.nobase, .nobase *)) {
+  width: frameless.$cols3;
+  height: 30px;
+  padding: 4px;
+  &.long {
+   width: frameless.$cols5;
+  }
+}
+
+.form-input.other{
+  display: inline;
+  margin-top: -40px;
+  margin-left: frameless.$cols3 + 1em;
+  width: frameless.$cols3;
+}
+.form-group, .form-choice, .form-table {
+  overflow: visible;
+  display: block;
+  padding: {
+    left: base.$marginS;
+    right: base.$marginS;
+  }
+  box-sizing: border-box;
+  border-bottom: 1px solid colors.$gray221;
+  &:last-child
+  {
+    border-bottom: none;
+  }
+  .form-group {
+    margin:base.$marginS;
+  }
+  .form-input {
+    display: block;
+  }
+  .form-input.checkbox, .form-input.radio {
+    margin: base.$marginL base.$marginS 0 0;
+    display: inline-block;
+  }
+  .form-label-checkbox{
+    vertical-align: middle;
+    width: auto !important;
+    margin-right: 4px;
+  }
+  .form-label-group, .form-label-table {
+    width: 100%;
+    display: block;
+    font-family: typography.$font-heading;
+    font-weight: bold;
+    margin-bottom: base.$marginS;
+  }
+  .property-group-header {
+    .form-label-property-group {
+      @extend .form-label-group;
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0;
+      margin-right: 1em;
+    }
+
+  }
+  .form-entry {
+    display: inline-block;
+    width: 300px;
+    min-height: 48px;
+  }
+  .form-entry.short {
+    width: 200px;
+  }
+}
+
+.form-group {
+  border: none;
+  padding-top: base.$marginM;
+  padding-bottom: base.$marginM;
+}
+
+.form-group.border--bottom {
+  border-bottom: 1px solid colors.$gray;
+}
+
+.form-choice {
+  .form-entry {
+    display: inline-block;
+    min-width: 45%;
+    .form-input.textarea {
+      height: base.$baseline *3;
+      width: 80%;
+    }
+    .form-indicator{
+      top: 0;
+    }
+  }
+}
+.form-info {
+  display: inline;
+  color: colors.get-signal( "red" );
+  margin: base.$marginM;
+}
+
+.docgen-content .form-choice .form-entry.form-full-width,
+.docgen-content .form-group .form-entry.form-full-width {
+  display: block !important;
+}
+
+.docgen-content .form-choice .form-entry.form-full-width.hidden-conditionally,
+.docgen-content .form-group .form-entry.form-full-width.hidden-conditionally {
+  display: none !important;
+}
+
+.form-input.textarea {
+  height: base.$baseline *8;
+  width: 80%;
+}
+
+.form-input.textarea.high {
+  height: base.$baseline *9;
+  width: 80%;
+}
+
+.form-input.textarea.wide {
+  font-size: 16px;
+  padding-left: 6px;
+  width: 99%;
+}
+
+.form-input-and-unit {
+  display: table;
+  margin-right: base.$marginM;
+  white-space: nowrap;
+  input {
+    display: table-cell
+  }
+}
+
+.form-input-and-unit .form-input {
+  margin-right: base.$marginM;
+}
+
+.form-string-unit {
+  display: table-cell;
+  vertical-align: middle;
+  padding-bottom: 5px;
+}
+
+.form-input.tiny {
+ width: math.div(frameless.$cols1, 2);
+}
+
+.form-input.short {
+  width: 7em;
+}
+
+.form-input.short-plus {
+ width: 1.5  * frameless.$cols1;
+}
+
+.form-input.short-plus-plus {
+  width: 1.7  * frameless.$cols1;
+}
+
+.form-input.medium {
+ width: frameless.$cols2;
+}
+
+.form-paragraph {
+  white-space: pre-wrap;
+  padding-left: 1em;
+}
+
+// docgen-spefic styles
+.docgen-content {
+  transition: width 600ms;
+  -webkit-transition: width 600ms; /* Safari */
+ .form-choice {
+    .form-entry {
+      min-height: 38px;
+      display: inline-block;
+      min-width: 49%;
+      width: auto;
+      margin-top: 8px;
+      height: auto;
+      label {
+        vertical-align: top;
+      }
+      input {
+        vertical-align: text-top;
+      }
+      .form-input-and-unit {
+        margin-right: base.$marginM;
+        input {
+          width: frameless.$cols1;
+        }
+      }
+      .form-input.checkbox {
+        margin-top: 0;
+      }
+    }
+  }
+  .form-entry {
+    min-width: 300px;
+    min-height: 64px;
+    margin-bottom: base.$marginM;
+
+    &.long {
+      min-width: 480px;
+    }
+    &.short {
+      min-width: 200px;
+    }
+    &.personSelector, &.companySelector {
+      display: block;
+      width: auto;
+      label {
+        display: block;
+      }
+      .form-input {
+        display: inline-block;
+      }
+    }
+  }
+  .form-entry.radioGroup {
+    min-height: 32px;
+    white-space: nowrap;
+    display: block;
+    width: auto;
+    min-width: initial;
+    .form-label-radio {
+      margin-right: base.$marginL;
+    }
+  }
+  .form-entry.verticalRadioGroup {
+    display: flex;
+    flex-direction: column;
+    white-space: wrap;
+    width: auto;
+    min-width: initial;
+    margin-left: 2em;
+    .form-label-radio {
+      margin-right: base.$marginL;
+    }
+  }
+  .form-entry.verticalRadioGroup > .form-label-select {
+    padding: 0.5em;
+
+  }
+  .form-full-width {
+    width: 80%;
+  }
+  .form-group {
+    overflow: visible;
+    .form-entry {
+      .form-input.text, .form-input.combobox,  .form-input.email {
+      }
+      .form-label-select, .form-label-date {
+        vertical-align: text-bottom;
+      }
+    }
+    .form-entry.personSelector .form-label-select {
+      bottom: 80px;
+    }
+  }
+
+  .long {
+    width: frameless.$cols5;
+  }
+
+  .really-long {
+    width: frameless.$cols5;
+  }
+
+  .long.full-width-component,
+  .full-width-component {
+    width: frameless.$cols11;
+    display: block;
+  }
+
+  .form-table td, .form-table th {
+    padding: base.$marginS base.$marginM;
+  }
+
+  .huoneistot-table, .muutHankkeet-table {
+    td, th {
+      padding: base.$marginS * 0.7;
+    }
+  }
+  .form-string {
+    background: none;
+    border:none;
+  }
+  .form-table th:first-child {
+    border-left: none;
+  }
+
+  .form-table th {
+    vertical-align: bottom;
+    border-style: solid;
+    border-left: 1px solid #ffffff;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+  }
+
+  .form-table .form-input {
+    display: inline;
+    margin: 0;
+  }
+
+  .form-table {
+    .form-input .text {
+      height: 25px;
+    }
+    .form-input.warn {
+      border: 1px solid theme.$red-dark;
+    }
+  }
+
+  .form-table .form-input.combobox, select {
+    min-width: frameless.$cols2;
+  }
+
+  .form-table .form-indicator {
+    top: 0;
+    height: 28px;
+    width: 28px;
+    padding: 0;
+
+    .icon {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .form-input-saved {
+      .icon {
+        background-position: 4px -2494px;
+      }
+    }
+  }
+
+  .form-table .form-entry {
+    display: block;
+    width: 100%;
+    min-width: 50px;
+    min-height: 30px;
+  }
+
+  .form-table .form-help {
+    bottom: 45px;
+  }
+
+  .button-group {
+    width: 100%;
+    position: relative;
+    padding: {
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      bottom: 10px;
+    }
+    background-color: colors.$gray247;
+    border-bottom: 1px solid colors.$gray221;
+  }
+
+  form.premises-upload {
+    display: inline-block;
+    i {
+      padding-right: 10px;
+    }
+  }
+}
+
+// Override default style on group level
+.form-group {
+  &.full-width-component-wrapper .form-entry {
+    width: 80%;
+    min-height: auto;
+    .blockbox-wrapper {
+      width: 80%;
+    }
+  }
+
+  &.full-width-component-wrapper {
+    margin-bottom: 12px;
+  }
+
+  &.form-group.checkbox-list-component-wrapper .form-entry {
+    width: frameless.$cols9;
+    min-height: auto;
+    margin-bottom: 0px;
+  }
+
+}
+
+// Padding tweaks for special cases.
+.accordion-fields > .form-entry,
+.accordion-fields > .verdict-info-fields,
+.accordion-fields .personSelector,
+.accordion-fields > div p {
+  padding: {
+    left: base.$marginS;
+    right: base.$marginS;
+  }
+}
+
+
+.accordion_content > .group-help-text {
+  display: block;
+  margin: base.$marginS;
+}
+
+.kiintun-and-maaraalatunnus {
+  .form-maaraala {
+    display: inline;
+  }
+  .form-input.text {
+    display: inline;
+    width: 48px;
+    margin: 0 4px;
+  }
+
+}
+
+.form-warning-message {
+  color: colors.$negative;
+  line-height: 24px;
+  margin-top: base.$marginS;
+  margin-bottom: base.$marginS;
+  span {
+    margin-left: 3px;
+    vertical-align: top;
+  }
+}
+
+.group-buttons {
+  width: 100%;
+  display: block;
+  overflow-y: hidden;
+  text-transform: none;
+  padding-right: base.$marginS;
+  padding-left: base.$marginS;
+  margin: {
+    top: base.$marginS;
+    bottom: base.$marginS;
+  }
+  .is-right {
+    float: right;
+    margin-left: base.$marginS;
+  }
+  .is-left {
+    float: left;
+    margin-right: base.$marginS;
+  }
+}
+
+// Top-level group buttons tweaks
+.accordion-toggle > .group-buttons {
+  background-color: colors.$gray247;
+  border: 1px solid colors.$gray221;
+  border-top: none;
+  padding: {
+    top: base.$marginS;
+    bottom: base.$marginS;
+  }
+  margin: 0;
+}
+
+div.sticky {
+  background-color: colors.$gray247;
+}
+
+.button-group button.is-right {
+  margin-right: 0;
+}
+
+.form-approval-status {
+  text-transform: none;
+
+  .form-buttons {
+    text-align: right;
+    float: right;
+     min-width: 200px;
+  }
+}
+
+.form-approval-status.approved,
+.form-approval-status.rejected {
+  display: inline-block;
+}
+
+.form-approval-status.stamped {
+  display: inline-block;
+}
+
+.is-status > .like-btn {
+  @include buttons.btn-height;
+  min-width: 500px;
+  span {
+    color: colors.get-signal( "gray" );
+  }
+  span.is-details--rejected {
+    color: colors.get-signal( "red" );
+  }
+  .lupicon-circle-attention {
+    color: colors.get-signal( "red" );
+  }
+  .lupicon-circle-check {
+    color: colors.get-signal( "green" );
+  }
+  .approved {
+    padding-right: buttons.$icon-pad;
+  }
+  .lupicon-circle-stamp {
+    color: colors.get-signal( "green" );
+  }
+}
+
+@mixin description-bubble-mixin( $width: 100%, $margin-top: 15px, $arrow-left: 5%, $padding: base.$marginS) {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: $width;
+  border-radius: 2px;
+  border: 1px solid colors.get-signal( "blue" );
+  padding: $padding;
+  margin-top: $margin-top;
+  &:after, &:before {
+             bottom: 100%;
+             left: $arrow-left;
+             border: solid transparent;
+             content: " ";
+             height: 0;
+             width: 0;
+             position: absolute;
+             pointer-events: none;
+           }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: color.adjust( colors.get-signal( "blue"), $alpha: -1 );
+    border-bottom-color: colors.get-signal( "blue");
+    border-width: 11px;
+    margin-left: -11px;
+  }
+  input {
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+    box-shadow: none;
+    color: colors.$gray51;
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+
+@include inputs.input-and-button( reject-edits ) {}
+
+@mixin reject( $margin-left: 34px,
+               $margin-top: -6px,
+               $color: inherit) {
+  margin: {
+    left: $margin-left;
+    top: $margin-top;
+  }
+  font-size: 16px;
+  color: $color;
+}
+
+.reject-note {
+  @include reject( $color: colors.get-signal( "gray" ));
+  padding-right: 1em;
+}
+
+.reject-note--rejected {
+  color: colors.get-signal( "red" );
+}
+
+.reject-note-editor {
+  @include reject;
+  display: inline-block;
+}
+
+.accordion-reject-note {
+  @include reject( $margin-left: 44px, $color: colors.get-gray( 5 ) );
+}
+
+.accordion-reject-note-editor {
+  @include reject( 45px );
+  margin-left: 45px;
+}
+
+.toolbar-reject-note {
+  @include reject( $margin-left: 44px, $color: colors.get-gray( 5 ) );
+  color: colors.get-gray( 5 );
+  min-height: 40px;
+  line-height: 40px;
+}
+
+.toolbar-reject-note-editor {
+  @include reject( 45px );
+  margin-left: 45px;
+  margin-bottom: 10px;
+}
+
+.attachment-reject-note-editor {
+  @include reject;
+  margin-bottom: 10px;
+}
+
+.table-reject-note {
+  @include reject( 0, 0 );
+}
+
+.table-reject-note-editor {
+  @include reject( 0 );
+}
+
+// Top-level form-approval-status
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: 1px solid colors.$gray221;
+  float: left;
+  .like-btn {
+    padding: {
+      left: 10px;
+    }
+    span {
+      color: colors.get-gray( 5 );
+    }
+    span.is-details--rejected {
+      color: colors.get-signal( "red" );
+    }
+  }
+}
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: none;
+}
+
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+  .like-btn {
+    padding: {
+      top: 4px;
+    }
+    margin-bottom: 6px;
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: colors.get-gray( 5 );
+    }
+    span.is-details--rejected {
+      color: colors.get-signal( "red" );
+    }
+  }
+}
+
+.is-middle {
+  vertical-align: middle;
+}
+
+
+.description-bubble {
+}
+
+.container-bubble {
+  $color: colors.get-signal( "violet" );
+  $bg: colors.$white;
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: $bg;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid $color;
+  padding: {
+    left: base.$marginM;
+    right: base.$marginM;
+    bottom: base.$marginM;
+    top: 0;
+  }
+  margin-top: 15px;
+
+  &.half-width {
+    width: 50%;
+  }
+
+  &:after, &:before {
+    bottom: 100%;
+    left: 5%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+
+  }
+
+  &.arrow-2nd-col:before, &.arrow-2nd-col:after {
+    left: 60%;
+  }
+
+  &:after {
+    border-color: color.adjust( $bg, $alpha: -1 );
+    border-bottom-color: $bg;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: color.adjust( $color , $alpha: -1 );
+    border-bottom-color: $color;
+    border-width: 11px;
+    margin-left: -11px;
+  }
+}
+
+.description-bubble.is-closed {
+  display: none;
+}
+
+.form-help {
+  display: none;
+  position: absolute;
+  z-index: 11000;
+  bottom: 70px;
+  left: 0;
+}
+.form-full-width {
+  .form-help {
+    top: 4px;
+    left: 85%;
+    bottom: auto;
+  }
+}
+
+.three-col {
+  width: 100%;
+
+  .form-input {
+    width: 17.25em;
+  }
+
+  .col1 {
+    float: left;
+    padding-right: base.$marginM;
+  }
+
+  .col2 {
+    float: left;
+    padding-left: base.$marginM;
+    padding-right: base.$marginM;
+  }
+  .col3 {
+    float: left;
+    padding-left: base.$marginM;
+  }
+}
+
+foreman-history {
+  h2 {
+    background-color: theme.$lp-light-grey !important;
+  }
+  th.first {
+    width: 10%;
+  }
+  th.second {
+    width: 15%;
+  }
+  th.third {
+    width: 10%;
+  }
+  th.fourth {
+    width: 20%;
+  }
+  th.fifth {
+    width: 45%;
+  }
+}
+
+.indicator-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+div.alleYli-radioGroup {
+  display: inline-block;
+  margin-bottom: base.$marginL;
+  margin-right: base.$marginS;
+}
+
+// Grid styles
+$col: 25%;
+// default columns 4
+$max-columns: 12;
+
+@mixin column-width ($width) {
+  width: $width;
+  min-width: $width;
+  max-width: $width;
+}
+
+@mixin column ($size) {
+  position: relative;
+  float: left;
+  @include column-width($size * $col);
+  // display: inline-block;;
+  padding-left: theme.$grid-margin;
+
+  label.required:after {
+    content: " *";
+    color: theme.$label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      display: block;
+    }
+  }
+}
+
+.form-grid {
+  width: 100%;
+  border-top: 1px solid theme.$grid-border-color;
+  color: colors.$gray51;
+  padding-left: theme.$grid-margin;
+  padding-right: theme.$grid-margin;
+
+  &.no-top-border {
+    border-top: none;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  h2 {
+    margin: base.$marginM 0;
+  }
+
+  // TODO could be removed after accordion styles are revamped
+  p {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .col--no-margin {
+    padding: 0 !important;
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
+
+  select::-ms-expand {
+      display: none;
+  }
+
+  button::-moz-focus-inner {
+    border: 0;
+  }
+
+  input[type=text], input[type=password], input[type=number], select, textarea, span.form-string {
+    width: 100%;
+  }
+
+  // for localized-string-template
+  span.form-string {
+    display: block;
+  }
+
+  textarea {
+    height: theme.$grid-textarea-height;
+    padding: base.$marginS base.$marginM;
+  }
+
+  select.required, input.required {
+    border-color: theme.$input-required-border-color;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 2px;
+    bottom: 1px;
+    color: theme.$orange-dark;
+    pointer-events:none;
+
+    // show white box behind selector arrow to hide default select arrows on IE9
+    background-color: #fff;
+    width: 30px;
+    line-height: theme.$grid-input-height - 2px;
+    vertical-align: middle;
+  }
+
+  .select-arrow.disabled {
+    background-color: theme.$input-disabled-background-color;
+    color: theme.$input-select-disabled-icon;
+  }
+
+  .submit-button {
+    display: table-row;
+    .submit-button__item {
+      display: table-cell;
+      &:first-child {
+        width: 100%;
+      }
+    }
+
+    .submittable {
+      input {
+        border-color: colors.$positive;
+      }
+    }
+  }
+
+  .search-field {
+    position: relative;
+    input {
+      padding-right: 40px !important;
+    }
+
+    &.active {
+      i {
+        color: theme.$orange-light;
+      }
+    }
+    i {
+      color: colors.$primary;
+      position: absolute;
+      bottom: -3px;
+      right: 8px;
+    }
+  }
+
+  button.input-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+
+  @for $i from 1 through $max-columns {
+    .col-#{$i} {
+      @include column($i);
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+    .col-#{$i}.col--full > * {
+      width: 100%;
+    }
+  }
+
+  .row {
+    @include mixins.clearfix {
+      margin: theme.$grid-margin 0;
+    }
+  }
+
+  .row--no-margin {
+    margin: 0;
+  }
+
+  .row--no-bottom-margin {
+    margin-bottom: 0;
+  }
+
+  .autocomplete-component {
+    width: 100%;
+  }
+
+  .error-message {
+    background-color: colors.$negative;
+    color: #fff;
+    margin: 0;
+    padding: base.$marginS;
+    font-style: normal;
+    font-weight: bold;
+    &:before {
+      @include lupicons.lupicon-font;
+      content: "\e63c";
+      margin-right: base.$marginS;
+    }
+  }
+}
+
+.info-message {
+  border-left: 8px solid colors.get-signal( "gray" );
+  margin-top: base.$marginS;
+  margin-bottom: base.$marginS;
+  padding: base.$marginS;
+  display: block;
+}
+
+@mixin info-msg( $cls, $bd) {
+  input[type=password].#{$cls} {
+    border-color: $bd;
+  }
+  .info-message.#{$cls} {
+    border-left: 4px solid $bd;
+    padding-left:  16px;
+    background-color: color.scale( $bd, $lightness: 80% );
+  }
+}
+
+@include info-msg( poor, colors.$red );
+@include info-msg( low, colors.get-red( 13) );
+@include info-msg( average, colors.get-violet( 10 ) );
+@include info-msg( good, colors.get-blue( 10 ) );
+@include info-msg( excellent, colors.$green );
+
+
+.no-padding {
+  padding: 0 !important;
+}
+
+// Support for form-cell component wrapper.
+// The component's use cases and visuals
+// are similar to error-message, but it
+// is laid out differently and encompasses
+// the input as well.
+.form-cell__message {
+  background-color: colors.$positive;
+  color: white;
+  display: inline-block;
+  width: 100%;
+}
+
+.form-cell--warning {
+  .form-cell__message {
+    background-color: colors.$negative;
+  }
+}
+
+label.mandatory:after {
+  content: " *";
+  color: theme.$label-required-star-color;
+}
+
+.form-cell--message {
+  input, select {
+    border: 1px solid colors.$positive !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+
+@for $i from 1 through $max-columns {
+  .form-grid.form-grid--columns-#{$i} > .row {
+    @for $j from 1 through $i {
+      .col-#{$j} {
+        @include column-width(math.div(100%, $i) *  $j);
+      }
+    }
+  }
+}
+
+.form-grid--no-border {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  @for $i from 1 through $max-columns {
+    .col-#{$i} {
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+  }
+}
+
+select.dropdown--full-width {
+  min-width: 100%;
+}
+
+select.dropdown--plain {
+  border: none;
+  background-image: white;
+  padding-left: 0;
+  &:disabled {
+    border: none;
+    background-image: none;
+    background-color: white;
+
+  }
+}
+
+.grid-style-input {
+  @include inputs.input-fields;
+}
+
+textarea.grid-style-input {
+  height: theme.$grid-textarea-height;
+  padding: base.$marginS base.$marginM;
+}
+
+textarea.grid-style-input.really-high {
+  height: theme.$grid-textarea-height * 2;
+}
+
+textarea.grid-style-input.wide {
+  width: 100%;
+}
+
+.no-wrap-whitespace {
+  white-space: nowrap;
+}
+
+.wrapped_text {
+  white-space: pre-wrap;
+}
+
+.cell-span {
+  line-height: buttons.$btn-height;
+}
+
+.check-string {
+  @extend .btn-base;
+  display: block;
+}
+
+.task-title {
+  display: inline-block;
+  max-width: 50em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.review-done {
+  margin: base.$marginL;
+}
+
+.foreman-info {
+  padding-left: base.$marginS;
+}
+
+.building-select-container {
+  margin-left: base.$marginS;
+  .building-select-box {
+    position: relative;
+  }
+}
+
+.link-permit-selector {
+  padding-left: base.$marginS;
+  label.form-label {
+    width: 100%;
+  }
+}
+
+@mixin row-label-x ($n, $row-margin: 10px) {
+  margin: {
+    top: $row-margin;
+    bottom: $row-margin;
+  }
+  .inline {
+    display: inherit;
+  }
+  .form-label {
+    display: table-cell;
+    vertical-align: bottom;
+    height: $n * 24 + 1px;
+    padding-bottom: 1px;
+  }
+  .form-input {
+    margin: 0;
+  }
+}
+
+.row.label-x-2 {
+  @include row-label-x( 2 );
+}
+
+.row.label-x-3 {
+  @include row-label-x( 3, 5 );
+}
+
+.row.row--tight {
+  margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+}
+
+
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: buttons.$btn-height;
+  line-height: buttons.$btn-height;
+}
+
+.calculation-error {
+  color: theme.$red-darkest;
+  line-height: buttons.$btn-height;
+  text-align: center;
+  display: inherit;
+  margin-bottom: 0;
+}
+
+input.form-input.layout--full-width,
+textarea.form-input.layout--full-width,
+select.form-input.layout--full-width {
+  width: 100%;
+}
+
+input.form-input.layout--initial-width,
+textarea.form-input.layout--initial-width,
+select.form-input.layout--initial-width {
+  width: initial;
+}
+
+.form-group .application-map-container {
+  margin-top: base.$marginL;
+}
+
+// Cloudpermit style form groups where its edit functions are only shown when the group (or a child) has focus
+.form-card {
+  padding: base.$marginM;
+  border-radius: 3px;
+  background-color: colors.$gray238;
+  border: 1px solid colors.$gray238; // Eliminates element jumping on focus
+
+  &.focus {
+    background-color: colors.$violet-background;
+    border: 1px solid colors.$violet-100;
+  }
+
+  .button-panel {
+    min-width: 300px; // Eliminates width jumping button visibility is toggled on focus/blur
+  }
+
+  .warnings {
+    margin-bottom: 0;
+  }
+
+  // Child cards have different default background to stand out from the main card
+  .form-card {
+    background-color: colors.$white;
+    &.focus {
+      background-color: colors.$violet-20;
+    }
+    button {
+      margin-top: -8px;
+      margin-bottom: -8px;
+    }
+  }
+}
+
+.form-entry.full-width-component{
+  width: frameless.$cols11;
+}
+
+// These styles are related to LPK-7315 Planning permit upgrades. And defines
+// special functionality related to the vertical radio group used in planning permits
+
+.form-entry.hide-blockbox-wrapper-border > .blockbox-wrapper {
+  border: hidden;
+}
+
+.form-group.group-border > div {
+  border: colors.$gray221 solid 1px !important;
+  margin: 0.5em;
+}
+
+// for old docgen
+.form-group.hide-header > .docgen-component .docgen-group-info {
+  display: none;
+}
+
+// for new docgen (no docgen-component class..)
+.form-group.hide-header > .docgen-group-info {
+  display: none;
+}
+
+.docgen-element-hidden {
+  // hide element, but retain the layout
+  visibility: hidden;
+}

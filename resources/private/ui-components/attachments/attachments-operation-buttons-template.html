@@ -1,0 +1,102 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-operation-buttons-template">
+  <div class="operation-button-row">
+    <div class="stacked--inline" data-bind="if: batchEmpty">
+      <icon-button params="buttonClass: 'primary',
+                           click: $data.attachmentTemplatesAdd,
+                           visible: $data.authModel.ok('create-attachments'),
+                           testId: 'add-attachment-templates',
+                           icon: 'circle-plus',
+                           ltext: 'application.newAttachmentTemplates'">
+      </icon-button>
+      <div class="bubble-dialog-arrow"
+           data-bind="visible: requireAttachmentsBubbleVisible">
+      </div>
+    </div>
+    <!--
+    Watch out, if you destroy this from DOM (eg with ko if:), the upload link is broken
+    because the jquery upload plugin doesn't have handle to the input anymore.
+     -->
+    <upload-zone params="upload: upload,
+                         testId: 'add-attachments'"></upload-zone>
+  </div>
+
+  <!-- ko if: batchEmpty -->
+  <div data-bind="component: { name: 'attachments-require-bubble',
+                  params: { bubbleVisible: requireAttachmentsBubbleVisible } }"
+       class="operation-bubble">
+  </div>
+
+  <div class="flex--wrap flex--gap2 gap--v2"
+       data-test-id="attachment-operation-buttons">
+
+    <!-- ko if: $data.canCopyUserAttachments() -->
+    <icon-button params="buttonClass: 'secondary',
+                         waiting: $data.processing,
+                         click: $data.copyUserAttachments,
+                         testId: 'copy-user-attachments',
+                         icon: 'circle-plus',
+                         ltext: 'application.attachmentsCopyOwn'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: $data.canStamp() -->
+    <icon-button params="buttonClass: 'secondary',
+                         click: $data.startStamping,
+                         testId: 'stamp-attachments',
+                         icon: 'circle-stamp',
+                         ltext: 'application.stampAttachments'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: $data.canSign() -->
+    <icon-button params="buttonClass: 'secondary',
+                         click: $data.signAttachments,
+                         testId: 'sign-attachments',
+                         icon: 'circle-pen',
+                         ltext: 'signAttachment.select'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: canExport() -->
+    <export-attachments params="css: 'secondary'"></export-attachments>
+    <!-- /ko -->
+    <!-- ko if: $data.canMarkVerdictAttachments() -->
+    <icon-button params="buttonClass: 'secondary',
+                         click: $data.markVerdictAttachments,
+                         testId: 'mark-verdict-attachments',
+                         icon: 'circle-section-sign',
+                         ltext: 'application.markVerdictAttachments'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: $data.canOrderAttachmentPrints() -->
+    <icon-button params="buttonClass: 'secondary',
+                         click: $data.orderAttachmentPrints,
+                         testId: 'order-attachment-prints',
+                         icon: 'envelope',
+                         ltext: 'verdict.orderAttachmentPrints.button'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: hasFiles() -->
+    <icon-button params="buttonClass: 'secondary',
+                         click: downloadAll,
+                         testId: 'download-all',
+                         icon: 'download',
+                         ltext: 'download-all-short'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: canEdit() -->
+    <icon-button params="buttonClass: 'secondary',
+                         click: updateMultipleAttachments,
+                         testId: 'update-multiple-attachments-button',
+                         icon: 'upload',
+                         ltext: 'update-attachments.title'">
+    </icon-button>
+    <!-- /ko -->
+    <!-- ko if: $data.printingOrderEnabled() -->
+    <icon-button params="click: $data.startPrintingOrder,
+                         testId: 'open-printing-order-form',
+                         icon: 'print',
+                         ltext: 'printing-order.start.ordering'">
+    </icon-button>
+    <!-- /ko -->
+  </div>
+  <!-- /ko -->
+</script>

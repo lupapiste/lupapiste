@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="cell-textarea-template">
+  <!-- ko if: immediate -->
+  <textarea class="lux"
+            data-bind="attr: attributes,
+                       textInput: value,
+                       required: isRequired,
+                       ariaInvalid: isInvalid,
+                       testId: testId">
+  </textarea>
+  <!-- /ko -->
+  <!-- ko ifnot: immediate -->
+  <textarea class="lux"
+            data-bind="attr: attributes,
+                       required: isRequired,
+                       ariaInvalid: isInvalid,
+                       value: value,
+                       testId: testId">
+  </textarea>
+  <!-- /ko -->
+</script>

@@ -1,0 +1,19 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="logout-template">
+  <!-- ko if: vetumaLogout -->
+  <icon-button params="ltext: 'logout',
+                       icon: 'log-out',
+                       buttonClass: 'navi',
+                       click: logoutBoth">
+  </icon-button>
+  <!-- /ko -->
+  <!-- ko ifnot: vetumaLogout -->
+  <a class="btn navi"
+     id="logout-button"
+     data-bind="attr: {href: logoutPath},
+                ltitle: 'logout'">
+    <i aria-hidden="true" class="lupicon-log-out"></i>
+    <span data-bind="ltext: 'logout'"></span>
+  </a>
+  <!-- /ko -->
+</script>

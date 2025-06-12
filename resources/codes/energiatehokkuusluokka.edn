@@ -1,0 +1,167 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "A", :fi "A", :sv "A"},
+   :codeValue "01",
+   :created "2025-02-04T13:20:04.833Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/01/members/",
+   :modified "2025-02-04T13:20:04.833Z",
+   :status "VALID",
+   :id "260a4f83-1302-4ccb-99b4-8fe99e651081",
+   :statusModified "2025-02-04T13:20:04.833Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "B", :fi "B", :sv "B"},
+   :codeValue "02",
+   :created "2025-02-04T13:20:04.853Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/02/members/",
+   :modified "2025-02-04T13:20:04.853Z",
+   :status "VALID",
+   :id "d45e02cf-2caa-42e3-8acf-5da9b0e5035a",
+   :statusModified "2025-02-04T13:20:04.853Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "C", :fi "C", :sv "C"},
+   :codeValue "03",
+   :created "2025-02-04T13:20:04.862Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/03/members/",
+   :modified "2025-02-04T13:20:04.862Z",
+   :status "VALID",
+   :id "f3476e02-0ebd-48ba-89d0-50b5176d1788",
+   :statusModified "2025-02-04T13:20:04.862Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "D", :fi "D", :sv "D"},
+   :codeValue "04",
+   :created "2025-02-04T13:20:04.871Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/04/members/",
+   :modified "2025-02-04T13:20:04.871Z",
+   :shortName " ",
+   :status "VALID",
+   :id "2f364d34-2df7-4420-a98a-5720c1bb1565",
+   :statusModified "2025-02-04T13:20:04.871Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/04",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "E", :fi "E", :sv "E"},
+   :codeValue "05",
+   :created "2025-02-04T13:20:04.880Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/05/members/",
+   :modified "2025-02-04T13:20:04.880Z",
+   :status "VALID",
+   :id "565dfc94-4431-4860-bfc5-25ab193080c9",
+   :statusModified "2025-02-04T13:20:04.880Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/05",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "F", :fi "F", :sv "F"},
+   :codeValue "06",
+   :created "2025-02-04T13:20:04.889Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/06/members/",
+   :modified "2025-02-04T13:20:04.889Z",
+   :status "VALID",
+   :id "10d8ec7a-a24e-4c3f-b5e9-7ecd5f1f7f21",
+   :statusModified "2025-02-04T13:20:04.889Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/06",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "G", :fi "G", :sv "G"},
+   :codeValue "07",
+   :created "2025-02-04T13:20:04.897Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/07/members/",
+   :modified "2025-02-04T13:20:04.897Z",
+   :status "VALID",
+   :id "b8a06094-a28c-4f58-ab61-abe0c041c135",
+   :statusModified "2025-02-04T13:20:04.897Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/07",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Not required", :fi "Ei vaadittu", :sv "Krävs inte"},
+   :codeValue "08",
+   :created "2025-02-04T13:20:04.906Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/08/members/",
+   :modified "2025-02-04T13:20:04.906Z",
+   :status "VALID",
+   :id "426fbd8e-bdbd-4dab-9b70-8868a17d0c2b",
+   :statusModified "2025-02-04T13:20:04.906Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Energiatehokkuusluokka/codes/08",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/Energiatehokkuusluokka/code/08",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:25:50.898Z"}

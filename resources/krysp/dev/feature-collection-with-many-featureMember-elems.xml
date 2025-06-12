@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd http://www.tekla.com/schemas/kuntagml https://kartta.salo.fi/teklaogcweb/WFS.ashx?SERVICE=WFS&amp;REQUEST=DescribeFeatureType&amp;typeName=rakval:RakennusvalvontaAsia ">
+    <gml:boundedBy>
+        <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
+            <gml:coordinates>29995396.591,6331000.232 29995850.741,6332600.524</gml:coordinates>
+        </gml:Box>
+    </gml:boundedBy><gml:featureMember>
+    <rakval:RakennusvalvontaAsia>
+        <rakval:kasittelynTilatieto>
+            <yht:Tilamuutos>
+                <yht:pvm>2016-12-30</yht:pvm>
+                <yht:tila>lupa hyväksytty</yht:tila>
+                <yht:kasittelija>
+                    <yht:henkilo>
+                        <yht:nimi>
+                            <yht:sukunimi>N.N.</yht:sukunimi>
+                        </yht:nimi>
+                    </yht:henkilo>
+                </yht:kasittelija>
+            </yht:Tilamuutos>
+        </rakval:kasittelynTilatieto>
+        <rakval:luvanTunnisteTiedot>
+            <yht:LupaTunnus>
+                <yht:kuntalupatunnus>999-2016-999</yht:kuntalupatunnus>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-999-2016-99999</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:saapumisPvm>2016-12-12</yht:saapumisPvm>
+            </yht:LupaTunnus>
+        </rakval:luvanTunnisteTiedot>
+        <rakval:viitelupatieto>
+            <yht:LupaTunnus>
+                <yht:kuntalupatunnus>444-2008-49</yht:kuntalupatunnus>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-999-2016-09999</yht:tunnus>
+                        <yht:sovellus />
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+            </yht:LupaTunnus>
+        </rakval:viitelupatieto>
+        <rakval:asianTiedot>
+            <rakval:Asiantiedot>
+                <rakval:rakennusvalvontaasianKuvaus>Kuvaus 999-2016-999</rakval:rakennusvalvontaasianKuvaus>
+            </rakval:Asiantiedot>
+        </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+</gml:featureMember><gml:featureMember>
+    <rakval:RakennusvalvontaAsia>
+        <rakval:kasittelynTilatieto>
+            <yht:Tilamuutos>
+                <yht:pvm>2017-01-20</yht:pvm>
+                <yht:tila>lupa hyväksytty</yht:tila>
+                <yht:kasittelija>
+                    <yht:henkilo>
+                        <yht:nimi>
+                            <yht:sukunimi>N.N</yht:sukunimi>
+                        </yht:nimi>
+                    </yht:henkilo>
+                </yht:kasittelija>
+            </yht:Tilamuutos>
+        </rakval:kasittelynTilatieto>
+        <rakval:luvanTunnisteTiedot>
+            <yht:LupaTunnus>
+                <yht:kuntalupatunnus>999-2017-11</yht:kuntalupatunnus>
+                <yht:muuTunnustieto>
+                    <yht:MuuTunnus>
+                        <yht:tunnus>LP-999-2016-99349</yht:tunnus>
+                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                    </yht:MuuTunnus>
+                </yht:muuTunnustieto>
+                <yht:saapumisPvm>2016-12-07</yht:saapumisPvm>
+            </yht:LupaTunnus>
+        </rakval:luvanTunnisteTiedot>
+        <rakval:asianTiedot>
+            <rakval:Asiantiedot>
+                <rakval:rakennusvalvontaasianKuvaus>Kuvaus 999-2017-11</rakval:rakennusvalvontaasianKuvaus>
+            </rakval:Asiantiedot>
+        </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+</gml:featureMember></wfs:FeatureCollection>

@@ -1,0 +1,48 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="fetch-headers-template">
+  <div class="flex--column">
+    <h2>Hae otsikot</h2>
+    <form class="flex--column flex--gap2"
+          data-bind="submit: fetchHeaders">
+      <div class="flex flex--gap1">
+        <input class="lux w--80"
+               type="text"
+               placeholder="URL"
+               data-bind="textInput: url,
+                          disable: waiting">
+        <icon-button params="ltext: 'search',
+                             icon: 'viewfinder',
+                             type: 'submit',
+                             enable: url,
+                             waiting: waiting">
+        </icon-button>
+      </div>
+      <!-- ko if: status -->
+      <table>
+        <thead>
+          <th colspan="2">
+            <div class="flex--between flex--wrap flex--align-center">
+              <strong class="txt--inc1"
+                      data-bind="text: status"></strong>
+              <icon-button params="iconOnly: true,
+                                   icon: 'trash',
+                                   click: clear">
+              </icon-button>
+            </div>
+          </th>
+        </thead>
+        <!-- ko if: headers -->
+        <tbody data-bind="foreach: headers">
+          <tr>
+            <td class="txt--bold ws--nowrap va--top"
+                data-bind="text: $data[0]"></td>
+            <td class="ws--pre-wrap txt--code va--top txt--dec1"
+                data-bind="text: $data[1]"></td>
+          </tr>
+        </tbody>
+        <!-- /ko -->
+      </table>
+      <!-- /ko -->
+    </form>
+  </div>
+</script>

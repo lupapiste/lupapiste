@@ -1,0 +1,168 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:fi "Asemakaava", :sv "Stadsplan"},
+   :codeValue "01",
+   :created "2021-05-18T11:19:58.884Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/01/members/",
+   :modified "2023-11-17T08:10:20.900Z",
+   :status "VALID",
+   :id "4f299ccc-ddef-4567-b82b-074325226c8c",
+   :statusModified "2021-05-18T11:19:58.884Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/01",
+   :order 12,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Rakennuskaava", :sv "Byggnadsplan"},
+   :codeValue "02",
+   :created "2021-05-18T11:21:13.558Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/02/members/",
+   :modified "2023-11-17T08:10:20.914Z",
+   :status "VALID",
+   :id "428af4ac-6c0f-41af-bdf7-ea1010e181dc",
+   :statusModified "2021-05-18T11:21:13.558Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/02",
+   :order 13,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Rantakaava", :sv "Strandplan"},
+   :codeValue "03",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/03/members/",
+   :modified "2023-11-17T08:10:20.920Z",
+   :status "VALID",
+   :id "989431e3-f996-4b93-be94-93cb2d26663b",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/03",
+   :order 14,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Yleiskaava", :sv "Generalplan"},
+   :codeValue "04",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/04/members/",
+   :modified "2023-11-17T08:10:20.926Z",
+   :status "VALID",
+   :id "e814d7ce-15af-4210-8654-5e0c45546693",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/04",
+   :order 15,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Ei kaavaa", :sv "Ingen plan"},
+   :codeValue "05",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/05/members/",
+   :modified "2023-11-17T08:10:20.932Z",
+   :status "VALID",
+   :id "c3ab0e57-714f-4fc1-8440-401fd06bd091",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/05",
+   :order 16,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Maakuntakaava", :sv "Landskapsplan"},
+   :codeValue "06",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/06/members/",
+   :modified "2023-11-17T08:10:20.937Z",
+   :status "VALID",
+   :id "62becc3d-03b5-4ce9-9ebe-ffe8ab708ba1",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/06",
+   :order 17,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Oikeusvaikutteinen yleiskaava",
+    :sv "Generalplan med rättsverkningar"},
+   :codeValue "07",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/07/members/",
+   :modified "2023-11-17T08:10:20.943Z",
+   :status "VALID",
+   :id "73ecb8c5-c658-4d3f-92e8-fcff550ee3de",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/07",
+   :order 18,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:fi "Oikeusvaikutukseton yleiskaava",
+    :sv "Generalplan utan rättsverkningar"},
+   :codeValue "08",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/08/members/",
+   :modified "2023-11-17T08:10:20.949Z",
+   :status "VALID",
+   :id "ff416489-c4fc-4da4-8ed7-639bc03c4638",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/08",
+   :order 19,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/08",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Ranta-asemakaava", :sv "Stranddetaljplan"},
+   :codeValue "09",
+   :created "2018-01-01T00:00:00.000Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/09/members/",
+   :modified "2023-11-17T08:10:20.955Z",
+   :status "VALID",
+   :id "6f0f8c9b-f28a-44bf-9a8b-8f1be3670042",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/vtj/codeschemes/Rake_kaava/codes/09",
+   :order 20,
+   :uri "http://uri.suomi.fi/codelist/vtj/Rake_kaava/code/09",
+   :hierarchyLevel 1}),
+ :modified "2023-12-04T05:37:28.713Z"}

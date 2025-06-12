@@ -1,0 +1,6 @@
+{:global {:admin              #{:global/get-billing-reports
+                                :global/map-config}
+          :authority          #{:global/map-config :global/property-info}
+          :applicant          #{:global/map-config :global/property-info}
+          :oirAuthority       #{:global/map-config}
+          :financialAuthority #{:global/map-config}}}

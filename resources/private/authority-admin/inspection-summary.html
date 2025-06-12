@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="auth-admin-inspection-summary">
+      <div class="container container--authority-admin"
+           data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'auth-admin-inspection-summary',
+                      css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <cljs-auth-admin_inspection-summary_view />
+
+      </div>
+    </section>
+  </body>
+</html>

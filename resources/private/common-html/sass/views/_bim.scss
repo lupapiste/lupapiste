@@ -1,0 +1,141 @@
+@use "../partials/colors";
+@use "../partials/theme";
+
+// A floating dialog panel for BIM viewer
+@mixin bim-viewer-panel {
+  padding: 0.5em;
+  border-radius: 6px;
+  background-color: white;
+  color: colors.$night-sky-100;
+}
+
+.bim-viewer-fullscreen {
+    position: fixed !important;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    height: 100vh;
+    width: 100vw;
+    z-index: 10000; // chatbot has z-index 9999
+}
+
+#bim-viewer-container {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+
+  #bim-viewer-canvas {
+    width: 100%;
+    height: 500px;
+    margin: 0;
+    border-radius: 6px;
+    background: colors.$light-gray;
+  }
+
+  .bim-viewer-canvas-fullscreen {
+      height: 100% !important;
+  }
+
+  .bim-viewer-tree-container {
+    @include bim-viewer-panel;
+    position: absolute;
+    top: 10px;
+    bottom: 15px;
+    left: 10px;
+    overflow-y: auto;
+
+    #bim-viewer-tree {
+      ul {
+        list-style-type: none;
+
+        li {
+          &.highlighted-node {
+            font-weight: bold;
+          }
+        }
+      }
+    }
+  }
+
+  .bim-viewer-button-container {
+    @include bim-viewer-panel;
+    position: absolute;
+    right: 10px;
+    bottom: 15px;
+
+    .mode-on {
+      background-color: black;
+      i {
+        color: white;
+      }
+    }
+  }
+
+  .bim-viewer-selection-details-container {
+    @include bim-viewer-panel;
+    position: absolute;
+    right: 10px;
+    top: 200px;
+
+    .title {
+      display: block;
+      font-weight: bold;
+    }
+  }
+
+  #bim-viewer-navcube-canvas {
+    display: block;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 200px;
+    height: 200px;
+  }
+
+  .bim-viewer-overlay {
+    @include bim-viewer-panel;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-color: colors.$light-gray;
+    align-content: center;
+    text-align: center;
+  }
+}
+
+// The context-sensitive menu that opens when the user right-clicks something in BIM viewer
+.xeokit-context-menu {
+  @include bim-viewer-panel;
+  padding: 0;
+
+  ul {
+    background: none;
+    list-style: none;
+    padding: 0px;
+
+    li {
+
+      &.xeokit-context-menu-item {
+        padding: 0.5em;
+
+        &:hover {
+          background-color: colors.$violet-100;
+          color: white;
+        }
+
+        &.disabled {
+          color: theme.$lp-dark-grey;
+          background-color: theme.$lp-light-grey;
+        }
+      }
+
+      &.xeokit-context-menu-item-separator {
+        border-top: 1px solid colors.$violet-100;
+      }
+    }
+  }
+}

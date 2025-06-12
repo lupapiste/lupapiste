@@ -1,0 +1,296 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Private agricultural entrepreneur",
+    :fi "Yksityinen maatalousyrittäjä",
+    :sv "Privat jordbruksföretagare"},
+   :codeValue "01",
+   :created "2021-10-25T13:34:43.604Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/01/members/",
+   :modified "2025-09-30T11:07:59.174Z",
+   :status "VALID",
+   :id "ac895420-9684-4918-9ace-1701b2c1bb74",
+   :statusModified "2021-10-25T13:34:43.604Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other private person or estate",
+    :fi "Muu yksityinen henkilö tai perikunta",
+    :sv "Annan privatperson eller dödsbo"},
+   :codeValue "02",
+   :created "2021-10-25T13:34:43.613Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/02/members/",
+   :modified "2025-09-30T11:07:59.192Z",
+   :status "VALID",
+   :id "1830721e-ecab-4b4c-91db-abd579bda183",
+   :statusModified "2021-10-25T13:34:43.613Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Housing company or housing cooperative",
+    :fi "Asunto oy tai asunto-osuuskunta",
+    :sv "Bostadsaktiebolag eller bostadsandelslag"},
+   :codeValue "03",
+   :created "2021-10-25T13:34:43.621Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/03/members/",
+   :modified "2025-09-30T11:07:59.208Z",
+   :status "VALID",
+   :id "5c88a4eb-c2da-4173-b378-be45c68131c0",
+   :statusModified "2021-10-25T13:34:43.621Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Real estate company",
+    :fi "Kiinteistö oy",
+    :sv "Fastighetsaktiebolag"},
+   :codeValue "04",
+   :created "2021-10-25T13:34:43.630Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/04/members/",
+   :modified "2025-09-30T11:07:59.221Z",
+   :status "VALID",
+   :id "a2e6637d-ab2f-4e7a-9d36-37ab537fa905",
+   :statusModified "2021-10-25T13:34:43.630Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Private company",
+    :fi "Yksityinen yritys",
+    :sv "Privat företag"},
+   :codeValue "05",
+   :created "2021-10-25T13:34:43.638Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/05/members/",
+   :modified "2025-09-30T11:07:59.234Z",
+   :status "VALID",
+   :id "57d1e598-24f4-4c14-9c44-9a33917cbe41",
+   :statusModified "2021-10-25T13:34:43.638Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Company where state or municipality is majority shareholder",
+    :fi "Valtio- tai kuntaenemmistöinen yritys",
+    :sv "Företag med statlig eller kommunal majoritet"},
+   :codeValue "06",
+   :created "2021-10-25T13:34:43.647Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/06/members/",
+   :modified "2025-09-30T11:07:59.246Z",
+   :status "VALID",
+   :id "66c3afcb-7fe5-43c5-9f1e-85083fc72ead",
+   :statusModified "2021-10-25T13:34:43.647Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Municipal utility",
+    :fi "Kunnan liikelaitos",
+    :sv "Kommunens affärsverk"},
+   :codeValue "07",
+   :created "2021-10-25T13:34:43.655Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/07/members/",
+   :modified "2025-09-30T11:07:59.260Z",
+   :status "VALID",
+   :id "90aaae58-c106-4415-b1d3-7ca7de257588",
+   :statusModified "2021-10-25T13:34:43.655Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/07",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "State enterprise",
+    :fi "Valtion liikelaitos",
+    :sv "Statens affärsverk"},
+   :codeValue "08",
+   :created "2021-10-25T13:34:43.662Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/08/members/",
+   :modified "2025-09-30T11:07:59.273Z",
+   :status "VALID",
+   :id "4ead472a-5dfe-44bb-bea0-9a2bf4d0bfab",
+   :statusModified "2021-10-25T13:34:43.662Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/08",
+   :order 8,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/08",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Banking or insurance institution",
+    :fi "Pankki- tai vakuutuslaitos",
+    :sv "Bank eller försäkringsanstalt"},
+   :codeValue "09",
+   :created "2021-10-25T13:34:43.668Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/09/members/",
+   :modified "2025-09-30T11:07:59.285Z",
+   :status "VALID",
+   :id "82ad80cd-0670-4ecb-86a4-011b2b38dfaa",
+   :statusModified "2021-10-25T13:34:43.668Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/09",
+   :order 9,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/09",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Municipality or federation of municipalities",
+    :fi "Kunta tai kuntainliitto",
+    :sv "Kommun eller samkommun"},
+   :codeValue "10",
+   :created "2021-10-25T13:34:43.674Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/10/members/",
+   :modified "2025-09-30T11:07:59.424Z",
+   :status "VALID",
+   :id "3bb78434-0347-4a0e-9654-f8e7227ffc92",
+   :statusModified "2021-10-25T13:34:43.674Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/10",
+   :order 10,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/10",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "State", :fi "Valtio", :sv "Staten"},
+   :codeValue "11",
+   :created "2021-10-25T13:34:43.680Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/11/members/",
+   :modified "2025-09-30T11:07:59.437Z",
+   :status "VALID",
+   :id "4b9cc257-bb44-4aae-8682-0e4c8f24c889",
+   :statusModified "2021-10-25T13:34:43.680Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/11",
+   :order 11,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/11",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Social security fund",
+    :fi "Sosiaaliturvarahasto",
+    :sv "Socialskyddsfond"},
+   :codeValue "12",
+   :created "2021-10-25T13:34:43.686Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/12/members/",
+   :modified "2025-09-30T11:07:59.450Z",
+   :status "VALID",
+   :id "053a9d26-e059-48b9-8b0b-63fb466b0d63",
+   :statusModified "2021-10-25T13:34:43.686Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/12",
+   :order 12,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/12",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Religious community, foundation, party or association",
+    :fi "Uskonnollinen yhteisö, säätiö, puolue tai yhdistys",
+    :sv "Religiöst samfund, stiftelse, parti eller förening"},
+   :codeValue "13",
+   :created "2021-10-25T13:34:43.692Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/13/members/",
+   :modified "2025-09-30T11:07:59.462Z",
+   :status "VALID",
+   :id "99f5a755-b737-4256-bee3-1580d680f6a3",
+   :statusModified "2021-10-25T13:34:43.692Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/13",
+   :order 13,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/13",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "14",
+   :created "2021-10-25T13:34:43.697Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/14/members/",
+   :modified "2025-09-30T11:07:59.476Z",
+   :status "VALID",
+   :id "2c21cbb3-078a-49a2-b795-9d0f0f60e6ba",
+   :statusModified "2021-10-25T13:34:43.697Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/14",
+   :order 14,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/14",
+   :hierarchyLevel 1}
+  {:description {:fi ""},
+   :prefLabel
+   {:en "Wellbeing services county",
+    :fi "Hyvinvointialue",
+    :sv "Välfärdsområde"},
+   :codeValue "15",
+   :startDate "2025-12-18",
+   :created "2025-09-30T11:07:59.489Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/15/members/",
+   :modified "2025-12-18T16:16:07.294Z",
+   :status "VALID",
+   :id "7750131f-4908-4003-a6a6-ebb3a656cc5d",
+   :statusModified "2025-12-18T16:16:07.294Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/Omistajalaji/codes/15",
+   :order 15,
+   :uri "http://uri.suomi.fi/codelist/rytj/Omistajalaji/code/15",
+   :hierarchyLevel 1}),
+ :modified "2025-12-18T16:16:36.183Z"}

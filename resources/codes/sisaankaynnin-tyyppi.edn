@@ -1,0 +1,179 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Main entrance to stairwell",
+    :fi "Pääsisäänkäynti porrashuoneeseen",
+    :sv "Huvudingång till trapphus"},
+   :codeValue "01",
+   :created "2023-01-04T16:47:13.050Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/01/members/",
+   :modified "2023-12-04T10:34:44.891Z",
+   :status "VALID",
+   :id "6cea1165-5071-488c-aa42-c6b59830ee9b",
+   :statusModified "2023-01-04T16:47:13.050Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other entrance to stairwell",
+    :fi "Muu sisäänkäynti porrashuoneeseen",
+    :sv "Annan ingång till trapphus"},
+   :codeValue "02",
+   :created "2023-01-04T16:47:13.082Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/02/members/",
+   :modified "2023-12-04T10:34:44.907Z",
+   :status "VALID",
+   :id "eaf9e60a-81e0-481c-a5a1-81ae84a2be17",
+   :statusModified "2023-01-04T16:47:13.082Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Entrance to apartment",
+    :fi "Sisäänkäynti huoneistoon",
+    :sv "Ingång till lägenhet"},
+   :codeValue "03",
+   :created "2023-01-04T16:47:13.092Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/03/members/",
+   :modified "2023-12-04T10:34:44.916Z",
+   :status "VALID",
+   :id "27358213-31ab-48ae-af3e-f0d5f9b70e7a",
+   :statusModified "2023-01-04T16:47:13.092Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Main entrance for public or customers",
+    :fi "Pääsisäänkäynti yleisölle tai asiakkaille",
+    :sv "Huvudingång för allmänheten eller kunder"},
+   :codeValue "04",
+   :created "2023-01-04T16:47:13.100Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/04/members/",
+   :modified "2023-12-04T10:34:44.923Z",
+   :status "VALID",
+   :id "6202fde6-f5e1-481e-9b53-220e2bcea4ad",
+   :statusModified "2023-01-04T16:47:13.100Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/04",
+   :order 4,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other entrance for public or customers",
+    :fi "Muu sisäänkäynti yleisölle tai asiakkaille",
+    :sv "Annan ingång för allmänheten eller kunder"},
+   :codeValue "05",
+   :created "2023-01-04T16:47:13.106Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/05/members/",
+   :modified "2023-12-04T10:34:44.931Z",
+   :status "VALID",
+   :id "964045a1-1925-4cab-9ae3-e92597301c1b",
+   :statusModified "2023-01-04T16:47:13.106Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/05",
+   :order 5,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Delivery or collection of goods",
+    :fi "Tavaran toimitus tai nouto",
+    :sv "Varuleverans eller -upphämtning"},
+   :codeValue "06",
+   :created "2023-01-04T16:47:13.111Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/06/members/",
+   :modified "2023-12-04T10:34:44.939Z",
+   :status "VALID",
+   :id "1678761d-9ab5-444b-bbd2-bcaee383313a",
+   :statusModified "2023-01-04T16:47:13.111Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/06",
+   :order 6,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Entrance for vehicles",
+    :fi "Sisäänkäynti ajoneuvoille",
+    :sv "Ingång för fordon"},
+   :codeValue "07",
+   :created "2023-01-04T16:47:13.123Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/07/members/",
+   :modified "2023-12-04T10:34:44.946Z",
+   :status "VALID",
+   :id "f8a48729-e127-4f2c-861f-00a9b562db80",
+   :statusModified "2023-01-04T16:47:13.123Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/07",
+   :order 7,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Other entrance", :fi "Muu sisäänkäynti", :sv "Annan ingång"},
+   :codeValue "99",
+   :created "2023-01-04T16:47:13.141Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/99/members/",
+   :modified "2023-12-04T10:34:44.954Z",
+   :status "VALID",
+   :id "10fd42ef-f210-40f3-9dbc-4127bcea6b27",
+   :statusModified "2023-01-04T16:47:13.141Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/sisaankaynti/codes/99",
+   :order 8,
+   :uri "http://uri.suomi.fi/codelist/rytj/sisaankaynti/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:37:00.871Z"}

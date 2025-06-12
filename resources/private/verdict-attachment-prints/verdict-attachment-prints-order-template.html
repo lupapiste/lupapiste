@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="verdict-attachment-prints-order-dialogs" style="visibility: visible; display: block;">
+
+      <div id="dialog-verdict-attachment-prints-order" class="window autosized"
+           role="dialog" aria-labelledby="print-order-dialog-title">
+        <div data-bind="with: $root.verdictAttachmentPrintsOrderModel">
+
+          <div class="dialog-header">
+            <p id="print-order-dialog-title"
+               data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.title'"></p>
+            <button class="tertiary close btn-icon-only btn-no-border"
+                    id="print-order-close"
+                    data-test-id="verdict-attachment-prints-order-close-dialog"
+                    data-bind="ariaLtext: 'close',
+                               focusPrevious: '#print-order-cancel'">
+              <i aria-hidden="true" class="lupicon-remove"></i>
+            </button>
+          </div>
+          <div class="dialog-content">
+
+            <h3 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.description'"></h3>
+
+            <div class="print-order-files">
+
+              <table class="fixed-headers">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.attachmentType'"></th>
+                    <th data-bind="ltext: 'application.attachmentContents'"></th>
+                    <th data-bind="ltext: 'application.attachmentFile'"></th>
+                    <th data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderCount'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: attachments" data-test-id="verdict-attachments-tbody">
+                  <tr data-bind="testId: 'order-prints-attachment-row-' + type['type-group'] + '-' + type['type-id']">
+                    <td data-test-col="type">
+                      <attachment-type-id params="attachmentId: $data.id"></attachment-type-id>
+                    </td>
+                    <td data-bind="text: contents" data-test-col="contents"></td>
+                    <td data-bind="text: filename" data-test-col="filename"></td>
+                    <td class="center" data-test-col="amount">
+                      <input type="text"
+                             data-bind="textInput: orderAmount,
+                                        ariaLtext: 'verdict-attachment-prints-order.order-dialog.orderCount'"
+                             class="lux order-amount" /></td>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+
+            <h1 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderInfo'"></h1>
+            <div>
+              <form id="verdict-attachment-prints-order-info"
+                    class="flex--column flex--gap2">
+                <h2 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.legend.orderer'"></h2>
+                <div class="dsp--flex flex--gap2 gap--r2">
+                  <div class="w--50 pad--r1">
+                    <label for="printsOrderOrdererOrganization"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererOrganization'"
+                           class="lux required dsp--block">
+                    </label>
+                    <input id="printsOrderOrdererOrganization" type="text"
+                           data-bind="textInput: ordererOrganization,
+                                      valueRequired: ordererOrganization"
+                           data-test-id="verdict-attachment-prints-order-orderer-organization"
+                           class="lux w--100">
+                  </div>
+                  <div  class="w--50 pad--l1">
+                      <label for="printsOrderOrdererEmail"
+                             data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererEmail'"
+                             class="lux required dsp--block"></label>
+                      <input id="printsOrderOrdererEmail" type="text"
+                             data-bind="textInput: ordererEmail,
+                                        valueRequired: ordererEmail,
+                                        ariaInvalid: badEmail"
+                             data-test-id="verdict-attachment-prints-order-orderer-email"
+                             class="lux w--100">
+                    </div>
+                </div>
+                <div class="dsp--flex flex--gap2 gap--r2">
+                  <div class="w--50 pad--r1">
+                    <label for="printsOrderOrdererAddress"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererAddress'"
+                           class="lux required dsp-block"></label>
+                    <input id="printsOrderOrdererAddress" type="text"
+                           data-bind="textInput: ordererAddress,
+                                      valueRequired: ordererAddress"
+                           data-test-id="verdict-attachment-prints-order-orderer-address"
+                           class="lux w--100">
+                  </div>
+                  <div class="w--50 pad--l1">
+                    <label for="printsOrderOrdererPhone"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererPhone'"
+                           class="lux required dsp--block"></label>
+                    <input id="printsOrderOrdererPhone" type="text"
+                           data-bind="textInput: ordererPhone,
+                                      valueRequired: ordererPhone,
+                                      ariaInvalid: badPhone"
+                           data-test-id="verdict-attachment-prints-order-orderer-phone"
+                           class="lux w--100">
+                  </div>
+                </div>
+                <h2 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.legend.application'"></h2>
+                <div class="dsp--flex flex--gap2 gap--r2">
+                  <div class="flex--g1">
+                    <label for="printsOrderApplicantName"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.applicantName'"
+                           class="lux dsp--block"></label>
+                    <input id="printsOrderApplicantName" type="text"
+                           data-bind="textInput: applicantName"
+                           disabled
+                           data-test-id="verdict-attachment-prints-order-applicant-name"
+                           class="lux w--100">
+                  </div>
+                  <div class="flex--g1">
+                    <label for="printsOrderAddress"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.address'"
+                           class="lux dsp--block"></label>
+                    <input id="printsOrderAddress" type="text"
+                           disabled
+                           data-bind="textInput: address"
+                         data-test-id="verdict-attachment-prints-order-address"
+                         class="lux w--100">
+                  </div>
+                </div>
+                <div class="dsp--flex flex--gap2 gap--r2">
+                  <div class="flex--g1">
+                    <label for="printsOrderLupapisteId"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.lupapisteId'"
+                           class="lux dsp--block"></label>
+                    <input id="printsOrderLupapisteId" type="text"
+                           disabled
+                           data-bind="textInput: lupapisteId"
+                         data-test-id="verdict-attachment-prints-order-lupapisteId"
+                         class="lux w--100">
+                  </div>
+                  <div  class="flex--g1">
+                    <label for="printsOrderKuntalupatunnus"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.kuntalupatunnus'"
+                           class="lux dsp--block"></label>
+                    <input id="printsOrderKuntalupatunnus" type="text"
+                           data-bind="textInput: kuntalupatunnus"
+                           disabled
+                           data-test-id="verdict-attachment-prints-order-kuntalupatunnus"
+                           class="lux w--100">
+                  </div>
+                  <div  class="flex--g1">
+                    <label for="printsOrderPropertyId"
+                           data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.propertyId'"
+                           class="lux dsp--block"></label>
+                    <input id="printsOrderPropertyId" type="text"
+                           disabled
+                           data-bind="textInput: propertyIdHumanReadable"
+                           data-test-id="verdict-attachment-prints-order-propertyId"
+                           class="lux w--100">
+                  </div>
+                </div>
+            </form>
+          </div>
+
+            <div class="clear">
+              <div data-bind="if: errorMessage" >
+                <div role="alert"
+                     data-bind="text: errorMessage"
+                     class="context-error"
+                     data-test-id="verdict-attachment-prints-order-error-message"></div>
+              </div>
+
+              <button data-bind="click: orderAttachmentPrints,
+                                 enable: ok() && !pending(),
+                                 ltext: 'verdict-attachment-prints-order.order-dialog.submit'"
+                      class="btn-primary btn-dialog btn-prints-dialog-ok"
+                      data-test-id="test-order-verdict-attachment-prints">
+              </button>
+
+              <button data-bind="ltext: 'cancel',
+                                 click: LUPAPISTE.ModalDialog.close,
+                                 focusNext: '#print-order-close'"
+                      class="secondary btn-dialog"
+                      id="print-order-cancel"
+                      data-test-id="test-order-verdict-attachment-prints-cancel"></button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

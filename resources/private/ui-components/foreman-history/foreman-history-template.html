@@ -1,0 +1,40 @@
+<script type="text/x-jquery-tmpl" id="foreman-history-template" class="ko-template">
+  <div class="foreman-history-container">
+    <label class="form-label form-label-table"
+           data-bind="ltext: title,
+                      testId: titleTestId">
+    </label>
+    <table class="content">
+      <thead>
+        <tr>
+          <th class="first"  data-bind="ltext: 'tyonjohtaja.historia.kunta'"></th>
+          <th class="second" data-bind="ltext: 'tyonjohtaja.historia.vaativuus'"></th>
+          <th class="third" data-bind="ltext: 'tyonjohtaja.historia.vainTamaHanke'"></th>
+          <th class="fourth"  data-bind="ltext: 'tyonjohtaja.historia.vastuu'"></th>
+          <th class="fifth" data-bind="ltext: 'tyonjohtaja.historia.hanke'"></th>
+        </tr>
+      </thead>
+
+      <tbody data-bind="visible: projects().length == 0">
+        <tr>
+          <td colspan="5" data-bind="ltext: 'tyonjohtaja.noProjects'"></td>
+        </tr>
+      </tbody>
+
+      <tbody data-bind="foreach: projects" >
+        <tr>
+          <td data-bind="text: loc(['municipality', municipality])"></td>
+          <td data-bind="text: loc(['osapuoli.patevyysvaatimusluokka', difficulty])"></td>
+          <td data-bind="text: loc(limitedApproval)"></td>
+          <td><span data-bind="text: loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', jobDescription])"></span> (<span data-bind="text: foremanAppId"></span>)</td>
+          <td><span data-bind="text: loc(['operations', operation])"></span> (<a data-bind="attr: {href: '#!/application/' + linkedAppId}, text: linkedAppId"></a>)</td>
+        </tr>
+      </tbody>
+    </table>
+    <toggle params="value: showAll,
+                    prefix: 'blockbox',
+                    testId: 'foreman-history-show-all', 
+                    ltext: 'tyonjohtaja.history.showAllProjects'"
+            data-bind="visible: showCheck"></toggle>
+  </div>
+</script>

@@ -1,0 +1,24 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="indicator-template">
+  <!-- ko with: currentIndicator -->
+  <div class="indicator-bar"
+       data-bind="fader: $parent.showIndicator,
+                  duration: 250,
+                  css: style,
+                  testId: 'indicator-' + style,
+                  attr: attributes">
+    <div class="indicator-box"
+         data-bind="click: $parent.showCloseButton($data) ? $parent.closeIndicator : _.noop,
+                    css: {'indicator-box--hand': $parent.showCloseButton($data)}">
+      <div class="indicator-info"
+           aria-hidden="true"
+           data-bind="css: iconStyle"></div>
+      <div class="indicator-message"
+           data-bind="html: message"></div>
+      <div class="indicator-close lupicon-remove"
+           aria-hidden="true"
+           data-bind="visible: $parent.showCloseButton($data),
+                      click: $parent.closeIndicator"></div>
+    </div>
+  </div>
+  <!-- /ko -->
+</script>

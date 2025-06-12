@@ -1,0 +1,6 @@
+"suomi.fi.sijaintikerroksen-tarkenne.kellari" "en" "Basement"
+"suomi.fi.sijaintikerroksen-tarkenne.kellari" "sv" "Källare"
+"suomi.fi.sijaintikerroksen-tarkenne.kellari" "fi" "Kellari"
+"suomi.fi.sijaintikerroksen-tarkenne.ullakko" "en" "Attic"
+"suomi.fi.sijaintikerroksen-tarkenne.ullakko" "sv" "Vind"
+"suomi.fi.sijaintikerroksen-tarkenne.ullakko" "fi" "Ullakko"

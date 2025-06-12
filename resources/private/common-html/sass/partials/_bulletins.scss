@@ -1,0 +1,356 @@
+@use "../views/application";
+@use "base";
+@use "colors";
+@use "theme";
+@use "typography";
+
+$bulletin-breakpoint: 1166px;
+
+#bulletins, #local-bulletins {
+  font-family: typography.$font-body;
+  font-weight: 400;
+  font-size: 1rem;
+  color: colors.$gray51;
+
+  h1,h2,h3,h4,h5 {
+    font-family: typography.$font-heading;
+    color: colors.$night-sky-100;
+    text-transform: none;
+    margin-bottom: base.$marginS;
+    line-height: 1.2em;
+  }
+
+  h1 {
+    font-weight: 900;
+    font-size: 3.75rem;
+    line-height: 3.75rem
+  }
+
+  h2 {
+    font-weight: 300;
+    font-size: 3rem;
+  }
+
+  h3 {
+    font-weight: 700;
+    font-size: 2rem;
+  }
+
+  h4 {
+    font-weight: 400;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+  }
+
+  h5 {
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+
+  p {
+    margin-bottom: theme.$grid-margin;
+  }
+
+  .intro {
+    font-weight: 300;
+    font-size: 1.375rem;
+    line-height: 1.4em;
+    margin-top: theme.$grid-margin;
+    button {
+      margin-left: theme.$grid-margin;
+    }
+  }
+
+  .help-toggle {
+    color: theme.$blue;
+
+    .lupicon-circle-question {
+      color: theme.$blue;
+      &.expanded {
+        color: theme.$blue;
+      }
+    }
+  }
+
+  .help-text {
+    border-color: theme.$blue;
+  }
+
+  .help-arrow {
+    &:before {
+      border-bottom-color: theme.$blue;
+    }
+  }
+
+  input {
+    &:focus {
+      border-color: colors.$blue-100;
+    }
+  }
+
+  .content {
+    //
+  }
+
+  .blue-bg {
+    background-color: theme.$blue-dark;
+    h1,p {
+      color: #fff;
+    }
+  }
+
+  .gray-bg {
+    background-color: colors.$gray238;
+  }
+
+  .orange-bg {
+    background-color: theme.$orange-dark;
+    h1,h2,p {
+      color: #fff;
+    }
+  }
+
+  .content-center {
+    max-width: base.$application-max-width;
+    margin: 0 auto;
+    position: relative;
+    padding: theme.$grid-margin-large;
+  }
+
+  .full {
+    width: 100%;
+    min-width: 320px;
+  }
+
+  .slogan, .ingress {
+    text-align: center;
+    width: 80%;
+    margin: 0 auto theme.$grid-margin;
+  }
+
+  .municipal-heading {
+    font-weight: 900;
+    padding-top: theme.$grid-margin-large;
+  }
+
+  .municipal-caption {
+    border: 1px solid;
+    padding: theme.$grid-margin;
+    margin-top: theme.$grid-margin-large;
+    border-color: colors.$dark-gray;
+
+    p:last-child {
+      margin-bottom: auto;
+    }
+  }
+
+  .autocomplete-component {
+    .autocomplete-selection-wrapper {
+      i.tag-chevron {
+        color: colors.$night-sky-100;
+        &.toggle {
+          color: colors.$blue-100;
+        }
+      }
+    }
+    .autocomplete-selection-wrapper.active {
+      border-color: colors.$blue-100;
+      .tag-chevron {
+        color: colors.$blue-100;
+      }
+    }
+    .search {
+      .search-icon {
+        color: colors.$night-sky-100;
+      }
+      &.active {
+        .search-icon {
+          color: colors.$blue-100;
+        }
+      }
+    }
+    .autocomplete-dropdown {
+      ul.autocomplete-result {
+        border-color: colors.$blue-100;
+        li.autocomplete-result-item.active {
+          background-color: colors.$blue-100;
+          &:active {
+            background-color: colors.$blue-100;
+          }
+        }
+
+      }
+    }
+  }
+  .form-grid {
+    textarea {
+      display: block;
+      &:focus {
+        color: theme.$input-focus-color;
+        border-color: theme.$blue-light;
+      }
+    }
+  }
+  .search-button-wrapper {
+    text-align: center;
+    button {
+      span:last-child {
+        padding-left: base.$marginS;
+        &:before {
+          content: "(";
+        }
+        &:after {
+          content: ")";
+        }
+      }
+    }
+  }
+
+  .bulletins-search {
+    .search-field {
+      i {
+        color: colors.$night-sky-100;
+      }
+      &.active {
+        i {
+          color: colors.$blue-100;
+        }
+      }
+    }
+  }
+
+  #application-bulletins-list {
+    th {
+      background-color: colors.$gray204;
+      &.zeroth {
+
+      }
+      &.first {
+
+      }
+      &.second {
+
+      }
+      &.third {
+
+      }
+      &.fourth {
+
+      }
+      &.fifth {
+        width: 5%;
+      }
+      &.sixth {
+      }
+      & > button {
+        margin: -6px -12px;
+        padding: 6px 6px 6px 12px;
+        line-height: 1em;
+        font-weight: bold;
+        box-sizing: border-box;
+        outline-offset: -2px;
+      }
+    }
+    tbody > tr {
+      cursor: pointer;
+      &:hover, &:focus {
+        background-color: colors.$blue-10;
+      }
+    }
+    tr:nth-child(even) {
+      background-color: colors.$gray238;
+    }
+  }
+
+  .bulletin-comment {
+    h5 {
+      display: inline-block;
+    }
+    .help-toggle {
+      vertical-align: top;
+    }
+    .user-info {
+      font-style: italic;
+    }
+  }
+  ul.bulletin-comment__attachment-list {
+    display: table;
+    list-style: none;
+    padding: 0;
+    li {
+      display: table-row;
+      padding: 0;
+      span {
+        display: table-cell;
+        padding-right: base.$marginL;
+      }
+    }
+  }
+  table.bulletin-attachments {
+    tr td {
+      word-wrap: break-word;
+      &:first-child {
+        padding-left: 12px;
+      }
+    }
+  }
+  .bulletin-tab-content {
+    h3 {
+      margin-bottom: base.$marginL;
+    }
+  }
+
+  div.key-value-pair {
+    width: 80%;
+  }
+}
+
+#application-ymp-bulletin-tab {
+  .bulletin-state {
+    font-weight: bold;
+  }
+  .bulletin-component {
+    margin-bottom: base.$marginL;
+  }
+  .back-button {
+    margin-bottom: base.$marginL;
+  }
+  .accordion_content {
+    padding: base.$marginM;
+  }
+  table {
+    margin: 0;
+  }
+}
+
+#bulletins .application_summary,
+#local-bulletins .application_summary,
+#r-bulletin .application_summary, {
+  .container {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .application_summary_info {
+    width: 80%;
+  }
+
+  .bulletin-preamble {
+    @include application.preamble-common {
+      margin-top: 2em;
+    }
+    @include application.preamble-breakpoint( $bulletin-breakpoint ) {
+      .application_summary_info {
+        width: initial;
+      }
+    }
+  }
+}
+
+#bulletins_bulletin_preamble2 {
+  span.markup {display: inline; }
+}
+
+#bulletin-tabs li.active {
+  background: colors.$white;
+}

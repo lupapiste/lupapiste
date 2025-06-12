@@ -1,0 +1,12 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="bulletin-instructions-tab-template">
+      <h3>
+        <span data-bind="visible: inProclaimedState, ltext: 'application.tabInstructions.proclaimed'"></span>
+        <span data-bind="visible: inVerdictGivenState() || inFinalState() , ltext: 'application.tabInstructions.verdictGiven'"></span>
+      </h3>
+      <!-- ko if: proclaimedText -->
+      <pre class="wrapped_text" data-bind="text: proclaimedText"></pre>
+      <!-- /ko -->
+      <!-- ko if: verdictGivenText -->
+      <pre class="wrapped_text" data-bind="text: verdictGivenText"></pre>
+      <!-- /ko -->
+</script>

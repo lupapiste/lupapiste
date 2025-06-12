@@ -1,0 +1,166 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel {:en "Not known", :fi "Ei tiedossa", :sv "Okänt"},
+   :codeValue "00",
+   :created "2023-01-04T13:54:32.896Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/00/members/",
+   :modified "2023-11-30T11:22:12.164Z",
+   :status "VALID",
+   :id "496038e7-f9b6-400d-8d2c-143bdec58641",
+   :statusModified "2023-01-04T13:54:32.896Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/00",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/00",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Concrete", :fi "Betoni", :sv "Betong"},
+   :codeValue "01",
+   :created "2023-01-04T13:54:32.904Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/01/members/",
+   :modified "2023-11-30T11:22:12.179Z",
+   :status "VALID",
+   :id "5d7e6a54-7b5a-454b-b844-485613040944",
+   :statusModified "2023-01-04T13:54:32.904Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/01",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Brick", :fi "Tiili", :sv "Tegel"},
+   :codeValue "02",
+   :created "2023-01-04T13:54:32.912Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/02/members/",
+   :modified "2023-11-30T11:22:12.186Z",
+   :status "VALID",
+   :id "690aa2f2-8407-48dd-886b-59f3c4224109",
+   :statusModified "2023-01-04T13:54:32.912Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/02",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Metal sheet", :fi "Metallilevy", :sv "Metallplatta"},
+   :codeValue "03",
+   :created "2023-01-04T13:54:32.920Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/03/members/",
+   :modified "2023-11-30T11:22:12.193Z",
+   :status "VALID",
+   :id "5d2a8cba-53c9-4cce-831c-e35146173479",
+   :statusModified "2023-01-04T13:54:32.920Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/03",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Stone", :fi "Kivi", :sv "Sten"},
+   :codeValue "04",
+   :created "2023-01-04T13:54:32.928Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/04/members/",
+   :modified "2023-11-30T11:22:12.200Z",
+   :status "VALID",
+   :id "bde7f13e-f14b-4cad-9824-d14d1aedfaaf",
+   :statusModified "2023-01-04T13:54:32.928Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/04",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Wood", :fi "Puu", :sv "Trä"},
+   :codeValue "05",
+   :created "2023-01-04T13:54:32.936Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/05/members/",
+   :modified "2023-11-30T11:22:12.207Z",
+   :status "VALID",
+   :id "ba050167-de3e-44b8-8207-4892e9434bc4",
+   :statusModified "2023-01-04T13:54:32.936Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/05",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Glass", :fi "Lasi", :sv "Glas"},
+   :codeValue "06",
+   :created "2023-01-04T13:54:32.944Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/06/members/",
+   :modified "2023-11-30T11:22:12.213Z",
+   :status "VALID",
+   :id "02c7bfca-0104-4a2f-88eb-3a0a16840869",
+   :statusModified "2023-01-04T13:54:32.944Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/06",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-01-04T13:54:32.953Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/99/members/",
+   :modified "2023-11-30T11:22:12.220Z",
+   :status "VALID",
+   :id "9c617ee9-e7fd-40b0-9de0-6fce1e30008d",
+   :statusModified "2023-01-04T13:54:32.953Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/julkisivunrakennusaine/codes/99",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/julkisivunrakennusaine/code/99",
+   :hierarchyLevel 1}),
+ :modified "2026-01-07T17:14:21.142Z"}

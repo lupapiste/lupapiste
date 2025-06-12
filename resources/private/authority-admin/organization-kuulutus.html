@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization-kuulutus" >
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <!-- ko if: $root.kuulutus.textsInitialized -->
+        <section data-bind="with: $root.kuulutus.texts">
+          <h2 data-bind="ltext: 'auth-admin.local-kuulutus-page-texts'"></h2>
+          <table class="admin-settings-local-bulletins">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'auth-admin.parameter'"></th>
+                <th data-bind="ltext: 'in_fi'"></th>
+                <th data-bind="ltext: 'in_sv'"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-bind="ltext: 'auth-admin.local-kuulutus-page-texts.heading1'"></td>
+                <td class="value">
+                  <input type="text" data-bind="value: $data.fi.heading1,
+                                                enable: $root.kuulutus.canEdit"/>
+                </td>
+                <td class="value">
+                  <input type="text" data-bind="value: $data.sv.heading1,
+                                                enable: $root.kuulutus.canEdit"/>
+                </td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'auth-admin.local-kuulutus-page-texts.heading2'"></td>
+                <td class="value">
+                  <input type="text" data-bind="value: $data.fi.heading2,
+                                                enable: $root.kuulutus.canEdit"/>
+                </td>
+                <td class="value">
+                  <input type="text" data-bind="value: $data.sv.heading2,
+                                                enable: $root.kuulutus.canEdit"/>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- ko foreach: loc.getSupportedLanguages() -->
+          <!-- ko if: _.get($parent, $data) -->
+          <h2 data-bind="ltext: 'auth-admin.local-kuulutus-page-texts.caption-in-' + $data"></h2>
+          <table class="admin-settings-local-bulletins">
+            <tbody data-bind="foreach: _.get($parent, [$data, 'caption'])">
+              <tr>
+                <td class="value full-width">
+                  <textarea data-bind="value: $data.text,
+                                       enable: $root.kuulutus.canEdit">
+                  </textarea>
+                </td>
+                <td>
+                  <i class="lupicon-remove primary"
+                     data-bind="click: $data.doRemove,
+                                visible: $root.kuulutus.canEdit"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><icon-button params="ltext: 'auth-admin.local-kuulutus-page-texts.caption-add',
+                               icon: 'circle-plus',
+                               click: _.partial($root.kuulutus.appendCaption, $data),
+                               testId: 'add-row'"
+                          data-bind="visible: $root.kuulutus.canEdit"></icon-button></p>
+          <!-- /ko -->
+          <!-- /ko -->
+        </section>
+        <!-- /ko -->
+      </div>
+    </section>
+  </body>
+</html>

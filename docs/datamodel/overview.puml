@@ -1,0 +1,97 @@
+@startuml
+
+' Overview of the new Lupapiste data model
+' Note: make new models for subsections, do not try to cram
+' everything into this one. '
+
+legend top left
+    |<#mediumpurple>| Hanke |
+    |<#gold>| Hankkeesta riippumaton |
+    |<#white>| Hankkeesta riippuvainen |
+endlegend
+
+object Hanke #mediumpurple
+object Organisaatio #gold
+object Päätöspohja #gold
+object Päätös
+object Vaatimus
+object Katselmus
+object Osapuoli
+object Rooli #gold
+object Valtuutus
+object Toimenpide
+object Lomake
+object Liite
+object Liitetyyppi #gold
+object Naapuri
+object Kuulutus
+object Piirros
+object Tilamuutos
+object Lausunto
+object Viesti
+object Lasku
+object Siirtoerä #gold
+object Notifikaatio
+object Muutoksenhaku
+object Yritystili #gold
+object Käyttäjä #gold
+object Viranomaisvaltuutus #gold
+object Toimenpidetyyppi #gold
+object Lomaketyyppi #gold
+object Rakennuskohde
+object "BIM tietomalli" as BIM
+object Tehtävä
+
+Organisaatio *--o Hanke
+
+Hanke *-up-o Päätös
+Hanke *-up--o Katselmus
+Hanke *--o Osapuoli
+Hanke *-left-o Valtuutus
+Hanke *-up--o Toimenpide
+Hanke *-right-o Lomake
+Hanke *-left-o Liite
+
+Hanke *--o Viesti
+Hanke *-down----o Naapuri
+Hanke *-down----o Kuulutus
+Hanke *-down----o Piirros
+Hanke *-down----o Tilamuutos
+Hanke *-down----o Lausunto
+Hanke *-down----o Notifikaatio
+Hanke *-down----o Tehtävä
+Hanke *-down----o Lasku
+
+Lasku o-up-o Siirtoerä
+
+Liite o-o Viesti
+Liitetyyppi *-o Liite
+
+Organisaatio *-o Päätöspohja
+Päätöspohja *-o Päätös
+Päätös *-up-o Muutoksenhaku
+Muutoksenhaku *--o Päätös
+
+Päätös o-o Päätös
+Päätös *--o Vaatimus
+Vaatimus o-down-o Katselmus
+Vaatimus o-o Rooli
+Vaatimus o-left-o Liitetyyppi
+
+Rooli *-o Osapuoli
+Käyttäjä o-up-o Viranomaisvaltuutus
+Viranomaisvaltuutus o-* Organisaatio
+Käyttäjä -up-o Viesti
+Käyttäjä o-o Osapuoli
+Käyttäjä o--o Valtuutus
+Yritystili o-up-o Käyttäjä
+Yritystili o-up-o Osapuoli
+Yritystili o-o Valtuutus
+
+Katselmus o--* Toimenpide
+Toimenpidetyyppi *-o Toimenpide
+Toimenpidetyyppi o-o Lomaketyyppi
+Lomaketyyppi *--o Lomake
+Toimenpide *--o Rakennuskohde
+Rakennuskohde *-up-o BIM
+@enduml

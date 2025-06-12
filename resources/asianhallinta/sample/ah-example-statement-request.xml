@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ah:UusiAsia xmlns:ah="http://www.lupapiste.fi/asianhallinta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lupapiste.fi/asianhallinta asianhallinta.xsd"
+             version="1.3" messageId="statement-request_1">
+    <ah:Tyyppi>Lausuntopyyntö</ah:Tyyppi>
+    <ah:TyypinTarkenne>Lausuntopyyntö rakennuslupahakemuksesta</ah:TyypinTarkenne>
+    <ah:Kuvaus>Testi lausuntoyyntö</ah:Kuvaus>
+    <ah:Kuntanumero>753</ah:Kuntanumero>
+    <ah:Hakijat>
+        <ah:Hakija>
+            <ah:Henkilo>
+                <ah:Etunimi>Pena</ah:Etunimi>
+                <ah:Sukunimi>Panaani</ah:Sukunimi>
+                <ah:Henkilotunnus>270127-512P</ah:Henkilotunnus>
+            </ah:Henkilo>
+        </ah:Hakija>
+    </ah:Hakijat>
+    <ah:HakemusTunnus>LP-297-2015-00001</ah:HakemusTunnus>
+    <ah:VireilletuloPvm>2017-05-05</ah:VireilletuloPvm>
+    <ah:Liitteet>
+        <ah:Liite>
+            <ah:Kuvaus>Liitteen kuvaus</ah:Kuvaus>
+            <ah:Tyyppi>Liitteen tyyppi</ah:Tyyppi>
+            <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment.pdf</ah:LinkkiLiitteeseen>
+        </ah:Liite>
+        <ah:Liite> <!-- Liitteiden linkki voidaan konfiguroida joko SFTP tai HTTPS -->
+            <ah:Kuvaus>Liitteen 2 kuvaus</ah:Kuvaus>
+            <ah:Tyyppi>Liitteen 2 tyyppi</ah:Tyyppi>
+            <ah:LinkkiLiitteeseen>https://www.lupapiste.fi/api/download-attachment/ah-example-attachment2.txt</ah:LinkkiLiitteeseen>
+        </ah:Liite>
+    </ah:Liitteet>
+    <ah:Asiointikieli>fi</ah:Asiointikieli>
+    <ah:Toimenpiteet>
+        <ah:Toimenpide>
+            <ah:ToimenpideTunnus>123</ah:ToimenpideTunnus>
+            <ah:ToimenpideTeksti>testi</ah:ToimenpideTeksti>
+        </ah:Toimenpide>
+    </ah:Toimenpiteet>
+    <ah:Lausuntopyynto>
+        <ah:LausuntoTunnus>321</ah:LausuntoTunnus><!-- Lupapisteen ID lausunnolle -->
+        <ah:Saateteksti>Lausuisitko lausunnon, plz</ah:Saateteksti>
+        <ah:Pyytaja>Sipoon rakennusvalvonta (Sonja Sibbo)</ah:Pyytaja>
+        <ah:PyyntoPvm>2017-05-05</ah:PyyntoPvm>
+        <ah:Maaraaika>2017-05-10</ah:Maaraaika>
+    </ah:Lausuntopyynto>
+    <ah:Sijainti>
+        <ah:Sijaintipiste>123.1 123.4</ah:Sijaintipiste>
+    </ah:Sijainti>
+</ah:UusiAsia>

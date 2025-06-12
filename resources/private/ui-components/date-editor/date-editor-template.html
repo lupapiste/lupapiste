@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="date-editor-template">
+  <div class="content">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-4">
+          <div data-bind="component: {name: 'form-cell',
+                          params: {cell: 'date',
+                          label: 'date',
+                          testId: 'edit-date',
+                          value: date}}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div data-bind="component: {name:'yes-no-button-group',
+                              params: {yesFn: okFn,
+                                       yesTitle: loc('ok'),
+                                       noTitle: loc('cancel'),
+                                       yesEnabled: yesEnabled}}"></div>
+</script>

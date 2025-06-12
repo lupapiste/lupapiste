@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="local-bulletins">
+  <!-- ko if: page() === "local-bulletins" -->
+  <div data-bind="attr: {'id': 'local-bulletins-component'}, component: {name: 'local-bulletins'}"></div>
+  <!-- /ko -->
+</section>
+<section class="page" id="r-bulletin">
+  <!-- ko if: page() === "r-bulletin" -->
+  <div data-bind="attr: {'id': 'bulletin-component'},
+                  component: {name: 'application-bulletin', params: pageParams}"></div>
+  <!-- /ko -->
+</section>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="ad-login-settings">
+    <div class="container container--authority-admin"
+         data-bind="if: organization.organizationId()">
+
+        <!-- ko if: $root.authorization.ok('ad-login-enabled') -->
+        <cljs-auth-admin_ad-login_ad-login-settings></cljs-auth-admin_ad-login_ad-login-settings>
+        <!-- /ko -->
+
+    </div>
+</section>
+</body>
+</html>

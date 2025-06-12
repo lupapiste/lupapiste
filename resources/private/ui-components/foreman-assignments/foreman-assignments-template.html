@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="foreman-assignments-template">
+  <!-- ko if: _.size( foremanAssignments() ) -->
+  <div class="notice-forms-container">
+    <!-- ko foreach: foremanAssignments() -->
+    <div class="notice-form-assignment">
+      <i class="lupicon-circle-info primary"></i>
+      <strong data-bind="text: $data.description"></strong>
+      <span data-bind="text:  $data.text"></span>
+    </div>
+    <!-- /ko -->
+  </div>
+  <!-- /ko -->
+</script>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="organization-terminal-settings">
+    <div class="container container--authority-admin docterminal-settings"
+         data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
+        <h2 data-bind="ltext: 'auth-admin.docterminal.allowed-document-types.title'"></h2>
+        <p data-bind="ltext: 'auth-admin.docterminal.allowed-document-types.instructions'"></p>
+        <div class="flex--wrap flex--gap2">
+            <div class="flex--column" data-bind="visible: $root.attachmentTypes.canEdit">
+                <h1 data-bind="ltext: 'auth-admin.docterminal.title'"></h1>
+
+                <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
+                      click: $root.attachmentTypes.toggleAll,
+                      visible: $root.attachmentTypes.canEdit"></a>
+                <!-- ko foreach: {data: $root.attachmentTypes.data} -->
+                <table class="admin-settings docterminal-settings">
+                    <thead>
+                    <tr>
+                        <th data-bind="ltext: $data[0] ? 'attachmentType.' + $data[0] + '._group_label' :
+                             'auth-admin.docterminal.allowed-document-types.general'"></th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind="foreach: {data: $data[1]}">
+                    <tr>
+                        <td>
+                            <toggle params="value: $data.enabled,
+                                enable: $root.attachmentTypes.canEdit,
+                                ltext: 'attachmentType.' + $data.type,
+                                prefix: 'checkbox'">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- /ko -->
+                <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
+                      click: $root.attachmentTypes.toggleAll,
+                      visible: $root.attachmentTypes.canEdit"></a>
+            </div>
+            <div class="flex--column" data-bind="visible: $root.attachmentTypesDocdepartmental.canEdit">
+                <h1 data-bind="ltext: 'auth-admin.docdepartmental.title'"></h1>
+
+                <a data-bind="ltext: $root.attachmentTypesDocdepartmental.toggleSelectText,
+                      click: $root.attachmentTypesDocdepartmental.toggleAll,
+                      visible: $root.attachmentTypesDocdepartmental.canEdit"></a>
+                <!-- ko foreach: {data: $root.attachmentTypesDocdepartmental.data} -->
+                <table class="admin-settings docterminal-settings">
+                    <thead>
+                    <tr>
+                        <th data-bind="ltext: $data[0] ? 'attachmentType.' + $data[0] + '._group_label' :
+                             'auth-admin.docterminal.allowed-document-types.general'"></th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind="foreach: {data: $data[1]}">
+                    <tr>
+                        <td>
+                            <toggle params="value: $data.enabled,
+                                enable: $root.attachmentTypesDocdepartmental.canEdit,
+                                ltext: 'attachmentType.' + $data.type,
+                                prefix: 'checkbox'">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- /ko -->
+                <a data-bind="ltext: $root.attachmentTypesDocdepartmental.toggleSelectText,
+                      click: $root.attachmentTypesDocdepartmental.toggleAll,
+                      visible: $root.attachmentTypesDocdepartmental.canEdit"></a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

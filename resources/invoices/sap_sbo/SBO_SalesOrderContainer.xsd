@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v2004 rel. 4 U (http://www.xmlspy.com) by Samuli Aarva (Siemens Osakeyhtiö) -->
+<xs:schema elementFormDefault="qualified" attributeFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="SBO_SalesOrderContainer" type="SBO_SalesOrderContainerType">
+		<xs:annotation>
+			<xs:documentation>Comment describing your root element</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="SBO_AccountsReceivableType"/>
+	<xs:complexType name="SBO_SalesOrderContainerType">
+		<xs:sequence>
+			<xs:element name="SBO_SalesOrder" type="SBO_SalesOrderType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SBO_SalesOrderType">
+		<xs:complexContent>
+			<xs:extension base="SBO_AccountsReceivableType">
+				<xs:sequence>
+					<xs:element name="SenderId">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="5"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="Reference">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="10"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="OriginalOrder">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="10"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="OrderType">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="4"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="SalesOrg">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="4"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DistributionChannel">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="2"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="Division">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="2"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="SalesOffice">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="4"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="SalesGroup">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="3"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="PONumber">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="35"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="BillingBlock">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="4"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="SalesDistrict">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="4"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="HiddenText">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="1000"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="BillText">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="1000"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="ReferenceText">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="1000"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="PMNTTERM">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="4"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="OrderReason">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="3"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="BillingDate">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="8"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="PricingDate">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="8"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="OrderParty">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="SAPCustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="10"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="11"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerYID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerOVT">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="17"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName3">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName4">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="BillingParty1">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="SAPCustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="10"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="11"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerYID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerOVT">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="17"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName3">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName4">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="BillingParty2">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="SAPCustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="10"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="11"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerYID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerOVT">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="17"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName3">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName4">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="PayerParty">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="SAPCustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="10"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="11"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerYID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerOVT">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="17"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName3">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName4">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="ShipToParty">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="SAPCustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="10"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="11"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerYID">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CustomerOVT">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="17"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TemporaryPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName3">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityName4">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress1">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityAddress2">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPOCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityCity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="35"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="PriorityPostalcode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="9"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="LineItem" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="GroupingFactor">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="8"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="Material">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="8"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="MaterialDescription">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="40"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="Quantity">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="13"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="Unit">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="3"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="NetPrice">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="14"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="TaxCode">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="2"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="MaterialSalesText">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="1000"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="LineText">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="1000"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="ProfitCenter">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="10"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="OrderItemNumber">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="12"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="WBS_Element">
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="16"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>

@@ -1,0 +1,89 @@
+{
+  "type" : "FeatureCollection",
+  "features" : [ {
+    "type" : "Feature",
+    "properties" : {
+      "rakennustunnus" : "103113176F",
+      "kiinteistotunnus" : "09100701830013",
+      "kuntanimiFin" : "Helsinki",
+      "kuntanimiSwe" : "Helsingfors",
+      "kuntatunnus" : "091",
+      "osoite.Osoite.katunimi" : "Laivurinkatu",
+      "osoite.Osoite.katunumero" : "3",
+      "osoite.Osoite.jarjestysnumero" : "1",
+      "osoite.Osoite.kieli" : "fin",
+      "osoite.Osoite.postinumero" : "00150",
+      "osoite.Osoite#2.katunimi" : "Skepparegatan",
+      "osoite.Osoite#2.katunumero" : "3",
+      "osoite.Osoite#2.jarjestysnumero" : "1",
+      "osoite.Osoite#2.kieli" : "swe",
+      "osoite.Osoite#2.postinumero" : "00150",
+      "osoite.Osoite#3.katunimi" : "Huvilakuja",
+      "osoite.Osoite#3.katunumero" : "6",
+      "osoite.Osoite#3.jarjestysnumero" : "2",
+      "osoite.Osoite#3.kieli" : "fin",
+      "osoite.Osoite#3.postinumero" : "00150",
+      "osoite.Osoite#4.katunimi" : "Villagränden",
+      "osoite.Osoite#4.katunumero" : "6",
+      "osoite.Osoite#4.jarjestysnumero" : "2",
+      "osoite.Osoite#4.kieli" : "swe",
+      "osoite.Osoite#4.postinumero" : "00150",
+      "source" : "addresses",
+      "gid" : "nlsfi:addresses#1",
+      "distance" : 35.96499442619192,
+      "rank" : 1,
+      "country" : "Suomi",
+      "country_gid" : "whosonfirst:country:85633143",
+      "continent" : "Eurooppa",
+      "continent_gid" : "whosonfirst:continent:102191581",
+      "country_a" : "FIN",
+      "label" : "Laivurinkatu 3 (Helsinki)",
+      "match_type" : "exact",
+      "accuracy" : "point",
+      "municipality" : "091",
+      "label:kuntatunnus" : "Helsinki",
+      "label:municipality" : "Helsinki"
+    },
+    "geometry" : {
+      "type" : "Point",
+      "coordinates" : [ 385806.0, 6670525.0 ]
+    }
+  } ],
+  "geocoding" : {
+    "status" : "success",
+    "metadata" : [ ],
+    "sources" : {
+      "addresses" : {
+        "status" : "success",
+        "duration" : 158,
+        "links" : [ ]
+      }
+    },
+    "query" : {
+      "limit" : 1,
+      "radius" : 500.0,
+      "searchGeometry" : {
+        "type" : "Polygon",
+        "coordinates" : [ [ [ 386319.58749773, 6670491.7004395 ], [ 386309.9801379316, 6670394.155278492 ], [ 386281.5272639856, 6670300.358723317 ], [ 386235.3223038812, 6670213.91532299 ], [ 386173.14088832325, 6670138.147048906 ], [ 386097.3726142398, 6670075.965633349 ], [ 386010.9292139125, 6670029.7606732445 ], [ 385917.13265873806, 6670001.307799298 ], [ 385819.58749773, 6669991.7004395 ], [ 385722.0423367219, 6670001.307799298 ], [ 385628.24578154745, 6670029.7606732445 ], [ 385541.80238122016, 6670075.965633349 ], [ 385466.0341071367, 6670138.147048906 ], [ 385403.85269157874, 6670213.91532299 ], [ 385357.64773147437, 6670300.358723317 ], [ 385329.1948575284, 6670394.155278492 ], [ 385319.58749773, 6670491.7004395 ], [ 385329.1948575284, 6670589.245600508 ], [ 385357.64773147437, 6670683.042155682 ], [ 385403.85269157874, 6670769.485556009 ], [ 385466.0341071367, 6670845.253830093 ], [ 385541.80238122016, 6670907.435245651 ], [ 385628.24578154745, 6670953.640205755 ], [ 385722.0423367219, 6670982.093079701 ], [ 385819.58749773, 6670991.7004395 ], [ 385917.13265873806, 6670982.093079701 ], [ 386010.9292139125, 6670953.640205755 ], [ 386097.3726142398, 6670907.435245651 ], [ 386173.14088832325, 6670845.253830093 ], [ 386235.3223038812, 6670769.485556009 ], [ 386281.5272639856, 6670683.042155682 ], [ 386309.9801379316, 6670589.245600508 ], [ 386319.58749773, 6670491.7004395 ] ] ]
+      },
+      "focusPoint" : {
+        "type" : "Point",
+        "coordinates" : [ 385819.58749773, 6670491.7004395 ]
+      },
+      "sources" : "addresses",
+      "lang" : "fin",
+      "crs" : "EPSG:3067",
+      "requestCrs" : "EPSG:3067",
+      "scaleDenominator" : 5000,
+      "excludesMaps" : { }
+    },
+    "version" : "2.0.1",
+    "attribution" : "https://www.maanmittauslaitos.fi/en/opendata-licence-cc40",
+    "engine" : {
+      "name" : "maanmittauslaitos.fi/geocoding",
+      "author" : "National Land Survey of Finland",
+      "version" : "2.0.1"
+    },
+    "timestamp" : 1669704670471
+  }
+}

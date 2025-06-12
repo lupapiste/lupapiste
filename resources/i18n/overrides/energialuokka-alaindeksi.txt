@@ -1,0 +1,3 @@
+"suomi.fi.energialuokka-alaindeksi.2007" "sv" "2007"
+"suomi.fi.energialuokka-alaindeksi.2013" "sv" "2013"
+"suomi.fi.energialuokka-alaindeksi.2018" "sv" "2018"

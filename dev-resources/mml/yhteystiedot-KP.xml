@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kyyh:Yhteystiedot xmlns:y="http://xml.nls.fi/ktjkir/yhteinen/2013/03/01"
+                  xmlns:kyyh="http://xml.nls.fi/ktjkir/kysely/yhteystiedot/2013/11/01"
+                  xmlns:tryh="http://xml.nls.fi/ktjkir/yhteystiedot/2013/11/01"
+                  xmlns:trpt="http://xml.nls.fi/ktjkir/perustiedot/2013/03/01"
+                  xmlns:muti="http://xml.nls.fi/ktjkir/yhteystiedot_muti/2013/03/01">
+  <tryh:Rekisteriyksikko>
+      <trpt:rekisteriyksikonPerustiedot ajantasaistettu="true">
+        <y:kiinteistotunnus>29741100050162</y:kiinteistotunnus>
+        <trpt:olotila>1</trpt:olotila>
+        <trpt:rekisteriyksikkolaji>1</trpt:rekisteriyksikkolaji>
+        <trpt:rekisterointipvm pvm="1974-07-04">19740704</trpt:rekisterointipvm>
+        <trpt:nimi>ONNELA</trpt:nimi>
+        <trpt:maapintaala yksikko="neliometri">2000</trpt:maapintaala>
+        <trpt:arkistoviittaus>
+            <trpt:arkisto>
+              <trpt:arkistoviite>3:127-</trpt:arkistoviite>
+            </trpt:arkisto>
+        </trpt:arkistoviittaus>
+        <trpt:kuntaviittaus>
+            <trpt:kunta>
+              <trpt:nimi kieli="fi">Kuopio</trpt:nimi>
+              <trpt:nimi kieli="sv">Kuopio</trpt:nimi>
+              <trpt:kuntatunnus>297</trpt:kuntatunnus>
+            </trpt:kunta>
+        </trpt:kuntaviittaus>
+      </trpt:rekisteriyksikonPerustiedot>
+      <tryh:kohteenHenkilot>
+        <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+              <y:henkilolaji>KP</y:henkilolaji>
+              <y:etunimet>Pjotr Seppo Risto</y:etunimet>
+              <y:sukunimi>Ylämärssy</y:sukunimi>
+              <y:syntymapvm>1917-12-09</y:syntymapvm>
+              <y:kuolinpvm>1995-05-02</y:kuolinpvm>
+              <y:ulkomaalainen>false</y:ulkomaalainen>
+              <y:Kuolinpesa>
+                  <y:Yhteyshenkilo henkilorooli="KPYH">
+                    <y:henkilonTiedot>
+                        <y:henkilolaji>LU</y:henkilolaji>
+                        <y:etunimet>Seppo Matias Unto</y:etunimet>
+                        <y:sukunimi>Lahti</y:sukunimi>
+                        <y:syntymapvm>1951-01-07</y:syntymapvm>
+                        <y:ulkomaalainen>false</y:ulkomaalainen>
+                    </y:henkilonTiedot>
+                    <muti:Osoite>
+                        <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                        <muti:postinumero>00100</muti:postinumero>
+                        <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                    </muti:Osoite>
+                  </y:Yhteyshenkilo>
+                  <y:kuolinpesanOsakkaat>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Harri Kaleva Pluto</y:etunimet>
+                          <y:sukunimi>Kaura</y:sukunimi>
+                          <y:syntymapvm>1966-10-03</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Seppo Matias Unto</y:etunimet>
+                          <y:sukunimi>Lahti</y:sukunimi>
+                          <y:syntymapvm>1951-01-07</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Vieno Sabina Oona</y:etunimet>
+                          <y:sukunimi>Vahvakäsi</y:sukunimi>
+                          <y:syntymapvm>1964-07-07</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Ismo Jorma Johannes</y:etunimet>
+                          <y:sukunimi>Männistö</y:sukunimi>
+                          <y:syntymapvm>1946-02-12</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                  </y:kuolinpesanOsakkaat>
+              </y:Kuolinpesa>
+            </y:henkilonTiedot>
+        </y:Henkilo>
+        <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+              <y:henkilolaji>KP</y:henkilolaji>
+              <y:etunimet>Legolas Kalervo Jalmari</y:etunimet>
+              <y:sukunimi>Niinistö</y:sukunimi>
+              <y:syntymapvm>1922-07-20</y:syntymapvm>
+              <y:kuolinpvm>1988-06-09</y:kuolinpvm>
+              <y:ulkomaalainen>false</y:ulkomaalainen>
+              <y:Kuolinpesa>
+                  <y:Yhteyshenkilo henkilorooli="KPYH">
+                    <y:henkilonTiedot>
+                        <y:henkilolaji>LU</y:henkilolaji>
+                        <y:etunimet>Seppo Matias Unto</y:etunimet>
+                        <y:sukunimi>Lahti</y:sukunimi>
+                        <y:syntymapvm>1951-01-07</y:syntymapvm>
+                        <y:ulkomaalainen>false</y:ulkomaalainen>
+                    </y:henkilonTiedot>
+                    <muti:Osoite>
+                        <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                        <muti:postinumero>00100</muti:postinumero>
+                        <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                    </muti:Osoite>
+                  </y:Yhteyshenkilo>
+                  <y:kuolinpesanOsakkaat>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Harri Kaleva Pluto</y:etunimet>
+                          <y:sukunimi>Kaura</y:sukunimi>
+                          <y:syntymapvm>1966-10-03</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Seppo Matias Unto</y:etunimet>
+                          <y:sukunimi>Lahti</y:sukunimi>
+                          <y:syntymapvm>1951-01-07</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Vieno Sabina Oona</y:etunimet>
+                          <y:sukunimi>Vahvakäsi</y:sukunimi>
+                          <y:syntymapvm>1964-07-07</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                    <y:Henkilo henkilorooli="KPOS">
+                        <y:henkilonTiedot>
+                          <y:henkilolaji>LU</y:henkilolaji>
+                          <y:etunimet>Ismo Jorma Johannes</y:etunimet>
+                          <y:sukunimi>Männistö</y:sukunimi>
+                          <y:syntymapvm>1946-02-12</y:syntymapvm>
+                          <y:ulkomaalainen>false</y:ulkomaalainen>
+                        </y:henkilonTiedot>
+                        <muti:Osoite>
+                          <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+                          <muti:postinumero>00100</muti:postinumero>
+                          <muti:paikkakunta>Helsinki</muti:paikkakunta>
+                        </muti:Osoite>
+                    </y:Henkilo>
+                  </y:kuolinpesanOsakkaat>
+              </y:Kuolinpesa>
+            </y:henkilonTiedot>
+        </y:Henkilo>
+      </tryh:kohteenHenkilot>
+  </tryh:Rekisteriyksikko>
+  
+</kyyh:Yhteystiedot>

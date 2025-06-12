@@ -1,0 +1,32 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-link-permits-template">
+  <label class="lux"
+         data-bind="attr: {for: uniqId},
+                    ltext: 'application.linkPermits'"></label>
+  <ul class="boxlist"
+      data-bind="attr: {id: uniqId},
+                 foreach: linkPermits">
+    <li>
+      <!-- ko if: $data.isLink -->
+      <a data-bind="attr: $data.attr,
+                    text: $data.text"
+         data-test-id="test-application-link-permit-lupapistetunnus"></a>
+      <!-- /ko -->
+      <!-- ko ifnot: $data.isLink -->
+      <span data-bind="attr: $data.attr,
+                       text: $data.text"
+            data-test-id="test-application-link-permit-kuntalupatunnus">
+      </span>
+      <!-- /ko -->
+      <!-- ko if: $parent.editing -->
+      <icon-button params="click: _.wrap( $data, $parent.removeLinkPermit ),
+                           testId: 'test-remove-link-permit',
+                           icon: 'remove',
+                           iconOnly: true,
+                           ltext: 'remove',
+                           buttonClass: 'tertiary'">
+      </icon-button>
+      <!-- /ko -->
+    </li>
+  </ul>
+</script>

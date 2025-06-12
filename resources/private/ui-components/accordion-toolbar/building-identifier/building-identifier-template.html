@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="building-identifier-template">
+    <div >
+      <label class="lux lux--inline gap--r1-half"
+             data-bind="ltext: 'document.building.identifier',
+                        attr: {'for': documentId + '-building-identifier-input'}"></label>
+      <input class="lux align--middle"
+             type="text"
+             data-bind="textInput: identifier,
+                        enable: enabled,
+                        attr: {'data-test-id': documentId + '-building-identifier-input',
+                               'id': documentId + '-building-identifier-input'}">
+      <span data-bind="saveIndicator: indicator"></span>
+      <button class="secondary gap--l1"
+              data-bind="attr: {'data-op-name': operation.name()},
+                         disable: isPrimaryOperation,
+                         click: clickStar,
+                         visible: showStar">
+        <i class="lupicon-star"></i>
+        <span data-bind="ltext: starTitle"></span>
+      </button>
+    </div>
+</script>

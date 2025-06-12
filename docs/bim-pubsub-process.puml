@@ -1,0 +1,23 @@
+@startuml
+
+== Perform BIM checking or extraction or XKT generation ==
+Frontend -> Lupapiste: Call command
+Lupapiste -> Mongo: Create job
+Lupapiste -> PubSub: Send BIM request
+Lupapiste -> Frontend: Return job id
+PubSub --> "Bimmer/Lupapiste": Receive BIM request
+"Bimmer/Lupapiste" --> "BIM service"
+"BIM service" --> "Bimmer/Lupapiste"
+"Bimmer/Lupapiste" -> PubSub: Send BIM response
+PubSub --> Lupapiste: Receive BIM response
+Lupapiste -> Mongo: Update job status
+Lupapiste -> Mongo: Store BIM results
+
+== Polling for BIM results ==
+Frontend -> Lupapiste: Poll job with id
+Mongo -> Lupapiste: Job status
+Mongo --> Lupapiste: BIM results
+Lupapiste -> Frontend: Return status
+
+@enduml
+

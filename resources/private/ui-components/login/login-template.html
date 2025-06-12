@@ -1,0 +1,40 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="login-template">
+  <form data-bind="submit: login">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="value: username,
+                             cell: 'text',
+                             immediate: true,
+                             testId: 'login-username',
+                             label: 'userinfo.username'"></form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="value: password,
+                             cell: 'text',
+                             immediate: true,
+                             testId: 'login-password',
+                             attr: {type: 'password'},
+                             label: 'userinfo.password'"></form-cell>
+        </div>
+        <div class="col-1">
+          <div class="col--vertical">
+            <label>&nbsp;</label>
+            <icon-button params="ltext: 'welcome.login',
+                                 icon: 'log-in',
+                                 testId: 'login-button',
+                                 buttonClass: 'primary',
+                                 enable: canLogin,
+                                 type: 'submit'"></icon-button>
+          </div>
+        </div>
+      </div>
+      <div class="row"
+           data-bind="if: error">
+        <div class="col-4 login--error"
+             data-bind="ltext: error"></div>
+      </div>
+    </div>
+  </form>
+</script>

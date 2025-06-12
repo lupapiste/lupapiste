@@ -1,0 +1,358 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Foundation structure designer ",
+    :fi "Pohjarakennesuunnittelija ",
+    :sv "Grundkonstruktionsplanerare"},
+   :codeValue "01",
+   :created "2023-06-22T12:14:13.737Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/01/members/",
+   :modified "2024-11-20T16:14:07.125Z",
+   :status "VALID",
+   :id "1ecea783-7317-4c0d-a9f9-1e3eb91fed7b",
+   :statusModified "2023-06-22T12:14:13.737Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/01",
+   :order 1,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "HVAC designer ",
+    :sv "VVS-planerare",
+    :fi "LVI-suunnittelija "},
+   :codeValue "02",
+   :created "2023-06-22T12:14:13.755Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/02/members/",
+   :modified "2024-11-20T16:14:07.147Z",
+   :status "VALID",
+   :id "801b922a-3a63-4340-8d74-e15c1c39f6d4",
+   :statusModified "2023-06-22T12:14:13.755Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/02",
+   :order 2,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Principal designer ",
+    :fi "Pääsuunnittelija ",
+    :sv "Huvudprojekterare "},
+   :codeValue "03",
+   :created "2023-06-22T12:14:13.762Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/03/members/",
+   :modified "2024-11-20T16:14:07.157Z",
+   :status "VALID",
+   :id "247edb53-421d-4a44-ba78-986032038bf4",
+   :statusModified "2023-06-22T12:14:13.762Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/03",
+   :order 3,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/03",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Structural engineer ",
+    :fi "Rakennesuunnittelija ",
+    :sv "Konstruktör "},
+   :codeValue "04",
+   :created "2023-06-22T12:14:13.768Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/04/members/",
+   :modified "2024-11-20T16:14:07.167Z",
+   :status "VALID",
+   :id "662b17cc-b5b8-40c0-966c-9ca32fc9734f",
+   :statusModified "2023-06-22T12:14:13.768Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/04",
+   :order 4,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/04",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Building designer ",
+    :fi "Rakennussuunnittelija ",
+    :sv "Byggnadsplanerare "},
+   :codeValue "05",
+   :created "2023-06-22T12:14:13.775Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/05/members/",
+   :modified "2024-11-20T16:14:07.177Z",
+   :status "VALID",
+   :id "210aa222-25bf-4892-9bc1-538525600808",
+   :statusModified "2023-06-22T12:14:13.775Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/05",
+   :order 5,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/05",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Designer of difficult work phases ",
+    :fi "Vaikeiden töiden suunnittelija ",
+    :sv "Planerare av svåra arbeten "},
+   :codeValue "06",
+   :created "2023-06-22T12:14:13.781Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/06/members/",
+   :modified "2024-11-20T16:14:07.186Z",
+   :status "VALID",
+   :id "ba571ac1-c69b-47dc-bb9c-8f440957d9e9",
+   :statusModified "2023-06-22T12:14:13.781Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/06",
+   :order 6,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/06",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Designer of load-bearing structures ",
+    :fi "Kantavien rakenteiden suunnittelija ",
+    :sv "Planerare av bärande konstruktioner "},
+   :codeValue "07",
+   :created "2023-06-22T12:14:13.790Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/07/members/",
+   :modified "2024-11-20T16:14:07.195Z",
+   :status "VALID",
+   :id "664865cc-36ed-46e2-8282-5c321bc2804d",
+   :statusModified "2023-06-22T12:14:13.790Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/07",
+   :order 7,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/07",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Ventilation designer ",
+    :fi "Ilmanvaihdon suunnittelija ",
+    :sv "Ventilationsplanerare "},
+   :codeValue "08",
+   :created "2023-06-22T12:14:13.796Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/08/members/",
+   :modified "2024-11-20T16:14:07.204Z",
+   :status "VALID",
+   :id "fb38a5a0-122e-428b-aab3-edba81eba5d6",
+   :statusModified "2023-06-22T12:14:13.796Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/08",
+   :conceptUriInVocabularies " ",
+   :order 8,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/08",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Designer of property’s water and sewage system ",
+    :fi "Kiinteistön vesi- ja viemäröintilaitteiston suunnittelija ",
+    :sv "Planerare för fastigheters vatten- och avloppsanordningar "},
+   :codeValue "09",
+   :created "2023-06-22T12:14:13.802Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/09/members/",
+   :modified "2024-11-20T16:14:07.213Z",
+   :status "VALID",
+   :id "e4f03e8c-f1a8-472a-9f6d-c7e3164b4aee",
+   :statusModified "2023-06-22T12:14:13.802Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/09",
+   :order 9,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/09",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Structural physics designer ",
+    :fi "Rakennusfysikaalinen suunnittelija ",
+    :sv "Byggnadsfysikalisk planerare "},
+   :codeValue "10",
+   :created "2023-06-22T12:14:13.808Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/10/members/",
+   :modified "2024-11-20T16:14:07.222Z",
+   :status "VALID",
+   :id "2bdec98d-6518-4fc9-b466-136f0d7a8904",
+   :statusModified "2023-06-22T12:14:13.808Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/10",
+   :order 10,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/10",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Designer of moisture damage repairs ",
+    :fi "Kosteusvaurion korjaustyön suunnittelija ",
+    :sv "Planerare av fuktskadereparationer "},
+   :codeValue "11",
+   :created "2023-06-22T12:14:13.814Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/11/members/",
+   :modified "2024-11-20T16:14:07.231Z",
+   :status "VALID",
+   :id "6ac70d2b-c617-443f-8e27-ea3717cc6e70",
+   :statusModified "2023-06-22T12:14:13.814Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/11",
+   :order 11,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/11",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Author of energy certificate ",
+    :fi "Energiatodistuksen laatija ",
+    :sv "Den som upprättat energiintyget "},
+   :codeValue "12",
+   :created "2023-06-22T12:14:13.819Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/12/members/",
+   :modified "2024-11-20T16:14:07.240Z",
+   :status "VALID",
+   :id "8aaf61a0-3323-4925-a160-ccfffb8a3f7f",
+   :statusModified "2023-06-22T12:14:13.819Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/12",
+   :order 12,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/12",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Humidity control coordinator ",
+    :fi "Kosteudenhallintakoordinaattori ",
+    :sv "Fuktsäkerhetskoordinator "},
+   :codeValue "13",
+   :created "2023-06-22T12:14:13.824Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/13/members/",
+   :modified "2024-11-20T16:14:07.249Z",
+   :status "VALID",
+   :id "7f602238-90dc-4610-b7ab-fc4f85359a32",
+   :statusModified "2023-06-22T12:14:13.824Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/13",
+   :order 13,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/13",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Fire resistance designer ",
+    :fi "Palotekninen suunnittelija ",
+    :sv "Brandteknisk planerare "},
+   :codeValue "14",
+   :created "2023-06-22T12:14:13.829Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/14/members/",
+   :modified "2024-11-20T16:14:07.258Z",
+   :status "VALID",
+   :id "9e480a6c-aca3-434e-9cc8-23e563346e9e",
+   :statusModified "2023-06-22T12:14:13.829Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/14",
+   :order 14,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/14",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Kalliorakenteiden suunnittelija"},
+   :codeValue "15",
+   :created "2023-06-22T12:14:13.834Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/15/members/",
+   :modified "2024-11-20T16:14:07.266Z",
+   :status "VALID",
+   :id "92f74c43-9395-4374-ad8b-9e6b3093cf59",
+   :statusModified "2023-06-22T12:14:13.834Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/15",
+   :order 15,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/15",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Maisemarakentamisen suunnittelija"},
+   :codeValue "16",
+   :created "2023-06-22T12:14:13.840Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/16/members/",
+   :modified "2024-11-20T16:14:07.274Z",
+   :status "VALID",
+   :id "cfe623f7-f154-4d2b-a8fd-a097d1f37b18",
+   :statusModified "2023-06-22T12:14:13.840Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/16",
+   :order 16,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/16",
+   :hierarchyLevel 1}
+  {:prefLabel {:fi "Akustiikan suunnittelija"},
+   :codeValue "17",
+   :created "2023-06-22T12:14:13.846Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/17/members/",
+   :modified "2024-11-20T16:14:07.282Z",
+   :status "VALID",
+   :id "af8a449b-61a1-482b-a0d7-13295a7464be",
+   :statusModified "2023-06-22T12:14:13.846Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/17",
+   :order 17,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/17",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Other", :fi "Muu ", :sv "Annat"},
+   :codeValue "99",
+   :created "2023-06-22T12:14:13.851Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/99/members/",
+   :modified "2024-11-20T16:14:07.289Z",
+   :status "VALID",
+   :id "5c3467e2-cfb9-47a1-a536-ba24bd040123",
+   :statusModified "2023-06-22T12:14:13.851Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/suunnittelijanrooli/codes/99",
+   :order 18,
+   :uri
+   "http://uri.suomi.fi/codelist/rytj/suunnittelijanrooli/code/99",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T10:57:16.760Z"}

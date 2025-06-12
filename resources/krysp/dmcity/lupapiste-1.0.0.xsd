@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lupapisteen DmCity integraation KuntaGML-skeeman laajennusten elementtien -->
+<!-- oma namespace, jolloin ne erottuvat selkeästi varsinaisen KuntaGML-skeeman elementeistä -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset"
+           xmlns:lp="http://www.lupapiste.fi/gml/dmcity"
+           targetNamespace="http://www.lupapiste.fi/gml/dmcity"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           version="1.0.0">
+    <xs:import namespace="http://www.kuntatietopalvelu.fi/gml/yhteiset"
+               schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.9/yhteiset.xsd"/>
+    <!-- Elements -->
+    <xs:element name="liitetieto" type="lp:LiitetietoType"/>
+    <xs:element name="viitelupatieto" type="yht:LuvanTunnisteTiedotType"/>
+    <xs:element name="lausuntotieto" type="lp:LausuntotietoType"/>
+    <xs:element name="toimenpiteet" type="lp:ToimenpiteetType"/>
+    <xs:element name="kohteet" type="lp:KohteetType"/>
+    <!-- Types -->
+    <xs:complexType name="LiitetietoType">
+        <xs:sequence>
+            <xs:element name="Liite" type="yht:YmparistoLiiteType"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LausuntotietoType">
+        <xs:sequence>
+            <xs:element name="Lausunto" type="yht:LausuntoRvPType"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ToimenpideType">
+        <xs:sequence>
+            <xs:element name="ToimenpideTunnus" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Lupapisteen tunnus toimenpiteelle</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ToimenpideTeksti" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Selväkielinen toimenpiteen lokalisointiteksti</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ToimenpiteetType">
+        <xs:sequence>
+            <xs:element name="Toimenpide" type="lp:ToimenpideType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="KohteetType">
+        <xs:sequence>
+            <xs:element name="Kohde" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

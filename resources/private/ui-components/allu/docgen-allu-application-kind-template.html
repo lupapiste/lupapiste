@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-allu-application-kind-template">
+  <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
+  <allu-application-kind
+    data-bind="attr: {class: schemaCss}"
+    params="value: value,
+            disable: disabled() || readonly(),
+            testId: path.join('.'),
+            applicationType: schema.applicationType">
+  </allu-application-kind>
+  <span data-bind="saveIndicator: indicator, label: false"></span>
+</script>

@@ -1,0 +1,31 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="help-toggle-template">
+  <div class="stacked help-toggle"
+       data-bind="css: {tight: lbutton}">
+    <!-- ko ifnot: lbutton -->
+    <button class="help"
+            data-bind="click: toggleHelp,
+                       ariaLtext: 'info.button',
+                       css: {expanded: flag}">
+      <i class="lupicon-circle-question"
+         aria-hidden="true"></i>
+    </button>
+    <!-- /ko -->
+    <!-- ko if: lbutton -->
+    <button class="help"
+            data-bind="click: toggleHelp,
+                       ariaLtext: lbutton,
+                       css: {expanded: flag}">
+      <i class="lupicon-circle-question"
+         aria-hidden="true"></i>
+      <span data-bind="ltext: lbutton"></span>
+    </button>
+    <!-- /ko -->
+    <div data-bind="css: {'help-arrow': flag}"></div>
+  </div>
+  <div class="help-text"
+       data-bind="slider: flag,
+                  html: html">
+  </div>
+  <div class="help-reset">&nbsp;</div>
+</script>

@@ -1,0 +1,27 @@
+.dashboard-area {
+  @apply grid gap-3;
+  @apply auto-rows-[100px];
+  @apply md:grid-cols-4;
+  /* @apply bg-ui-gray-221; */
+  /* grid-auto-flow: auto; */
+  /* grid-auto-flow: dense; */
+  contain: layout;
+}
+
+.dashboard-card {
+  @apply transition-[transform,box-shadow] duration-300 ease-in-out;
+  contain: layout style paint;
+}
+
+/* Active drag item */
+/* Avoid using data-dnd-dragging directly, in case the API changes.
+ * Though using aria-hidden to detect which one is the placeholder. */
+.dashboard-card[data-dragging="true"]:not([aria-hidden="true"]) {
+  @apply shadow-md scale-[1.025];
+  @apply will-change-transform;
+}
+
+/* Cloned placeholder */
+.dashboard-card[data-dragging="true"][aria-hidden="true"] {
+  @apply opacity-50;
+}

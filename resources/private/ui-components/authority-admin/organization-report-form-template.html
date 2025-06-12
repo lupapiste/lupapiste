@@ -1,0 +1,39 @@
+<script type="text/x-jquery-tmpl" id="organization-report-form-template" class="ko-template">
+  <!-- ko if: showForm -->
+  <h2 data-bind="ltext: ltitle, visible: !_.isNil(ltitle)"></h2>
+  <span data-bind="ltext: lcaption, visible: !_.isNil(lcaption)"></span>
+  <form data-bind="attr: {'action': '/api/raw/' + action, 'method': 'get'}">
+    <input type="hidden" name="organizationId" data-bind="value: orgId">
+    <!-- ko if: hasTimestampRange -->
+    <input type="hidden" name="startTs" data-bind="value: startTs">
+    <input type="hidden" name="endTs" data-bind="value: endTs">
+    <!-- /ko -->
+    <div class="labeled-input row">
+      <!-- ko if: hasDateRange -->
+      <div class="labeled-input cell">
+        <label data-bind="ltext: lstartDate"></label>
+        <input type="text"
+               data-bind="datepicker: startDate,
+                          css: {err: badDates}"
+               class="lux dateinput">
+      </div>
+      <div class="labeled-input cell">
+        <label data-bind="ltext: lendDate"></label>
+        <input type="text"
+               data-bind="datepicker: endDate,
+                          css: {err: badDates}"
+               class="lux dateinput">
+      </div>
+      <!-- /ko -->
+      <div class="labeled-input cell">
+        <button type="submit"
+                data-bind="disable: badDates"
+                class="primary outline">
+          <i class="lupicon-download"></i>
+          <span data-bind="ltext: lbutton"></span>
+        </button>
+      </div>
+    </div>
+  </form>
+  <!-- /ko -->
+</script>

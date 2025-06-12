@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-button-template">
+    <button data-bind="attr: { 'id': id, 'class': className},
+                       testId: testId,
+                       ariaLtext: label,
+                       click: clickFn">
+        <!-- ko if: icon -->
+        <i aria-hidden="true" data-bind="attr: { 'class': icon }"></i>
+        <!-- /ko -->
+        <span aria-hidden="true" data-bind="ltext: label"></span>
+    </button>
+</script>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+        xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset
+                     http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd
+                     http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd
+                     http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+        xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:ogc="http://www.opengis.net/ogc"
+        xmlns:wfs="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+        xmlns:ows="http://www.opengis.net/ows" xmlns:gml="http://www.opengis.net/gml"
+        xmlns:xlink="http://www.w3.org/1999/xlink">
+    <rakval:toimituksenTiedot>
+        <yht:aineistonnimi></yht:aineistonnimi>
+        <yht:aineistotoimittaja></yht:aineistotoimittaja>
+        <yht:tila>valmis</yht:tila>
+        <yht:toimitusPvm>2016-02-24</yht:toimitusPvm>
+        <yht:kuntakoodi>186</yht:kuntakoodi>
+        <yht:kielitieto>Suomi</yht:kielitieto>
+    </rakval:toimituksenTiedot>
+    <rakval:rakennusvalvontaAsiatieto>
+        <rakval:RakennusvalvontaAsia>
+            <rakval:kasittelynTilatieto>
+                <yht:Tilamuutos>
+                    <yht:pvm>2016-02-24</yht:pvm>
+                    <yht:tila>ei tiedossa</yht:tila>
+                </yht:Tilamuutos>
+            </rakval:kasittelynTilatieto>
+            <rakval:luvanTunnisteTiedot>
+                <yht:LupaTunnus>
+                    <yht:kuntalupatunnus>2013-01</yht:kuntalupatunnus>
+                    <yht:muuTunnustieto>
+                        <yht:MuuTunnus>
+                            <yht:tunnus>LP-186-2016-00001</yht:tunnus>
+                            <yht:sovellus>Lupapiste</yht:sovellus>
+                        </yht:MuuTunnus>
+                    </yht:muuTunnustieto>
+                </yht:LupaTunnus>
+            </rakval:luvanTunnisteTiedot>
+            <rakval:toimenpidetieto>
+                <rakval:Toimenpide>
+                    <rakval:uusi>
+                    </rakval:uusi>
+                    <rakval:rakennustieto>
+                        <rakval:Rakennus>
+                            <yht:yksilointitieto></yht:yksilointitieto>
+                            <yht:alkuHetki>2013-09-01T00:00:00</yht:alkuHetki>
+                            <rakval:sijaintitieto>
+                                <rakval:Sijainti>
+                                    <yht:tyhja></yht:tyhja>
+                                </rakval:Sijainti>
+                            </rakval:sijaintitieto>
+                            <rakval:rakennuksenTiedot>
+                                <rakval:rakennustunnus>
+                                    <rakval:valtakunnallinenNumero>123456001M</rakval:valtakunnallinenNumero>
+                                    <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                    <rakval:kiinttun>18601234567890</rakval:kiinttun>
+                                    <rakval:rakennusnro>101</rakval:rakennusnro>
+                                    <rakval:muuTunnustieto>
+                                        <rakval:MuuTunnus>
+                                            <yht:tunnus>abcdefghijklmnopqr</yht:tunnus>
+                                            <yht:sovellus>toimenpideId</yht:sovellus>
+                                        </rakval:MuuTunnus>
+                                    </rakval:muuTunnustieto>
+                                    <rakval:muuTunnustieto>
+                                        <rakval:MuuTunnus>
+                                            <yht:tunnus>rqponmlkjihgfedcba</yht:tunnus>
+                                            <yht:sovellus>toimenpideId</yht:sovellus>
+                                        </rakval:MuuTunnus>
+                                    </rakval:muuTunnustieto>
+                                    <rakval:rakennuksenSelite>Talo A, Toinen selite</rakval:rakennuksenSelite>
+                                </rakval:rakennustunnus>
+                                <rakval:kayttotarkoitus>039 muut asuinkerrostalot</rakval:kayttotarkoitus>
+                                <rakval:kokonaisala>2000</rakval:kokonaisala>
+                                <rakval:liitettyJatevesijarjestelmaanKytkin>true</rakval:liitettyJatevesijarjestelmaanKytkin>
+                            </rakval:rakennuksenTiedot>
+                        </rakval:Rakennus>
+                    </rakval:rakennustieto>
+                </rakval:Toimenpide>
+            </rakval:toimenpidetieto>
+            <rakval:toimenpidetieto>
+                <rakval:Toimenpide>
+                    <rakval:uusi></rakval:uusi>
+                    <rakval:rakennelmatieto>
+                        <rakval:Rakennelma>
+                            <yht:yksilointitieto></yht:yksilointitieto>
+                            <yht:alkuHetki>2013-09-01T00:00:00</yht:alkuHetki>
+                            <rakval:sijaintitieto>
+                                <rakval:Sijainti>
+                                    <yht:tyhja></yht:tyhja>
+                                </rakval:Sijainti>
+                            </rakval:sijaintitieto>
+                            <rakval:kuvaus>
+                                <rakval:kuvaus>Joku rakennelma</rakval:kuvaus>
+                            </rakval:kuvaus>
+                            <rakval:tunnus>
+                                <rakval:jarjestysnumero>3</rakval:jarjestysnumero>
+                                <rakval:kiinttun>18601234567892</rakval:kiinttun>
+                                <rakval:rakennusnro>103</rakval:rakennusnro>
+                                <rakval:muuTunnustieto>
+                                    <rakval:MuuTunnus>
+                                        <yht:tunnus>56c72f3cf165623f0132a28b</yht:tunnus>
+                                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
+                                    </rakval:MuuTunnus>
+                                </rakval:muuTunnustieto>
+                            </rakval:tunnus>
+                            <rakval:kokoontumistilanHenkilomaara>22</rakval:kokoontumistilanHenkilomaara>
+                            <rakval:kokonaisala>22</rakval:kokonaisala>
+                        </rakval:Rakennelma>
+                    </rakval:rakennelmatieto>
+                </rakval:Toimenpide>
+            </rakval:toimenpidetieto>
+        </rakval:RakennusvalvontaAsia>
+    </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

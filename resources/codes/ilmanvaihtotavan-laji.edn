@@ -1,0 +1,96 @@
+{:languageCodes
+ ({:prefLabel {:en "English", :fi "englanti", :sv "engelska"},
+   :codeValue "en",
+   :created "2018-10-05T12:35:59.315Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en/members/",
+   :modified "2019-09-03T05:06:59.187Z",
+   :status "VALID",
+   :id "1cc15c8d-256e-4235-b1cc-071e5b750a08",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/en",
+   :order 883,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/en",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Finnish", :fi "suomi", :sv "finska"},
+   :codeValue "fi",
+   :created "2018-10-05T12:36:02.639Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi/members/",
+   :modified "2019-09-03T05:07:06.108Z",
+   :status "VALID",
+   :id "beda08b1-c3ac-4e82-af4b-cb269d36eaf9",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/fi",
+   :order 1034,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/fi",
+   :hierarchyLevel 1}
+  {:prefLabel {:en "Swedish", :fi "ruotsi", :sv "svenska"},
+   :codeValue "sv",
+   :created "2018-10-05T12:36:13.394Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv/members/",
+   :modified "2019-09-03T05:07:23.042Z",
+   :status "VALID",
+   :id "931ea36d-b2e9-409b-bf86-87ff85708c75",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/interoperabilityplatform/codeschemes/languagecodes/codes/sv",
+   :order 1433,
+   :uri
+   "http://uri.suomi.fi/codelist/interoperabilityplatform/languagecodes/code/sv",
+   :hierarchyLevel 1}),
+ :codes
+ ({:prefLabel
+   {:en "Natural ventilation",
+    :fi "Painovoimainen ilmanvaihto",
+    :sv "Självdragsventilation"},
+   :codeValue "01",
+   :created "2023-01-04T16:20:26.625Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ilmanvaihto/codes/01/members/",
+   :modified "2023-11-30T11:17:16.949Z",
+   :status "VALID",
+   :id "8157028f-a69b-4d0c-a22d-67d17325ad5a",
+   :statusModified "2023-01-04T16:20:26.625Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ilmanvaihto/codes/01",
+   :order 1,
+   :uri "http://uri.suomi.fi/codelist/rytj/ilmanvaihto/code/01",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Mechanical extraction ventilation",
+    :fi "Koneellinen poistoilmanvaihto",
+    :sv "Maskinell frånluftsventilation"},
+   :codeValue "02",
+   :created "2023-01-04T16:20:26.636Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ilmanvaihto/codes/02/members/",
+   :modified "2023-11-30T11:17:16.963Z",
+   :status "VALID",
+   :id "0af7b5d9-60cf-44eb-9f69-5d2ff683a9a7",
+   :statusModified "2023-01-04T16:20:26.636Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ilmanvaihto/codes/02",
+   :order 2,
+   :uri "http://uri.suomi.fi/codelist/rytj/ilmanvaihto/code/02",
+   :hierarchyLevel 1}
+  {:prefLabel
+   {:en "Mechanical supply and extraction ventilation",
+    :fi "Koneellinen tulo- ja poistoilmanvaihto",
+    :sv "Maskinell till- och frånluftsventilation"},
+   :codeValue "03",
+   :created "2023-01-04T16:20:26.644Z",
+   :membersUrl
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ilmanvaihto/codes/03/members/",
+   :modified "2023-11-30T11:17:16.970Z",
+   :status "VALID",
+   :id "a7d448d7-b464-4cd6-9e12-a638dd7504cd",
+   :statusModified "2023-01-04T16:20:26.644Z",
+   :url
+   "https://koodistot.suomi.fi/codelist-api/api/v1/coderegistries/rytj/codeschemes/ilmanvaihto/codes/03",
+   :order 3,
+   :uri "http://uri.suomi.fi/codelist/rytj/ilmanvaihto/code/03",
+   :hierarchyLevel 1}),
+ :modified "2025-02-07T09:52:05.486Z"}

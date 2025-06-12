@@ -1,0 +1,19 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="summary-bulletin-process-template">
+  <label class="lux"
+         data-bind="ltext: 'a11y.summary.bulletin-process',
+                    required: required,
+                    attr: {for: uniqId}"></label>
+  <!-- ko if: editing -->
+  <select class="lux"
+          data-bind="options: options,
+                     required: required,
+                     value: selected,
+                     optionsText: optionsText"
+          id="bulletinProcessSelect">
+  </select>
+  <!-- /ko -->
+  <!-- ko ifnot: editing -->
+  <span data-bind="text: text"></span>
+  <!-- /ko -->
+</script>

@@ -1,0 +1,32 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="application-bulletins-template">
+      <div class="full content bg--white">
+        <div class="content-center">
+          <div>
+            <h1 class="slogan" data-bind="ltext: 'bulletin.page.header'"></h1>
+            <p class="ingress intro">
+              <span data-bind="ltext: 'bulletin.page.info'"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="full content bg--blue">
+        <div class="content-center">
+          <div data-bind="component: {name: 'bulletins-search',
+                                      params: {municipalities: bulletinService.municipalities,
+                                               states: bulletinService.states,
+                                               categories: bulletinService.categories}}"></div>
+        </div>
+      </div>
+      <div class="full content">
+        <div class="content-center">
+          <div data-bind="component: {name: 'application-bulletins-list',
+                                      params: {bulletins: bulletinService.bulletins,
+                                               sort: bulletinService.query.sort}}"></div>
+
+          <div data-bind="component: {name: 'load-more-application-bulletins',
+                                      params: {dataRemaining: bulletinService.bulletinsLeft,
+                                               pending: isLoadButtonPending,
+                                               visible: isLoadButtonVisible}}"></div>
+        </div>
+      </div>
+</script>

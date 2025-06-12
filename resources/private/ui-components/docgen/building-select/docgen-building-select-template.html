@@ -1,0 +1,29 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-building-select-template">
+  <div class="building-select-container">
+    <div class="building-select-box">
+      <label data-bind="visible: label,
+                        ltext: label,
+                        css: labelClasses,
+                        attr: {for: id}"></label>
+      <select data-bind="options: buildingOptions,
+                         optionsText: optionsText,
+                         optionsValue: 'buildingId',
+                         value: selectValue,
+                         valueAllowUnset: true,
+                         optionsCaption: nonSelection,
+                         disable: disabled() || readonly(),
+                         css: inputClasses,
+                         attr: {id: id},
+                         testId: path.join('.')"
+              class="lux w--100 w--max-40em gap--b1"
+              name="buildingId">
+      </select>
+      <ping params="indicator: indicator, mode: 'icon'"></ping>
+      <div data-bind="component: {name: 'docgen-string', params: otherParams},
+                      visible: otherSelected,
+                      attr: {id: otherId}"></div>
+    </div>
+  </div>
+
+</script>

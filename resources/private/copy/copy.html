@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <!-- autocomplete and map need to stay in dom, so 'ko if' cannot be used. -->
+  <section class="page container" id="copy">
+    <h1 data-bind="ltext: 'copyApplication.topic'"></h1>
+    <div class="copy-state-indication">
+      <div data-bind="foreach: phases">
+        <span data-bind="text: $data.text,
+                         css: $data.cssClass"></span>
+      </div>
+    </div>
+    <div class="create-application-search-box"
+         data-bind="visible: phase() === 0">
+      <p data-bind="ltext: 'copyApplication.locationInfo'"></p>
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
+             id="copy-search" type="text" class="form-input text address-search" autofocus="autofocus" />
+      <button data-bind="click: searchNow" class="positive" data-test-id="copy-search-button">
+          <i class="lupicon-search"></i>
+          <span data-bind="ltext: 'search'"></span>
+      </button>
+    </div>
+    <div id="copy-map" class="map create-application-map"
+         data-bind="visible: phase() === 0"
+         style="width: 100%; height: 700px;"></div>
+
+    <!-- ko if: phase() >= 1 -->
+    <div data-bind="ltext: 'applications.location'"></div>
+    <div class="copy-selection-verified copy-selection-wrapper"
+         data-test-id="copy-selected-location">
+      <span data-bind="text: locationInfo()"
+            data-test-id="copy-selected-location-text"></span>
+      <i class="lupicon-check right positive"></i>
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: phase() === 1 -->
+    <!-- ko if: inviteCandidates().length > 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.candidates'"></div>
+    <div id="copy-auths"
+         data-bind="foreach: inviteCandidates ">
+      <div class="blockbox-wrapper copy-selection-wrapper">
+        <input type="checkbox"
+               data-bind="attr: {'id': $index()},
+                                 checked: $data.selected">
+        <label class="blockbox-label"
+               data-bind="attr: {'for': $index()},
+                          text: $parent.authDescription($data)"></label>
+      </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: inviteCandidates().length === 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.not-available'"></div>
+    <!-- /ko -->
+    <!-- /ko -->
+
+    <!-- ko if: phase() === 2 -->
+    <!-- ko if: selectedInviteCandidates().length > 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.invitees'"></div>
+    <div id="copy-auths"
+         data-bind="foreach: selectedInviteCandidates ">
+      <div class="copy-selection-verified copy-selection-wrapper"
+           data-bind="attr: {'data-test-id': 'selected-auth-' + $index()}">
+          <span data-bind="text: $parent.authDescription($data),
+                           attr: {'data-test-id': 'selected-auth-text-' + $index()}"></span>
+          <i class="lupicon-check right positive"></i>
+        </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: selectedInviteCandidates().length === 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.not-selected'"></div>
+    <!-- /ko -->
+    <!-- /ko -->
+
+    <!-- ko if: phase() > 0 -->
+    <div class="copy-phase-buttons">
+      <button data-bind="click: buttonActions[phase()].previous.action,
+                         disable: processing() || pending()"
+              data-test-id="copy-button-previous"
+              class="secondary">
+        <i class="lupicon-chevron-left"></i>
+        <span data-bind="ltext: buttonActions[phase()].previous.ltext"></span>
+      </button>
+      <button data-bind="click: buttonActions[phase()].next.action,
+                         disable: processing() || pending(),
+                         css: {waiting: pending}"
+              data-test-id="copy-button-next"
+              class="positive">
+        <!-- ko if: phase() === 2 -->
+        <i class="lupicon-check"></i>
+        <!-- /ko -->
+        <i class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: buttonActions[phase()].next.ltext"></span>
+        <!-- ko if: phase() < 2 -->
+        <i class="lupicon-chevron-right"></i>
+        <!-- /ko -->
+      </button>
+    </div>
+    <!-- /ko -->
+  </section>
+</body>
+</html>

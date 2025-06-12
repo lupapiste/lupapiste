@@ -1,0 +1,8 @@
+<script type="text/x-jquery-tmpl" id="radio-button-template" class="ko-template">
+    <button class="radio-button"
+            data-bind="click: clicked,
+                       testId: testId,
+                       css: {toggled: isThisSelected()}">
+      <span data-bind="text: label"></span>
+    </button>
+</script>
